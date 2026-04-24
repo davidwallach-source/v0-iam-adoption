@@ -1842,7 +1842,7 @@ export default function App() {
       ) : isNavigatorView ? (
         <DataTable columns={navigatorColumns} data={filteredNavigator} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage="No completed documents" onRowClick={() => setShowAgreementDetail(true)} pagination={{ page: 1, pageSize: 50, totalItems: 687, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : (
-        <DataTable columns={agreementColumns} data={filteredAgreements} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" onRowClick={() => setShowAgreementDetail(true)} emptyMessage={
+        <DataTable columns={agreementColumns} data={filteredAgreements} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage={
           sidebarView === 'drafts' ? 'No drafts found' :
           sidebarView === 'in-progress' ? 'No documents in progress' :
           sidebarView === 'deleted' ? 'No deleted documents' :
