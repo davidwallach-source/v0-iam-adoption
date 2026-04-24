@@ -1162,7 +1162,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-function DealWorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
+function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
@@ -1212,7 +1212,7 @@ function DealWorkspaceView({ agreement, onClose }: { agreement: Agreement; onClo
         </button>
         <div style={{ flex: 1 }}>
           <Inline gap="medium" align="center">
-            <Heading level={3} style={{ margin: 0 }}>Momentum Driver MSA 2026</Heading>
+            <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
             <Badge kind="neutral">Negotiation</Badge>
           </Inline>
         </div>
@@ -2353,7 +2353,7 @@ export default function App() {
       <AgreementDetailView onClose={() => setShowAgreementDetail(false)} />
     )}
     {showDealWorkspace && selectedAgreement && (
-      <DealWorkspaceView agreement={selectedAgreement} onClose={() => {
+      <WorkspaceView agreement={selectedAgreement} onClose={() => {
         setShowDealWorkspace(false);
         setSelectedAgreement(null);
       }} />
