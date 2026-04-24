@@ -372,7 +372,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════���════
+/* ══════════════════════════════════�����════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -1266,7 +1266,13 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
               {/* Deal info card */}
-              <Card style={{ marginBottom: 'var(--ink-spacing-300)' }}>
+              <div style={{
+                background: 'var(--ink-white-100)',
+                border: '1px solid var(--ink-neutral-fade-10)',
+                borderRadius: 'var(--ink-radius-size-s)',
+                padding: '24px 16px',
+                marginBottom: 'var(--ink-spacing-300)',
+              }}>
                 <Inline justify="between" align="flex-start">
                   <Inline gap="medium" align="center">
                     <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--ink-cobalt-80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 'var(--ink-font-size-sm)' }}>M+</div>
@@ -1300,7 +1306,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     <Text size="sm">June 30, 2026</Text>
                   </div>
                 </Grid>
-              </Card>
+              </div>
 
               {/* Needs Attention */}
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
