@@ -1046,7 +1046,7 @@ function Footer() {
   );
 }
 
-/* ══════════════════════════��════════════
+/* ══════════════════════════���════════════
    App
    ═══════════════════════════════════════ */
 
@@ -1290,7 +1290,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               </Card>
 
               {/* Needs Attention */}
-              <div style={{ fontSize: 'var(--ink-font-heading-s-size)', lineHeight: 'var(--ink-font-heading-s-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
+              <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
               
               {/* Alert banner */}
               <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
@@ -1364,7 +1364,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
             </Alert>
 
-            <div style={{ fontSize: 'var(--ink-font-heading-s-size)', lineHeight: 'var(--ink-font-heading-s-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
+            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
 
             {/* Team progress cards */}
             <Grid columns={4} gap="medium" style={{ marginBottom: 'var(--ink-spacing-300)' }}>
@@ -1437,7 +1437,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
 
         {activeTab === 'documents' && (
           <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
-            <div style={{ fontSize: 'var(--ink-font-heading-s-size)', lineHeight: 'var(--ink-font-heading-s-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
+            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
 
             {/* Documents table */}
             <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden', marginBottom: 'var(--ink-spacing-300)' }}>
@@ -1485,7 +1485,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               </table>
             </div>
 
-            <div style={{ fontSize: 'var(--ink-font-heading-s-size)', lineHeight: 'var(--ink-font-heading-s-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
+            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
 
             {/* Supplemental documents table */}
             <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
