@@ -1046,7 +1046,7 @@ function Footer() {
   );
 }
 
-/* ══════════════════════════�����════════════
+/* ══════════════════════════���════════════
    App
    ═══════════════════════════════════════ */
 
@@ -1471,7 +1471,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     
                     return (
                       <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 40px)' : undefined }}>
+                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : undefined }}>
                           <Inline gap="small" align="center">
                             {doc.isParent && (
                               <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
@@ -1480,7 +1480,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                             )}
                             <Text size="sm">{doc.name}</Text>
                             {doc.commentCount && (
-                              <Badge kind="emphasis" size="small">{doc.commentCount}</Badge>
+                              <span style={{ background: 'var(--ink-neutral-20)', color: 'var(--ink-text-secondary)', padding: '1px 6px', borderRadius: 10, fontSize: 'var(--ink-font-size-xs)' }}>{doc.commentCount}</span>
                             )}
                           </Inline>
                         </td>
