@@ -1089,204 +1089,6 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-function DealWorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'people' | 'timeline'>('overview');
-  const fadeIn = useFadeIn(0, 250);
-
-  const tasks = [
-    { id: '1', title: 'Review contract terms', status: 'In Progress', assignee: 'Sarah Chen', dueDate: '2026-04-26' },
-    { id: '2', title: 'Get legal approval', status: 'Pending', assignee: 'James Wilson', dueDate: '2026-04-28' },
-    { id: '3', title: 'Negotiate pricing', status: 'In Progress', assignee: 'Alex Thompson', dueDate: '2026-04-25' },
-    { id: '4', title: 'Obtain signature', status: 'Not Started', assignee: 'Unassigned', dueDate: '2026-05-01' },
-  ];
-
-  const people = [
-    { id: '1', name: 'Sarah Chen', role: 'Legal Counsel', avatar: 'SC' },
-    { id: '2', name: 'James Wilson', role: 'Contract Manager', avatar: 'JW' },
-    { id: '3', name: 'Alex Thompson', role: 'Negotiator', avatar: 'AT' },
-    { id: '4', name: 'You', role: 'Document Owner', avatar: 'AM' },
-  ];
-
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1060,
-      ...fadeIn.style,
-      background: 'var(--ink-bg-color-default)',
-      display: 'flex', flexDirection: 'column',
-    }}>
-      {/* Top bar */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-100)',
-        padding: '0 var(--ink-spacing-200)',
-        background: 'var(--ink-neutral-140)',
-        color: 'white',
-        height: 64,
-        borderBottom: '1px solid rgba(0,0,0,0.1)',
-      }}>
-        <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 64 }}>
-          <Icon name="close" size={20} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <Text size="sm" style={{ color: 'white', fontWeight: 500 }}>{agreement.name}</Text>
-          <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{agreement.recipient}</Text>
-        </div>
-        <Inline gap="small" align="center">
-          <Badge>{agreement.status}</Badge>
-          <IconButton icon="bell" variant="tertiary" size="small" aria-label="Notifications" style={{ color: 'white' }} />
-          <IconButton icon="dots-horizontal" variant="tertiary" size="small" aria-label="More" style={{ color: 'white' }} />
-        </Inline>
-      </div>
-
-      {/* Tabs */}
-      <div style={{
-        display: 'flex', gap: 0,
-        borderBottom: '1px solid var(--ink-border-subtle)',
-        background: 'var(--ink-bg-color-default)',
-        padding: '0 var(--ink-spacing-200)',
-      }}>
-        {(['overview', 'tasks', 'people', 'timeline'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: 'var(--ink-spacing-100) var(--ink-spacing-200)',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === tab ? '2px solid var(--ink-cobalt-140)' : 'none',
-              color: activeTab === tab ? 'var(--ink-cobalt-140)' : 'var(--ink-text-secondary)',
-              cursor: 'pointer',
-              fontSize: 'var(--ink-font-size-sm)',
-              fontWeight: activeTab === tab ? 600 : 400,
-              textTransform: 'capitalize',
-            }}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto', padding: 'var(--ink-spacing-300)' }}>
-        <Container>
-          {activeTab === 'overview' && (
-            <Stack gap="large">
-              <div>
-                <Heading level={2} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Deal Overview</Heading>
-                <Grid columns={2} gap="large">
-                  <Card>
-                    <Stack gap="medium">
-                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase' }}>Status</Text>
-                      <Inline gap="small" align="center">
-                        <StatusLight kind={agreement.statusKind} />
-                        <Text size="sm" weight="semibold">{agreement.status}</Text>
-                      </Inline>
-                    </Stack>
-                  </Card>
-                  <Card>
-                    <Stack gap="medium">
-                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase' }}>Recipient</Text>
-                      <Text size="sm">{agreement.recipient}</Text>
-                    </Stack>
-                  </Card>
-                  <Card>
-                    <Stack gap="medium">
-                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase' }}>Created</Text>
-                      <Text size="sm">{agreement.date} at {agreement.time}</Text>
-                    </Stack>
-                  </Card>
-                  <Card>
-                    <Stack gap="medium">
-                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase' }}>Team Members</Text>
-                      <Text size="sm">{people.length} assigned</Text>
-                    </Stack>
-                  </Card>
-                </Grid>
-              </div>
-            </Stack>
-          )}
-
-          {activeTab === 'tasks' && (
-            <Stack gap="large">
-              <div>
-                <Heading level={2} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Tasks & Milestones</Heading>
-                <Stack gap="medium">
-                  {tasks.map(task => (
-                    <Card key={task.id}>
-                      <Inline justify="between" align="center">
-                        <Stack gap="small" style={{ flex: 1 }}>
-                          <Inline gap="small" align="center">
-                            <Text size="sm" weight="semibold">{task.title}</Text>
-                            <Badge kind={task.status === 'In Progress' ? 'info' : task.status === 'Pending' ? 'warning' : 'neutral'}>
-                              {task.status}
-                            </Badge>
-                          </Inline>
-                          <Inline gap="medium" align="center">
-                            <Text size="xs" color="secondary">{task.assignee}</Text>
-                            <Text size="xs" color="secondary">Due {task.dueDate}</Text>
-                          </Inline>
-                        </Stack>
-                        <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="View task" />
-                      </Inline>
-                    </Card>
-                  ))}
-                </Stack>
-              </div>
-            </Stack>
-          )}
-
-          {activeTab === 'people' && (
-            <Stack gap="large">
-              <div>
-                <Heading level={2} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Team Members</Heading>
-                <Stack gap="medium">
-                  {people.map(person => (
-                    <Card key={person.id}>
-                      <Inline justify="between" align="center">
-                        <Inline gap="medium" align="center">
-                          <Avatar initials={person.avatar} size="medium" />
-                          <Stack gap="small">
-                            <Text size="sm" weight="semibold">{person.name}</Text>
-                            <Text size="xs" color="secondary">{person.role}</Text>
-                          </Stack>
-                        </Inline>
-                        <IconButton icon="dots-horizontal" variant="tertiary" size="small" aria-label="More options" />
-                      </Inline>
-                    </Card>
-                  ))}
-                </Stack>
-              </div>
-            </Stack>
-          )}
-
-          {activeTab === 'timeline' && (
-            <Stack gap="large">
-              <div>
-                <Heading level={2} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Timeline</Heading>
-                <Stack gap="small">
-                  <Inline gap="medium" align="flex-start">
-                    <StatusLight kind="success" style={{ marginTop: 'var(--ink-spacing-50)' }} />
-                    <Stack gap="small" style={{ flex: 1 }}>
-                      <Text size="sm" weight="semibold">Document created</Text>
-                      <Text size="xs" color="secondary">{agreement.date} at {agreement.time}</Text>
-                    </Stack>
-                  </Inline>
-                  <Inline gap="medium" align="flex-start">
-                    <StatusLight kind="info" style={{ marginTop: 'var(--ink-spacing-50)' }} />
-                    <Stack gap="small" style={{ flex: 1 }}>
-                      <Text size="sm" weight="semibold">Awaiting review</Text>
-                      <Text size="xs" color="secondary">Pending legal approval and negotiation</Text>
-                    </Stack>
-                  </Inline>
-                </Stack>
-              </div>
-            </Stack>
-          )}
-        </Container>
-      </div>
-    </div>
-  );
-}
-
 function AgreementDetailView({ onClose }: { onClose: () => void }) {
   const detail = AGREEMENT_DETAIL;
   const [activeDetailTab, setActiveDetailTab] = useState<string | null>('details');
@@ -1620,8 +1422,6 @@ export default function App() {
   const [insightsSidebarView, setInsightsSidebarView] = useState<InsightsSidebarView>('overview');
   const [search, setSearch] = useState('');
   const [showAgreementDetail, setShowAgreementDetail] = useState(false);
-  const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
-  const [showDealWorkspace, setShowDealWorkspace] = useState(false);
 
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
@@ -2047,14 +1847,7 @@ export default function App() {
           sidebarView === 'in-progress' ? 'No documents in progress' :
           sidebarView === 'deleted' ? 'No deleted documents' :
           'No agreements match your search'
-        } onRowClick={(row: Agreement) => {
-          setSelectedAgreement(row);
-          if (sidebarView === 'drafts' || sidebarView === 'in-progress') {
-            setShowDealWorkspace(true);
-          } else {
-            setShowAgreementDetail(true);
-          }
-        }} pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
+        } pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       )}
     </AgreementTableView>
   );
@@ -2093,12 +1886,6 @@ export default function App() {
       </FadeIn>
       <Footer />
     </DocuSignShell>
-    {showDealWorkspace && selectedAgreement && (
-      <DealWorkspaceView agreement={selectedAgreement} onClose={() => {
-        setShowDealWorkspace(false);
-        setSelectedAgreement(null);
-      }} />
-    )}
     {showAgreementDetail && (
       <AgreementDetailView onClose={() => setShowAgreementDetail(false)} />
     )}
