@@ -32,6 +32,7 @@ import {
   ProgressBar,
   SearchInput,
   Alert,
+  AlertBadge,
   dataTableStyles,
 } from '@/design-system';
 
@@ -1480,7 +1481,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                             )}
                             <Text size="sm">{doc.name}</Text>
                             {doc.commentCount && (
-                              <span style={{ background: 'var(--ink-neutral-20)', color: 'var(--ink-text-secondary)', padding: '1px 6px', borderRadius: 10, fontSize: 'var(--ink-font-size-xs)' }}>{doc.commentCount}</span>
+                              <AlertBadge value={doc.commentCount} kind="emphasis" />
                             )}
                           </Inline>
                         </td>
