@@ -29,6 +29,8 @@ import {
   Chip,
   StatusLight,
   Link,
+  ProgressBar,
+  SearchInput,
   dataTableStyles,
 } from '@/design-system';
 
@@ -1089,6 +1091,460 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
+/* ═══════════════════════════════════════
+   Deal Workspace View (Draft / In Progress)
+   ═══════════════════════════════════════ */
+
+interface DealTask {
+  id: string;
+  title: string;
+  type: string;
+  team: string;
+  assignee: string;
+  assigneeInitials: string;
+  status: 'In progress' | 'Not started' | 'Complete';
+  dueDate: string;
+  isDueSoon?: boolean;
+}
+
+interface DealDocument {
+  id: string;
+  name: string;
+  commentCount?: number;
+  status: 'In Review' | 'Executed';
+  owner: string;
+  ownerInitials: string;
+  dateModified: string;
+  isParent?: boolean;
+}
+
+const DEAL_TASKS: DealTask[] = [
+  { id: '1', title: 'Review DPA Terms', type: 'View', team: 'Legal', assignee: 'Leona Legal', assigneeInitials: 'LL', status: 'In progress', dueDate: '3/20/24' },
+  { id: '2', title: 'Finance Approval', type: 'Approval', team: 'Finance', assignee: 'Frank Finance', assigneeInitials: 'FF', status: 'In progress', dueDate: 'Tomorrow', isDueSoon: true },
+  { id: '3', title: 'Security Assessment', type: 'Approval', team: 'Security', assignee: 'Sam Sales', assigneeInitials: 'SS', status: 'Not started', dueDate: '3/22/24' },
+  { id: '4', title: 'AI Addendum Upload', type: 'Upload', team: 'Product', assignee: 'Patricia Procurement', assigneeInitials: 'PP', status: 'In progress', dueDate: '3/26/24' },
+  { id: '5', title: 'SLA Comparison', type: 'View', team: 'Legal', assignee: 'Leona Legal', assigneeInitials: 'LL', status: 'In progress', dueDate: '3/25/24' },
+  { id: '6', title: 'Compliance Check', type: 'Approval', team: 'Finance', assignee: 'Frank Finance', assigneeInitials: 'FF', status: 'Complete', dueDate: '3/27/24' },
+];
+
+const DEAL_DOCUMENTS: DealDocument[] = [
+  { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 3, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/15/2026', isParent: true },
+  { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 2, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/20/2026' },
+  { id: '3', name: 'Security Terms', status: 'In Review', owner: 'Sam Sales', ownerInitials: 'SS', dateModified: '3/22/2026' },
+  { id: '4', name: 'AI Addendum', commentCount: 5, status: 'In Review', owner: 'Patricia Procurement', ownerInitials: 'PP', dateModified: '3/23/2026' },
+];
+
+const SUPPLEMENTAL_DOCUMENTS: DealDocument[] = [
+  { id: '5', name: 'Request for Proposal (RFP)', status: 'Executed', owner: 'Frank Finance', ownerInitials: 'FF', dateModified: '6/15/2025' },
+  { id: '6', name: 'Non-Disclosure Agreement (NDA)', status: 'Executed', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '5/22/2025' },
+];
+
+const ATTENTION_ITEMS = [
+  { id: '1', item: 'Finance Approval', description: 'Finance approval pending since 3/24', riskLevel: 'High' as const },
+  { id: '2', item: 'Liability Cap Modification', description: 'Unlimited liability requested for data breaches', riskLevel: 'High' as const },
+  { id: '3', item: 'Custom Termination Terms', description: '90-day notice period instead of standard 30-day', riskLevel: 'Medium' as const },
+  { id: '4', item: 'IP Assignment Clause', description: 'Broader IP rights requested than standard template', riskLevel: 'Medium' as const },
+];
+
+const ACTIVITY_ITEMS = [
+  { id: '1', icon: 'clock' as const, user: 'AI Agent', action: 'Analyzing party history', time: 'Running...', isAI: true },
+  { id: '2', icon: 'clock' as const, user: 'AI Agent', action: 'Extracting prevailing terms', time: 'Running...', isAI: true },
+  { id: '3', icon: 'upload' as const, user: 'Leona Legal', action: 'Uploaded DPA_Final.pdf', time: '2 hours ago' },
+  { id: '4', icon: 'status-check' as const, user: 'Shawn Security', action: 'Approved Security Terms', time: '4 hours ago' },
+  { id: '5', icon: 'comment' as const, user: 'Patricia Procurement', action: 'Added comment on AI Addendum', time: '6 hours ago' },
+  { id: '6', icon: 'status-check' as const, user: 'Sam Sales', action: 'Updated status to Approved', time: '1 day ago' },
+];
+
+const TEAM_PROGRESS = [
+  { team: 'Legal', completed: 1, total: 3, color: 'var(--ink-cobalt-80)' },
+  { team: 'Finance', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+  { team: 'Security', completed: 3, total: 3, color: 'var(--ink-green-80)' },
+  { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
+];
+
+function DealWorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
+  const [taskSearch, setTaskSearch] = useState('');
+  const fadeIn = useFadeIn(0, 250);
+
+  const tabStyle = (isActive: boolean): CSSProperties => ({
+    padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
+    border: 'none',
+    background: 'none',
+    borderBottom: isActive ? '2px solid var(--ink-neutral-140)' : '2px solid transparent',
+    color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
+    cursor: 'pointer',
+    fontSize: 'var(--ink-font-size-sm)',
+    fontWeight: isActive ? 600 : 400,
+    fontFamily: 'var(--ink-font-family-default)',
+  });
+
+  const getStatusBadgeStyle = (status: string): CSSProperties => {
+    if (status === 'In progress') return { background: 'var(--ink-cobalt-20)', color: 'var(--ink-cobalt-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    if (status === 'Not started') return { background: 'var(--ink-neutral-20)', color: 'var(--ink-neutral-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    if (status === 'Complete') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    if (status === 'In Review') return { background: 'var(--ink-cobalt-20)', color: 'var(--ink-cobalt-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    if (status === 'Executed') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    return {};
+  };
+
+  const getRiskBadgeStyle = (level: 'High' | 'Medium'): CSSProperties => {
+    if (level === 'High') return { background: 'var(--ink-red-20)', color: 'var(--ink-red-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    return { background: 'var(--ink-yellow-20)', color: 'var(--ink-yellow-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 1060,
+      ...fadeIn.style,
+      background: 'var(--ink-bg-color-default)',
+      display: 'flex', flexDirection: 'column',
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)',
+        padding: 'var(--ink-spacing-150) var(--ink-spacing-300)',
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        background: 'var(--ink-bg-color-default)',
+      }}>
+        <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+          <Icon name="arrow-left" size={20} />
+        </button>
+        <div style={{ flex: 1 }}>
+          <Inline gap="medium" align="center">
+            <Heading level={3} style={{ margin: 0 }}>Momentum Driver MSA 2026</Heading>
+            <Badge kind="neutral">Negotiation</Badge>
+          </Inline>
+        </div>
+        <Inline gap="small" align="center">
+          <div style={{ display: 'flex' }}>
+            <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
+            <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
+            <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
+          </div>
+          <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
+          <Button kind="primary">Add</Button>
+          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+        </Inline>
+      </div>
+
+      {/* Tabs */}
+      <div style={{
+        display: 'flex', gap: 0,
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        background: 'var(--ink-bg-color-default)',
+        padding: '0 var(--ink-spacing-300)',
+      }}>
+        <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+        <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+        <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflow: 'auto', background: 'var(--ink-bg-color-secondary)' }}>
+        {activeTab === 'overview' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%' }}>
+            {/* Main content */}
+            <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
+              {/* Deal info card */}
+              <Card style={{ marginBottom: 'var(--ink-spacing-300)' }}>
+                <Inline justify="between" align="flex-start">
+                  <Inline gap="medium" align="center">
+                    <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--ink-cobalt-80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 'var(--ink-font-size-sm)' }}>M+</div>
+                    <div>
+                      <Inline gap="small" align="center">
+                        <Text size="sm" weight="semibold">Momentum Driver Inc.</Text>
+                        <Icon name="chevron-down" size={16} />
+                      </Inline>
+                      <Inline gap="small" align="center">
+                        <StatusLight kind="info" />
+                        <Text size="xs" color="secondary">OPP-2024-0891</Text>
+                      </Inline>
+                    </div>
+                  </Inline>
+                </Inline>
+                <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
+                  <div>
+                    <Text size="xs" color="secondary">Deal Value</Text>
+                    <Text size="sm" weight="semibold">$2.4M</Text>
+                  </div>
+                  <div>
+                    <Text size="xs" color="secondary">Agreement Type</Text>
+                    <Text size="sm">Enterprise License</Text>
+                  </div>
+                  <div>
+                    <Text size="xs" color="secondary">Term Length</Text>
+                    <Text size="sm">36 months</Text>
+                  </div>
+                  <div>
+                    <Text size="xs" color="secondary">Anticipated Close</Text>
+                    <Text size="sm">June 30, 2026</Text>
+                  </div>
+                </Grid>
+              </Card>
+
+              {/* Needs Attention */}
+              <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</Heading>
+              
+              {/* Alert banner */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)',
+                padding: 'var(--ink-spacing-150) var(--ink-spacing-200)',
+                background: 'var(--ink-yellow-10)',
+                border: '1px solid var(--ink-yellow-40)',
+                borderRadius: 8,
+                marginBottom: 'var(--ink-spacing-200)',
+              }}>
+                <Icon name="warning" size={20} color="var(--ink-yellow-100)" />
+                <Text size="sm" style={{ flex: 1 }}>Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?</Text>
+                <Button kind="secondary" size="small">Send reminder</Button>
+                <IconButton icon="close" variant="tertiary" size="small" aria-label="Dismiss" />
+              </div>
+
+              {/* Attention items table */}
+              <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ATTENTION_ITEMS.map((item) => (
+                      <tr key={item.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{item.item}</td>
+                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{item.description}</td>
+                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                          <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
+                        </td>
+                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                          <Button kind={item.riskLevel === 'High' && item.item === 'Finance Approval' ? 'secondary' : 'primary'} size="small">
+                            {item.item === 'Finance Approval' ? 'Remind' : 'View'}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Activity sidebar */}
+            <div style={{ padding: 'var(--ink-spacing-300)', borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)' }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>ACTIVITY</Text>
+                <IconButton icon="filter" variant="tertiary" size="small" aria-label="Filter" />
+              </Inline>
+              <Stack gap="medium">
+                {ACTIVITY_ITEMS.map((item) => (
+                  <Inline key={item.id} gap="medium" align="flex-start">
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <Text size="sm">
+                        <strong>{item.user}</strong> {item.action}
+                      </Text>
+                      <Text size="xs" color="secondary">{item.time}</Text>
+                    </div>
+                  </Inline>
+                ))}
+              </Stack>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'tasks' && (
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
+            {/* Alert banner */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)',
+              padding: 'var(--ink-spacing-150) var(--ink-spacing-200)',
+              background: 'var(--ink-yellow-10)',
+              border: '1px solid var(--ink-yellow-40)',
+              borderRadius: 8,
+              marginBottom: 'var(--ink-spacing-300)',
+            }}>
+              <Icon name="warning" size={20} color="var(--ink-yellow-100)" />
+              <Text size="sm" style={{ flex: 1 }}>Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?</Text>
+              <Button kind="secondary" size="small">Send reminder</Button>
+              <IconButton icon="close" variant="tertiary" size="small" aria-label="Dismiss" />
+            </div>
+
+            <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Tasks</Heading>
+
+            {/* Team progress cards */}
+            <Grid columns={4} gap="medium" style={{ marginBottom: 'var(--ink-spacing-300)' }}>
+              {TEAM_PROGRESS.map((team) => (
+                <Card key={team.team}>
+                  <Text size="sm" weight="semibold" style={{ marginBottom: 'var(--ink-spacing-100)' }}>{team.team}</Text>
+                  <ProgressBar value={(team.completed / team.total) * 100} style={{ marginBottom: 'var(--ink-spacing-50)' }} />
+                  <Text size="xs" color="secondary">{team.completed} of {team.total} complete</Text>
+                </Card>
+              ))}
+            </Grid>
+
+            {/* Search and filters */}
+            <Inline gap="medium" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+              <SearchInput placeholder="Search tasks..." value={taskSearch} onChange={setTaskSearch} style={{ width: 240 }} />
+              <Button kind="secondary" size="small">Any status <Icon name="chevron-down" size={14} /></Button>
+              <Button kind="secondary" size="small">Any team <Icon name="chevron-down" size={14} /></Button>
+            </Inline>
+
+            {/* Tasks table */}
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DEAL_TASKS.map((task) => (
+                    <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
+                          <div>
+                            <Text size="sm">{task.title}</Text>
+                            <Text size="xs" color="secondary">{task.type}</Text>
+                          </div>
+                        </Inline>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          <Avatar initials={task.assigneeInitials} size="small" />
+                          <Text size="sm">{task.assignee}</Text>
+                        </Inline>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <span style={getStatusBadgeStyle(task.status)}>{task.status}</span>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Button kind={task.isDueSoon ? 'primary' : 'secondary'} size="small">
+                          {task.isDueSoon ? 'Remind' : 'View'}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'documents' && (
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
+            <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Documents</Heading>
+
+            {/* Documents table */}
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden', marginBottom: 'var(--ink-spacing-300)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Document</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Owner</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Modified</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DEAL_DOCUMENTS.map((doc) => (
+                    <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          {doc.isParent && <Icon name="chevron-down" size={16} />}
+                          <Text size="sm">{doc.name}</Text>
+                          {doc.commentCount && (
+                            <span style={{ background: 'var(--ink-neutral-20)', color: 'var(--ink-text-secondary)', padding: '1px 6px', borderRadius: 10, fontSize: 'var(--ink-font-size-xs)' }}>{doc.commentCount}</span>
+                          )}
+                        </Inline>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          <Avatar initials={doc.ownerInitials} size="small" />
+                          <Text size="sm">{doc.owner}</Text>
+                        </Inline>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          <Button kind="secondary" size="small">View</Button>
+                          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                        </Inline>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</Heading>
+
+            {/* Supplemental documents table */}
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Document</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Owner</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Modified</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {SUPPLEMENTAL_DOCUMENTS.map((doc) => (
+                    <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          <Avatar initials={doc.ownerInitials} size="small" />
+                          <Text size="sm">{doc.owner}</Text>
+                        </Inline>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          <Button kind="secondary" size="small">View</Button>
+                          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                        </Inline>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AgreementDetailView({ onClose }: { onClose: () => void }) {
   const detail = AGREEMENT_DETAIL;
   const [activeDetailTab, setActiveDetailTab] = useState<string | null>('details');
@@ -1422,6 +1878,8 @@ export default function App() {
   const [insightsSidebarView, setInsightsSidebarView] = useState<InsightsSidebarView>('overview');
   const [search, setSearch] = useState('');
   const [showAgreementDetail, setShowAgreementDetail] = useState(false);
+  const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
+  const [showDealWorkspace, setShowDealWorkspace] = useState(false);
 
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
@@ -1847,7 +2305,12 @@ export default function App() {
           sidebarView === 'in-progress' ? 'No documents in progress' :
           sidebarView === 'deleted' ? 'No deleted documents' :
           'No agreements match your search'
-        } pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
+        } onRowClick={(row: Agreement) => {
+          if (sidebarView === 'drafts' || sidebarView === 'in-progress') {
+            setSelectedAgreement(row);
+            setShowDealWorkspace(true);
+          }
+        }} pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       )}
     </AgreementTableView>
   );
@@ -1888,6 +2351,12 @@ export default function App() {
     </DocuSignShell>
     {showAgreementDetail && (
       <AgreementDetailView onClose={() => setShowAgreementDetail(false)} />
+    )}
+    {showDealWorkspace && selectedAgreement && (
+      <DealWorkspaceView agreement={selectedAgreement} onClose={() => {
+        setShowDealWorkspace(false);
+        setSelectedAgreement(null);
+      }} />
     )}
     </>
   );
