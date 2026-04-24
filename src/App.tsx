@@ -31,6 +31,7 @@ import {
   Link,
   ProgressBar,
   SearchInput,
+  Alert,
   dataTableStyles,
 } from '@/design-system';
 
@@ -1287,19 +1288,9 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</Heading>
               
               {/* Alert banner */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)',
-                padding: 'var(--ink-spacing-150) var(--ink-spacing-200)',
-                background: 'var(--ink-yellow-10)',
-                border: '1px solid var(--ink-yellow-40)',
-                borderRadius: 8,
-                marginBottom: 'var(--ink-spacing-200)',
-              }}>
-                <Icon name="warning" size={20} color="var(--ink-yellow-100)" />
-                <Text size="sm" style={{ flex: 1 }}>Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?</Text>
-                <Button kind="secondary" size="small">Send reminder</Button>
-                <IconButton icon="close" variant="tertiary" size="small" aria-label="Dismiss" />
-              </div>
+              <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
+              </Alert>
 
               {/* Attention items table */}
               <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
@@ -1364,19 +1355,9 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
         {activeTab === 'tasks' && (
           <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
             {/* Alert banner */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)',
-              padding: 'var(--ink-spacing-150) var(--ink-spacing-200)',
-              background: 'var(--ink-yellow-10)',
-              border: '1px solid var(--ink-yellow-40)',
-              borderRadius: 8,
-              marginBottom: 'var(--ink-spacing-300)',
-            }}>
-              <Icon name="warning" size={20} color="var(--ink-yellow-100)" />
-              <Text size="sm" style={{ flex: 1 }}>Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?</Text>
-              <Button kind="secondary" size="small">Send reminder</Button>
-              <IconButton icon="close" variant="tertiary" size="small" aria-label="Dismiss" />
-            </div>
+            <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-300)' }}>
+              Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
+            </Alert>
 
             <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Tasks</Heading>
 
