@@ -1486,10 +1486,6 @@ export default function App() {
         items: [
           { id: 'parties', label: 'Parties', icon: 'building-person' as const, badge: 'New', onClick: () => setSidebarView('parties') },
           { id: 'requests', label: 'Requests', icon: 'ticket' as const, badge: 'New', onClick: () => setSidebarView('requests') },
-          { id: 'maestro', label: 'Maestro Workflows', icon: 'workflow' as const, badge: 'New' },
-          { id: 'workspaces', label: 'Workspaces', icon: 'transaction' as const },
-          { id: 'powerforms', label: 'PowerForms', icon: 'flash' as const },
-          { id: 'bulk-send', label: 'Bulk Send', icon: 'document-stack' as const },
         ],
       },
     ],
