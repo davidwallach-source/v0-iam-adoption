@@ -1194,6 +1194,16 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
     return { background: 'var(--ink-yellow-20)', color: 'var(--ink-yellow-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
   };
 
+  const innerStyle: CSSProperties = {
+    maxWidth: 1440,
+    minWidth: 1280,
+    margin: '0 auto',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 var(--ink-spacing-300)',
+  };
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1060,
@@ -1201,50 +1211,50 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
       background: 'var(--ink-bg-color-default)',
       display: 'flex', flexDirection: 'column',
     }}>
-      {/* Header */}
+      {/* Header — full-width background, constrained inner content */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)',
-        padding: 'var(--ink-spacing-150) var(--ink-spacing-300)',
         borderBottom: '1px solid var(--ink-border-subtle)',
-        background: 'var(--ink-bg-color-default)',
+        background: 'var(--ink-bg-color-canvas-page)',
       }}>
-        <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
-          <Icon name="arrow-left" size={20} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <Inline gap="medium" align="center">
-            <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
-            <Badge kind="neutral">Negotiation</Badge>
+        <div style={{ ...innerStyle, height: 64, gap: 'var(--ink-spacing-200)' }}>
+          <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, flexShrink: 0 }}>
+            <Icon name="arrow-left" size={20} />
+          </button>
+          <div style={{ flex: 1 }}>
+            <Inline gap="medium" align="center">
+              <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
+              <Badge kind="emphasis">Negotiation</Badge>
+            </Inline>
+          </div>
+          <Inline gap="small" align="center">
+            <div style={{ display: 'flex' }}>
+              <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
+              <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
+              <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
+            </div>
+            <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
+            <Button kind="primary">Add</Button>
+            <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
           </Inline>
         </div>
-        <Inline gap="small" align="center">
-          <div style={{ display: 'flex' }}>
-            <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-            <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-            <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
-          </div>
-          <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
-          <Button kind="primary">Add</Button>
-          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-        </Inline>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs — full-width background, constrained inner content */}
       <div style={{
-        display: 'flex', gap: 0,
         borderBottom: '1px solid var(--ink-border-subtle)',
-        background: 'var(--ink-bg-color-default)',
-        padding: '0 var(--ink-spacing-300)',
+        background: 'var(--ink-bg-color-canvas-page)',
       }}>
-        <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-        <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-        <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
+        <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0 }}>
+          <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+          <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+          <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
+        </div>
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', background: 'var(--ink-bg-color-secondary)' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
               {/* Deal info card */}
@@ -1353,7 +1363,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
         )}
 
         {activeTab === 'tasks' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Alert banner */}
             <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-300)' }}>
               Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
@@ -1431,7 +1441,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
         )}
 
         {activeTab === 'documents' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Documents</Heading>
 
             {/* Documents table */}
