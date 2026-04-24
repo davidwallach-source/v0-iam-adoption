@@ -1117,6 +1117,7 @@ interface DealDocument {
   ownerInitials: string;
   dateModified: string;
   isParent?: boolean;
+  parentId?: string;
 }
 
 const DEAL_TASKS: DealTask[] = [
@@ -1130,9 +1131,9 @@ const DEAL_TASKS: DealTask[] = [
 
 const DEAL_DOCUMENTS: DealDocument[] = [
   { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 3, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/15/2026', isParent: true },
-  { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 2, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/20/2026' },
-  { id: '3', name: 'Security Terms', status: 'In Review', owner: 'Sam Sales', ownerInitials: 'SS', dateModified: '3/22/2026' },
-  { id: '4', name: 'AI Addendum', commentCount: 5, status: 'In Review', owner: 'Patricia Procurement', ownerInitials: 'PP', dateModified: '3/23/2026' },
+  { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 2, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/20/2026', parentId: '1' },
+  { id: '3', name: 'Security Terms', status: 'In Review', owner: 'Sam Sales', ownerInitials: 'SS', dateModified: '3/22/2026', parentId: '1' },
+  { id: '4', name: 'AI Addendum', commentCount: 5, status: 'In Review', owner: 'Patricia Procurement', ownerInitials: 'PP', dateModified: '3/23/2026', parentId: '1' },
 ];
 
 const SUPPLEMENTAL_DOCUMENTS: DealDocument[] = [
@@ -1166,7 +1167,18 @@ const TEAM_PROGRESS = [
 function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const fadeIn = useFadeIn(0, 250);
+
+  const toggleGroup = (id: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedGroups(newExpanded);
+  };
 
   const tabStyle = (isActive: boolean): CSSProperties => ({
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
@@ -1452,35 +1464,45 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                   </tr>
                 </thead>
                 <tbody>
-                  {DEAL_DOCUMENTS.map((doc) => (
-                    <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          {doc.isParent && <Icon name="chevron-down" size={16} />}
-                          <Text size="sm">{doc.name}</Text>
-                          {doc.commentCount && (
-                            <span style={{ background: 'var(--ink-neutral-20)', color: 'var(--ink-text-secondary)', padding: '1px 6px', borderRadius: 10, fontSize: 'var(--ink-font-size-xs)' }}>{doc.commentCount}</span>
-                          )}
-                        </Inline>
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          <Avatar initials={doc.ownerInitials} size="small" />
-                          <Text size="sm">{doc.owner}</Text>
-                        </Inline>
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          <Button kind="secondary" size="small">View</Button>
-                          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                        </Inline>
-                      </td>
-                    </tr>
-                  ))}
+                  {DEAL_DOCUMENTS.map((doc) => {
+                    const isChild = !!doc.parentId;
+                    const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
+                    if (isChild && !isParentExpanded) return null;
+                    
+                    return (
+                      <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : undefined }}>
+                          <Inline gap="small" align="center">
+                            {doc.isParent && (
+                              <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+                                <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
+                              </button>
+                            )}
+                            <Text size="sm">{doc.name}</Text>
+                            {doc.commentCount && (
+                              <span style={{ background: 'var(--ink-neutral-20)', color: 'var(--ink-text-secondary)', padding: '1px 6px', borderRadius: 10, fontSize: 'var(--ink-font-size-xs)' }}>{doc.commentCount}</span>
+                            )}
+                          </Inline>
+                        </td>
+                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                          <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                        </td>
+                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                          <Inline gap="small" align="center">
+                            <Avatar initials={doc.ownerInitials} size="small" />
+                            <Text size="sm">{doc.owner}</Text>
+                          </Inline>
+                        </td>
+                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                          <Inline gap="small" align="center">
+                            <Button kind="secondary" size="small">View</Button>
+                            <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                          </Inline>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
