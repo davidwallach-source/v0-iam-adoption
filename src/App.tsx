@@ -1244,7 +1244,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', background: 'var(--ink-bg-color-secondary)' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1280, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%' }}>
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
               {/* Deal info card */}
@@ -1353,7 +1353,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
         )}
 
         {activeTab === 'tasks' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1280, margin: '0 auto' }}>
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
             {/* Alert banner */}
             <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-300)' }}>
               Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
@@ -1431,7 +1431,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
         )}
 
         {activeTab === 'documents' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1280, margin: '0 auto' }}>
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%' }}>
             <Heading level={4} style={{ marginBottom: 'var(--ink-spacing-200)' }}>Documents</Heading>
 
             {/* Documents table */}
