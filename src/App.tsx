@@ -372,7 +372,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════���════
+/* ══════════════════════════════════�����════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -1386,14 +1386,14 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                   background: 'var(--ink-white-100)',
                   border: '1px solid var(--ink-neutral-fade-10)',
                   borderRadius: 'var(--ink-radius-size-s)',
-                  padding: '20px',
+                  padding: '32px 20px',
                   display: 'flex',
                   flexDirection: 'column',
                 }}>
                   <ProgressBar 
                     value={(team.completed / team.total) * 100}
                     label={team.team}
-                    content={`${team.completed} of ${team.total} complete`}
+                    content={`${team.completed} of ${team.total} tasks`}
                   />
                 </div>
               ))}
