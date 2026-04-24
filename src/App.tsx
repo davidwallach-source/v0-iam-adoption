@@ -372,7 +372,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════���════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -1047,7 +1047,7 @@ function Footer() {
   );
 }
 
-/* ══════════════════════════���════════════
+/* ═════════════════════��════���════════════
    App
    ═══════════════════════════════════════ */
 
@@ -1382,11 +1382,20 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
             {/* Team progress cards */}
             <Grid columns={4} gap="medium" style={{ marginBottom: 'var(--ink-spacing-300)' }}>
               {TEAM_PROGRESS.map((team) => (
-                <Card key={team.team}>
-                  <Text size="sm" weight="semibold" style={{ marginBottom: 'var(--ink-spacing-100)' }}>{team.team}</Text>
-                  <ProgressBar value={(team.completed / team.total) * 100} style={{ marginBottom: 'var(--ink-spacing-50)' }} />
-                  <Text size="xs" color="secondary">{team.completed} of {team.total} complete</Text>
-                </Card>
+                <div key={team.team} style={{
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-neutral-fade-10)',
+                  borderRadius: 'var(--ink-radius-size-s)',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                  <ProgressBar 
+                    value={(team.completed / team.total) * 100}
+                    label={team.team}
+                    content={`${team.completed} of ${team.total} complete`}
+                  />
+                </div>
               ))}
             </Grid>
 
