@@ -1211,40 +1211,35 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
       background: 'var(--ink-bg-color-default)',
       display: 'flex', flexDirection: 'column',
     }}>
-      {/* Header — full-width background, constrained inner content */}
-      <div style={{
-        borderBottom: '1px solid var(--ink-border-subtle)',
-        background: 'var(--ink-bg-color-canvas-page)',
-      }}>
-        <div style={{ ...innerStyle, height: 64, gap: 'var(--ink-spacing-200)' }}>
+      {/* Header + Tabs — single full-width block */}
+      <div style={{ background: 'var(--ink-bg-color-canvas-page)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+        {/* Actions row — back arrow far left, actions far right, both outside constraint */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: 'var(--ink-spacing-100) var(--ink-spacing-200)' }}>
           <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, flexShrink: 0 }}>
             <Icon name="arrow-left" size={20} />
           </button>
-          <div style={{ flex: 1 }}>
-            <Inline gap="medium" align="center">
-              <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
-              <Badge kind="emphasis">Negotiation</Badge>
-            </Inline>
-          </div>
+          <div style={{ flex: 1 }} />
           <Inline gap="small" align="center">
             <div style={{ display: 'flex' }}>
               <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
               <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
-            <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
+            <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
             <Button kind="primary">Add</Button>
-            <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
           </Inline>
         </div>
-      </div>
 
-      {/* Tabs — full-width background, constrained inner content */}
-      <div style={{
-        borderBottom: '1px solid var(--ink-border-subtle)',
-        background: 'var(--ink-bg-color-canvas-page)',
-      }}>
-        <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0 }}>
+        {/* Title row — constrained */}
+        <div style={{ ...innerStyle, paddingBottom: 'var(--ink-spacing-150)' }}>
+          <Inline gap="medium" align="center">
+            <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
+            <Badge kind="emphasis">Negotiation</Badge>
+          </Inline>
+        </div>
+
+        {/* Tabs — constrained, no top border */}
+        <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0, paddingTop: 'var(--ink-spacing-100)' }}>
           <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
           <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
           <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
