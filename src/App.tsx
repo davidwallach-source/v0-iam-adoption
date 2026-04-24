@@ -2297,9 +2297,11 @@ export default function App() {
           sidebarView === 'deleted' ? 'No deleted documents' :
           'No agreements match your search'
         } onRowClick={(row: Agreement) => {
-          if (sidebarView === 'drafts' || sidebarView === 'in-progress') {
+          if (sidebarView === 'drafts' || sidebarView === 'in-progress' || row.status === 'Draft' || row.status === 'In Progress') {
             setSelectedAgreement(row);
             setShowDealWorkspace(true);
+          } else {
+            setShowAgreementDetail(true);
           }
         }} pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       )}
