@@ -31,7 +31,7 @@
   --dt-text-inverse: var(--ink-white-100);
 
   /* Spacing - using Ink spacing tokens */
-  --dt-cell-padding-h: var(--ink-spacing-200);
+  --dt-cell-padding-h: var(--ink-spacing-150);
   --dt-cell-padding-v: var(--ink-spacing-50);
   --dt-gap-xxs: var(--ink-spacing-100);
   --dt-gap-xs: var(--ink-spacing-200);
@@ -90,11 +90,22 @@
 
 .table {
   width: 100%;
-  min-width: max-content; /* Force table to expand for all columns */
+  min-width: 0; /* Allow table to compress to container width — no horizontal scroll */
   border-collapse: separate;
   border-spacing: 0;
   background: var(--dt-bg-default);
   font-family: var(--ink-font-family);
+}
+
+/* Hide the Tasks column at narrow widths */
+.hideNarrow {
+  display: table-cell;
+}
+
+@media (max-width: 900px) {
+  .hideNarrow {
+    display: none;
+  }
 }
 
 /* =============================================================================
@@ -311,11 +322,11 @@
    ============================================================================= */
 
 .checkboxCell {
-  width: 56px;
+  width: 40px;
   text-align: center;
   vertical-align: middle;
-  padding-left: var(--dt-cell-padding-h);
-  padding-right: var(--dt-cell-padding-h);
+  padding-left: var(--ink-spacing-150);
+  padding-right: var(--ink-spacing-50);
   /* Make checkbox cell sticky */
   position: sticky;
   left: 0;

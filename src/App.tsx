@@ -71,12 +71,20 @@ const tableRowStaggerStyles = `
 [data-ink-component="DataTable"] tbody tr:nth-child(n+11) { animation-delay: 200ms; }
 
 /* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
+  @media (prefers-reduced-motion: reduce) {
   [data-ink-component="DataTable"] tbody tr {
-    animation: none;
+  animation: none;
   }
-}
-`;
+  }
+
+  /* Hide Tasks column when table is too narrow */
+  @media (max-width: 900px) {
+  [data-ink-component="DataTable"] th.dt-col-hide-narrow,
+  [data-ink-component="DataTable"] td.dt-col-hide-narrow {
+  display: none;
+  }
+  }
+  `;
 
 /* ═══════════════════════════════════════
    Entrance Animation Hooks
@@ -197,12 +205,30 @@ const AGREEMENTS_DATA: Agreement[] = [
   { id: '11', name: 'OldCorp Vendor Agreement', party: 'OldCorp Inc.', partyLogo: 'OC', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Cancelled', dealValue: '$320K', agreementType: 'Vendor Agreement', termLength: '24 months', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 5, tasksPending: 0 },
 ];
 
+// Natural language relative dates from dd/mm/yyyy strings
+function relativeDate(dateStr: string): string {
+  const [d, m, y] = dateStr.split('/').map(Number);
+  const then = new Date(y, m - 1, d);
+  const now = new Date();
+  const diffMs = now.getTime() - then.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks === 1) return '1 week ago';
+  if (diffWeeks < 5) return `${diffWeeks} weeks ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths === 1) return '1 month ago';
+  return `${diffMonths} months ago`;
+}
+
 const agreementColumns = [
   {
     key: 'name',
     header: 'Agreement',
     sortable: true,
-    width: '35%',
+    width: '40%',
     cell: (row: Agreement) => (
       <Stack gap="none" style={{ gap: 2 }}>
         <Text size="sm" weight="medium">{row.name}</Text>
@@ -223,26 +249,27 @@ const agreementColumns = [
   {
     key: 'docs',
     header: 'Docs',
-    align: 'center',
+    alignment: 'center',
     cell: (row: Agreement) => (
       <Text size="sm">{row.documentsCount || 0}</Text>
     ),
   },
   {
-    key: 'people',
-    header: 'People',
-    align: 'center',
+    key: 'parties',
+    header: 'Parties',
+    alignment: 'center',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="center">
         <Text size="sm">1</Text>
-        <Text size="xs" color="secondary">ext</Text>
+        <Text size="xs" color="secondary" style={{ color: 'var(--ink-cobalt-80)' }}>ext</Text>
       </Inline>
     ),
   },
   {
     key: 'tasks',
     header: 'Tasks',
-    align: 'center',
+    alignment: 'center',
+    className: 'dt-col-hide-narrow',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="center">
         {row.tasksPending && row.tasksPending > 0 ? (
@@ -255,16 +282,16 @@ const agreementColumns = [
   },
   {
     key: 'date',
-    header: 'Last Updated',
+    header: 'Updated',
     sortable: true,
     cell: (row: Agreement) => (
-      <Text size="sm">{row.date}</Text>
+      <Text size="sm">{relativeDate(row.date)}</Text>
     ),
   },
   {
     key: 'action',
     header: '',
-    align: 'end',
+    alignment: 'end',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
         <Button kind="secondary" size="small">{row.status === 'Executed' ? 'View' : 'Edit'}</Button>
@@ -671,7 +698,7 @@ const reportColumns: any[] = [
 
 /* ═��═════════════════════════════════════
    Home Page
-   ═══════════════════════════════════════ */
+   ═══════════════════════���═══════════════ */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
