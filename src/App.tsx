@@ -372,7 +372,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════�������════
+/* ══════════════════════════════════���������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -739,15 +739,18 @@ function HomePage() {
   ];
 
   return (
-    <div style={{ background: 'var(--ink-bg-color-canvas-page)', minHeight: '100%' }}>
-      {/* ── Hero banner ── */}
+    /* Gradient flows from #DBD6FE at top to #FFFFFF at bottom, covering both hero and cards */
+    <div style={{
+      background: 'linear-gradient(180deg, #DBD6FE 0%, #ffffff 420px)',
+      minHeight: '100%',
+    }}>
+      {/* ── Hero banner — transparent so gradient shows through ── */}
       <div style={{
-        background: 'linear-gradient(174deg, var(--ink-cobalt-40) 0%, var(--ink-cobalt-100) 100%)',
         textAlign: 'center',
         padding: '40px 24px 52px',
       }}>
         {/* Greeting */}
-        <div style={{ fontSize: 24, fontWeight: 400, color: 'var(--ink-white-100)', marginBottom: 16, fontFamily: 'var(--ink-font-family)' }}>
+        <div style={{ fontSize: 24, fontWeight: 400, color: '#130032', marginBottom: 16, fontFamily: 'var(--ink-font-family)' }}>
           Welcome, Kathie Brown
         </div>
 
@@ -756,19 +759,19 @@ function HomePage() {
           display: 'inline-flex',
           alignItems: 'center',
           gap: 0,
-          background: 'var(--ink-white-fade-10)',
-          border: '1px solid var(--ink-white-fade-20)',
+          background: 'rgba(255,255,255,0.55)',
+          border: '1px solid rgba(19,0,50,0.12)',
           borderRadius: 'var(--ink-radius-size-full)',
           padding: '7px 20px',
           marginBottom: 32,
           fontSize: 13,
-          color: 'var(--ink-white-100)',
+          color: '#130032',
           fontFamily: 'var(--ink-font-family)',
         }}>
           <span>2 expiring soon</span>
-          <span style={{ margin: '0 14px', opacity: 0.4 }}>|</span>
+          <span style={{ margin: '0 14px', opacity: 0.3 }}>|</span>
           <span>3 open requests</span>
-          <span style={{ margin: '0 14px', opacity: 0.4 }}>|</span>
+          <span style={{ margin: '0 14px', opacity: 0.3 }}>|</span>
           <span>8 upcoming renewals</span>
         </div>
 
@@ -783,19 +786,19 @@ function HomePage() {
             <div key={btn.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               <div style={{
                 width: 48, height: 48,
-                background: 'var(--ink-cobalt-140)',
+                background: 'var(--ink-cobalt-100)',
                 borderRadius: 'var(--ink-radius-size-s)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <Icon name={btn.icon} size={22} color="var(--ink-white-100)" />
+                <Icon name={btn.icon} size={22} color="#ffffff" />
               </div>
               {btn.hasArrow ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--ink-white-100)', fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#130032', fontSize: 13, fontFamily: 'var(--ink-font-family)' }}>
                   <span>{btn.label}</span>
-                  <Icon name="chevron-down" size={12} color="var(--ink-white-100)" />
+                  <Icon name="chevron-down" size={12} color="#130032" />
                 </div>
               ) : (
-                <div style={{ color: 'var(--ink-white-100)', fontSize: 13, textAlign: 'center', lineHeight: 1.4, whiteSpace: 'pre-line' }}>
+                <div style={{ color: '#130032', fontSize: 13, textAlign: 'center', lineHeight: 1.4, whiteSpace: 'pre-line', fontFamily: 'var(--ink-font-family)' }}>
                   {btn.label}
                 </div>
               )}
@@ -804,8 +807,8 @@ function HomePage() {
         </div>
       </div>
 
-      {/* ── Page body ── */}
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '24px 24px 40px' }}>
+      {/* ── Page body — sits on the gradient, no background of its own ── */}
+      <div style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px 40px' }}>
         <Stack gap="none" style={{ gap: 20 }}>
 
           {/* ── Tasks ── */}
@@ -1243,7 +1246,7 @@ function Footer() {
   );
 }
 
-/* ══════════════════════════���════════════
+/* ════════════��═════════════���════════════
    App
    ═══════════════════════════════════════ */
 
