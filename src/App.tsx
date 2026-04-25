@@ -151,73 +151,117 @@ type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'a
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
 /* ═══════════════════════════════════════
-   Agreements Data
+   Agreement Workspace Data (Sales Use Case)
+   An Agreement Workspace is a dynamic package of 
+   documents, data, and tasks required to execute 
+   a specific transaction between parties.
    ═══════════════════════════════════════ */
 
 interface Agreement {
   id: string;
-  name: string;
-  recipient: string;
-  status: string;
+  name: string;                    // Deal/Agreement name
+  party: string;                   // Primary counterparty
+  partyLogo?: string;              // Logo initials
+  status: string;                  // Workflow status
   statusIcon: 'status-check' | 'status-void' | 'clock' | 'status-warn';
   statusKind: 'success' | 'warning' | 'info' | 'neutral';
-  statusSub?: string;
-  date: string;
+  statusSub?: string;              // Status detail
+  dealValue?: string;              // Deal value
+  agreementType?: string;          // MSA, SOW, NDA, etc.
+  termLength?: string;             // Contract term
+  closeDate?: string;              // Expected close
+  date: string;                    // Last activity date
   time: string;
-  action: 'Copy' | 'Download';
+  action: 'Copy' | 'Download' | 'Edit';
+  documentsCount?: number;
+  tasksCount?: number;
+  tasksPending?: number;
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
-  { id: '1', name: 'Complete with Docusign: rhi.pdf, Sample_Service_Agreement.pdf', recipient: 'To: Akshat Mishra', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Purging soon', date: '24/3/2026', time: '20:26', action: 'Copy' },
-  { id: '2', name: 'Here is your signed document: Sample_Service_Agreement.pdf', recipient: 'To: Akshat Mishra, [Placeholder]', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Purging soon', date: '24/3/2026', time: '20:23', action: 'Copy' },
-  { id: '3', name: 'Complete with Docusign: rhi.pdf', recipient: 'To: Akshat Mishra', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Purging soon', date: '24/3/2026', time: '20:16', action: 'Copy' },
-  { id: '4', name: 'Complete with Docusign: Sample_Service_Agreement.pdf', recipient: 'To: Akshat Mishra', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Purging soon', date: '24/3/2026', time: '20:14', action: 'Copy' },
-  { id: '5', name: 'Complete with Docusign: Sample_Service_Agreement.pdf', recipient: 'To: Akshat Mishra', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Purging soon', date: '24/3/2026', time: '20:10', action: 'Copy' },
-  { id: '6', name: 'Complete with Docusign: rhi.pdf, Sample_Service_Agreement.pdf', recipient: 'To: Akshat Mishra', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Purging soon', date: '23/3/2026', time: '20:25', action: 'Download' },
-  { id: '7', name: 'Complete with Docusign: Screenshot 2026-03-18 at 10.27.30 AM.png', recipient: 'To: Akshat Mishra', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Purging soon', date: '18/3/2026', time: '11:05', action: 'Download' },
-  { id: '8', name: 'Complete with Docusign: Screenshot 2026-03-18 at 10.27.21 AM.png', recipient: 'To: Akshat Mishra', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Purging soon', date: '18/3/2026', time: '10:57', action: 'Download' },
-  { id: '9', name: 'Please sign: test.txt', recipient: 'To: Akshat Mishra', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Purged', date: '26/2/2026', time: '12:15', action: 'Download' },
-  { id: '10', name: 'Complete with Docusign: Fontara Financial SOW.pdf', recipient: 'To: Akshat Mishra', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Purged', date: '24/2/2026', time: '10:50', action: 'Download' },
-  { id: '11', name: 'Complete with DocuSign: Georgia-Residential-Lease-Agreement.pdf', recipient: 'From: Renewal Management', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', date: '24/2/2026', time: '10:44', action: 'Download' },
+  // Active Negotiations / In Progress
+  { id: '1', name: 'Momentum Driver MSA 2026', party: 'Momentum Driver Inc.', partyLogo: 'MD', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Waiting for Legal', dealValue: '$2.4M', agreementType: 'Enterprise License', termLength: '36 months', closeDate: 'Jun 30, 2026', date: '24/4/2026', time: '14:30', action: 'Edit', documentsCount: 5, tasksCount: 12, tasksPending: 4 },
+  { id: '2', name: 'TechStart Platform Agreement', party: 'TechStart Inc.', partyLogo: 'TS', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Review', dealValue: '$890K', agreementType: 'SaaS License', termLength: '24 months', closeDate: 'May 15, 2026', date: '23/4/2026', time: '11:20', action: 'Edit', documentsCount: 3, tasksCount: 8, tasksPending: 2 },
+  { id: '3', name: 'CloudCo Services SOW', party: 'CloudCo Services', partyLogo: 'CC', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: '1 of 2 signed', dealValue: '$450K', agreementType: 'Statement of Work', termLength: '12 months', closeDate: 'Apr 30, 2026', date: '22/4/2026', time: '16:45', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 1 },
+  { id: '4', name: 'Acme Solutions Renewal', party: 'Acme Solutions', partyLogo: 'AS', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Terms Discussion', dealValue: '$1.2M', agreementType: 'Renewal', termLength: '36 months', closeDate: 'Jul 1, 2026', date: '21/4/2026', time: '09:15', action: 'Edit', documentsCount: 4, tasksCount: 9, tasksPending: 3 },
+  { id: '5', name: 'DataFlow Integration MSA', party: 'DataFlow Systems', partyLogo: 'DF', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Preparing Documents', dealValue: '$675K', agreementType: 'Master Agreement', termLength: '24 months', closeDate: 'Jun 15, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 1, tasksCount: 6, tasksPending: 6 },
+  
+  // Completed / Executed
+  { id: '6', name: 'GlobalTech Enterprise Deal', party: 'GlobalTech Corp.', partyLogo: 'GT', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Fully Signed', dealValue: '$3.1M', agreementType: 'Enterprise License', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 15, tasksPending: 0 },
+  { id: '7', name: 'Innovate Labs Partnership', party: 'Innovate Labs', partyLogo: 'IL', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$520K', agreementType: 'Partnership', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 4, tasksCount: 10, tasksPending: 0 },
+  { id: '8', name: 'FinanceHub SaaS Agreement', party: 'FinanceHub Inc.', partyLogo: 'FH', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$780K', agreementType: 'SaaS License', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 3, tasksCount: 8, tasksPending: 0 },
+  { id: '9', name: 'RetailMax Platform Deal', party: 'RetailMax Group', partyLogo: 'RM', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$1.8M', agreementType: 'Platform License', termLength: '36 months', date: '1/4/2026', time: '11:30', action: 'Download', documentsCount: 6, tasksCount: 14, tasksPending: 0 },
+  
+  // Expired / Voided
+  { id: '10', name: 'Legacy Systems NDA', party: 'Legacy Systems', partyLogo: 'LS', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Term Ended', dealValue: '$150K', agreementType: 'NDA', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 3, tasksPending: 0 },
+  { id: '11', name: 'OldCorp Vendor Agreement', party: 'OldCorp Inc.', partyLogo: 'OC', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Cancelled', dealValue: '$320K', agreementType: 'Vendor Agreement', termLength: '24 months', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 5, tasksPending: 0 },
 ];
 
 const agreementColumns = [
   {
     key: 'name',
-    header: 'Name',
+    header: 'Agreement Workspace',
     sortable: true,
-    width: '50%',
+    width: '40%',
     cell: (row: Agreement) => (
-      <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)' }}>
-        <Text size="sm">{row.name}</Text>
-        <Text size="xs" color="secondary">{row.recipient}</Text>
-      </Stack>
+      <Inline gap="small" align="center">
+        <div style={{
+          width: 36, height: 36, borderRadius: 6,
+          background: 'var(--ink-cobalt-80)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'white', fontWeight: 600, fontSize: 11, flexShrink: 0,
+        }}>
+          {row.partyLogo || row.party.substring(0, 2).toUpperCase()}
+        </div>
+        <Stack gap="none" style={{ gap: 2 }}>
+          <Text size="sm" weight="medium">{row.name}</Text>
+          <Text size="xs" color="secondary">{row.party}</Text>
+        </Stack>
+      </Inline>
+    ),
+  },
+  {
+    key: 'dealValue',
+    header: 'Value',
+    sortable: true,
+    cell: (row: Agreement) => (
+      <Text size="sm" weight="medium">{row.dealValue || '—'}</Text>
     ),
   },
   {
     key: 'status',
     header: 'Status',
     cell: (row: Agreement) => (
-      <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)' }}>
+      <Stack gap="none" style={{ gap: 2 }}>
         <Inline gap="small" align="center">
-          <Icon name={row.statusIcon} size={16} color={row.statusKind === 'success' ? 'var(--ink-green-80)' : undefined} />
+          <Icon name={row.statusIcon} size={16} color={row.statusKind === 'success' ? 'var(--ink-green-80)' : row.statusKind === 'warning' ? 'var(--ink-orange-80)' : undefined} />
           <Text size="sm">{row.status}</Text>
         </Inline>
         {row.statusSub && (
-          <Text size="xs" color="secondary" style={{ textDecoration: 'underline', textDecorationColor: 'var(--ink-border-subtle)' }}>{row.statusSub}</Text>
+          <Text size="xs" color="secondary">{row.statusSub}</Text>
         )}
       </Stack>
     ),
   },
   {
-    key: 'date',
-    header: 'Last Change',
+    key: 'closeDate',
+    header: 'Close Date',
     sortable: true,
     cell: (row: Agreement) => (
-      <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)' }}>
-        <Text size="sm">{row.date}</Text>
-        <Text size="xs" color="secondary">{row.time}</Text>
-      </Stack>
+      <Text size="sm">{row.closeDate || '—'}</Text>
+    ),
+  },
+  {
+    key: 'tasks',
+    header: 'Tasks',
+    cell: (row: Agreement) => (
+      <Inline gap="small" align="center">
+        {row.tasksPending && row.tasksPending > 0 ? (
+          <Badge kind="warning">{row.tasksPending} pending</Badge>
+        ) : (
+          <Text size="sm" color="secondary">{row.tasksCount || 0} total</Text>
+        )}
+      </Inline>
     ),
   },
   {
@@ -226,7 +270,7 @@ const agreementColumns = [
     align: 'end',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
-        <Button kind="secondary" size="small">{row.action}</Button>
+        <Button kind="primary" size="small">Open</Button>
         <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
       </Inline>
     ),
@@ -372,7 +416,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════�����������════
+/* ══════════════════════════════════�������������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -688,54 +732,58 @@ function DocPreview({ hasLogo, hasForm }: { hasLogo?: boolean; hasForm?: boolean
 function HomePage() {
   const getStaggerProps = useStaggerEntrance(5, { baseDelay: 80, staggerInterval: 60, duration: 380, distance: 10 });
 
+  // Tasks for Sales use case
   const tasks = [
     {
-      icon: 'comment' as const,
-      title: 'Resolve comment',
-      description: 'Complete with Docusign: 123 Main St...',
+      icon: 'status-check' as const,
+      title: 'Finance Approval',
+      description: 'Momentum Driver MSA 2026',
       badge: 'Due today',
       badgeColor: 'var(--ink-red-80)',
     },
     {
       icon: 'edit' as const,
-      title: 'Needs to sign',
-      description: 'Complete with Docusign: 123 Main St. Lo...',
-      badge: 'Assigned 5 days ago',
+      title: 'Review Redlines',
+      description: 'TechStart Platform Agreement',
+      badge: 'Due in 2 days',
       badgeColor: 'var(--ink-orange-60)',
     },
     {
       icon: 'eye' as const,
-      title: 'Needs to view',
-      description: 'Fontara agreement',
-      sub: 'From: Sam Sender',
+      title: 'Review SOW Terms',
+      description: 'CloudCo Services SOW',
+      sub: 'From: Legal Team',
     },
     {
       icon: 'document' as const,
-      title: 'Create or upload document',
-      description: '123 Main St. Louis, MO',
-      sub: 'From: Sam Sender',
+      title: 'Upload Security Addendum',
+      description: 'Acme Solutions Renewal',
+      sub: 'From: Security Team',
     },
   ];
 
+  // Agreement activity for Sales
   const activity = [
-    { name: 'Offer Letter_Dan Daves',              time: '1 day ago',   type: 'completed' as const },
-    { name: 'Complete with Docusign: Tally MSA',   time: '1 week ago',  type: 'waiting' as const,  progress: 35 },
-    { name: 'Complete with Docusign: Tally MSA',   time: '1 week ago',  type: 'waiting' as const,  progress: 60 },
-    { name: 'Complete with Docusign: Tally MSA',   time: '1 week ago',  type: 'expiring' as const  },
-    { name: 'Offer Letter_Dan Daves',              time: '1 day ago',   type: 'completed' as const },
+    { name: 'GlobalTech Enterprise Deal',     time: '2 hours ago', type: 'completed' as const },
+    { name: 'Momentum Driver MSA 2026',       time: '4 hours ago', type: 'waiting' as const,  progress: 75 },
+    { name: 'TechStart Platform Agreement',   time: '1 day ago',   type: 'waiting' as const,  progress: 45 },
+    { name: 'CloudCo Services SOW',           time: '2 days ago',  type: 'expiring' as const  },
+    { name: 'Innovate Labs Partnership',      time: '3 days ago',  type: 'completed' as const },
   ];
 
+  // Templates for Sales
   const templates = [
-    { name: 'Statement of Work',   sub: 'Document Template',  badge: 'Favorite',        badgeColor: 'var(--ink-cobalt-100)', hasLogo: true,  hasForm: false },
-    { name: 'I-9 Form',            sub: 'Web Form Template',  badge: 'Favorite',        badgeColor: 'var(--ink-cobalt-100)', hasLogo: false, hasForm: true  },
-    { name: 'Employment Contract', sub: 'Document Template',  badge: 'Human Resources', badgeColor: 'var(--ink-green-80)',   hasLogo: false, hasForm: false },
-    { name: 'Termination Letter',  sub: 'Envelope Template',  badge: 'Human Resources', badgeColor: 'var(--ink-green-80)',   hasLogo: true,  hasForm: false },
+    { name: 'Master Service Agreement', sub: 'Document Template',  badge: 'Favorite',     badgeColor: 'var(--ink-cobalt-100)', hasLogo: true,  hasForm: false },
+    { name: 'Statement of Work',        sub: 'Document Template',  badge: 'Favorite',     badgeColor: 'var(--ink-cobalt-100)', hasLogo: false, hasForm: false },
+    { name: 'Enterprise NDA',           sub: 'Envelope Template',  badge: 'Sales',        badgeColor: 'var(--ink-green-80)',   hasLogo: false, hasForm: true  },
+    { name: 'Order Form',               sub: 'Web Form Template',  badge: 'Sales',        badgeColor: 'var(--ink-green-80)',   hasLogo: true,  hasForm: false },
   ];
 
+  // Recommended for Sales
   const recommended = [
-    { icon: 'ai-spark-filled' as const, label: 'Streamline your agreement workflow', active: true },
-    { icon: 'document' as const,        label: 'Simplify data collection' },
-    { icon: 'workflow' as const,        label: 'Automate agreement workflows' },
+    { icon: 'ai-spark-filled' as const, label: 'Accelerate deal velocity with AI', active: true },
+    { icon: 'document' as const,        label: 'Standardize contract language' },
+    { icon: 'workflow' as const,        label: 'Automate approval workflows' },
   ];
 
   return (
@@ -1448,7 +1496,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
         <div style={{ ...innerStyle, paddingBottom: 'var(--ink-spacing-150)' }}>
           <Inline gap="medium" align="center">
             <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
-            <Badge kind="emphasis">Negotiation</Badge>
+            <Badge kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : 'emphasis'}>{agreement.status}</Badge>
           </Inline>
         </div>
 
@@ -1476,15 +1524,15 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               }}>
                 <Inline justify="between" align="flex-start">
                   <Inline gap="medium" align="center">
-                    <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--ink-cobalt-80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 'var(--ink-font-size-sm)' }}>M+</div>
+                    <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--ink-cobalt-80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 'var(--ink-font-size-sm)' }}>{agreement.partyLogo || agreement.party.substring(0, 2).toUpperCase()}</div>
                     <div>
                       <Inline gap="small" align="center">
-                        <Text size="sm" weight="semibold">Momentum Driver Inc.</Text>
+                        <Text size="sm" weight="semibold">{agreement.party}</Text>
                         <Icon name="chevron-down" size={16} />
                       </Inline>
                       <Inline gap="small" align="center">
-                        <StatusLight kind="info" />
-                        <Text size="xs" color="secondary">OPP-2024-0891</Text>
+                        <StatusLight kind={agreement.statusKind === 'success' ? 'success' : 'info'} />
+                        <Text size="xs" color="secondary">OPP-{agreement.id.padStart(4, '0')}</Text>
                       </Inline>
                     </div>
                   </Inline>
@@ -1492,19 +1540,19 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                 <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
                   <div>
                     <Text size="xs" color="secondary">Deal Value</Text>
-                    <Text size="sm" weight="semibold">$2.4M</Text>
+                    <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
                   </div>
                   <div>
                     <Text size="xs" color="secondary">Agreement Type</Text>
-                    <Text size="sm">Enterprise License</Text>
+                    <Text size="sm">{agreement.agreementType || '—'}</Text>
                   </div>
                   <div>
                     <Text size="xs" color="secondary">Term Length</Text>
-                    <Text size="sm">36 months</Text>
+                    <Text size="sm">{agreement.termLength || '—'}</Text>
                   </div>
                   <div>
                     <Text size="xs" color="secondary">Anticipated Close</Text>
-                    <Text size="sm">June 30, 2026</Text>
+                    <Text size="sm">{agreement.closeDate || '—'}</Text>
                   </div>
                 </Grid>
               </div>
@@ -2154,11 +2202,11 @@ export default function App() {
       {
         id: 'agreements',
         items: [
-          { id: 'all-agreements', label: 'All Agreements', icon: 'envelope' as const, onClick: () => setSidebarView('all-agreements') },
+          { id: 'all-agreements', label: 'All Workspaces', icon: 'envelope' as const, onClick: () => setSidebarView('all-agreements') },
           { id: 'drafts', label: 'Drafts', nested: true, onClick: () => setSidebarView('drafts') },
-          { id: 'in-progress', label: 'In Progress', nested: true, onClick: () => setSidebarView('in-progress') },
-          { id: 'completed', label: 'Completed', nested: true, onClick: () => setSidebarView('completed') },
-          { id: 'deleted', label: 'Deleted', nested: true, onClick: () => setSidebarView('deleted') },
+          { id: 'in-progress', label: 'Active Deals', nested: true, onClick: () => setSidebarView('in-progress') },
+          { id: 'completed', label: 'Executed', nested: true, onClick: () => setSidebarView('completed') },
+          { id: 'deleted', label: 'Expired / Voided', nested: true, onClick: () => setSidebarView('deleted') },
         ],
       },
       { id: 'folders-divider', hasDivider: true, items: [
@@ -2251,28 +2299,17 @@ export default function App() {
     ],
   };
 
-  /* ── View-filtered data ── */
+  /* ── View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
     switch (sidebarView) {
       case 'drafts':
-        return [
-          { id: 'd1', name: 'Q2 Partnership Agreement - Draft', recipient: 'To: Legal Team', status: 'Draft', statusIcon: 'clock' as const, statusKind: 'neutral' as const, date: '31/3/2026', time: '09:15', action: 'Edit' as const },
-          { id: 'd2', name: 'Contractor NDA - Pending Review', recipient: 'To: Akshat Mishra', status: 'Draft', statusIcon: 'clock' as const, statusKind: 'neutral' as const, date: '30/3/2026', time: '14:30', action: 'Edit' as const },
-          { id: 'd3', name: 'Office Lease Renewal 2026', recipient: 'To: Facilities', status: 'Draft', statusIcon: 'clock' as const, statusKind: 'neutral' as const, date: '28/3/2026', time: '11:00', action: 'Edit' as const },
-        ];
+        return AGREEMENTS_DATA.filter(a => a.status === 'Draft');
       case 'in-progress':
-        return [
-          { id: 'ip1', name: 'Vendor Agreement - CloudCo Services', recipient: 'To: CloudCo Services', status: 'Sent', statusIcon: 'clock' as const, statusKind: 'info' as const, statusSub: 'Waiting for others', date: '30/3/2026', time: '16:45', action: 'Copy' as const },
-          { id: 'ip2', name: 'Consulting Agreement - DesignLab', recipient: 'To: DesignLab Studio', status: 'Sent', statusIcon: 'clock' as const, statusKind: 'info' as const, statusSub: 'Waiting for others', date: '29/3/2026', time: '10:20', action: 'Copy' as const },
-          { id: 'ip3', name: 'Software License Agreement - Acme', recipient: 'To: Acme Solutions, Inc.', status: 'Delivered', statusIcon: 'clock' as const, statusKind: 'info' as const, statusSub: '1 of 2 signed', date: '27/3/2026', time: '09:00', action: 'Copy' as const },
-          { id: 'ip4', name: 'Service Level Agreement - TechStart', recipient: 'To: TechStart Inc', status: 'Delivered', statusIcon: 'clock' as const, statusKind: 'info' as const, statusSub: 'Viewed', date: '25/3/2026', time: '14:10', action: 'Copy' as const },
-        ];
+        return AGREEMENTS_DATA.filter(a => ['Negotiation', 'In Review', 'Pending Signature'].includes(a.status));
       case 'completed':
-        return AGREEMENTS_DATA.filter(a => a.status === 'Completed');
+        return AGREEMENTS_DATA.filter(a => a.status === 'Executed');
       case 'deleted':
-        return [
-          { id: 'del1', name: 'Old NDA - Expired', recipient: 'To: Akshat Mishra', status: 'Voided', statusIcon: 'status-void' as const, statusKind: 'neutral' as const, statusSub: 'Deleted', date: '15/3/2026', time: '08:30', action: 'Copy' as const },
-        ];
+        return AGREEMENTS_DATA.filter(a => ['Expired', 'Voided'].includes(a.status));
       default:
         return AGREEMENTS_DATA;
     }
@@ -2281,7 +2318,7 @@ export default function App() {
   const filteredAgreements = useMemo(() => {
     if (!search) return viewAgreements;
     const q = search.toLowerCase();
-    return viewAgreements.filter((a) => a.name.toLowerCase().includes(q) || a.recipient.toLowerCase().includes(q));
+    return viewAgreements.filter((a) => a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q));
   }, [search, viewAgreements]);
 
   const filteredParties = useMemo(() => {
@@ -2291,8 +2328,8 @@ export default function App() {
   }, [search]);
 
   const VIEW_LABELS: Record<SidebarView, string> = {
-    'all-agreements': 'All Agreements', drafts: 'Drafts', 'in-progress': 'In Progress',
-    completed: 'Completed', deleted: 'Deleted', parties: 'Parties', requests: 'Requests',
+    'all-agreements': 'All Agreement Workspaces', drafts: 'Drafts', 'in-progress': 'Active Deals',
+    completed: 'Executed', deleted: 'Expired / Voided', parties: 'Parties', requests: 'Requests',
   };
 
   const isPartiesView = sidebarView === 'parties';
@@ -2527,17 +2564,14 @@ export default function App() {
         <DataTable columns={navigatorColumns} data={filteredNavigator} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage="No completed documents" onRowClick={() => setShowAgreementDetail(true)} pagination={{ page: 1, pageSize: 50, totalItems: 687, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : (
         <DataTable columns={agreementColumns} data={filteredAgreements} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage={
-          sidebarView === 'drafts' ? 'No drafts found' :
-          sidebarView === 'in-progress' ? 'No documents in progress' :
-          sidebarView === 'deleted' ? 'No deleted documents' :
-          'No agreements match your search'
+          sidebarView === 'drafts' ? 'No draft workspaces' :
+          sidebarView === 'in-progress' ? 'No active deals in progress' :
+          sidebarView === 'deleted' ? 'No expired or voided workspaces' :
+          'No agreement workspaces match your search'
         } onRowClick={(row: Agreement) => {
-          if (sidebarView === 'drafts' || sidebarView === 'in-progress' || row.status === 'Draft' || row.status === 'In Progress') {
-            setSelectedAgreement(row);
-            setShowDealWorkspace(true);
-          } else {
-            setShowAgreementDetail(true);
-          }
+          // All Agreement Workspaces open the WorkspaceView
+          setSelectedAgreement(row);
+          setShowDealWorkspace(true);
         }} pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       )}
     </AgreementTableView>
