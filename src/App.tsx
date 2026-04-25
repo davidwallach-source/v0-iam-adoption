@@ -228,7 +228,7 @@ const agreementColumns = [
     key: 'name',
     header: 'Agreement',
     sortable: true,
-    width: '40%',
+    width: '30%',
     cell: (row: Agreement) => (
       <Stack gap="none" style={{ gap: 2 }}>
         <Text size="sm" weight="medium">{row.name}</Text>
@@ -239,6 +239,7 @@ const agreementColumns = [
   {
     key: 'status',
     header: 'Status',
+    width: '15%',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center">
         <Icon name={row.statusIcon} size={14} color={row.statusKind === 'success' ? 'var(--ink-green-80)' : row.statusKind === 'warning' ? 'var(--ink-orange-80)' : 'var(--ink-neutral-60)'} />
@@ -250,6 +251,7 @@ const agreementColumns = [
     key: 'docs',
     header: 'Docs',
     alignment: 'center',
+    width: '10%',
     cell: (row: Agreement) => (
       <Text size="sm">{row.documentsCount || 0}</Text>
     ),
@@ -258,6 +260,7 @@ const agreementColumns = [
     key: 'parties',
     header: 'Parties',
     alignment: 'center',
+    width: '12%',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="center">
         <Text size="sm">1</Text>
@@ -269,6 +272,7 @@ const agreementColumns = [
     key: 'tasks',
     header: 'Tasks',
     alignment: 'center',
+    width: '12%',
     className: 'dt-col-hide-narrow',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="center">
@@ -284,6 +288,7 @@ const agreementColumns = [
     key: 'date',
     header: 'Updated',
     sortable: true,
+    width: '15%',
     cell: (row: Agreement) => (
       <Text size="sm">{relativeDate(row.date)}</Text>
     ),
@@ -292,6 +297,7 @@ const agreementColumns = [
     key: 'action',
     header: '',
     alignment: 'end',
+    width: 'auto',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
         <Button kind="secondary" size="small">{row.status === 'Executed' ? 'View' : 'Edit'}</Button>
@@ -1329,7 +1335,7 @@ const VALID_TABS: TabId[] = ['home', 'agreements', 'templates', 'insights', 'adm
 /* ═══════════════════════════════════════
    Agreement Detail View (Navigator Viewer)
    Full-screen dialog with PDF viewer + detail sidebar
-   ═══════════════════════════════════════ */
+   ═════════════════════��═════════════════ */
 
 const AGREEMENT_DETAIL = {
   fileName: 'Batterii MLA_00992.pdf',
