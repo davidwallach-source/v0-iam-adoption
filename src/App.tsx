@@ -372,7 +372,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════���������════
+/* ══════════════════════════════════�����������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -776,7 +776,7 @@ function HomePage() {
         </div>
 
         {/* Action buttons row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 56 }}>
           {[
             { icon: 'plus' as const,      label: 'Start',            hasArrow: true },
             { icon: 'send' as const,      label: 'Get\nSignatures',  hasArrow: false },
@@ -784,13 +784,15 @@ function HomePage() {
             { icon: 'templates' as const, label: 'Use\nTemplate',    hasArrow: false },
           ].map((btn) => (
             <div key={btn.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              {/* Setting color on the wrapper resolves currentColor to white for all child SVG paths */}
               <div style={{
                 width: 48, height: 48,
                 background: 'var(--ink-cobalt-100)',
                 borderRadius: 'var(--ink-radius-size-s)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#ffffff',
               }}>
-                <Icon name={btn.icon} size={22} color="#ffffff" />
+                <Icon name={btn.icon} size={22} />
               </div>
               {btn.hasArrow ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#130032', fontSize: 13, fontFamily: 'var(--ink-font-family)' }}>
