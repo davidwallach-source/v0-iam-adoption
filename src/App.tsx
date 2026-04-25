@@ -1297,7 +1297,7 @@ function AdminPage() {
 
 /* ═══════════════════════════════════════
    Footer
-   ══════════���════════════════════════════ */
+   ══════════�����════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -2236,7 +2236,6 @@ export default function App() {
           { id: 'drafts', label: 'Drafts', nested: true, onClick: () => setSidebarView('drafts') },
           { id: 'in-progress', label: 'In Progress', nested: true, onClick: () => setSidebarView('in-progress') },
           { id: 'completed', label: 'Completed', nested: true, onClick: () => setSidebarView('completed') },
-          { id: 'deleted', label: 'Expired / Voided', nested: true, onClick: () => setSidebarView('deleted') },
         ],
       },
       { id: 'folders-divider', hasDivider: true, items: [
@@ -2510,15 +2509,10 @@ export default function App() {
   /* ── Agreements content ── */
   const agreementsContent = (
     <AgreementTableView
-      banner={isNavigatorView ? (
-        <Banner kind="promo" closable customIcon={<IrisIcon />}>
-          <strong>0 agreements</strong> with renewal notice dates in the next 30 days.
-        </Banner>
-      ) : undefined}
       pageHeader={
         <PageHeader
-          title={isNavigatorView ? 'Completed' : isPartiesView ? 'Parties' : isRequestsView ? 'Requests' : VIEW_LABELS[sidebarView]}
-          showAIBadge={isNavigatorView || isPartiesView}
+          title={isPartiesView ? 'Parties' : isRequestsView ? 'Requests' : VIEW_LABELS[sidebarView]}
+          showAIBadge={isPartiesView}
           aiBadgeText="AI-Assisted"
           actions={isPartiesView
             ? (<>
@@ -2527,35 +2521,24 @@ export default function App() {
               </>)
             : isRequestsView
             ? <Button kind="secondary">Create Request</Button>
-            : isNavigatorView
-            ? (<>
-                <ComboButton variant="secondary" startIcon="plus">New</ComboButton>
-                <IconButton icon="settings" variant="tertiary" size="small" aria-label="Settings" />
-              </>)
             : null
           }
         />
       }
       filterBar={
         <FilterBar
-          viewSelector={isNavigatorView ? (
-            <Button kind="secondary" size="small" menuTrigger>Documents</Button>
-          ) : isPartiesView ? (
+          viewSelector={isPartiesView ? (
             <Button kind="secondary" size="small" menuTrigger>Role View</Button>
           ) : undefined}
           search={{
             value: search,
             onChange: setSearch,
-            placeholder: isNavigatorView
-              ? "Try 'which agreements expire in 90 days'"
-              : isPartiesView ? 'Search parties...'
+            placeholder: isPartiesView ? 'Search parties...'
               : isRequestsView ? 'Search Request Titles or IDs...'
-              : 'Search Envelopes',
+              : 'Search agreements',
           }}
           showSearchIndicator={!isPartiesView && !isRequestsView}
-          quickActions={isNavigatorView ? [
-            <IconButton key="bm" icon="bookmark" variant="secondary" size="small" aria-label="Bookmarks" />,
-          ] : isRequestsView ? [
+          quickActions={isRequestsView ? [
             <IconButton key="bm" icon="bookmark" variant="secondary" size="small" aria-label="Bookmarks" />,
           ] : undefined}
           filters={isPartiesView ? (
@@ -2572,14 +2555,10 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
               <Button kind="secondary" size="small" startElement={<Icon name="filter" size={14} />}>All Filters</Button>
             </Inline>
-          ) : isNavigatorView ? (
-            <Button kind="secondary" size="small" startElement={<Icon name="filter" size={14} />}>Filters</Button>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
-              <Chip onRemove={() => {}}>Date: Last 6 Months</Chip>
-              <div style={{ width: 1, height: 20, background: 'var(--ink-border-subtle)', flexShrink: 0 }} />
               <Button kind="secondary" size="small" menuTrigger>Status</Button>
-              <Button kind="secondary" size="small" menuTrigger>Sender</Button>
+              <Button kind="secondary" size="small" menuTrigger>Type</Button>
               <Button kind="secondary" size="small" startElement={<Icon name="filter" size={14} />}>All Filters</Button>
             </Inline>
           )}
@@ -2590,16 +2569,13 @@ export default function App() {
         <DataTable columns={partyColumns} data={filteredParties} getRowKey={(row) => row.id} stickyHeader showColumnControl emptyMessage="No parties match your search" pagination={{ page: 1, pageSize: 25, totalItems: 1334, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : isRequestsView ? (
         <DataTable columns={requestColumns} data={filteredRequests} getRowKey={(row) => row.id} stickyHeader showColumnControl rowHeight="tall" emptyMessage="No requests found" pagination={{ page: 1, pageSize: 10, totalItems: filteredRequests.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
-      ) : isNavigatorView ? (
-        <DataTable columns={navigatorColumns} data={filteredNavigator} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage="No completed documents" onRowClick={() => setShowAgreementDetail(true)} pagination={{ page: 1, pageSize: 50, totalItems: 687, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : (
         <DataTable columns={agreementColumns} data={filteredAgreements} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage={
-          sidebarView === 'drafts' ? 'No draft workspaces' :
-          sidebarView === 'in-progress' ? 'No active deals in progress' :
-          sidebarView === 'deleted' ? 'No expired or voided workspaces' :
-          'No agreement workspaces match your search'
+          sidebarView === 'drafts' ? 'No draft agreements' :
+          sidebarView === 'in-progress' ? 'No agreements in progress' :
+          sidebarView === 'completed' ? 'No completed agreements' :
+          'No agreements match your search'
         } onRowClick={(row: Agreement) => {
-          // All Agreement Workspaces open the WorkspaceView
           setSelectedAgreement(row);
           setShowDealWorkspace(true);
         }} pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
