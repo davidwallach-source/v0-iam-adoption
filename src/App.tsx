@@ -200,68 +200,65 @@ const AGREEMENTS_DATA: Agreement[] = [
 const agreementColumns = [
   {
     key: 'name',
-    header: 'Agreement Workspace',
+    header: 'Agreement',
     sortable: true,
-    width: '40%',
+    width: '35%',
     cell: (row: Agreement) => (
-      <Inline gap="small" align="center">
-        <div style={{
-          width: 36, height: 36, borderRadius: 6,
-          background: 'var(--ink-cobalt-80)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'white', fontWeight: 600, fontSize: 11, flexShrink: 0,
-        }}>
-          {row.partyLogo || row.party.substring(0, 2).toUpperCase()}
-        </div>
-        <Stack gap="none" style={{ gap: 2 }}>
-          <Text size="sm" weight="medium">{row.name}</Text>
-          <Text size="xs" color="secondary">{row.party}</Text>
-        </Stack>
-      </Inline>
-    ),
-  },
-  {
-    key: 'dealValue',
-    header: 'Value',
-    sortable: true,
-    cell: (row: Agreement) => (
-      <Text size="sm" weight="medium">{row.dealValue || '—'}</Text>
+      <Stack gap="none" style={{ gap: 2 }}>
+        <Text size="sm" weight="medium">{row.name}</Text>
+        <Text size="xs" color="secondary">{row.agreementType} · {row.dealValue}</Text>
+      </Stack>
     ),
   },
   {
     key: 'status',
     header: 'Status',
     cell: (row: Agreement) => (
-      <Stack gap="none" style={{ gap: 2 }}>
-        <Inline gap="small" align="center">
-          <Icon name={row.statusIcon} size={16} color={row.statusKind === 'success' ? 'var(--ink-green-80)' : row.statusKind === 'warning' ? 'var(--ink-orange-80)' : undefined} />
-          <Text size="sm">{row.status}</Text>
-        </Inline>
-        {row.statusSub && (
-          <Text size="xs" color="secondary">{row.statusSub}</Text>
-        )}
-      </Stack>
+      <Inline gap="small" align="center">
+        <Icon name={row.statusIcon} size={14} color={row.statusKind === 'success' ? 'var(--ink-green-80)' : row.statusKind === 'warning' ? 'var(--ink-orange-80)' : 'var(--ink-neutral-60)'} />
+        <Text size="sm">{row.status}</Text>
+      </Inline>
     ),
   },
   {
-    key: 'closeDate',
-    header: 'Close Date',
-    sortable: true,
+    key: 'docs',
+    header: 'Docs',
+    align: 'center',
     cell: (row: Agreement) => (
-      <Text size="sm">{row.closeDate || '—'}</Text>
+      <Text size="sm">{row.documentsCount || 0}</Text>
+    ),
+  },
+  {
+    key: 'people',
+    header: 'People',
+    align: 'center',
+    cell: (row: Agreement) => (
+      <Inline gap="small" align="center" justify="center">
+        <Text size="sm">1</Text>
+        <Text size="xs" color="secondary">ext</Text>
+      </Inline>
     ),
   },
   {
     key: 'tasks',
     header: 'Tasks',
+    align: 'center',
     cell: (row: Agreement) => (
-      <Inline gap="small" align="center">
+      <Inline gap="small" align="center" justify="center">
         {row.tasksPending && row.tasksPending > 0 ? (
-          <Badge kind="warning">{row.tasksPending} pending</Badge>
+          <Text size="sm" style={{ color: 'var(--ink-orange-60)', fontWeight: 500 }}>{row.tasksPending} active</Text>
         ) : (
           <Text size="sm" color="secondary">{row.tasksCount || 0} total</Text>
         )}
       </Inline>
+    ),
+  },
+  {
+    key: 'date',
+    header: 'Last Updated',
+    sortable: true,
+    cell: (row: Agreement) => (
+      <Text size="sm">{row.date}</Text>
     ),
   },
   {
@@ -270,7 +267,7 @@ const agreementColumns = [
     align: 'end',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
-        <Button kind="primary" size="small">Open</Button>
+        <Button kind="secondary" size="small">{row.status === 'Executed' ? 'View' : 'Edit'}</Button>
         <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
       </Inline>
     ),
@@ -672,7 +669,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═══════════════════════════════════════
+/* ═��═════════════════════════════════════
    Home Page
    ═══════════════════════════════════════ */
 
