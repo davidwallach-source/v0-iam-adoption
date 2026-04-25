@@ -1297,7 +1297,7 @@ function AdminPage() {
 
 /* ═══════════════════════════════════════
    Footer
-   ═══════════════════════════════════════ */
+   ══════════���════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -2232,10 +2232,10 @@ export default function App() {
       {
         id: 'agreements',
         items: [
-          { id: 'all-agreements', label: 'All Workspaces', icon: 'envelope' as const, onClick: () => setSidebarView('all-agreements') },
+          { id: 'all-agreements', label: 'All Agreements', icon: 'envelope' as const, onClick: () => setSidebarView('all-agreements') },
           { id: 'drafts', label: 'Drafts', nested: true, onClick: () => setSidebarView('drafts') },
-          { id: 'in-progress', label: 'Active Deals', nested: true, onClick: () => setSidebarView('in-progress') },
-          { id: 'completed', label: 'Executed', nested: true, onClick: () => setSidebarView('completed') },
+          { id: 'in-progress', label: 'In Progress', nested: true, onClick: () => setSidebarView('in-progress') },
+          { id: 'completed', label: 'Completed', nested: true, onClick: () => setSidebarView('completed') },
           { id: 'deleted', label: 'Expired / Voided', nested: true, onClick: () => setSidebarView('deleted') },
         ],
       },
@@ -2358,8 +2358,8 @@ export default function App() {
   }, [search]);
 
   const VIEW_LABELS: Record<SidebarView, string> = {
-    'all-agreements': 'All Agreement Workspaces', drafts: 'Drafts', 'in-progress': 'Active Deals',
-    completed: 'Executed', deleted: 'Expired / Voided', parties: 'Parties', requests: 'Requests',
+    'all-agreements': 'All Agreements', drafts: 'Drafts', 'in-progress': 'In Progress',
+    completed: 'Completed', deleted: 'Expired / Voided', parties: 'Parties', requests: 'Requests',
   };
 
   const isPartiesView = sidebarView === 'parties';
@@ -2532,7 +2532,7 @@ export default function App() {
                 <ComboButton variant="secondary" startIcon="plus">New</ComboButton>
                 <IconButton icon="settings" variant="tertiary" size="small" aria-label="Settings" />
               </>)
-            : <Button kind="secondary" menuTrigger>Shared Access</Button>
+            : null
           }
         />
       }
