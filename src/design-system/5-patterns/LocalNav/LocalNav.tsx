@@ -211,11 +211,13 @@ export const LocalNav: React.FC<LocalNavProps> = ({
             aria-haspopup={headerMenuItems && headerMenuItems.length > 0 ? 'menu' : undefined}
             tabIndex={isExpanded ? 0 : -1}
             endElement={
-              <span
-                className={`${styles.headerChevron} ${headerMenuOpen ? styles.headerChevronRotated : ''}`}
-              >
-                <Icon name="chevron-down" size="small" />
-              </span>
+              headerMenuItems && headerMenuItems.length > 0 ? (
+                <span
+                  className={`${styles.headerChevron} ${headerMenuOpen ? styles.headerChevronRotated : ''}`}
+                >
+                  <Icon name="chevron-down" size="small" />
+                </span>
+              ) : undefined
             }
           >
             {headerLabel}
