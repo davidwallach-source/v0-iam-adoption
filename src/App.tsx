@@ -2291,7 +2291,7 @@ export default function App() {
   const agreementsSidebar = {
     headerLabel: 'Start',
     headerIcon: 'plus' as const,
-    headerOnClick: () => setShowStartModal(true),
+    onHeaderClick: () => setShowStartModal(true),
     activeItemId: sidebarView,
     sections: [
       {
