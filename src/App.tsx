@@ -1297,7 +1297,7 @@ function AdminPage() {
 
 /* ═══════════════════════════════════════
    Footer
-   ══════════�����════════════════════════════ */
+   ══════════�������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -2213,9 +2213,6 @@ export default function App() {
     showSettings: true,
     settingsIcon: 'sliders-horizontal' as const,
     user: { name: 'Kathie P' },
-    extraActions: (
-      <Button kind="brand" size="small">Upgrade</Button>
-    ),
   };
 
   /* ── LocalNav — Agreements tab ── */
