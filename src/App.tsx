@@ -579,7 +579,7 @@ const partyColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Requests Data (matches real DocuSign)
-   ═══════════════════════════════════════ */
+   ═══════════���═══════════════════════════ */
 
 interface RequestItem {
   id: string;
@@ -2291,11 +2291,7 @@ export default function App() {
   const agreementsSidebar = {
     headerLabel: 'Start',
     headerIcon: 'plus' as const,
-    headerMenuItems: [
-      { id: 'new-agreement', label: 'New Agreement', icon: 'edit' as const },
-      { id: 'new-template', label: 'New Template', icon: 'star' as const },
-      { id: 'upload', label: 'Upload Document', icon: 'upload' as const },
-    ],
+    headerOnClick: () => setShowStartModal(true),
     activeItemId: sidebarView,
     sections: [
       {
@@ -2590,7 +2586,7 @@ export default function App() {
               </>)
             : isRequestsView
             ? <Button kind="secondary">Create Request</Button>
-            : <Button kind="primary" onClick={() => setShowStartModal(true)}>Start</Button>
+            : null
           }
         />
       }
