@@ -33,12 +33,90 @@ import {
   SearchInput,
   Alert,
   AlertBadge,
+  Modal,
   dataTableStyles,
 } from '@/design-system';
 
 /* ═══════════════════════════════════════
-   DataTable Row Stagger Animation (CSS)
+   StartNewModal Component
    ═══════════════════════════════════════ */
+
+interface StartNewModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function StartNewModal({ open, onClose }: StartNewModalProps) {
+  const [search, setSearch] = useState('');
+
+  const agreements = [
+    { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
+    { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
+    { id: 'purchase', title: 'Purchase Request', description: 'Initiate a purchase with a new or existing vendor.' },
+    { id: 'legal', title: 'Legal Rev', description: 'Submit a first contract for in-house legal review.' },
+  ];
+
+  const otherTasks = [
+    { icon: 'envelope' as const, label: 'Send an Agreement' },
+    { icon: 'edit' as const, label: 'Sign a Document' },
+    { icon: 'templates' as const, label: 'Use a Template' },
+    { icon: 'form' as const, label: 'Create a Form' },
+  ];
+
+  return (
+    <Modal open={open} onClose={onClose} size="lg">
+      <Stack gap="none" style={{ gap: 24, padding: '32px 48px' }}>
+        <Heading level={2} style={{ margin: 0 }}>Start New</Heading>
+
+        {/* Search input */}
+        <SearchInput
+          value={search}
+          onChange={(v) => setSearch(v)}
+          placeholder="What would you like to do?"
+          trailingContent={
+            <Inline gap="small" align="center">
+              <Icon name="ai-spark-filled" size={14} color="var(--ink-cobalt-100)" />
+              <Text size="xs" weight="medium" color="secondary">AI-Assisted</Text>
+            </Inline>
+          }
+        />
+
+        {/* Agreements section */}
+        <div>
+          <Text size="sm" weight="medium" style={{ marginBottom: 12 }}>Agreements</Text>
+          <Grid columns={4} gap={12}>
+            {agreements.map((item) => (
+              <Card key={item.id} radius="medium" style={{ padding: 0, border: '1px solid var(--ink-neutral-fade-10)' }}>
+                <Stack gap="none" style={{ padding: '20px 16px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Text size="sm" weight="medium" style={{ marginBottom: 8 }}>{item.title}</Text>
+                  <Text size="xs" color="secondary" style={{ marginBottom: 16, flex: 1 }}>{item.description}</Text>
+                  <Button kind="secondary" size="small" style={{ alignSelf: 'flex-start' }}>Start</Button>
+                </Stack>
+              </Card>
+            ))}
+          </Grid>
+        </div>
+
+        {/* Other Tasks section */}
+        <div>
+          <Text size="sm" weight="medium" style={{ marginBottom: 12 }}>Other Tasks</Text>
+          <Grid columns={4} gap={12}>
+            {otherTasks.map((task) => (
+              <Card key={task.label} radius="medium" style={{ padding: 0, border: '1px solid var(--ink-neutral-fade-10)', cursor: 'pointer' }}>
+                <Stack gap="none" style={{ padding: '20px 16px', alignItems: 'center', textAlign: 'center', height: '100%' }}>
+                  <Icon name={task.icon} size={24} style={{ marginBottom: 12 }} />
+                  <Text size="sm" weight="medium">{task.label}</Text>
+                </Stack>
+              </Card>
+            ))}
+          </Grid>
+        </div>
+      </Stack>
+    </Modal>
+  );
+}
+
+
 
 const tableRowStaggerStyles = `
 @keyframes inkRowEntrance {
@@ -856,12 +934,12 @@ function HomePage() {
         {/* Action buttons row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 56 }}>
           {[
-            { icon: 'plus' as const,      label: 'Start',            hasArrow: true },
-            { icon: 'send' as const,      label: 'Get\nSignatures',  hasArrow: false },
-            { icon: 'edit' as const,      label: 'Sign a\nDocument', hasArrow: false },
-            { icon: 'templates' as const, label: 'Use\nTemplate',    hasArrow: false },
+            { icon: 'plus' as const,      label: 'Start',            onClick: () => setShowStartModal(true) },
+            { icon: 'send' as const,      label: 'Get\nSignatures',  onClick: () => {} },
+            { icon: 'edit' as const,      label: 'Sign a\nDocument', onClick: () => {} },
+            { icon: 'templates' as const, label: 'Use\nTemplate',    onClick: () => {} },
           ].map((btn) => (
-            <div key={btn.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <div key={btn.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={btn.onClick}>
               {/* Setting color on the wrapper resolves currentColor to white for all child SVG paths */}
               <div style={{
                 width: 48, height: 48,
@@ -872,16 +950,9 @@ function HomePage() {
               }}>
                 <Icon name={btn.icon} size={22} />
               </div>
-              {btn.hasArrow ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#130032', fontSize: 13, fontFamily: 'var(--ink-font-family)' }}>
-                  <span>{btn.label}</span>
-                  <Icon name="chevron-down" size={12} color="#130032" />
-                </div>
-              ) : (
-                <div style={{ color: '#130032', fontSize: 13, textAlign: 'center', lineHeight: 1.4, whiteSpace: 'pre-line', fontFamily: 'var(--ink-font-family)' }}>
-                  {btn.label}
-                </div>
-              )}
+              <div style={{ color: '#130032', fontSize: 13, textAlign: 'center', lineHeight: 1.4, whiteSpace: 'pre-line', fontFamily: 'var(--ink-font-family)' }}>
+                {btn.label}
+              </div>
             </div>
           ))}
         </div>
@@ -1297,7 +1368,7 @@ function AdminPage() {
 
 /* ═══════════════════════════════════════
    Footer
-   ══════════�������════════════════════════════ */
+   ══════════���������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -2181,6 +2252,7 @@ export default function App() {
   const [showAgreementDetail, setShowAgreementDetail] = useState(false);
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
   const [showDealWorkspace, setShowDealWorkspace] = useState(false);
+  const [showStartModal, setShowStartModal] = useState(false);
 
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
@@ -2518,7 +2590,7 @@ export default function App() {
               </>)
             : isRequestsView
             ? <Button kind="secondary">Create Request</Button>
-            : null
+            : <Button kind="primary" onClick={() => setShowStartModal(true)}>Start</Button>
           }
         />
       }
@@ -2623,6 +2695,7 @@ export default function App() {
         setSelectedAgreement(null);
       }} />
     )}
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} />
     </>
   );
 }
