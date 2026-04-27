@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �����������������══════════════════════════════════════ */
+   �������������������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2386,8 +2386,8 @@ export default function App() {
         id: 'features',
         hasDivider: true,
         items: [
-          { id: 'parties', label: 'Parties', icon: 'building-person' as const, badge: 'New', onClick: () => setSidebarView('parties') },
-          { id: 'requests', label: 'Requests', icon: 'ticket' as const, badge: 'New', onClick: () => setSidebarView('requests') },
+          { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => setSidebarView('parties') },
+          { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => setSidebarView('requests') },
         ],
       },
     ],
