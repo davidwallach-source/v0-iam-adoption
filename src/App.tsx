@@ -123,7 +123,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
           <p style={{
             margin: '0 0 10px 0',
             fontSize: 20,
-            fontWeight: 600,
+            fontWeight: 400,
             fontFamily: 'var(--ink-font-family)',
             color: '#130032',
           }}>Agreements</p>
@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   ���══════════════════════════════════════ */
+   �����══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
