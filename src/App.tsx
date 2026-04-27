@@ -2227,7 +2227,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     
                     return (
                       <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : undefined }}>
+                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
                           <Inline gap="small" align="center">
                             {hasChildren && (
                               <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
