@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: center;
   z-index: var(--ink-z-modal);
-  padding: 80px 0; /* 80px top/bottom padding from Figma */
+  padding: 40px 0; /* 40px top/bottom padding */
   animation: fadeIn var(--ink-motion-duration-300) var(--ink-motion-curve-opacity);
 }
 
@@ -36,7 +36,7 @@
   box-shadow: var(--ink-shadow-xl);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 160px); /* Account for 80px top/bottom padding */
+  max-height: calc(100vh - 80px); /* Account for 40px top/bottom padding */
   width: 100%;
   position: relative;
   animation: slideUp 350ms var(--ink-motion-curve-default) 50ms both;
