@@ -53,7 +53,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
     { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
     { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
     { id: 'purchase', title: 'Purchase Request', description: 'Initiate a purchase with a new or existing vendor.' },
-    { id: 'legal', title: 'Legal Rev', description: 'Submit a first contract for in-house legal review.' },
+    { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
   ];
 
   const otherTasks = [
@@ -76,7 +76,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
         borderRadius: '16px 16px 0 0',
       }} />
       
-      <div style={{ padding: '40px 48px 32px' }}>
+      <div style={{ padding: '40px 40px 32px' }}>
         {/* Title - light weight */}
         <h2 style={{
           margin: '0 0 24px 0',
@@ -137,22 +137,21 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
           
           <div style={{
             display: 'flex',
-            gap: 16,
-            overflowX: 'auto',
-            paddingBottom: 4,
+            gap: 12,
           }}>
             {agreements.map((item) => (
               <div
                 key={item.id}
                 style={{
-                  flex: '0 0 200px',
+                  flex: '1 1 0',
+                  minWidth: 0,
                   display: 'flex',
                   flexDirection: 'column',
-                  padding: 20,
+                  padding: '16px 16px 16px 16px',
                   border: '1px solid var(--ink-neutral-fade-10)',
                   borderRadius: 8,
                   background: 'white',
-                  minHeight: 160,
+                  minHeight: 150,
                 }}
               >
                 {/* Card header with title and overflow menu */}
