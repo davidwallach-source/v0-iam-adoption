@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �������������������══════════════════════════════════════ */
+   ���������������������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -1591,10 +1591,290 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
+/* ═══════════════════════════════════════
+   DocPreview Component
+   ═══════════════════════════════════════ */
+
+interface DocPreviewProps {
+  documentName: string;
+  onClose: () => void;
+}
+
+function DocPreview({ documentName, onClose }: DocPreviewProps) {
+  const fadeIn = useFadeIn(0, 250);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 24;
+  const [aiMessage, setAiMessage] = useState('');
+  const [isGenerating, setIsGenerating] = useState(true);
+
+  // Simulate AI summary generation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsGenerating(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const documentContent = `
+# MASTER SERVICES AGREEMENT
+
+**Acme Corporation & Globex Industries**
+
+*Effective Date: January 15, 2026*
+
+## 1. Definitions
+
+This Master Services Agreement ("Agreement") is entered into as of January 15, 2026 ("Effective Date") by and between Acme Corporation, a Delaware corporation ("Buyer"), and Globex Industries, a California corporation ("Supplier"). "Services" shall mean the cloud infrastructure, software development, and technical consulting services described in Exhibit A. "Confidential Information" means any information disclosed by either party that is marked as confidential or would reasonably be considered confidential.
+
+## 2. Scope of Services
+
+Supplier shall provide the Services as described in Exhibit A, attached hereto and incorporated by reference. The Services shall include: (a) Cloud infrastructure provisioning and management; (b) Custom software development per specifications in Exhibit B; (c) Technical consulting and advisory services; (d) 24/7 monitoring and incident response. Supplier shall assign dedicated resources dedicated full-time resources with minimum 3 years experience to perform the Services and shall not subcontract any portion shall not subcontract any material portion exceeding 10% of contract value without prior written consent of Buyer.
+
+## 3. Term and Termination
+
+This Agreement shall commence on the Effective Date and continue for a period of thirty-six (36) months ("Initial Term"), unless earlier terminated as provided herein. Upon expiration of the Initial Term, this Agreement shall automatically renew for successive twelve (12) month periods unless either party provides written notice of non-renewal at least ninety (90) days prior to the end of the then-current term. Either party may terminate this Agreement for cause upon thirty (30) days written notice forty-five (45) days written notice if the other party materially breaches any term and fails to cure within such notice period.
+
+## 4. Compensation and Payment
+
+Buyer shall pay Supplier the fees set forth in Exhibit C ("Fees"). Fees for the Initial Term total $2,400,000 USD, payable in equal monthly installments of $66,667 $66,667 subject to quarterly true-up. Payment shall be due within thirty (30) days of receipt of a valid invoice. Late payments shall accrue interest at a rate of 1.5% per month 1.0% per month or the maximum rate permitted by law. Supplier may increase Fees by no more than 5% no more than CPI or 3%, whichever is lower upon each renewal term with sixty (60) days prior written notice. All Fees are exclusive of applicable taxes.
+
+## 5. Intellectual Property
+
+All intellectual property rights in pre-existing materials shall remain with the respective party. Any work product created by Supplier specifically for Buyer under this Agreement ("Work Product") shall be deemed works made for hire and shall be the exclusive property of Buyer. Supplier hereby assigns to Buyer all rights, title, and interest in the Work Product. Supplier retains a non-exclusive license to use general knowledge, skills, and experience gained during performance.
+
+## 6. Confidentiality
+
+Each party agrees to hold the other party's Confidential Information in strict confidence and not to disclose it to any third party without prior written consent. The receiving party shall protect Confidential Information using the same degree of care it uses to protect its own confidential information, but no less than reasonable care. This obligation shall survive termination of this Agreement for a period of five (5) years.
+
+## 7. Limitation of Liability
+
+EXCEPT FOR BREACHES OF CONFIDENTIALITY OR INTELLECTUAL PROPERTY OBLIGATIONS, NEITHER PARTY SHALL BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES. THE TOTAL AGGREGATE LIABILITY OF EITHER PARTY SHALL NOT EXCEED THE TOTAL FEES PAID OR PAYABLE UNDER THIS AGREEMENT DURING THE TWELVE (12) MONTH PERIOD PRECEDING THE CLAIM THE TOTAL FEES PAID OR PAYABLE UNDER THIS AGREEMENT DURING THE TERM. This limitation shall apply regardless of the form of action regardless of the form of action, except for breaches of Section 6 (Confidentiality) and Section 5 (IP) or theory of liability.
+  `.trim();
+
+  const shortcuts = [
+    { label: 'Suggest changes against Playbook' },
+    { label: 'Insert Clause' },
+    { label: 'Automatically route approvals' },
+    { label: 'Compare Documents' },
+  ];
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 1070,
+      background: 'var(--ink-bg-color-default)',
+      display: 'flex',
+      flexDirection: 'column',
+      ...fadeIn.style,
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        background: 'var(--ink-bg-color-canvas-page)',
+      }}>
+        <button
+          onClick={onClose}
+          aria-label="Back"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 8,
+          }}
+        >
+          <Icon name="arrow-left" size={20} />
+        </button>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Badge kind="emphasis" style={{ marginRight: 8 }}>Editing</Badge>
+          <Text size="sm" weight="medium">{documentName}</Text>
+        </div>
+        <Inline gap="small" align="center">
+          <Button kind="secondary" size="small">Save</Button>
+          <Button kind="primary" size="small">Send</Button>
+        </Inline>
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Document viewer */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--ink-bg-color-secondary)' }}>
+          {/* Toolbar */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px 16px',
+            gap: 16,
+            borderBottom: '1px solid var(--ink-border-subtle)',
+            background: 'var(--ink-bg-color-default)',
+          }}>
+            {/* Page navigation */}
+            <Inline gap="small" align="center">
+              <IconButton icon="chevron-left" variant="tertiary" size="small" aria-label="Previous page" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} />
+              <Text size="sm">{currentPage} / {totalPages}</Text>
+              <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="Next page" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} />
+            </Inline>
+            <Divider orientation="vertical" style={{ height: 24 }} />
+            {/* Formatting toolbar */}
+            <Inline gap="small" align="center">
+              <Button kind="secondary" size="small" menuTrigger>Body Text</Button>
+              <Button kind="secondary" size="small" menuTrigger>Arial</Button>
+              <Button kind="secondary" size="small" menuTrigger>12</Button>
+            </Inline>
+            <Divider orientation="vertical" style={{ height: 24 }} />
+            <Inline gap="small" align="center">
+              <IconButton icon="bold" variant="tertiary" size="small" aria-label="Bold" />
+              <IconButton icon="italic" variant="tertiary" size="small" aria-label="Italic" />
+              <IconButton icon="underline" variant="tertiary" size="small" aria-label="Underline" />
+            </Inline>
+          </div>
+
+          {/* Document content */}
+          <div style={{ flex: 1, overflow: 'auto', padding: 40, display: 'flex', justifyContent: 'center' }}>
+            <div style={{
+              background: 'white',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              borderRadius: 4,
+              padding: '60px 80px',
+              maxWidth: 816,
+              width: '100%',
+              minHeight: 1056,
+              fontFamily: 'Arial, sans-serif',
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: '#130032',
+            }}>
+              {documentContent.split('\n').map((line, i) => {
+                if (line.startsWith('# ')) {
+                  return <h1 key={i} style={{ fontSize: 28, fontWeight: 600, marginBottom: 8, marginTop: i === 0 ? 0 : 24 }}>{line.slice(2)}</h1>;
+                }
+                if (line.startsWith('## ')) {
+                  return <h2 key={i} style={{ fontSize: 18, fontWeight: 600, marginBottom: 12, marginTop: 24 }}>{line.slice(3)}</h2>;
+                }
+                if (line.startsWith('**') && line.endsWith('**')) {
+                  return <p key={i} style={{ fontWeight: 600, marginBottom: 4 }}>{line.slice(2, -2)}</p>;
+                }
+                if (line.startsWith('*') && line.endsWith('*') && !line.startsWith('**')) {
+                  return <p key={i} style={{ fontStyle: 'italic', marginBottom: 16, color: '#666' }}>{line.slice(1, -1)}</p>;
+                }
+                if (line.trim() === '') {
+                  return <br key={i} />;
+                }
+                return <p key={i} style={{ marginBottom: 16 }}>{line}</p>;
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* AI Assistant panel */}
+        <div style={{
+          width: 380,
+          borderLeft: '1px solid var(--ink-border-subtle)',
+          background: 'var(--ink-bg-color-default)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {/* AI Header */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+            <Inline gap="small" align="center">
+              <AIBadge infoContent={false}>AI-Assisted</AIBadge>
+            </Inline>
+          </div>
+
+          {/* AI Content */}
+          <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
+            <Stack gap="large">
+              {/* Greeting */}
+              <div>
+                <Text size="lg" weight="semibold" style={{ marginBottom: 4 }}>Hello, Larry</Text>
+                <Text size="sm" color="secondary">What would you like to know?</Text>
+              </div>
+
+              {/* Summary section */}
+              <div style={{
+                background: 'var(--ink-bg-color-secondary)',
+                borderRadius: 8,
+                padding: 16,
+              }}>
+                {isGenerating ? (
+                  <Inline gap="small" align="center">
+                    <Icon name="ai-spark-filled" size={16} color="var(--ink-cobalt-100)" />
+                    <Text size="sm" color="secondary">Generating summary...</Text>
+                  </Inline>
+                ) : (
+                  <Stack gap="small">
+                    <Text size="sm" weight="medium">Document Summary</Text>
+                    <Text size="sm" color="secondary">
+                      This is a Master Services Agreement between Acme Corporation (Buyer) and Globex Industries (Supplier) 
+                      for cloud infrastructure, software development, and consulting services. The 36-month contract is valued 
+                      at $2.4M with automatic renewal provisions.
+                    </Text>
+                  </Stack>
+                )}
+              </div>
+
+              {/* Shortcuts */}
+              <div>
+                <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>My shortcuts</Text>
+                <Stack gap="small">
+                  {shortcuts.map((shortcut) => (
+                    <Button key={shortcut.label} kind="secondary" size="small" style={{ justifyContent: 'flex-start', width: '100%' }}>
+                      {shortcut.label}
+                    </Button>
+                  ))}
+                </Stack>
+              </div>
+            </Stack>
+          </div>
+
+          {/* AI Input */}
+          <div style={{ padding: 16, borderTop: '1px solid var(--ink-border-subtle)' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '10px 12px',
+              background: 'var(--ink-bg-color-secondary)',
+              borderRadius: 8,
+              border: '1px solid var(--ink-border-subtle)',
+            }}>
+              <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-100)" />
+              <input
+                type="text"
+                value={aiMessage}
+                onChange={(e) => setAiMessage(e.target.value)}
+                placeholder="Ask a question..."
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: 14,
+                  fontFamily: 'var(--ink-font-family)',
+                  color: 'var(--ink-neutral-100)',
+                  outline: 'none',
+                }}
+              />
+              <IconButton icon="send" variant="tertiary" size="small" aria-label="Send" />
+            </div>
+            <Text size="xs" color="secondary" style={{ marginTop: 8, textAlign: 'center' }}>
+              Responses are generated with AI and are not legal advice.
+            </Text>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
+  const [previewDoc, setPreviewDoc] = useState<string | null>(null);
   const fadeIn = useFadeIn(0, 250);
 
   const toggleGroup = (id: string) => {
@@ -1910,11 +2190,11 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     if (isChild && !isParentExpanded) return null;
                     
                     return (
-                      <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                      <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }} onClick={() => setPreviewDoc(doc.name)}>
                         <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : undefined }}>
                           <Inline gap="small" align="center">
                             {doc.isParent && (
-                              <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+                              <button onClick={(e) => { e.stopPropagation(); toggleGroup(doc.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
                                 <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
                               </button>
                             )}
@@ -1936,7 +2216,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                         <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
                         <td style={{ padding: 'var(--ink-spacing-150)' }}>
                           <Inline gap="small" align="center">
-                            <Button kind="secondary" size="small">View</Button>
+                            <Button kind="secondary" size="small" onClick={() => setPreviewDoc(doc.name)}>View</Button>
                             <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                           </Inline>
                         </td>
@@ -1963,7 +2243,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                 </thead>
                 <tbody>
                   {SUPPLEMENTAL_DOCUMENTS.map((doc) => (
-                    <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                    <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }} onClick={() => setPreviewDoc(doc.name)}>
                       <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
@@ -1977,7 +2257,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                       <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
-                          <Button kind="secondary" size="small">View</Button>
+                          <Button kind="secondary" size="small" onClick={() => setPreviewDoc(doc.name)}>View</Button>
                           <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                         </Inline>
                       </td>
@@ -1989,6 +2269,11 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
           </div>
         )}
       </div>
+
+      {/* Doc Preview overlay */}
+      {previewDoc && (
+        <DocPreview documentName={previewDoc} onClose={() => setPreviewDoc(null)} />
+      )}
     </div>
   );
 }
