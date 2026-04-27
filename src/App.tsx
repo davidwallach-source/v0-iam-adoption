@@ -64,54 +64,183 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
   ];
 
   return (
-    <Modal open={open} onClose={onClose} size="lg">
-      <Stack gap="none" style={{ gap: 24, padding: '32px 48px' }}>
-        <Heading level={2} style={{ margin: 0 }}>Start New</Heading>
+    <Modal open={open} onClose={onClose} size="full">
+      {/* Lavender gradient top edge */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 6,
+        background: 'linear-gradient(90deg, var(--ink-cobalt-fade-10) 0%, var(--ink-lavender-fade-20) 100%)',
+        borderRadius: '16px 16px 0 0',
+      }} />
+      
+      <div style={{ padding: '40px 48px 32px' }}>
+        {/* Title - light weight */}
+        <h2 style={{
+          margin: '0 0 24px 0',
+          fontSize: 28,
+          fontWeight: 300,
+          fontFamily: 'var(--ink-font-family)',
+          color: 'var(--ink-neutral-100)',
+        }}>Start New</h2>
 
-        {/* Search input */}
-        <SearchInput
-          value={search}
-          onChange={(v) => setSearch(v)}
-          placeholder="What would you like to do?"
-          trailingContent={
-            <Inline gap="small" align="center">
-              <Icon name="ai-spark-filled" size={14} color="var(--ink-cobalt-100)" />
-              <Text size="xs" weight="medium" color="secondary">AI-Assisted</Text>
-            </Inline>
-          }
-        />
+        {/* Search bar - pill shaped with background */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '12px 20px',
+          background: 'var(--ink-neutral-fade-5)',
+          borderRadius: 999,
+          marginBottom: 28,
+        }}>
+          <Icon name="search" size={18} color="var(--ink-neutral-60)" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="What would you like to do?"
+            style={{
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              fontSize: 14,
+              fontFamily: 'var(--ink-font-family)',
+              color: 'var(--ink-neutral-100)',
+              outline: 'none',
+            }}
+          />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            background: 'var(--ink-neutral-fade-10)',
+            borderRadius: 999,
+          }}>
+            <Icon name="ai-spark-filled" size={14} color="var(--ink-cobalt-100)" />
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-neutral-80)' }}>AI-Assisted</span>
+          </div>
+        </div>
 
         {/* Agreements section */}
-        <div>
-          <Text size="sm" weight="medium" style={{ marginBottom: 12 }}>Agreements</Text>
-          <Grid columns={4} gap={12}>
+        <div style={{ marginBottom: 28 }}>
+          <p style={{
+            margin: '0 0 16px 0',
+            fontSize: 14,
+            fontWeight: 600,
+            fontFamily: 'var(--ink-font-family)',
+            color: 'var(--ink-neutral-100)',
+          }}>Agreements</p>
+          
+          <div style={{
+            display: 'flex',
+            gap: 16,
+            overflowX: 'auto',
+            paddingBottom: 4,
+          }}>
             {agreements.map((item) => (
-              <Card key={item.id} radius="medium" style={{ padding: 0, border: '1px solid var(--ink-neutral-fade-10)' }}>
-                <Stack gap="none" style={{ padding: '20px 16px', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Text size="sm" weight="medium" style={{ marginBottom: 8 }}>{item.title}</Text>
-                  <Text size="xs" color="secondary" style={{ marginBottom: 16, flex: 1 }}>{item.description}</Text>
-                  <Button kind="secondary" size="small" style={{ alignSelf: 'flex-start' }}>Start</Button>
-                </Stack>
-              </Card>
+              <div
+                key={item.id}
+                style={{
+                  flex: '0 0 200px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: 20,
+                  border: '1px solid var(--ink-neutral-fade-10)',
+                  borderRadius: 8,
+                  background: 'white',
+                  minHeight: 160,
+                }}
+              >
+                {/* Card header with title and overflow menu */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                  <span style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    fontFamily: 'var(--ink-font-family)',
+                    color: 'var(--ink-neutral-100)',
+                    lineHeight: 1.3,
+                  }}>{item.title}</span>
+                  <button
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      color: 'var(--ink-neutral-60)',
+                      marginTop: -2,
+                    }}
+                    aria-label="More options"
+                  >
+                    <Icon name="overflow-horizontal" size={18} />
+                  </button>
+                </div>
+                
+                {/* Description */}
+                <p style={{
+                  margin: '0 0 auto 0',
+                  fontSize: 13,
+                  fontFamily: 'var(--ink-font-family)',
+                  color: 'var(--ink-neutral-60)',
+                  lineHeight: 1.5,
+                }}>{item.description}</p>
+                
+                {/* Start button */}
+                <button style={{
+                  marginTop: 16,
+                  alignSelf: 'flex-start',
+                  padding: '8px 20px',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  fontFamily: 'var(--ink-font-family)',
+                  color: 'var(--ink-neutral-100)',
+                  background: 'white',
+                  border: '1px solid var(--ink-neutral-fade-20)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                }}>Start</button>
+              </div>
             ))}
-          </Grid>
+          </div>
         </div>
 
         {/* Other Tasks section */}
         <div>
-          <Text size="sm" weight="medium" style={{ marginBottom: 12 }}>Other Tasks</Text>
-          <Grid columns={4} gap={12}>
+          <p style={{
+            margin: '0 0 16px 0',
+            fontSize: 14,
+            fontWeight: 600,
+            fontFamily: 'var(--ink-font-family)',
+            color: 'var(--ink-neutral-100)',
+          }}>Other Tasks</p>
+          
+          <div style={{ display: 'flex', gap: 12 }}>
             {otherTasks.map((task) => (
-              <Card key={task.label} radius="medium" style={{ padding: 0, border: '1px solid var(--ink-neutral-fade-10)', cursor: 'pointer' }}>
-                <Stack gap="none" style={{ padding: '20px 16px', alignItems: 'center', textAlign: 'center', height: '100%' }}>
-                  <Icon name={task.icon} size={24} style={{ marginBottom: 12 }} />
-                  <Text size="sm" weight="medium">{task.label}</Text>
-                </Stack>
-              </Card>
+              <button
+                key={task.label}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '14px 16px',
+                  background: 'white',
+                  border: '1px solid var(--ink-neutral-fade-10)',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--ink-font-family)',
+                }}
+              >
+                <Icon name={task.icon} size={20} color="var(--ink-neutral-80)" />
+                <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-neutral-100)' }}>{task.label}</span>
+              </button>
             ))}
-          </Grid>
+          </div>
         </div>
-      </Stack>
+      </div>
     </Modal>
   );
 }
@@ -579,7 +708,7 @@ const partyColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Requests Data (matches real DocuSign)
-   ═══════════���═══════════════════════════ */
+   ═══════════�����═══════════════════════════ */
 
 interface RequestItem {
   id: string;

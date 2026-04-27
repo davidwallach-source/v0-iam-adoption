@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 import { IconButton } from '../../3-primitives/IconButton';
 
-export type ModalSize = 'small' | 'medium' | 'large' | 'xlarge';
+export type ModalSize = 'small' | 'medium' | 'large' | 'xlarge' | 'full';
 
 export interface ModalProps {
   /** Whether the modal is visible */

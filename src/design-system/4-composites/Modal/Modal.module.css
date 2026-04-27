@@ -75,6 +75,11 @@
   min-width: 800px;
 }
 
+.full {
+  max-width: 960px;
+  min-width: 960px;
+}
+
 /* Header - From Figma: 32px top, 16px bottom, 32px horizontal, no border */
 .header {
   display: flex;
