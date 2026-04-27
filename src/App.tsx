@@ -76,7 +76,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
         borderRadius: '16px 16px 0 0',
       }} />
       
-      <div style={{ padding: '28px 40px 24px' }}>
+      <div style={{ padding: '40px' }}>
         {/* Title - light weight */}
         <h2 style={{
           margin: '0 0 16px 0',
