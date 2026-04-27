@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �����══════════════════════════════════════ */
+   �������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2678,7 +2678,7 @@ export default function App() {
               : isRequestsView ? 'Search Request Titles or IDs...'
               : 'Search agreements',
           }}
-          showSearchIndicator={!isPartiesView && !isRequestsView}
+          showSearchIndicator={false}
           quickActions={isRequestsView ? [
             <IconButton key="bm" icon="bookmark" variant="secondary" size="small" aria-label="Bookmarks" />,
           ] : undefined}
@@ -2694,13 +2694,15 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Due Date</Button>
               <Button kind="secondary" size="small" menuTrigger>Last Activity At</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <Button kind="secondary" size="small" startElement={<Icon name="filter" size={14} />}>All Filters</Button>
+              <IconButton icon="filter" variant="secondary" size="small" aria-label="All Filters" />
             </Inline>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
-              <Button kind="secondary" size="small" menuTrigger>Status</Button>
+              <Button kind="secondary" size="small" menuTrigger>Party</Button>
               <Button kind="secondary" size="small" menuTrigger>Type</Button>
-              <Button kind="secondary" size="small" startElement={<Icon name="filter" size={14} />}>All Filters</Button>
+              <Button kind="secondary" size="small" menuTrigger>Status</Button>
+              <Button kind="secondary" size="small" menuTrigger>Last Activity</Button>
+              <IconButton icon="sliders-horizontal" variant="secondary" size="small" aria-label="All Filters" />
             </Inline>
           )}
         />
