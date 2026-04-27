@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �������══════════════════════════════════════ */
+   ���������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2701,8 +2701,8 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Party</Button>
               <Button kind="secondary" size="small" menuTrigger>Type</Button>
               <Button kind="secondary" size="small" menuTrigger>Status</Button>
-              <Button kind="secondary" size="small" menuTrigger>Last Activity</Button>
-              <IconButton icon="sliders-horizontal" variant="secondary" size="small" aria-label="All Filters" />
+              <Button kind="secondary" size="small" menuTrigger>Owner</Button>
+              <Button kind="secondary" size="small" aria-label="All Filters" startElement={<Icon name="sliders-horizontal" size={16} />} />
             </Inline>
           )}
         />
