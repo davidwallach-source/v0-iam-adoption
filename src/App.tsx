@@ -76,10 +76,10 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
         borderRadius: '16px 16px 0 0',
       }} />
       
-      <div style={{ padding: '40px 40px 32px' }}>
+      <div style={{ padding: '28px 40px 24px' }}>
         {/* Title - light weight */}
         <h2 style={{
-          margin: '0 0 24px 0',
+          margin: '0 0 16px 0',
           fontSize: 28,
           fontWeight: 300,
           fontFamily: 'var(--ink-font-family)',
@@ -91,10 +91,10 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          padding: '12px 20px',
+          padding: '10px 16px',
           background: 'var(--ink-neutral-fade-5)',
           borderRadius: 999,
-          marginBottom: 28,
+          marginBottom: 20,
         }}>
           <Icon name="search" size={18} color="var(--ink-neutral-60)" />
           <input
@@ -126,9 +126,9 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
         </div>
 
         {/* Agreements section */}
-        <div style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 20 }}>
           <p style={{
-            margin: '0 0 16px 0',
+            margin: '0 0 10px 0',
             fontSize: 14,
             fontWeight: 600,
             fontFamily: 'var(--ink-font-family)',
@@ -147,11 +147,10 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                   minWidth: 0,
                   display: 'flex',
                   flexDirection: 'column',
-                  padding: '16px 16px 16px 16px',
+                  padding: '14px 14px 14px 14px',
                   border: '1px solid var(--ink-neutral-fade-10)',
                   borderRadius: 8,
                   background: 'white',
-                  minHeight: 150,
                 }}
               >
                 {/* Card header with title and overflow menu */}
@@ -188,7 +187,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                 }}>{item.description}</p>
                 
                 {/* Start button */}
-                <div style={{ marginTop: 16 }}>
+                <div style={{ marginTop: 12 }}>
                   <Button kind="secondary" size="small">Start</Button>
                 </div>
               </div>
@@ -199,7 +198,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
         {/* Other Tasks section */}
         <div>
           <p style={{
-            margin: '0 0 16px 0',
+            margin: '0 0 10px 0',
             fontSize: 14,
             fontWeight: 600,
             fontFamily: 'var(--ink-font-family)',
