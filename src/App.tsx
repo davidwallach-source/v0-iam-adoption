@@ -120,7 +120,13 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
 
         {/* Agreements section */}
         <div style={{ marginBottom: 32 }}>
-          <Heading level={3} style={{ margin: '0 0 10px 0', color: '#130032' }}>Agreements</Heading>
+          <p style={{
+            margin: '0 0 10px 0',
+            fontSize: 20,
+            fontWeight: 600,
+            fontFamily: 'var(--ink-font-family)',
+            color: '#130032',
+          }}>Agreements</p>
           
           <div style={{
             display: 'flex',
