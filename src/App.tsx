@@ -1572,25 +1572,36 @@ const WORKSPACE_DATA: Record<string, {
   // Apex Manufacturing MSA (Draft)
   '1': {
     tasks: [
-      { id: '1', title: 'Draft Initial MSA Terms', type: 'View', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '5/5/26' },
-      { id: '2', title: 'Review Manufacturing SLA Requirements', type: 'View', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/8/26' },
-      { id: '3', title: 'Obtain Budget Approval', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Not started', dueDate: '5/12/26' },
+      { id: '1', title: 'Draft Master Services Agreement', type: 'Upload', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '5/5/26' },
+      { id: '2', title: 'Define Manufacturing SLA Requirements', type: 'Upload', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/8/26' },
+      { id: '3', title: 'Draft Quality Assurance Standards', type: 'Upload', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/10/26' },
+      { id: '4', title: 'Create Pricing Schedule', type: 'Upload', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Not started', dueDate: '5/12/26' },
+      { id: '5', title: 'Budget Approval ($1.8M)', type: 'Approval', team: 'Finance', assignee: 'CFO - Robert Hayes', assigneeInitials: 'RH', status: 'Not started', dueDate: '5/15/26' },
+      { id: '6', title: 'Legal Review - Indemnification Terms', type: 'Review', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'Not started', dueDate: '5/18/26' },
+      { id: '7', title: 'Stakeholder Sign-off', type: 'Approval', team: 'Executive', assignee: 'VP Sales - Mark Johnson', assigneeInitials: 'MJ', status: 'Not started', dueDate: '5/22/26' },
+      { id: '8', title: 'Send for Customer Signature', type: 'Sign', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'Not started', dueDate: '5/25/26' },
     ],
     documents: [
-      { id: '1', name: 'Apex Manufacturing MSA Draft v0.1', status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/27/2026', isParent: true },
+      { id: '1', name: 'Master Services Agreement', status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/27/2026' },
     ],
-    supplementalDocs: [],
+    supplementalDocs: [
+      { id: '10', name: 'Apex Manufacturing Credit Report', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/20/2026' },
+      { id: '11', name: 'Apex Manufacturing Company Profile', status: 'Executed', owner: 'Rachel Kim', ownerInitials: 'RK', dateModified: '4/15/2026' },
+    ],
     attentionItems: [
       { id: '1', item: 'Initial Draft Needed', description: 'MSA template needs customization for manufacturing terms', riskLevel: 'Medium' },
+      { id: '2', item: 'Large Deal Value', description: '$1.8M deal requires CFO approval', riskLevel: 'Medium' },
     ],
     activityItems: [
       { id: '1', icon: 'clock', user: 'AI Agent', action: 'Analyzing Apex Manufacturing company profile', time: 'Running...', isAI: true },
       { id: '2', icon: 'edit', user: 'Laura Chen', action: 'Created new agreement workspace', time: '2 hours ago' },
+      { id: '3', icon: 'upload', user: 'Rachel Kim', action: 'Uploaded company profile', time: '1 day ago' },
     ],
     teamProgress: [
       { team: 'Legal', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
-      { team: 'Operations', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
-      { team: 'Finance', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
+      { team: 'Operations', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+      { team: 'Finance', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+      { team: 'Sales', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
     ],
     alertMessage: 'Initial MSA draft is due next week. Start drafting terms.',
     alertAssignee: 'Laura Chen',
@@ -1598,13 +1609,17 @@ const WORKSPACE_DATA: Record<string, {
   // Sterling Logistics NDA (Draft)
   '2': {
     tasks: [
-      { id: '1', title: 'Customize NDA Template', type: 'View', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'In progress', dueDate: '5/2/26' },
-      { id: '2', title: 'Internal Stakeholder Review', type: 'Approval', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'Not started', dueDate: '5/4/26' },
+      { id: '1', title: 'Customize NDA Template', type: 'Upload', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'In progress', dueDate: '5/2/26' },
+      { id: '2', title: 'Define Confidential Information Scope', type: 'Review', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'Not started', dueDate: '5/3/26' },
+      { id: '3', title: 'Internal Stakeholder Review', type: 'Approval', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'Not started', dueDate: '5/4/26' },
+      { id: '4', title: 'Send for Counterparty Signature', type: 'Sign', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'Not started', dueDate: '5/5/26' },
     ],
     documents: [
-      { id: '1', name: 'Sterling Logistics Mutual NDA Draft', status: 'In Review', owner: 'James Park', ownerInitials: 'JP', dateModified: '4/26/2026', isParent: true },
+      { id: '1', name: 'Mutual Non-Disclosure Agreement', status: 'In Review', owner: 'James Park', ownerInitials: 'JP', dateModified: '4/26/2026' },
     ],
-    supplementalDocs: [],
+    supplementalDocs: [
+      { id: '5', name: 'Sterling Logistics Company Overview', status: 'Executed', owner: 'Rachel Kim', ownerInitials: 'RK', dateModified: '4/22/2026' },
+    ],
     attentionItems: [
       { id: '1', item: 'Confidentiality Scope', description: 'Define scope of confidential information for logistics data', riskLevel: 'Medium' },
     ],
@@ -1612,54 +1627,75 @@ const WORKSPACE_DATA: Record<string, {
       { id: '1', icon: 'edit', user: 'James Park', action: 'Started NDA customization', time: '4 hours ago' },
     ],
     teamProgress: [
-      { team: 'Legal', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
+      { team: 'Legal', completed: 0, total: 3, color: 'var(--ink-neutral-60)' },
       { team: 'Sales', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
     ],
   },
   // Horizon Cloud Services RFP (Draft)
   '3': {
     tasks: [
-      { id: '1', title: 'Complete RFP Requirements', type: 'Upload', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'In progress', dueDate: '5/10/26' },
-      { id: '2', title: 'Technical Requirements Review', type: 'Approval', team: 'IT', assignee: 'Kevin Nguyen', assigneeInitials: 'KN', status: 'In progress', dueDate: '5/12/26' },
-      { id: '3', title: 'Budget Allocation', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Not started', dueDate: '5/15/26' },
+      { id: '1', title: 'Draft RFP Requirements Document', type: 'Upload', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'In progress', dueDate: '5/10/26' },
+      { id: '2', title: 'Define Technical Requirements', type: 'Upload', team: 'IT', assignee: 'Kevin Nguyen', assigneeInitials: 'KN', status: 'In progress', dueDate: '5/12/26' },
+      { id: '3', title: 'Security Requirements Review', type: 'Review', team: 'Security', assignee: 'Tom Bradley', assigneeInitials: 'TB', status: 'Not started', dueDate: '5/14/26' },
+      { id: '4', title: 'Budget Allocation ($425K)', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Not started', dueDate: '5/15/26' },
+      { id: '5', title: 'Vendor Shortlist Approval', type: 'Approval', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/18/26' },
+      { id: '6', title: 'Issue RFP to Vendors', type: 'Upload', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/20/26' },
     ],
     documents: [
-      { id: '1', name: 'Cloud Services RFP Template', status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/25/2026', isParent: true },
-      { id: '2', name: 'Technical Requirements Spec', status: 'In Review', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/24/2026', parentId: '1' },
+      { id: '1', name: 'Request for Proposal (RFP)', status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/25/2026' },
+      { id: '2', name: 'Technical Requirements Specification', status: 'In Review', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/24/2026' },
+      { id: '3', name: 'Security Requirements Checklist', status: 'In Review', owner: 'Tom Bradley', ownerInitials: 'TB', dateModified: '4/23/2026' },
+      { id: '4', name: 'Vendor Evaluation Scorecard', status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/22/2026' },
     ],
-    supplementalDocs: [],
+    supplementalDocs: [
+      { id: '10', name: 'Current Infrastructure Assessment', status: 'Executed', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/10/2026' },
+      { id: '11', name: 'Cloud Migration Strategy Document', status: 'Executed', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/5/2026' },
+    ],
     attentionItems: [
       { id: '1', item: 'Technical Specs Incomplete', description: 'IT team needs to finalize cloud infrastructure requirements', riskLevel: 'Medium' },
+      { id: '2', item: 'Security Review Pending', description: 'Security team needs to review cloud compliance requirements', riskLevel: 'Medium' },
     ],
     activityItems: [
       { id: '1', icon: 'clock', user: 'AI Agent', action: 'Comparing vendor capabilities', time: 'Running...', isAI: true },
       { id: '2', icon: 'upload', user: 'Sarah Miller', action: 'Uploaded initial RFP draft', time: '1 day ago' },
+      { id: '3', icon: 'edit', user: 'Kevin Nguyen', action: 'Updated technical requirements', time: '2 days ago' },
     ],
     teamProgress: [
-      { team: 'Procurement', completed: 1, total: 2, color: 'var(--ink-cobalt-80)' },
+      { team: 'Procurement', completed: 1, total: 3, color: 'var(--ink-cobalt-80)' },
       { team: 'IT', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+      { team: 'Security', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
       { team: 'Finance', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
     ],
   },
   // Quantum Solutions Enterprise License (In Progress)
   '4': {
     tasks: [
-      { id: '1', title: 'Review License Terms', type: 'View', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '5/1/26' },
-      { id: '2', title: 'Finance Approval', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: 'Tomorrow', isDueSoon: true },
-      { id: '3', title: 'Security Assessment', type: 'Approval', team: 'Security', assignee: 'Tom Bradley', assigneeInitials: 'TB', status: 'Not started', dueDate: '5/5/26' },
-      { id: '4', title: 'Data Privacy Review', type: 'View', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'In progress', dueDate: '5/3/26' },
-      { id: '5', title: 'Integration Planning', type: 'View', team: 'IT', assignee: 'Kevin Nguyen', assigneeInitials: 'KN', status: 'Complete', dueDate: '4/25/26' },
+      { id: '1', title: 'Review License Agreement Terms', type: 'Review', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '5/1/26' },
+      { id: '2', title: 'Finance Approval ($2.4M)', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: 'Tomorrow', isDueSoon: true },
+      { id: '3', title: 'Security Assessment - Data Handling', type: 'Review', team: 'Security', assignee: 'Tom Bradley', assigneeInitials: 'TB', status: 'Not started', dueDate: '5/5/26' },
+      { id: '4', title: 'Data Privacy Review (DPA)', type: 'Review', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'In progress', dueDate: '5/3/26' },
+      { id: '5', title: 'Integration Planning Complete', type: 'Review', team: 'IT', assignee: 'Kevin Nguyen', assigneeInitials: 'KN', status: 'Complete', dueDate: '4/25/26' },
+      { id: '6', title: 'Negotiate Liability Terms', type: 'Review', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Not started', dueDate: '5/8/26' },
+      { id: '7', title: 'Executive Approval', type: 'Approval', team: 'Executive', assignee: 'CFO - Robert Hayes', assigneeInitials: 'RH', status: 'Not started', dueDate: '5/10/26' },
+      { id: '8', title: 'Internal Signature - Legal', type: 'Sign', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Not started', dueDate: '5/12/26' },
+      { id: '9', title: 'Send for Customer Signature', type: 'Sign', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'Not started', dueDate: '5/15/26' },
     ],
     documents: [
-      { id: '1', name: 'Enterprise Software License Agreement', commentCount: 4, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/27/2026', isParent: true },
-      { id: '2', name: 'Data Processing Addendum', commentCount: 2, status: 'In Review', owner: 'James Park', ownerInitials: 'JP', dateModified: '4/26/2026', parentId: '1' },
-      { id: '3', name: 'Security Requirements Exhibit', status: 'In Review', owner: 'Tom Bradley', ownerInitials: 'TB', dateModified: '4/25/2026', parentId: '1' },
-      { id: '4', name: 'Support and SLA Terms', commentCount: 1, status: 'In Review', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/24/2026', parentId: '1' },
-      { id: '5', name: 'Pricing Schedule', status: 'In Review', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/23/2026', parentId: '1' },
+      // Parent: Enterprise Software License Agreement with nested exhibits
+      { id: '1', name: 'Enterprise Software License Agreement', commentCount: 4, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/27/2026' },
+      { id: '2', name: 'Exhibit A: Data Processing Addendum (DPA)', commentCount: 2, status: 'In Review', owner: 'James Park', ownerInitials: 'JP', dateModified: '4/26/2026', parentId: '1' },
+      { id: '3', name: 'Exhibit B: Security Requirements', status: 'In Review', owner: 'Tom Bradley', ownerInitials: 'TB', dateModified: '4/25/2026', parentId: '1' },
+      { id: '4', name: 'Exhibit C: Support and SLA Terms', commentCount: 1, status: 'In Review', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/24/2026', parentId: '1' },
+      { id: '5', name: 'Exhibit D: Pricing Schedule', status: 'In Review', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/23/2026', parentId: '1' },
+      // Standalone documents
+      { id: '6', name: 'Implementation Statement of Work', status: 'In Review', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '4/22/2026' },
+      { id: '7', name: 'Professional Services Agreement', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/20/2026' },
     ],
     supplementalDocs: [
-      { id: '6', name: 'Quantum Solutions Company Profile', status: 'Executed', owner: 'Rachel Kim', ownerInitials: 'RK', dateModified: '3/15/2026' },
-      { id: '7', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '2/20/2026' },
+      { id: '10', name: 'Quantum Solutions Company Profile', status: 'Executed', owner: 'Rachel Kim', ownerInitials: 'RK', dateModified: '3/15/2026' },
+      { id: '11', name: 'Non-Disclosure Agreement (Executed)', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '2/20/2026' },
+      { id: '12', name: 'Proof of Concept Results', status: 'Executed', owner: 'Kevin Nguyen', ownerInitials: 'KN', dateModified: '3/1/2026' },
+      { id: '13', name: 'Vendor Security Questionnaire', status: 'Executed', owner: 'Tom Bradley', ownerInitials: 'TB', dateModified: '2/15/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Finance Approval', description: 'Finance approval pending since 4/24 - $2.4M deal value', riskLevel: 'High' },
@@ -1674,10 +1710,11 @@ const WORKSPACE_DATA: Record<string, {
       { id: '5', icon: 'status-check', user: 'Kevin Nguyen', action: 'Completed Integration Planning', time: '1 day ago' },
     ],
     teamProgress: [
-      { team: 'Legal', completed: 1, total: 3, color: 'var(--ink-cobalt-80)' },
+      { team: 'Legal', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
       { team: 'Finance', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
       { team: 'Security', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
       { team: 'IT', completed: 1, total: 1, color: 'var(--ink-green-80)' },
+      { team: 'Sales', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
     ],
     alertMessage: 'Finance Approval is due tomorrow. Would you like to send Diana Walsh a reminder?',
     alertAssignee: 'Diana Walsh',
@@ -1685,18 +1722,28 @@ const WORKSPACE_DATA: Record<string, {
   // Pinnacle Consulting SOW (In Progress)
   '5': {
     tasks: [
-      { id: '1', title: 'Finalize Scope of Work', type: 'View', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Complete', dueDate: '4/20/26' },
-      { id: '2', title: 'Legal Review of Terms', type: 'Approval', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '4/28/26' },
-      { id: '3', title: 'Budget Sign-off', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Complete', dueDate: '4/22/26' },
-      { id: '4', title: 'Obtain Client Signature', type: 'Approval', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'In progress', dueDate: '5/5/26', isDueSoon: true },
+      { id: '1', title: 'Define Project Scope', type: 'Upload', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Complete', dueDate: '4/18/26' },
+      { id: '2', title: 'Create Project Milestones', type: 'Upload', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Complete', dueDate: '4/20/26' },
+      { id: '3', title: 'Legal Review of SOW Terms', type: 'Review', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '4/28/26' },
+      { id: '4', title: 'Finalize Rate Card', type: 'Upload', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Complete', dueDate: '4/22/26' },
+      { id: '5', title: 'Budget Sign-off ($890K)', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Complete', dueDate: '4/22/26' },
+      { id: '6', title: 'Internal Executive Approval', type: 'Approval', team: 'Executive', assignee: 'VP Operations - Lisa Park', assigneeInitials: 'LP', status: 'Complete', dueDate: '4/24/26' },
+      { id: '7', title: 'Send for Client Signature', type: 'Sign', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'In progress', dueDate: '5/5/26', isDueSoon: true },
+      { id: '8', title: 'Countersign After Client Approval', type: 'Sign', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Not started', dueDate: '5/8/26' },
     ],
     documents: [
-      { id: '1', name: 'Consulting Services SOW', commentCount: 2, status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/26/2026', isParent: true },
-      { id: '2', name: 'Project Milestones Schedule', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/25/2026', parentId: '1' },
-      { id: '3', name: 'Rate Card and Pricing', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/22/2026', parentId: '1' },
+      // Parent: Statement of Work with attachments
+      { id: '1', name: 'Statement of Work (SOW)', commentCount: 2, status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/26/2026' },
+      { id: '2', name: 'Attachment A: Project Milestones', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/25/2026', parentId: '1' },
+      { id: '3', name: 'Attachment B: Rate Card and Pricing', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/22/2026', parentId: '1' },
+      { id: '4', name: 'Attachment C: Resource Allocation Plan', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/24/2026', parentId: '1' },
+      // Standalone
+      { id: '5', name: 'Change Order Template', status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/20/2026' },
     ],
     supplementalDocs: [
-      { id: '4', name: 'Pinnacle Consulting MSA (Reference)', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '1/15/2025' },
+      { id: '10', name: 'Pinnacle Consulting MSA (Governing)', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '1/15/2025' },
+      { id: '11', name: 'Original Proposal Submitted', status: 'Executed', owner: 'Rachel Kim', ownerInitials: 'RK', dateModified: '3/10/2026' },
+      { id: '12', name: 'Pinnacle Project Requirements', status: 'Executed', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '3/15/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Pending Client Signature', description: '1 of 3 signatures collected - awaiting Pinnacle CEO', riskLevel: 'Medium' },
@@ -1706,11 +1753,12 @@ const WORKSPACE_DATA: Record<string, {
       { id: '1', icon: 'status-check', user: 'Diana Walsh', action: 'Approved budget allocation', time: '2 days ago' },
       { id: '2', icon: 'upload', user: 'Mike Torres', action: 'Updated milestone schedule', time: '3 days ago' },
       { id: '3', icon: 'comment', user: 'Rachel Kim', action: 'Sent signature request to client', time: '4 days ago' },
+      { id: '4', icon: 'status-check', user: 'Lisa Park', action: 'Executive approval granted', time: '3 days ago' },
     ],
     teamProgress: [
       { team: 'Operations', completed: 2, total: 2, color: 'var(--ink-green-80)' },
-      { team: 'Legal', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
-      { team: 'Finance', completed: 1, total: 1, color: 'var(--ink-green-80)' },
+      { team: 'Legal', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+      { team: 'Finance', completed: 2, total: 2, color: 'var(--ink-green-80)' },
       { team: 'Sales', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
     ],
     alertMessage: 'Awaiting client signature. Send a follow-up to Pinnacle?',
@@ -1719,20 +1767,31 @@ const WORKSPACE_DATA: Record<string, {
   // Atlas Supply Chain Agreement (In Progress)
   '6': {
     tasks: [
-      { id: '1', title: 'Review Supply Terms', type: 'View', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'In progress', dueDate: '5/1/26' },
-      { id: '2', title: 'Quality Standards Approval', type: 'Approval', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'In progress', dueDate: '5/3/26' },
-      { id: '3', title: 'Pricing Negotiation', type: 'View', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: '5/5/26' },
-      { id: '4', title: 'Legal Terms Review', type: 'Approval', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'Not started', dueDate: '5/8/26' },
-      { id: '5', title: 'Logistics Coordination', type: 'View', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/10/26' },
+      { id: '1', title: 'Draft Supply Agreement Terms', type: 'Upload', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Complete', dueDate: '4/22/26' },
+      { id: '2', title: 'Review Quality Standards', type: 'Review', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'In progress', dueDate: '5/3/26' },
+      { id: '3', title: 'Negotiate Pricing Terms', type: 'Review', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: '5/5/26' },
+      { id: '4', title: 'Review Supply Terms - Legal', type: 'Review', team: 'Legal', assignee: 'James Park', assigneeInitials: 'JP', status: 'Not started', dueDate: '5/8/26' },
+      { id: '5', title: 'Evaluate Exclusivity Request', type: 'Review', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'In progress', dueDate: '5/1/26' },
+      { id: '6', title: 'Approve Logistics Plan', type: 'Approval', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/10/26' },
+      { id: '7', title: 'Finance Approval ($1.2M)', type: 'Approval', team: 'Finance', assignee: 'CFO - Robert Hayes', assigneeInitials: 'RH', status: 'Not started', dueDate: '5/12/26' },
+      { id: '8', title: 'Vendor Signature Collection', type: 'Sign', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/18/26' },
+      { id: '9', title: 'Internal Countersignature', type: 'Sign', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Not started', dueDate: '5/20/26' },
     ],
     documents: [
-      { id: '1', name: 'Supply Chain Master Agreement', commentCount: 3, status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/25/2026', isParent: true },
-      { id: '2', name: 'Quality Assurance Standards', commentCount: 1, status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/24/2026', parentId: '1' },
-      { id: '3', name: 'Pricing and Volume Schedule', status: 'In Review', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/23/2026', parentId: '1' },
-      { id: '4', name: 'Delivery Terms and Logistics', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/22/2026', parentId: '1' },
+      // Parent: Supply Agreement with schedules
+      { id: '1', name: 'Supply Chain Master Agreement', commentCount: 3, status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/25/2026' },
+      { id: '2', name: 'Schedule A: Quality Assurance Standards', commentCount: 1, status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/24/2026', parentId: '1' },
+      { id: '3', name: 'Schedule B: Pricing and Volume Tiers', status: 'In Review', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/23/2026', parentId: '1' },
+      { id: '4', name: 'Schedule C: Delivery Terms', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/22/2026', parentId: '1' },
+      { id: '5', name: 'Schedule D: Product Specifications', status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/21/2026', parentId: '1' },
+      // Standalone
+      { id: '6', name: 'Vendor Compliance Certificate', status: 'In Review', owner: 'Tom Bradley', ownerInitials: 'TB', dateModified: '4/20/2026' },
+      { id: '7', name: 'Insurance Certificate of Coverage', status: 'In Review', owner: 'James Park', ownerInitials: 'JP', dateModified: '4/18/2026' },
     ],
     supplementalDocs: [
-      { id: '5', name: 'Atlas Supply Co. Vendor Profile', status: 'Executed', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '3/1/2026' },
+      { id: '10', name: 'Atlas Supply Co. Vendor Profile', status: 'Executed', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '3/1/2026' },
+      { id: '11', name: 'Vendor Due Diligence Report', status: 'Executed', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '3/15/2026' },
+      { id: '12', name: 'Market Pricing Analysis', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/1/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Volume Discount Negotiation', description: 'Atlas requesting 15% discount for volume commitment', riskLevel: 'Medium' },
@@ -1745,25 +1804,31 @@ const WORKSPACE_DATA: Record<string, {
       { id: '3', icon: 'upload', user: 'Sarah Miller', action: 'Updated supply agreement draft', time: '1 day ago' },
     ],
     teamProgress: [
-      { team: 'Procurement', completed: 1, total: 2, color: 'var(--ink-cobalt-80)' },
-      { team: 'Operations', completed: 0, total: 3, color: 'var(--ink-neutral-60)' },
-      { team: 'Finance', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
-      { team: 'Legal', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
+      { team: 'Procurement', completed: 1, total: 3, color: 'var(--ink-cobalt-80)' },
+      { team: 'Operations', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+      { team: 'Finance', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
+      { team: 'Legal', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
     ],
   },
   // Vertex Technologies Renewal (In Progress)
   '7': {
     tasks: [
-      { id: '1', title: 'Review Renewal Terms', type: 'View', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Complete', dueDate: '4/20/26' },
-      { id: '2', title: 'Pricing Adjustment Review', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Complete', dueDate: '4/22/26' },
-      { id: '3', title: 'Obtain Signatures', type: 'Approval', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'In progress', dueDate: 'Today', isDueSoon: true },
+      { id: '1', title: 'Review Renewal Terms vs Original', type: 'Review', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Complete', dueDate: '4/20/26' },
+      { id: '2', title: 'Evaluate Price Increase (5%)', type: 'Review', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Complete', dueDate: '4/21/26' },
+      { id: '3', title: 'Update Pricing Schedule', type: 'Upload', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'Complete', dueDate: '4/22/26' },
+      { id: '4', title: 'Customer Approval of New Terms', type: 'Approval', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'Complete', dueDate: '4/24/26' },
+      { id: '5', title: 'Obtain Customer Signature', type: 'Sign', team: 'Sales', assignee: 'Rachel Kim', assigneeInitials: 'RK', status: 'In progress', dueDate: 'Today', isDueSoon: true },
+      { id: '6', title: 'Internal Countersignature', type: 'Sign', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'Not started', dueDate: 'Today' },
     ],
     documents: [
-      { id: '1', name: 'License Renewal Agreement', commentCount: 1, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/24/2026', isParent: true },
-      { id: '2', name: 'Updated Pricing Schedule', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/22/2026', parentId: '1' },
+      // Renewal with updated schedule
+      { id: '1', name: 'License Renewal Amendment', commentCount: 1, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/24/2026' },
+      { id: '2', name: 'Exhibit A: Updated Pricing Schedule', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/22/2026', parentId: '1' },
     ],
     supplementalDocs: [
-      { id: '3', name: 'Original License Agreement (2025)', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/30/2025' },
+      { id: '10', name: 'Original License Agreement (2025)', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/30/2025' },
+      { id: '11', name: 'Original Pricing Schedule (2025)', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '4/30/2025' },
+      { id: '12', name: 'Vertex Account History', status: 'Executed', owner: 'Rachel Kim', ownerInitials: 'RK', dateModified: '4/15/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Signature Deadline', description: 'Renewal must be signed by end of day to avoid lapse', riskLevel: 'High' },
@@ -1774,9 +1839,9 @@ const WORKSPACE_DATA: Record<string, {
       { id: '3', icon: 'upload', user: 'Rachel Kim', action: 'Sent for client signature', time: '1 day ago' },
     ],
     teamProgress: [
-      { team: 'Legal', completed: 1, total: 1, color: 'var(--ink-green-80)' },
-      { team: 'Finance', completed: 1, total: 1, color: 'var(--ink-green-80)' },
-      { team: 'Sales', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
+      { team: 'Legal', completed: 1, total: 2, color: 'var(--ink-cobalt-80)' },
+      { team: 'Finance', completed: 2, total: 2, color: 'var(--ink-green-80)' },
+      { team: 'Sales', completed: 1, total: 2, color: 'var(--ink-cobalt-80)' },
     ],
     alertMessage: 'Renewal signature is due today! Follow up with Vertex immediately.',
     alertAssignee: 'Rachel Kim',
@@ -1784,16 +1849,23 @@ const WORKSPACE_DATA: Record<string, {
   // Nova Dynamics Purchase Order (In Progress)
   '8': {
     tasks: [
-      { id: '1', title: 'Verify PO Details', type: 'View', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Complete', dueDate: '4/20/26' },
-      { id: '2', title: 'Budget Approval', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: '4/28/26' },
-      { id: '3', title: 'Delivery Schedule Confirmation', type: 'Approval', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/1/26' },
+      { id: '1', title: 'Create Purchase Requisition', type: 'Upload', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Complete', dueDate: '4/18/26' },
+      { id: '2', title: 'Verify Product Specifications', type: 'Review', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Complete', dueDate: '4/20/26' },
+      { id: '3', title: 'Validate Pricing Against Contract', type: 'Review', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: '4/28/26' },
+      { id: '4', title: 'Budget Approval ($340K)', type: 'Approval', team: 'Finance', assignee: 'Diana Walsh', assigneeInitials: 'DW', status: 'In progress', dueDate: '4/28/26' },
+      { id: '5', title: 'Confirm Delivery Schedule', type: 'Approval', team: 'Operations', assignee: 'Mike Torres', assigneeInitials: 'MT', status: 'Not started', dueDate: '5/1/26' },
+      { id: '6', title: 'Issue PO to Vendor', type: 'Upload', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/3/26' },
+      { id: '7', title: 'Vendor Acknowledgment', type: 'Approval', team: 'Procurement', assignee: 'Sarah Miller', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/5/26' },
     ],
     documents: [
-      { id: '1', name: 'Purchase Order #PO-2026-0892', status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/23/2026', isParent: true },
-      { id: '2', name: 'Product Specifications', status: 'Executed', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/20/2026', parentId: '1' },
+      { id: '1', name: 'Purchase Order #PO-2026-0892', status: 'In Review', owner: 'Sarah Miller', ownerInitials: 'SM', dateModified: '4/23/2026' },
+      { id: '2', name: 'Product Specifications Sheet', status: 'Executed', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/20/2026' },
+      { id: '3', name: 'Delivery Schedule', status: 'In Review', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/22/2026' },
     ],
     supplementalDocs: [
-      { id: '3', name: 'Nova Dynamics Vendor Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '1/15/2026' },
+      { id: '10', name: 'Nova Dynamics Vendor Agreement (Governing)', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '1/15/2026' },
+      { id: '11', name: 'Approved Vendor Pricing Sheet', status: 'Executed', owner: 'Diana Walsh', ownerInitials: 'DW', dateModified: '1/20/2026' },
+      { id: '12', name: 'Original Purchase Requisition', status: 'Executed', owner: 'Mike Torres', ownerInitials: 'MT', dateModified: '4/15/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Budget Approval Pending', description: 'Finance review needed for $340K purchase', riskLevel: 'Medium' },
@@ -1801,11 +1873,12 @@ const WORKSPACE_DATA: Record<string, {
     activityItems: [
       { id: '1', icon: 'status-check', user: 'Sarah Miller', action: 'Verified PO specifications', time: '3 days ago' },
       { id: '2', icon: 'upload', user: 'Sarah Miller', action: 'Submitted PO for approval', time: '4 days ago' },
+      { id: '3', icon: 'status-check', user: 'Mike Torres', action: 'Created purchase requisition', time: '5 days ago' },
     ],
     teamProgress: [
-      { team: 'Procurement', completed: 1, total: 1, color: 'var(--ink-green-80)' },
-      { team: 'Finance', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
-      { team: 'Operations', completed: 0, total: 1, color: 'var(--ink-neutral-60)' },
+      { team: 'Operations', completed: 1, total: 2, color: 'var(--ink-cobalt-80)' },
+      { team: 'Procurement', completed: 1, total: 3, color: 'var(--ink-cobalt-80)' },
+      { team: 'Finance', completed: 0, total: 2, color: 'var(--ink-neutral-60)' },
     ],
   },
 };
@@ -2149,11 +2222,14 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
                     if (isChild && !isParentExpanded) return null;
                     
+                    // Check if this document has any children
+                    const hasChildren = workspaceData.documents.some(d => d.parentId === doc.id);
+                    
                     return (
                       <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                         <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : undefined }}>
                           <Inline gap="small" align="center">
-                            {doc.isParent && (
+                            {hasChildren && (
                               <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
                                 <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
                               </button>
