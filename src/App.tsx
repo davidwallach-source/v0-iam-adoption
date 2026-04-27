@@ -341,22 +341,29 @@ interface Agreement {
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
-  // Active Negotiations / In Progress
-  { id: '1', name: 'Momentum Driver MSA 2026', party: 'Momentum Driver Inc.', partyLogo: 'MD', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Waiting for Legal', dealValue: '$2.4M', agreementType: 'Enterprise License', termLength: '36 months', closeDate: 'Jun 30, 2026', date: '24/4/2026', time: '14:30', action: 'Edit', documentsCount: 5, tasksCount: 12, tasksPending: 4 },
-  { id: '2', name: 'TechStart Platform Agreement', party: 'TechStart Inc.', partyLogo: 'TS', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Review', dealValue: '$890K', agreementType: 'SaaS License', termLength: '24 months', closeDate: 'May 15, 2026', date: '23/4/2026', time: '11:20', action: 'Edit', documentsCount: 3, tasksCount: 8, tasksPending: 2 },
-  { id: '3', name: 'CloudCo Services SOW', party: 'CloudCo Services', partyLogo: 'CC', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: '1 of 2 signed', dealValue: '$450K', agreementType: 'Statement of Work', termLength: '12 months', closeDate: 'Apr 30, 2026', date: '22/4/2026', time: '16:45', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 1 },
-  { id: '4', name: 'Acme Solutions Renewal', party: 'Acme Solutions', partyLogo: 'AS', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Terms Discussion', dealValue: '$1.2M', agreementType: 'Renewal', termLength: '36 months', closeDate: 'Jul 1, 2026', date: '21/4/2026', time: '09:15', action: 'Edit', documentsCount: 4, tasksCount: 9, tasksPending: 3 },
-  { id: '5', name: 'DataFlow Integration MSA', party: 'DataFlow Systems', partyLogo: 'DF', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Preparing Documents', dealValue: '$675K', agreementType: 'Master Agreement', termLength: '24 months', closeDate: 'Jun 15, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 1, tasksCount: 6, tasksPending: 6 },
+  // Draft - Agreements being prepared
+  { id: '1', name: 'Apex Manufacturing MSA', party: 'Apex Manufacturing Co.', partyLogo: 'AM', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Preparing Documents', dealValue: '$1.8M', agreementType: 'Master Services Agreement', termLength: '36 months', closeDate: 'May 30, 2026', date: '27/4/2026', time: '09:15', action: 'Edit', documentsCount: 1, tasksCount: 8, tasksPending: 8 },
+  { id: '2', name: 'Sterling Logistics NDA', party: 'Sterling Logistics', partyLogo: 'SL', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Internal Review', dealValue: '$0', agreementType: 'Non-Disclosure Agreement', termLength: '24 months', closeDate: 'May 5, 2026', date: '26/4/2026', time: '14:30', action: 'Edit', documentsCount: 1, tasksCount: 3, tasksPending: 3 },
+  { id: '3', name: 'Horizon Cloud Services RFP', party: 'Horizon Cloud Inc.', partyLogo: 'HC', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Awaiting Approval', dealValue: '$425K', agreementType: 'Request for Proposal', termLength: '12 months', closeDate: 'May 20, 2026', date: '25/4/2026', time: '11:00', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 5 },
   
-  // Completed / Executed
-  { id: '6', name: 'GlobalTech Enterprise Deal', party: 'GlobalTech Corp.', partyLogo: 'GT', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Fully Signed', dealValue: '$3.1M', agreementType: 'Enterprise License', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 15, tasksPending: 0 },
-  { id: '7', name: 'Innovate Labs Partnership', party: 'Innovate Labs', partyLogo: 'IL', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$520K', agreementType: 'Partnership', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 4, tasksCount: 10, tasksPending: 0 },
-  { id: '8', name: 'FinanceHub SaaS Agreement', party: 'FinanceHub Inc.', partyLogo: 'FH', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$780K', agreementType: 'SaaS License', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 3, tasksCount: 8, tasksPending: 0 },
-  { id: '9', name: 'RetailMax Platform Deal', party: 'RetailMax Group', partyLogo: 'RM', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$1.8M', agreementType: 'Platform License', termLength: '36 months', date: '1/4/2026', time: '11:30', action: 'Download', documentsCount: 6, tasksCount: 14, tasksPending: 0 },
+  // In Progress - Active negotiations and pending signatures
+  { id: '4', name: 'Quantum Solutions Enterprise License', party: 'Quantum Solutions Ltd.', partyLogo: 'QS', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Legal Review', dealValue: '$2.4M', agreementType: 'Enterprise Software License', termLength: '36 months', closeDate: 'Jun 15, 2026', date: '27/4/2026', time: '16:45', action: 'Edit', documentsCount: 5, tasksCount: 12, tasksPending: 4 },
+  { id: '5', name: 'Pinnacle Consulting SOW', party: 'Pinnacle Consulting Group', partyLogo: 'PC', status: 'In Progress', statusIcon: 'clock', statusKind: 'warning', statusSub: '1 of 3 signed', dealValue: '$890K', agreementType: 'Statement of Work', termLength: '18 months', closeDate: 'May 10, 2026', date: '26/4/2026', time: '10:20', action: 'Edit', documentsCount: 3, tasksCount: 9, tasksPending: 2 },
+  { id: '6', name: 'Atlas Supply Chain Agreement', party: 'Atlas Supply Co.', partyLogo: 'AS', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Negotiating Terms', dealValue: '$1.2M', agreementType: 'Supply Agreement', termLength: '24 months', closeDate: 'Jun 1, 2026', date: '25/4/2026', time: '15:30', action: 'Edit', documentsCount: 4, tasksCount: 11, tasksPending: 6 },
+  { id: '7', name: 'Vertex Technologies Renewal', party: 'Vertex Technologies', partyLogo: 'VT', status: 'In Progress', statusIcon: 'clock', statusKind: 'warning', statusSub: '2 of 2 signed', dealValue: '$675K', agreementType: 'License Renewal', termLength: '12 months', closeDate: 'Apr 30, 2026', date: '24/4/2026', time: '13:00', action: 'Edit', documentsCount: 2, tasksCount: 6, tasksPending: 1 },
+  { id: '8', name: 'Nova Dynamics Purchase Order', party: 'Nova Dynamics Inc.', partyLogo: 'ND', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Approval', dealValue: '$340K', agreementType: 'Purchase Order', termLength: '6 months', closeDate: 'May 8, 2026', date: '23/4/2026', time: '09:45', action: 'Edit', documentsCount: 2, tasksCount: 7, tasksPending: 3 },
+  
+  // Completed - Fully executed agreements
+  { id: '9', name: 'Meridian Partners MSA', party: 'Meridian Partners LLC', partyLogo: 'MP', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Fully Executed', dealValue: '$3.1M', agreementType: 'Master Services Agreement', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 15, tasksPending: 0 },
+  { id: '10', name: 'Catalyst Innovation License', party: 'Catalyst Innovation Corp.', partyLogo: 'CI', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$1.5M', agreementType: 'Technology License', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 4, tasksCount: 10, tasksPending: 0 },
+  { id: '11', name: 'Summit Healthcare Vendor Agreement', party: 'Summit Healthcare Systems', partyLogo: 'SH', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$780K', agreementType: 'Vendor Agreement', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 3, tasksCount: 8, tasksPending: 0 },
+  { id: '12', name: 'Orion Financial Services SOW', party: 'Orion Financial Group', partyLogo: 'OF', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$520K', agreementType: 'Statement of Work', termLength: '18 months', date: '1/4/2026', time: '11:30', action: 'Download', documentsCount: 5, tasksCount: 12, tasksPending: 0 },
+  { id: '13', name: 'BlueStar Retail Platform Deal', party: 'BlueStar Retail Inc.', partyLogo: 'BR', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$2.2M', agreementType: 'Platform License', termLength: '36 months', date: '28/3/2026', time: '16:00', action: 'Download', documentsCount: 6, tasksCount: 14, tasksPending: 0 },
   
   // Expired / Voided
-  { id: '10', name: 'Legacy Systems NDA', party: 'Legacy Systems', partyLogo: 'LS', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Term Ended', dealValue: '$150K', agreementType: 'NDA', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 3, tasksPending: 0 },
-  { id: '11', name: 'OldCorp Vendor Agreement', party: 'OldCorp Inc.', partyLogo: 'OC', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Cancelled', dealValue: '$320K', agreementType: 'Vendor Agreement', termLength: '24 months', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 5, tasksPending: 0 },
+  { id: '14', name: 'Legacy Procurement NDA', party: 'Legacy Systems Corp.', partyLogo: 'LS', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Term Ended', dealValue: '$0', agreementType: 'Non-Disclosure Agreement', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 3, tasksPending: 0 },
+  { id: '15', name: 'Falcon Industries Purchase Order', party: 'Falcon Industries', partyLogo: 'FI', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Cancelled', dealValue: '$280K', agreementType: 'Purchase Order', termLength: '6 months', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 5, tasksPending: 0 },
+  { id: '16', name: 'Titan Corp Services Agreement', party: 'Titan Corporation', partyLogo: 'TC', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Not Renewed', dealValue: '$450K', agreementType: 'Services Agreement', termLength: '24 months', date: '1/2/2026', time: '10:00', action: 'Copy', documentsCount: 3, tasksCount: 7, tasksPending: 0 },
 ];
 
 // Natural language relative dates from dd/mm/yyyy strings
@@ -481,14 +488,16 @@ interface NavigatorAgreement {
 }
 
 const NAVIGATOR_DATA: NavigatorAgreement[] = [
-  { id: '1', fileName: '01_people_ai_guidebook.pdf', fileStatus: 'uploaded', fileStatusDetail: 'View Job', parties: [], status: 'inactive', agreementType: 'Handbook', isAIAssisted: true },
-  { id: '2', fileName: 'Restricted Access Request Form 1726...', fileStatus: 'completed', fileStatusDetail: 'Please DocuSign this...', parties: ['Akshat Mishra', '+2 More'], status: 'active', agreementType: 'Form', effectiveDate: '5/20/2025', isAIAssisted: true },
-  { id: '3', fileName: 'Offer Letter 1.pdf', fileStatus: 'uploaded', fileStatusDetail: 'View Job', parties: ['KENNETH L. HARRIS', 'UNIVERSAL BIOENERGY INC'], status: 'inactive', statusDate: 'Expired 3/31/2016', agreementType: 'Offer Letter', contractValue: '$27,600.00 USD', effectiveDate: '3/26/2015', expirationDate: '3/31/2016', isAIAssisted: false },
-  { id: '4', fileName: '1100.L0005-US01 - Inventor-approved...', fileStatus: 'completed', fileStatusDetail: '[SIGNATURE REQUIRE...', parties: [], status: 'inactive', agreementType: 'Miscellaneous', isAIAssisted: true },
-  { id: '5', fileName: '1100.L0005-US01 - Inventor-approved...', fileStatus: 'completed', fileStatusDetail: '[SIGNATURE REQUIRE...', parties: [], status: 'inactive', agreementType: 'Form', isAIAssisted: true },
-  { id: '6', fileName: '1100.L0005-US01 Combined Declaration...', fileStatus: 'completed', fileStatusDetail: '[SIGNATURE REQUIRE...', parties: ['INVENTOR', 'Docusign, Inc.'], status: 'active', agreementType: 'Miscellaneous', effectiveDate: '2/4/2025', isAIAssisted: false },
-  { id: '7', fileName: 'reseller6.pdf', fileStatus: 'uploaded', fileStatusDetail: 'View Job', parties: ['[INSERT FULL NAME OF RES...', 'Voyager Worldwide'], status: 'inactive', agreementType: 'C_Mariya_27s...', isAIAssisted: true },
-  { id: '8', fileName: 'reseller8.pdf', fileStatus: 'uploaded', fileStatusDetail: 'View Job', parties: ['MiniQ, Inc.'], status: 'active', agreementType: 'C_Mariya_27s...', effectiveDate: '11/19/2024', isAIAssisted: false },
+  { id: '1', fileName: 'Meridian_Partners_MSA_2026_Executed.pdf', fileStatus: 'completed', fileStatusDetail: 'Fully Executed', parties: ['Meridian Partners LLC', 'Your Company'], status: 'active', agreementType: 'MSA', contractValue: '$3,100,000 USD', effectiveDate: '4/15/2026', expirationDate: '4/15/2029', isAIAssisted: true },
+  { id: '2', fileName: 'Catalyst_Innovation_License_Agreement.pdf', fileStatus: 'completed', fileStatusDetail: 'All Signatures Complete', parties: ['Catalyst Innovation Corp.', '+1 More'], status: 'active', agreementType: 'License', contractValue: '$1,500,000 USD', effectiveDate: '4/10/2026', expirationDate: '4/10/2028', isAIAssisted: true },
+  { id: '3', fileName: 'Summit_Healthcare_Vendor_Agreement.pdf', fileStatus: 'completed', fileStatusDetail: 'Countersigned', parties: ['Summit Healthcare Systems'], status: 'active', agreementType: 'Vendor Agreement', contractValue: '$780,000 USD', effectiveDate: '4/5/2026', expirationDate: '4/5/2027', isAIAssisted: false },
+  { id: '4', fileName: 'Orion_Financial_SOW_Q2_2026.pdf', fileStatus: 'completed', fileStatusDetail: 'Executed', parties: ['Orion Financial Group', '+2 More'], status: 'active', agreementType: 'SOW', contractValue: '$520,000 USD', effectiveDate: '4/1/2026', expirationDate: '10/1/2027', isAIAssisted: true },
+  { id: '5', fileName: 'BlueStar_Retail_Platform_License.pdf', fileStatus: 'completed', fileStatusDetail: 'Fully Signed', parties: ['BlueStar Retail Inc.'], status: 'active', agreementType: 'Platform License', contractValue: '$2,200,000 USD', effectiveDate: '3/28/2026', expirationDate: '3/28/2029', isAIAssisted: false },
+  { id: '6', fileName: 'Vanguard_Supply_Chain_NDA.pdf', fileStatus: 'completed', fileStatusDetail: 'Mutual NDA Signed', parties: ['Vanguard Supply Chain'], status: 'active', agreementType: 'NDA', effectiveDate: '3/20/2026', expirationDate: '3/20/2028', isAIAssisted: true },
+  { id: '7', fileName: 'Nexus_Technologies_PO_2026-0412.pdf', fileStatus: 'completed', fileStatusDetail: 'Order Confirmed', parties: ['Nexus Technologies Ltd.', 'Procurement Dept.'], status: 'active', agreementType: 'Purchase Order', contractValue: '$156,000 USD', effectiveDate: '3/15/2026', isAIAssisted: false },
+  { id: '8', fileName: 'Evergreen_Consulting_Services_Renewal.pdf', fileStatus: 'completed', fileStatusDetail: 'Renewal Complete', parties: ['Evergreen Consulting'], status: 'active', agreementType: 'Service Renewal', contractValue: '$340,000 USD', effectiveDate: '3/1/2026', expirationDate: '3/1/2027', isAIAssisted: true },
+  { id: '9', fileName: 'Legacy_Systems_NDA_Expired.pdf', fileStatus: 'uploaded', fileStatusDetail: 'Archived', parties: ['Legacy Systems Corp.'], status: 'inactive', statusDate: 'Expired 3/1/2026', agreementType: 'NDA', effectiveDate: '3/1/2025', expirationDate: '3/1/2026', isAIAssisted: false },
+  { id: '10', fileName: 'Falcon_Industries_PO_Cancelled.pdf', fileStatus: 'uploaded', fileStatusDetail: 'Voided', parties: ['Falcon Industries'], status: 'inactive', statusDate: 'Cancelled 2/15/2026', agreementType: 'Purchase Order', contractValue: '$280,000 USD', isAIAssisted: true },
 ];
 
 function capitalize(str: string): string {
@@ -614,16 +623,18 @@ interface Party {
 }
 
 const PARTIES_DATA: Party[] = [
-  { id: '1', name: 'DocuSign, Inc.', role: 'Other', activeAgreements: 1009, existingAgreements: 16, starred: false },
-  { id: '2', name: 'Docusign', role: 'Other', activeAgreements: 192, existingAgreements: 6, starred: false },
-  { id: '3', name: 'DocuSign Inc.', role: 'Other', activeAgreements: 95, existingAgreements: 3, starred: false },
-  { id: '4', name: 'Bio-Logistics Solutions LLC', role: 'Seller', activeAgreements: 19, existingAgreements: 2, starred: false },
-  { id: '5', name: 'Docusign Inc', role: 'Other', activeAgreements: 55, existingAgreements: 2, starred: false },
-  { id: '6', name: 'Grant Thornton Advisors LLC', role: 'Other', activeAgreements: 2, existingAgreements: 3, starred: false },
-  { id: '7', name: 'FinLogic LLC', role: 'Other', activeAgreements: 2, existingAgreements: 3, starred: false },
-  { id: '8', name: 'Docusign, Inc', role: 'Other', activeAgreements: 90, existingAgreements: 3, starred: false },
-  { id: '9', name: 'Umbrella Corporation', role: 'Buyer', activeAgreements: 19, existingAgreements: 3, starred: false },
-  { id: '10', name: 'DocuSign France', role: 'Other', activeAgreements: 3, existingAgreements: 3, starred: false },
+  { id: '1', name: 'Quantum Solutions Ltd.', role: 'Customer', activeAgreements: 3, existingAgreements: 8, starred: true },
+  { id: '2', name: 'Meridian Partners LLC', role: 'Customer', activeAgreements: 2, existingAgreements: 5, starred: true },
+  { id: '3', name: 'Atlas Supply Co.', role: 'Vendor', activeAgreements: 4, existingAgreements: 12, starred: false },
+  { id: '4', name: 'Pinnacle Consulting Group', role: 'Partner', activeAgreements: 1, existingAgreements: 6, starred: false },
+  { id: '5', name: 'Catalyst Innovation Corp.', role: 'Customer', activeAgreements: 2, existingAgreements: 4, starred: true },
+  { id: '6', name: 'Summit Healthcare Systems', role: 'Customer', activeAgreements: 1, existingAgreements: 3, starred: false },
+  { id: '7', name: 'Orion Financial Group', role: 'Customer', activeAgreements: 3, existingAgreements: 7, starred: false },
+  { id: '8', name: 'BlueStar Retail Inc.', role: 'Customer', activeAgreements: 1, existingAgreements: 2, starred: false },
+  { id: '9', name: 'Nova Dynamics Inc.', role: 'Vendor', activeAgreements: 2, existingAgreements: 5, starred: false },
+  { id: '10', name: 'Horizon Cloud Inc.', role: 'Vendor', activeAgreements: 1, existingAgreements: 3, starred: false },
+  { id: '11', name: 'Sterling Logistics', role: 'Partner', activeAgreements: 1, existingAgreements: 2, starred: false },
+  { id: '12', name: 'Apex Manufacturing Co.', role: 'Customer', activeAgreements: 1, existingAgreements: 1, starred: false },
 ];
 
 const partyColumns: any[] = [
@@ -738,7 +749,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �������������������══════════════════════════════════════ */
+   ���������������������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2475,9 +2486,9 @@ export default function App() {
       case 'drafts':
         return AGREEMENTS_DATA.filter(a => a.status === 'Draft');
       case 'in-progress':
-        return AGREEMENTS_DATA.filter(a => ['Negotiation', 'In Review', 'Pending Signature'].includes(a.status));
+        return AGREEMENTS_DATA.filter(a => a.status === 'In Progress');
       case 'completed':
-        return AGREEMENTS_DATA.filter(a => a.status === 'Executed');
+        return AGREEMENTS_DATA.filter(a => a.status === 'Completed');
       case 'deleted':
         return AGREEMENTS_DATA.filter(a => ['Expired', 'Voided'].includes(a.status));
       default:
