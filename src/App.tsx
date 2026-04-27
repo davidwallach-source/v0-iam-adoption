@@ -72,11 +72,11 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
       <div style={{ padding: '40px' }}>
         {/* Title - light weight */}
         <h2 style={{
-          margin: '0 0 16px 0',
+          margin: '0 0 32px 0',
           fontSize: 28,
           fontWeight: 300,
           fontFamily: 'var(--ink-font-family)',
-          color: 'var(--ink-neutral-100)',
+          color: '#130032',
         }}>Start New</h2>
 
         {/* Search bar - pill shaped with background */}
@@ -87,7 +87,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
           padding: '10px 16px',
           background: 'var(--ink-neutral-fade-5)',
           borderRadius: 999,
-          marginBottom: 20,
+          marginBottom: 32,
         }}>
           <Icon name="search" size={18} color="var(--ink-neutral-60)" />
           <input
@@ -114,18 +114,18 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
             borderRadius: 999,
           }}>
             <Icon name="ai-spark-filled" size={14} color="var(--ink-cobalt-100)" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-neutral-80)' }}>AI-Assisted</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#130032' }}>AI-Assisted</span>
           </div>
         </div>
 
         {/* Agreements section */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 32 }}>
           <p style={{
             margin: '0 0 10px 0',
             fontSize: 14,
             fontWeight: 600,
             fontFamily: 'var(--ink-font-family)',
-            color: 'var(--ink-neutral-100)',
+            color: '#130032',
           }}>Agreements</p>
           
           <div style={{
@@ -152,7 +152,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                     fontSize: 14,
                     fontWeight: 600,
                     fontFamily: 'var(--ink-font-family)',
-                    color: 'var(--ink-neutral-100)',
+                    color: '#130032',
                     lineHeight: 1.3,
                   }}>{item.title}</span>
                   <button
@@ -175,7 +175,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                   margin: '0 0 auto 0',
                   fontSize: 13,
                   fontFamily: 'var(--ink-font-family)',
-                  color: 'var(--ink-neutral-80)',
+                  color: '#130032',
                   lineHeight: 1.5,
                 }}>{item.description}</p>
                 
