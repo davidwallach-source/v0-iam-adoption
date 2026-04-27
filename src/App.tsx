@@ -189,19 +189,9 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                 }}>{item.description}</p>
                 
                 {/* Start button */}
-                <button style={{
-                  marginTop: 16,
-                  alignSelf: 'flex-start',
-                  padding: '8px 20px',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  fontFamily: 'var(--ink-font-family)',
-                  color: 'var(--ink-neutral-100)',
-                  background: 'white',
-                  border: '1px solid var(--ink-neutral-fade-20)',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                }}>Start</button>
+                <div style={{ marginTop: 16 }}>
+                  <Button kind="secondary" size="small">Start</Button>
+                </div>
               </div>
             ))}
           </div>
@@ -219,24 +209,14 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
           
           <div style={{ display: 'flex', gap: 12 }}>
             {otherTasks.map((task) => (
-              <button
+              <Button
                 key={task.label}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '14px 16px',
-                  background: 'white',
-                  border: '1px solid var(--ink-neutral-fade-10)',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--ink-font-family)',
-                }}
+                kind="secondary"
+                style={{ flex: 1, justifyContent: 'flex-start', minWidth: 0 }}
+                startElement={<Icon name={task.icon} size={18} />}
               >
-                <Icon name={task.icon} size={20} color="var(--ink-neutral-80)" />
-                <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-neutral-100)' }}>{task.label}</span>
-              </button>
+                {task.label}
+              </Button>
             ))}
           </div>
         </div>
@@ -1358,7 +1338,7 @@ function HomePage() {
   );
 }
 
-/* ═══════════════════════════════════════
+/* ═════���═════════════════════════════════
    Insights — Overview sub-view
    ═══════════════════════════════════════ */
 
