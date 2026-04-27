@@ -120,13 +120,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
 
         {/* Agreements section */}
         <div style={{ marginBottom: 32 }}>
-          <p style={{
-            margin: '0 0 10px 0',
-            fontSize: 14,
-            fontWeight: 600,
-            fontFamily: 'var(--ink-font-family)',
-            color: '#130032',
-          }}>Agreements</p>
+          <Heading level={3} style={{ margin: '0 0 10px 0', color: '#130032' }}>Agreements</Heading>
           
           <div style={{
             display: 'flex',
@@ -738,7 +732,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   ═══════════════════════════════════════ */
+   ���══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
