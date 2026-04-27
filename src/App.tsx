@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �������������══════════════════════════════════════ */
+   ���������������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2694,20 +2694,9 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Due Date</Button>
               <Button kind="secondary" size="small" menuTrigger>Last Activity At</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <button
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '6px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                aria-label="All Filters"
-              >
-                <img src="/filter-icon.svg" alt="" style={{ width: 20, height: 20 }} />
-              </button>
+              <Button kind="secondary" size="small" aria-label="All Filters" style={{ minWidth: 'auto', padding: '0 8px' }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </Button>
             </Inline>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
@@ -2715,20 +2704,9 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Type</Button>
               <Button kind="secondary" size="small" menuTrigger>Status</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <button
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '6px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                aria-label="All Filters"
-              >
-                <img src="/filter-icon.svg" alt="" style={{ width: 20, height: 20 }} />
-              </button>
+              <Button kind="secondary" size="small" aria-label="All Filters" style={{ minWidth: 'auto', padding: '0 8px' }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </Button>
             </Inline>
           )}
         />
