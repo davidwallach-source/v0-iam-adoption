@@ -56,13 +56,6 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
     { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
   ];
 
-  const otherTasks = [
-    { icon: 'envelope' as const, label: 'Send an Agreement' },
-    { icon: 'edit' as const, label: 'Sign a Document' },
-    { icon: 'templates' as const, label: 'Use a Template' },
-    { icon: 'form' as const, label: 'Create a Form' },
-  ];
-
   return (
     <Modal open={open} onClose={onClose} size="full">
       {/* Lavender gradient top edge */}
@@ -148,7 +141,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                   display: 'flex',
                   flexDirection: 'column',
                   padding: '14px 14px 14px 14px',
-                  border: '1px solid var(--ink-cta-border-color-secondary-default)',
+                  border: '1px solid var(--ink-neutral-fade-10)',
                   borderRadius: 8,
                   background: 'white',
                 }}
@@ -182,7 +175,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                   margin: '0 0 auto 0',
                   fontSize: 13,
                   fontFamily: 'var(--ink-font-family)',
-                  color: 'var(--ink-neutral-60)',
+                  color: 'var(--ink-neutral-80)',
                   lineHeight: 1.5,
                 }}>{item.description}</p>
                 
@@ -191,30 +184,6 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                   <Button kind="secondary" size="small">Start</Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Other Tasks section */}
-        <div>
-          <p style={{
-            margin: '0 0 10px 0',
-            fontSize: 14,
-            fontWeight: 600,
-            fontFamily: 'var(--ink-font-family)',
-            color: 'var(--ink-neutral-100)',
-          }}>Other Tasks</p>
-          
-          <div style={{ display: 'flex', gap: 12 }}>
-            {otherTasks.map((task) => (
-              <Button
-                key={task.label}
-                kind="secondary"
-                style={{ flex: 1, justifyContent: 'flex-start', minWidth: 0 }}
-                startElement={<Icon name={task.icon} size={18} />}
-              >
-                {task.label}
-              </Button>
             ))}
           </div>
         </div>
