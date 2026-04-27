@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   ���������══════════════════════════════════════ */
+   �����������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -1652,7 +1652,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
     }}>
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'var(--ink-bg-color-canvas-page)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-        {/* Actions row — back arrow far left, actions far right, both outside constraint */}
+        {/* Actions row ��� back arrow far left, actions far right, both outside constraint */}
         <div style={{ display: 'flex', alignItems: 'center', padding: 'var(--ink-spacing-100) var(--ink-spacing-200)' }}>
           <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, flexShrink: 0 }}>
             <Icon name="arrow-left" size={20} />
@@ -2694,7 +2694,7 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Due Date</Button>
               <Button kind="secondary" size="small" menuTrigger>Last Activity At</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <IconButton icon="filter" variant="secondary" size="small" aria-label="All Filters" />
+              <IconButton icon="sliders-horizontal" variant="tertiary" size="small" aria-label="All Filters" />
             </Inline>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
@@ -2702,7 +2702,7 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Type</Button>
               <Button kind="secondary" size="small" menuTrigger>Status</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <Button kind="secondary" size="small" aria-label="All Filters" startElement={<Icon name="sliders-horizontal" size={16} />} />
+              <IconButton icon="sliders-horizontal" variant="tertiary" size="small" aria-label="All Filters" />
             </Inline>
           )}
         />
