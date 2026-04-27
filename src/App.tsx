@@ -148,7 +148,7 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                   display: 'flex',
                   flexDirection: 'column',
                   padding: '14px 14px 14px 14px',
-                  border: '1px solid var(--ink-neutral-fade-10)',
+                  border: '1px solid var(--ink-cta-border-color-secondary-default)',
                   borderRadius: 8,
                   background: 'white',
                 }}
