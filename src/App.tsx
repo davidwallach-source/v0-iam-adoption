@@ -738,7 +738,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �����������══════════════════════════════════════ */
+   �������������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2694,7 +2694,20 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Due Date</Button>
               <Button kind="secondary" size="small" menuTrigger>Last Activity At</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <IconButton icon="sliders-horizontal" variant="tertiary" size="small" aria-label="All Filters" />
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                aria-label="All Filters"
+              >
+                <img src="/filter-icon.svg" alt="" style={{ width: 20, height: 20 }} />
+              </button>
             </Inline>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
@@ -2702,7 +2715,20 @@ export default function App() {
               <Button kind="secondary" size="small" menuTrigger>Type</Button>
               <Button kind="secondary" size="small" menuTrigger>Status</Button>
               <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <IconButton icon="sliders-horizontal" variant="tertiary" size="small" aria-label="All Filters" />
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                aria-label="All Filters"
+              >
+                <img src="/filter-icon.svg" alt="" style={{ width: 20, height: 20 }} />
+              </button>
             </Inline>
           )}
         />
