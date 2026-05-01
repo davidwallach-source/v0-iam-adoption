@@ -341,23 +341,219 @@ interface Agreement {
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
-  // Active Negotiations / In Progress
-  { id: '1', name: 'Momentum Driver MSA 2026', party: 'Momentum Driver Inc.', partyLogo: 'MD', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Waiting for Legal', dealValue: '$2.4M', agreementType: 'Enterprise License', termLength: '36 months', closeDate: 'Jun 30, 2026', date: '24/4/2026', time: '14:30', action: 'Edit', documentsCount: 5, tasksCount: 12, tasksPending: 4 },
-  { id: '2', name: 'TechStart Platform Agreement', party: 'TechStart Inc.', partyLogo: 'TS', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Review', dealValue: '$890K', agreementType: 'SaaS License', termLength: '24 months', closeDate: 'May 15, 2026', date: '23/4/2026', time: '11:20', action: 'Edit', documentsCount: 3, tasksCount: 8, tasksPending: 2 },
-  { id: '3', name: 'CloudCo Services SOW', party: 'CloudCo Services', partyLogo: 'CC', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: '1 of 2 signed', dealValue: '$450K', agreementType: 'Statement of Work', termLength: '12 months', closeDate: 'Apr 30, 2026', date: '22/4/2026', time: '16:45', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 1 },
-  { id: '4', name: 'Acme Solutions Renewal', party: 'Acme Solutions', partyLogo: 'AS', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Terms Discussion', dealValue: '$1.2M', agreementType: 'Renewal', termLength: '36 months', closeDate: 'Jul 1, 2026', date: '21/4/2026', time: '09:15', action: 'Edit', documentsCount: 4, tasksCount: 9, tasksPending: 3 },
-  { id: '5', name: 'DataFlow Integration MSA', party: 'DataFlow Systems', partyLogo: 'DF', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Preparing Documents', dealValue: '$675K', agreementType: 'Master Agreement', termLength: '24 months', closeDate: 'Jun 15, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 1, tasksCount: 6, tasksPending: 6 },
+  // ═══ COMPLEX DEALS — Multiple documents, many stakeholders, various task types ═══
   
-  // Completed / Executed
-  { id: '6', name: 'GlobalTech Enterprise Deal', party: 'GlobalTech Corp.', partyLogo: 'GT', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Fully Signed', dealValue: '$3.1M', agreementType: 'Enterprise License', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 15, tasksPending: 0 },
-  { id: '7', name: 'Innovate Labs Partnership', party: 'Innovate Labs', partyLogo: 'IL', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$520K', agreementType: 'Partnership', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 4, tasksCount: 10, tasksPending: 0 },
-  { id: '8', name: 'FinanceHub SaaS Agreement', party: 'FinanceHub Inc.', partyLogo: 'FH', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$780K', agreementType: 'SaaS License', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 3, tasksCount: 8, tasksPending: 0 },
-  { id: '9', name: 'RetailMax Platform Deal', party: 'RetailMax Group', partyLogo: 'RM', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$1.8M', agreementType: 'Platform License', termLength: '36 months', date: '1/4/2026', time: '11:30', action: 'Download', documentsCount: 6, tasksCount: 14, tasksPending: 0 },
+  // Complex: Enterprise software procurement with multiple docs and approvals
+  { id: '1', name: 'Globex Enterprise Platform', party: 'Globex Industries', partyLogo: 'GI', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Legal Review', dealValue: '$2.8M', agreementType: 'Enterprise License', termLength: '36 months', closeDate: 'Jun 30, 2026', date: '24/4/2026', time: '14:30', action: 'Edit', documentsCount: 6, tasksCount: 14, tasksPending: 5 },
   
-  // Expired / Voided
-  { id: '10', name: 'Legacy Systems NDA', party: 'Legacy Systems', partyLogo: 'LS', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Term Ended', dealValue: '$150K', agreementType: 'NDA', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 3, tasksPending: 0 },
-  { id: '11', name: 'OldCorp Vendor Agreement', party: 'OldCorp Inc.', partyLogo: 'OC', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Cancelled', dealValue: '$320K', agreementType: 'Vendor Agreement', termLength: '24 months', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 5, tasksPending: 0 },
+  // Complex: Major vendor onboarding with compliance requirements
+  { id: '2', name: 'Apex Manufacturing Supply Agreement', party: 'Apex Manufacturing Co.', partyLogo: 'AM', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Procurement Review', dealValue: '$1.6M', agreementType: 'Supply Agreement', termLength: '24 months', closeDate: 'May 20, 2026', date: '23/4/2026', time: '11:20', action: 'Edit', documentsCount: 5, tasksCount: 11, tasksPending: 4 },
+  
+  // Complex: SaaS deal with security and DPA requirements
+  { id: '3', name: 'DataVault Cloud Services MSA', party: 'DataVault Technologies', partyLogo: 'DV', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: '2 of 4 signed', dealValue: '$920K', agreementType: 'SaaS License', termLength: '36 months', closeDate: 'May 5, 2026', date: '22/4/2026', time: '16:45', action: 'Edit', documentsCount: 4, tasksCount: 9, tasksPending: 2 },
+  
+  // ═══ MEDIUM COMPLEXITY — 2-3 documents, moderate stakeholders ═══
+  
+  // Medium: Professional services engagement
+  { id: '4', name: 'Pinnacle Consulting SOW', party: 'Pinnacle Advisory Group', partyLogo: 'PA', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Rate Negotiation', dealValue: '$340K', agreementType: 'Statement of Work', termLength: '6 months', closeDate: 'May 15, 2026', date: '21/4/2026', time: '09:15', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 2 },
+  
+  // Medium: Software license renewal with updated terms
+  { id: '5', name: 'Horizon Analytics Renewal', party: 'Horizon Analytics', partyLogo: 'HA', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Approval', dealValue: '$185K', agreementType: 'License Renewal', termLength: '12 months', closeDate: 'May 10, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 2, tasksCount: 4, tasksPending: 1 },
+  
+  // ═══ SIMPLE DEALS — Single document, 1-2 people ═══
+  
+  // Simple: Standard NDA for sales prospect
+  { id: '6', name: 'Sterling Industries NDA', party: 'Sterling Industries', partyLogo: 'SI', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: 'Awaiting Signature', dealValue: '—', agreementType: 'NDA', termLength: '24 months', closeDate: 'Apr 28, 2026', date: '19/4/2026', time: '15:30', action: 'Edit', documentsCount: 1, tasksCount: 1, tasksPending: 1 },
+  
+  // Simple: Quick PO for office supplies
+  { id: '7', name: 'OfficePro Supply Order', party: 'OfficePro Supplies', partyLogo: 'OP', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Preparing', dealValue: '$12K', agreementType: 'Purchase Order', termLength: 'One-time', closeDate: 'Apr 30, 2026', date: '18/4/2026', time: '10:00', action: 'Edit', documentsCount: 1, tasksCount: 2, tasksPending: 2 },
+  
+  // ═══ EXECUTED — Completed deals of varying complexity ═══
+  
+  // Complex executed: Full enterprise deal
+  { id: '8', name: 'Quantum Systems Integration', party: 'Quantum Systems Inc.', partyLogo: 'QS', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$3.2M', agreementType: 'Enterprise License', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 16, tasksPending: 0 },
+  
+  // Medium executed: Vendor partnership
+  { id: '9', name: 'Velocity Logistics Partnership', party: 'Velocity Logistics', partyLogo: 'VL', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$480K', agreementType: 'Partnership Agreement', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 3, tasksCount: 6, tasksPending: 0 },
+  
+  // Simple executed: Completed NDA
+  { id: '10', name: 'TechBridge Solutions NDA', party: 'TechBridge Solutions', partyLogo: 'TB', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '—', agreementType: 'NDA', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 1, tasksCount: 2, tasksPending: 0 },
+  
+  // ═══ EXPIRED / VOIDED ═══
+  { id: '11', name: 'Legacy Vendor NDA', party: 'Legacy Vendor Corp.', partyLogo: 'LV', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Term Ended', dealValue: '—', agreementType: 'NDA', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 2, tasksPending: 0 },
+  { id: '12', name: 'Cancelled RFP Response', party: 'Metro Government', partyLogo: 'MG', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'RFP Withdrawn', dealValue: '$750K', agreementType: 'RFP Response', termLength: '—', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 4, tasksPending: 0 },
 ];
+
+// Per-agreement data for workspace views
+const AGREEMENT_WORKSPACE_DATA: Record<string, {
+  tasks: DealTask[];
+  documents: DealDocument[];
+  supplementalDocs: DealDocument[];
+  attentionItems: { id: string; item: string; description: string; riskLevel: 'High' | 'Medium' }[];
+  activity: { id: string; icon: IconName; user: string; action: string; time: string; isAI?: boolean }[];
+}> = {
+  // ═══ COMPLEX: Globex Enterprise Platform (id: 1) ═══
+  '1': {
+    tasks: [
+      { id: '1', title: 'Legal Review of MSA Terms', type: 'Approval', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '4/28/26' },
+      { id: '2', title: 'Finance Deal Approval', type: 'Approval', team: 'Finance', assignee: 'Marcus Webb', assigneeInitials: 'MW', status: 'Not started', dueDate: '5/2/26' },
+      { id: '3', title: 'Security Assessment Review', type: 'Approval', team: 'Security', assignee: 'Priya Sharma', assigneeInitials: 'PS', status: 'In progress', dueDate: '4/30/26' },
+      { id: '4', title: 'Upload Insurance Certificate', type: 'Upload', team: 'Procurement', assignee: 'David Kim', assigneeInitials: 'DK', status: 'Not started', dueDate: '5/5/26' },
+      { id: '5', title: 'Complete Vendor Profile', type: 'Form', team: 'Procurement', assignee: 'Globex Industries', assigneeInitials: 'GI', status: 'In progress', dueDate: '4/29/26' },
+      { id: '6', title: 'Sign Master Service Agreement', type: 'Sign', team: 'Executive', assignee: 'Jennifer Mills', assigneeInitials: 'JM', status: 'Not started', dueDate: '5/10/26' },
+      { id: '7', title: 'Resolve DPA Comments', type: 'Resolve', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '4/27/26', isDueSoon: true },
+      { id: '8', title: 'Sign Data Processing Agreement', type: 'Sign', team: 'External', assignee: 'Globex Industries', assigneeInitials: 'GI', status: 'Not started', dueDate: '5/12/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 5, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/24/2026', isParent: true },
+      { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 8, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/23/2026', parentId: '1' },
+      { id: '3', name: 'Security & Compliance Addendum', commentCount: 2, status: 'In Review', owner: 'Priya Sharma', ownerInitials: 'PS', dateModified: '4/22/2026', parentId: '1' },
+      { id: '4', name: 'Service Level Agreement (SLA)', status: 'In Review', owner: 'David Kim', ownerInitials: 'DK', dateModified: '4/20/2026', parentId: '1' },
+    ],
+    supplementalDocs: [
+      { id: '5', name: 'Globex Company Profile', status: 'Executed', owner: 'Globex Industries', ownerInitials: 'GI', dateModified: '4/15/2026' },
+      { id: '6', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '3/10/2026' },
+    ],
+    attentionItems: [
+      { id: '1', item: 'DPA Comments Outstanding', description: '8 comments need resolution before signing', riskLevel: 'High' },
+      { id: '2', item: 'Liability Cap Negotiation', description: 'Globex requesting 3x annual contract value', riskLevel: 'High' },
+      { id: '3', item: 'Vendor Profile Incomplete', description: 'Insurance documentation missing', riskLevel: 'Medium' },
+    ],
+    activity: [
+      { id: '1', icon: 'ai-spark-filled', user: 'AI Agent', action: 'Analyzing contract terms against playbook', time: 'Running...', isAI: true },
+      { id: '2', icon: 'comment', user: 'Laura Chen', action: 'Added 3 comments on DPA Section 4.2', time: '2 hours ago' },
+      { id: '3', icon: 'upload', user: 'David Kim', action: 'Uploaded revised SLA document', time: '4 hours ago' },
+      { id: '4', icon: 'status-check', user: 'Priya Sharma', action: 'Completed initial security review', time: '1 day ago' },
+    ],
+  },
+  
+  // ═══ COMPLEX: Apex Manufacturing Supply Agreement (id: 2) ═══
+  '2': {
+    tasks: [
+      { id: '1', title: 'Review Supply Agreement Terms', type: 'Approval', team: 'Procurement', assignee: 'Sarah Martinez', assigneeInitials: 'SM', status: 'In progress', dueDate: '4/28/26' },
+      { id: '2', title: 'Quality Standards Approval', type: 'Approval', team: 'Quality', assignee: 'Robert Yang', assigneeInitials: 'RY', status: 'Not started', dueDate: '5/1/26' },
+      { id: '3', title: 'Upload Supplier Certification', type: 'Upload', team: 'External', assignee: 'Apex Manufacturing', assigneeInitials: 'AM', status: 'Not started', dueDate: '5/3/26' },
+      { id: '4', title: 'Complete Supplier Questionnaire', type: 'Form', team: 'External', assignee: 'Apex Manufacturing', assigneeInitials: 'AM', status: 'In progress', dueDate: '4/30/26' },
+      { id: '5', title: 'Finance Budget Approval', type: 'Approval', team: 'Finance', assignee: 'Marcus Webb', assigneeInitials: 'MW', status: 'In progress', dueDate: '4/29/26', isDueSoon: true },
+      { id: '6', title: 'Sign Supply Agreement', type: 'Sign', team: 'Procurement', assignee: 'Sarah Martinez', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/8/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Supply Agreement', commentCount: 4, status: 'In Review', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '4/23/2026', isParent: true },
+      { id: '2', name: 'Quality Standards Exhibit', commentCount: 1, status: 'In Review', owner: 'Robert Yang', ownerInitials: 'RY', dateModified: '4/22/2026', parentId: '1' },
+      { id: '3', name: 'Pricing Schedule', status: 'In Review', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '4/21/2026', parentId: '1' },
+    ],
+    supplementalDocs: [
+      { id: '4', name: 'Supplier Capability Assessment', status: 'Executed', owner: 'Robert Yang', ownerInitials: 'RY', dateModified: '4/10/2026' },
+      { id: '5', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '3/15/2026' },
+    ],
+    attentionItems: [
+      { id: '1', item: 'Budget Approval Pending', description: 'Finance review required for $1.6M commitment', riskLevel: 'High' },
+      { id: '2', item: 'Supplier Certifications', description: 'ISO 9001 certification expires in 60 days', riskLevel: 'Medium' },
+    ],
+    activity: [
+      { id: '1', icon: 'ai-spark-filled', user: 'AI Agent', action: 'Comparing pricing against market rates', time: 'Running...', isAI: true },
+      { id: '2', icon: 'edit', user: 'Sarah Martinez', action: 'Updated pricing schedule terms', time: '3 hours ago' },
+      { id: '3', icon: 'comment', user: 'Robert Yang', action: 'Requested quality spec clarification', time: '6 hours ago' },
+    ],
+  },
+  
+  // ═══ COMPLEX: DataVault Cloud Services MSA (id: 3) ═══
+  '3': {
+    tasks: [
+      { id: '1', title: 'Sign Master Service Agreement', type: 'Sign', team: 'Executive', assignee: 'Jennifer Mills', assigneeInitials: 'JM', status: 'Complete', dueDate: '4/20/26' },
+      { id: '2', title: 'Sign Data Processing Agreement', type: 'Sign', team: 'External', assignee: 'DataVault Technologies', assigneeInitials: 'DV', status: 'Complete', dueDate: '4/22/26' },
+      { id: '3', title: 'Security Team Sign-off', type: 'Sign', team: 'Security', assignee: 'Priya Sharma', assigneeInitials: 'PS', status: 'In progress', dueDate: '4/25/26', isDueSoon: true },
+      { id: '4', title: 'Vendor Counter-signature', type: 'Sign', team: 'External', assignee: 'DataVault Technologies', assigneeInitials: 'DV', status: 'Not started', dueDate: '4/28/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Master Service Agreement', status: 'Executed', owner: 'Jennifer Mills', ownerInitials: 'JM', dateModified: '4/20/2026', isParent: true },
+      { id: '2', name: 'Data Processing Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/22/2026', parentId: '1' },
+      { id: '3', name: 'Security Addendum', commentCount: 1, status: 'In Review', owner: 'Priya Sharma', ownerInitials: 'PS', dateModified: '4/24/2026', parentId: '1' },
+    ],
+    supplementalDocs: [
+      { id: '4', name: 'SOC 2 Type II Report', status: 'Executed', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '4/1/2026' },
+    ],
+    attentionItems: [
+      { id: '1', item: 'Security Sign-off Pending', description: 'Final security review needed before vendor counter-sign', riskLevel: 'Medium' },
+    ],
+    activity: [
+      { id: '1', icon: 'status-check', user: 'Jennifer Mills', action: 'Signed Master Service Agreement', time: '2 days ago' },
+      { id: '2', icon: 'status-check', user: 'DataVault Technologies', action: 'Signed Data Processing Agreement', time: '1 day ago' },
+      { id: '3', icon: 'clock', user: 'Priya Sharma', action: 'Security review in progress', time: '4 hours ago' },
+    ],
+  },
+  
+  // ═══ MEDIUM: Pinnacle Consulting SOW (id: 4) ═══
+  '4': {
+    tasks: [
+      { id: '1', title: 'Approve Rate Card', type: 'Approval', team: 'Finance', assignee: 'Marcus Webb', assigneeInitials: 'MW', status: 'In progress', dueDate: '4/26/26', isDueSoon: true },
+      { id: '2', title: 'Sign Statement of Work', type: 'Sign', team: 'Procurement', assignee: 'David Kim', assigneeInitials: 'DK', status: 'Not started', dueDate: '5/1/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Statement of Work', commentCount: 2, status: 'In Review', owner: 'David Kim', ownerInitials: 'DK', dateModified: '4/21/2026', isParent: true },
+      { id: '2', name: 'Rate Card & Fee Schedule', status: 'In Review', owner: 'Marcus Webb', ownerInitials: 'MW', dateModified: '4/20/2026', parentId: '1' },
+    ],
+    supplementalDocs: [],
+    attentionItems: [
+      { id: '1', item: 'Rate Negotiation', description: 'Blended rate 15% above budget target', riskLevel: 'Medium' },
+    ],
+    activity: [
+      { id: '1', icon: 'comment', user: 'Marcus Webb', action: 'Requested rate reduction', time: '5 hours ago' },
+      { id: '2', icon: 'edit', user: 'David Kim', action: 'Updated deliverables timeline', time: '1 day ago' },
+    ],
+  },
+  
+  // ═══ MEDIUM: Horizon Analytics Renewal (id: 5) ═══
+  '5': {
+    tasks: [
+      { id: '1', title: 'Finance Renewal Approval', type: 'Approval', team: 'Finance', assignee: 'Marcus Webb', assigneeInitials: 'MW', status: 'In progress', dueDate: '4/28/26' },
+      { id: '2', title: 'Sign License Renewal', type: 'Sign', team: 'IT', assignee: 'Kevin Park', assigneeInitials: 'KP', status: 'Not started', dueDate: '5/5/26' },
+    ],
+    documents: [
+      { id: '1', name: 'License Renewal Agreement', status: 'In Review', owner: 'Kevin Park', ownerInitials: 'KP', dateModified: '4/20/2026', isParent: true },
+      { id: '2', name: 'Updated Pricing Schedule', status: 'In Review', owner: 'Marcus Webb', ownerInitials: 'MW', dateModified: '4/19/2026', parentId: '1' },
+    ],
+    supplementalDocs: [
+      { id: '3', name: 'Original License Agreement', status: 'Executed', owner: 'Kevin Park', ownerInitials: 'KP', dateModified: '5/10/2025' },
+    ],
+    attentionItems: [],
+    activity: [
+      { id: '1', icon: 'ai-spark-filled', user: 'AI Agent', action: 'Comparing renewal terms to original', time: 'Completed', isAI: true },
+      { id: '2', icon: 'upload', user: 'Kevin Park', action: 'Uploaded renewal documentation', time: '2 days ago' },
+    ],
+  },
+  
+  // ═══ SIMPLE: Sterling Industries NDA (id: 6) ═══
+  '6': {
+    tasks: [
+      { id: '1', title: 'Sign Non-Disclosure Agreement', type: 'Sign', team: 'External', assignee: 'Sterling Industries', assigneeInitials: 'SI', status: 'In progress', dueDate: '4/28/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Mutual Non-Disclosure Agreement', status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/19/2026' },
+    ],
+    supplementalDocs: [],
+    attentionItems: [],
+    activity: [
+      { id: '1', icon: 'send', user: 'Laura Chen', action: 'Sent NDA for signature', time: '3 days ago' },
+    ],
+  },
+  
+  // ═══ SIMPLE: OfficePro Supply Order (id: 7) ═══
+  '7': {
+    tasks: [
+      { id: '1', title: 'Approve Purchase Order', type: 'Approval', team: 'Procurement', assignee: 'David Kim', assigneeInitials: 'DK', status: 'Not started', dueDate: '4/29/26' },
+      { id: '2', title: 'Submit Purchase Order', type: 'Form', team: 'Procurement', assignee: 'David Kim', assigneeInitials: 'DK', status: 'Not started', dueDate: '4/30/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Purchase Order #PO-2026-0892', status: 'In Review', owner: 'David Kim', ownerInitials: 'DK', dateModified: '4/18/2026' },
+    ],
+    supplementalDocs: [],
+    attentionItems: [],
+    activity: [
+      { id: '1', icon: 'edit', user: 'David Kim', action: 'Created purchase order', time: '1 day ago' },
+    ],
+  },
+};
 
 // Natural language relative dates from dd/mm/yyyy strings
 function relativeDate(dateStr: string): string {
@@ -738,7 +934,7 @@ const requestColumns: any[] = [
 
 /* ═══════════════════════════════════════
    Templates Data (matches real DocuSign)
-   �������������������══════════════════════════════════════ */
+   ���������������������══════════════════════════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -1596,6 +1792,14 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const fadeIn = useFadeIn(0, 250);
+  
+  // Get per-agreement data or fall back to first agreement's data
+  const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
+  const currentTasks = workspaceData.tasks;
+  const currentDocuments = workspaceData.documents;
+  const currentSupplementalDocs = workspaceData.supplementalDocs;
+  const currentAttentionItems = workspaceData.attentionItems;
+  const currentActivity = workspaceData.activity;
 
   const toggleGroup = (id: string) => {
     const newExpanded = new Set(expandedGroups);
@@ -1734,43 +1938,62 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                 </Grid>
               </div>
 
-              {/* Needs Attention */}
-              <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
-              
-              {/* Alert banner */}
-              <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-                Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
-              </Alert>
+              {/* Needs Attention - only show if there are items */}
+              {currentAttentionItems.length > 0 && (
+                <>
+                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
+                  
+                  {/* Alert banner - show for high priority items */}
+                  {currentAttentionItems.some(item => item.riskLevel === 'High') && (
+                    <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                      {currentAttentionItems.find(item => item.riskLevel === 'High')?.item} requires attention. Would you like to take action?
+                    </Alert>
+                  )}
 
-              {/* Attention items table */}
-              <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ATTENTION_ITEMS.map((item) => (
-                      <tr key={item.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{item.item}</td>
-                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{item.description}</td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <Button kind={item.riskLevel === 'High' && item.item === 'Finance Approval' ? 'secondary' : 'primary'} size="small">
-                            {item.item === 'Finance Approval' ? 'Remind' : 'View'}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  {/* Attention items table */}
+                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentAttentionItems.map((item) => (
+                          <tr key={item.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{item.item}</td>
+                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{item.description}</td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
+                            </td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <Button kind={item.riskLevel === 'High' ? 'secondary' : 'primary'} size="small">
+                                {item.riskLevel === 'High' ? 'Remind' : 'View'}
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
+              {/* No attention items message for simple agreements */}
+              {currentAttentionItems.length === 0 && (
+                <div style={{ 
+                  padding: 'var(--ink-spacing-300)', 
+                  background: 'var(--ink-bg-color-secondary)', 
+                  borderRadius: 8,
+                  textAlign: 'center'
+                }}>
+                  <Icon name="status-check" size={24} color="var(--ink-green-80)" style={{ marginBottom: 8 }} />
+                  <Text size="sm" color="secondary">No items need attention right now</Text>
+                </div>
+              )}
             </div>
 
             {/* Activity sidebar */}
@@ -1780,7 +2003,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                 <IconButton icon="filter" variant="tertiary" size="small" aria-label="Filter" />
               </Inline>
               <Stack gap="medium">
-                {ACTIVITY_ITEMS.map((item) => (
+                {currentActivity.map((item) => (
                   <Inline key={item.id} gap="medium" align="flex-start">
                     <div style={{
                       width: 32, height: 32, borderRadius: '50%',
@@ -1850,7 +2073,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                   </tr>
                 </thead>
                 <tbody>
-                  {DEAL_TASKS.map((task) => (
+                  {currentTasks.map((task) => (
                     <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
@@ -1904,7 +2127,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                   </tr>
                 </thead>
                 <tbody>
-                  {DEAL_DOCUMENTS.map((doc) => {
+                  {currentDocuments.map((doc) => {
                     const isChild = !!doc.parentId;
                     const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
                     if (isChild && !isParentExpanded) return null;
@@ -1947,45 +2170,50 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               </table>
             </div>
 
-            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
+            {/* Supplemental documents - only show if there are any */}
+            {currentSupplementalDocs.length > 0 && (
+              <>
+                <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
 
-            {/* Supplemental documents table */}
-            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Document</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Owner</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Modified</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {SUPPLEMENTAL_DOCUMENTS.map((doc) => (
-                    <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          <Avatar initials={doc.ownerInitials} size="small" />
-                          <Text size="sm">{doc.owner}</Text>
-                        </Inline>
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          <Button kind="secondary" size="small">View</Button>
-                          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                        </Inline>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                {/* Supplemental documents table */}
+                <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Document</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Owner</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Modified</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentSupplementalDocs.map((doc) => (
+                        <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
+                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                          </td>
+                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <Inline gap="small" align="center">
+                              <Avatar initials={doc.ownerInitials} size="small" />
+                              <Text size="sm">{doc.owner}</Text>
+                            </Inline>
+                          </td>
+                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <Inline gap="small" align="center">
+                              <Button kind="secondary" size="small">View</Button>
+                              <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                            </Inline>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
