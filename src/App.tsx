@@ -409,10 +409,11 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 8, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/23/2026', parentId: '1' },
       { id: '3', name: 'Security & Compliance Addendum', commentCount: 2, status: 'In Review', owner: 'Priya Sharma', ownerInitials: 'PS', dateModified: '4/22/2026', parentId: '1' },
       { id: '4', name: 'Service Level Agreement (SLA)', status: 'In Review', owner: 'David Kim', ownerInitials: 'DK', dateModified: '4/20/2026', parentId: '1' },
+      { id: '5', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '3/10/2026' },
     ],
     supplementalDocs: [
-      { id: '5', name: 'Globex Company Profile', status: 'Executed', owner: 'Globex Industries', ownerInitials: 'GI', dateModified: '4/15/2026' },
-      { id: '6', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '3/10/2026' },
+      { id: '6', name: 'Globex Company Profile', owner: 'Globex Industries', ownerInitials: 'GI', dateModified: '4/15/2026' },
+      { id: '7', name: 'Insurance Certificate (COI)', owner: 'Globex Industries', ownerInitials: 'GI', dateModified: '4/12/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'DPA Comments Outstanding', description: '8 comments need resolution before signing', riskLevel: 'High' },
@@ -441,10 +442,11 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '1', name: 'Supply Agreement', commentCount: 4, status: 'In Review', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '4/23/2026', isParent: true },
       { id: '2', name: 'Quality Standards Exhibit', commentCount: 1, status: 'In Review', owner: 'Robert Yang', ownerInitials: 'RY', dateModified: '4/22/2026', parentId: '1' },
       { id: '3', name: 'Pricing Schedule', status: 'In Review', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '4/21/2026', parentId: '1' },
+      { id: '4', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '3/15/2026' },
     ],
     supplementalDocs: [
-      { id: '4', name: 'Supplier Capability Assessment', status: 'Executed', owner: 'Robert Yang', ownerInitials: 'RY', dateModified: '4/10/2026' },
-      { id: '5', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '3/15/2026' },
+      { id: '5', name: 'Supplier Capability Assessment', owner: 'Robert Yang', ownerInitials: 'RY', dateModified: '4/10/2026' },
+      { id: '6', name: 'ISO 9001 Certification', owner: 'Apex Manufacturing', ownerInitials: 'AM', dateModified: '1/15/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Budget Approval Pending', description: 'Finance review required for $1.6M commitment', riskLevel: 'High' },
@@ -471,7 +473,8 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '3', name: 'Security Addendum', commentCount: 1, status: 'In Review', owner: 'Priya Sharma', ownerInitials: 'PS', dateModified: '4/24/2026', parentId: '1' },
     ],
     supplementalDocs: [
-      { id: '4', name: 'SOC 2 Type II Report', status: 'Executed', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '4/1/2026' },
+      { id: '4', name: 'SOC 2 Type II Report', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '4/1/2026' },
+      { id: '5', name: 'Data Center Locations & Compliance', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '3/28/2026' },
     ],
     attentionItems: [
       { id: '1', item: 'Security Sign-off Pending', description: 'Final security review needed before vendor counter-sign', riskLevel: 'Medium' },
@@ -514,7 +517,8 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '2', name: 'Updated Pricing Schedule', status: 'In Review', owner: 'Marcus Webb', ownerInitials: 'MW', dateModified: '4/19/2026', parentId: '1' },
     ],
     supplementalDocs: [
-      { id: '3', name: 'Original License Agreement', status: 'Executed', owner: 'Kevin Park', ownerInitials: 'KP', dateModified: '5/10/2025' },
+      { id: '3', name: 'Original License Agreement (Reference)', owner: 'Kevin Park', ownerInitials: 'KP', dateModified: '5/10/2025' },
+      { id: '4', name: 'Product Roadmap 2026', owner: 'Horizon Analytics', ownerInitials: 'HA', dateModified: '4/5/2026' },
     ],
     attentionItems: [],
     activity: [
@@ -2175,15 +2179,14 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
               <>
                 <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
 
-                {/* Supplemental documents table */}
+                {/* Supplemental documents table - info-only documents without status */}
                 <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Document</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Owner</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Modified</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Provided By</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Added</th>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
                       </tr>
                     </thead>
@@ -2191,9 +2194,6 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                       {currentSupplementalDocs.map((doc) => (
                         <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                           <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
-                          </td>
                           <td style={{ padding: 'var(--ink-spacing-150)' }}>
                             <Inline gap="small" align="center">
                               <Avatar initials={doc.ownerInitials} size="small" />
