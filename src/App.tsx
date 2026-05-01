@@ -800,7 +800,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════���������������════
+/* ══════════════════════════════════����������������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -2185,6 +2185,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     <thead>
                       <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Document</th>
+                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}></th>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Provided By</th>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Date Added</th>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
@@ -2194,6 +2195,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                       {currentSupplementalDocs.map((doc) => (
                         <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                           <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
+                          <td style={{ padding: 'var(--ink-spacing-150)' }}></td>
                           <td style={{ padding: 'var(--ink-spacing-150)' }}>
                             <Inline gap="small" align="center">
                               <Avatar initials={doc.ownerInitials} size="small" />
