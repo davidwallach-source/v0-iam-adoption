@@ -800,7 +800,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════������������������════
+/* ══════════════════════════════════��������������������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -1962,7 +1962,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'right', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1973,7 +1973,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                             <td style={{ padding: 'var(--ink-spacing-150)' }}>
                               <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
                             </td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
                               <Button kind={item.riskLevel === 'High' ? 'secondary' : 'primary'} size="small">
                                 {item.riskLevel === 'High' ? 'Remind' : 'View'}
                               </Button>
@@ -2073,7 +2073,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'right', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2101,7 +2101,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
                       </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                      <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
                         <Button kind={task.isDueSoon ? 'primary' : 'secondary'} size="small">
                           {task.isDueSoon ? 'Remind' : 'View'}
                         </Button>
@@ -2161,7 +2161,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                           </Inline>
                         </td>
                         <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
                           <Inline gap="small" align="center">
                             <Button kind="secondary" size="small">View</Button>
                             <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
@@ -2188,7 +2188,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}></th>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Provided By</th>
                         <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Added</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'right', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2203,7 +2203,7 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                             </Inline>
                           </td>
                           <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                          <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
                             <Inline gap="small" align="center">
                               <Button kind="secondary" size="small">View</Button>
                               <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
