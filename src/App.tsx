@@ -48,6 +48,7 @@ interface StartNewModalProps {
 
 function StartNewModal({ open, onClose }: StartNewModalProps) {
   const [search, setSearch] = useState('');
+  const [showNDAModal, setShowNDAModal] = useState(false);
 
   const agreements = [
     { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
@@ -181,18 +182,291 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                 
                 {/* Start button */}
                 <div style={{ marginTop: 12 }}>
-                  <Button kind="secondary" size="small">Start</Button>
+                  <Button 
+                    kind="secondary" 
+                    size="small"
+                    onClick={() => {
+                      if (item.id === 'nda') {
+                        setShowNDAModal(true);
+                      }
+                    }}
+                  >Start</Button>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Instant NDA Modal */}
+      <InstantNDAModal open={showNDAModal} onClose={() => setShowNDAModal(false)} />
     </Modal>
   );
 }
 
 
+
+/* ═══════════════════════════════════════
+   InstantNDAModal Component
+   ═══════════════════════════════════════ */
+
+interface InstantNDAModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function InstantNDAModal({ open, onClose }: InstantNDAModalProps) {
+  const [disclosingParty, setDisclosingParty] = useState('');
+  const [receivingParty, setReceivingParty] = useState('');
+  const [effectiveDate, setEffectiveDate] = useState('');
+  const [duration, setDuration] = useState('12');
+  const [authorizedSigner, setAuthorizedSigner] = useState('');
+  const [highlightData, setHighlightData] = useState(true);
+
+  if (!open) return null;
+
+  const renderFieldValue = (value: string, placeholder: string, isNumber = false) => {
+    if (value) {
+      return (
+        <span style={{
+          color: isNumber ? 'var(--ink-gold-100)' : 'var(--ink-purple-100)',
+          fontWeight: 500,
+          backgroundColor: highlightData ? (isNumber ? 'var(--ink-gold-fade-10)' : 'var(--ink-purple-fade-10)') : 'transparent',
+          padding: highlightData ? '2px 4px' : 0,
+          borderRadius: 4,
+        }}>{value}</span>
+      );
+    }
+    return (
+      <span style={{
+        color: 'var(--ink-neutral-60)',
+        backgroundColor: highlightData ? 'var(--ink-neutral-fade-10)' : 'transparent',
+        padding: highlightData ? '2px 4px' : 0,
+        borderRadius: 4,
+      }}>[{placeholder}]</span>
+    );
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 1100,
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--ink-bg-color-default)',
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '12px 20px',
+        background: '#130032',
+        color: 'white',
+        gap: 16,
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 8,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label="Close"
+        >
+          <Icon name="close" size={20} color="white" />
+        </button>
+        <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.3)' }} />
+        <Text size="sm" weight="medium" style={{ color: 'white' }}>New Agreement</Text>
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Left panel - Form fields */}
+        <div style={{
+          width: 400,
+          borderRight: '1px solid var(--ink-border-subtle)',
+          padding: '32px 28px',
+          overflow: 'auto',
+          background: 'var(--ink-bg-color-default)',
+        }}>
+          <Text size="xl" weight="medium" style={{ marginBottom: 24, display: 'block' }}>Add field data</Text>
+
+          {/* Sender Field Data section */}
+          <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, display: 'block' }}>Sender Field Data</Text>
+
+          {/* Disclosing Party */}
+          <div style={{ marginBottom: 20 }}>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Disclosing Party</Text>
+            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>The party sharing confidential information.</Text>
+            <Input
+              value={disclosingParty}
+              onChange={(e) => setDisclosingParty(e.target.value)}
+              placeholder=""
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Receiving Party */}
+          <div style={{ marginBottom: 20 }}>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Receiving Party</Text>
+            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>The party receiving confidential information.</Text>
+            <Input
+              value={receivingParty}
+              onChange={(e) => setReceivingParty(e.target.value)}
+              placeholder=""
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Effective Date */}
+          <div style={{ marginBottom: 20 }}>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Effective Date</Text>
+            <Input
+              type="date"
+              value={effectiveDate}
+              onChange={(e) => setEffectiveDate(e.target.value)}
+              placeholder="mm/dd/yyyy"
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Duration */}
+          <div style={{ marginBottom: 20 }}>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Duration (months)</Text>
+            <Input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder=""
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Authorized Signer */}
+          <div style={{ marginBottom: 28 }}>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Authorized Signer</Text>
+            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>The person authorized to sign on behalf of the Receiving Party.</Text>
+            <Input
+              value={authorizedSigner}
+              onChange={(e) => setAuthorizedSigner(e.target.value)}
+              placeholder=""
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Highlight Data toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+            <button
+              onClick={() => setHighlightData(!highlightData)}
+              style={{
+                width: 44,
+                height: 24,
+                borderRadius: 12,
+                border: 'none',
+                background: highlightData ? 'var(--ink-purple-100)' : 'var(--ink-neutral-30)',
+                cursor: 'pointer',
+                position: 'relative',
+                transition: 'background 0.2s',
+              }}
+            >
+              <div style={{
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: 'white',
+                position: 'absolute',
+                top: 3,
+                left: highlightData ? 23 : 3,
+                transition: 'left 0.2s',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              }} />
+            </button>
+            <Text size="sm">Highlight Data</Text>
+          </div>
+        </div>
+
+        {/* Right panel - Document preview */}
+        <div style={{
+          flex: 1,
+          padding: 40,
+          overflow: 'auto',
+          background: 'var(--ink-bg-color-secondary)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {/* Document */}
+          <div style={{
+            flex: 1,
+            background: 'white',
+            border: '1px solid var(--ink-border-subtle)',
+            borderRadius: 4,
+            padding: '48px 56px',
+            maxWidth: 900,
+            marginBottom: 24,
+          }}>
+            <h1 style={{
+              textAlign: 'center',
+              fontSize: 22,
+              fontWeight: 600,
+              marginBottom: 32,
+              color: '#130032',
+            }}>Non-Disclosure Agreement</h1>
+
+            {/* Field values header */}
+            <div style={{
+              fontSize: 14,
+              lineHeight: 1.8,
+              marginBottom: 32,
+              color: '#130032',
+            }}>
+              <span>Disclosing Party: {renderFieldValue(disclosingParty, 'Disclosing Party')}</span>
+              <span style={{ margin: '0 16px' }}>Receiving Party: {renderFieldValue(receivingParty, 'Receiving Party')}</span>
+              <span style={{ margin: '0 16px' }}>Effective Date: {renderFieldValue(effectiveDate, 'Effective Date')}</span>
+              <span style={{ margin: '0 16px' }}>Duration (months): {renderFieldValue(duration, 'Duration', true)}</span>
+              <br />
+              <span>Authorized Signer: {renderFieldValue(authorizedSigner, 'Authorized Signer')}</span>
+            </div>
+
+            {/* Section 1 */}
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>1. Definition of Confidential Information</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                For purposes of this Agreement, "Confidential Information" shall include all information or data that has or could have commercial value or other utility in the business in which Disclosing Party is engaged.
+              </p>
+            </div>
+
+            {/* Section 2 */}
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>2. Obligations of Receiving Party</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                Receiving Party agrees to: (a) hold the Confidential Information in strict confidence; (b) not to use the Confidential Information for any purpose other than evaluating a potential business relationship; (c) not to disclose Confidential Information to any third parties.
+              </p>
+            </div>
+
+            {/* Section 3 */}
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>3. Term</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                This Agreement shall remain in effect for the duration specified above from the Effective Date, unless terminated earlier by either party with 30 days written notice.
+              </p>
+            </div>
+          </div>
+
+          {/* Footer buttons */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <Button kind="secondary" size="medium">Save</Button>
+            <Button kind="primary" size="medium">Send for Signature</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const tableRowStaggerStyles = `
 @keyframes inkRowEntrance {
@@ -800,7 +1074,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════������������������════
+/* ══════════════════════════════════�������������������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
