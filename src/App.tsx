@@ -209,18 +209,49 @@ function StartNewModal({ open, onClose, onStartNDA }: StartNewModalProps) {
    InstantNDAModal Component
    ═══════════════════════════════════════ */
 
+interface NDAFormData {
+  disclosingParty: string;
+  receivingParty: string;
+  effectiveDate: string;
+  duration: string;
+  authorizedSigner: string;
+}
+
 interface InstantNDAModalProps {
   open: boolean;
   onClose: () => void;
+  onSave: (data: NDAFormData) => void;
+  initialData?: NDAFormData | null;
 }
 
-function InstantNDAModal({ open, onClose }: InstantNDAModalProps) {
-  const [disclosingParty, setDisclosingParty] = useState('');
-  const [receivingParty, setReceivingParty] = useState('');
-  const [effectiveDate, setEffectiveDate] = useState('');
-  const [duration, setDuration] = useState('12');
-  const [authorizedSigner, setAuthorizedSigner] = useState('');
+function InstantNDAModal({ open, onClose, onSave, initialData }: InstantNDAModalProps) {
+  const [disclosingParty, setDisclosingParty] = useState(initialData?.disclosingParty || '');
+  const [receivingParty, setReceivingParty] = useState(initialData?.receivingParty || '');
+  const [effectiveDate, setEffectiveDate] = useState(initialData?.effectiveDate || '');
+  const [duration, setDuration] = useState(initialData?.duration || '12');
+  const [authorizedSigner, setAuthorizedSigner] = useState(initialData?.authorizedSigner || '');
   const [highlightData, setHighlightData] = useState(true);
+  
+  // Reset form when initialData changes (opening with new data)
+  React.useEffect(() => {
+    if (open) {
+      setDisclosingParty(initialData?.disclosingParty || '');
+      setReceivingParty(initialData?.receivingParty || '');
+      setEffectiveDate(initialData?.effectiveDate || '');
+      setDuration(initialData?.duration || '12');
+      setAuthorizedSigner(initialData?.authorizedSigner || '');
+    }
+  }, [open, initialData]);
+  
+  const handleSave = () => {
+    onSave({
+      disclosingParty,
+      receivingParty,
+      effectiveDate,
+      duration,
+      authorizedSigner,
+    });
+  };
 
   if (!open) return null;
 
@@ -458,7 +489,7 @@ function InstantNDAModal({ open, onClose }: InstantNDAModalProps) {
 
           {/* Footer buttons */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button kind="secondary" size="medium">Save</Button>
+            <Button kind="secondary" size="medium" onClick={handleSave}>Save</Button>
             <Button kind="primary" size="medium">Send for Signature</Button>
           </div>
         </div>
@@ -1331,7 +1362,7 @@ const reportColumns: any[] = [
 
 /* ═��═════════════════════════════════════
    Home Page
-   ═══════════════════════���═══════════════ */
+   ═══════════════════════���═════��═════════ */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -2064,14 +2095,42 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: () => void }) {
+interface WorkspaceViewProps {
+  agreement: Agreement;
+  onClose: () => void;
+  onEditNDA?: () => void;
+  savedNDAData?: NDAFormData | null;
+}
+
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const fadeIn = useFadeIn(0, 250);
   
+  // Check if this is the NDA draft
+  const isNDADraft = agreement.id === 'nda-draft';
+  
+  // Generate NDA-specific workspace data if this is a draft NDA
+  const ndaWorkspaceData = isNDADraft ? {
+    tasks: [
+      { id: '1', title: 'Complete NDA Form Fields', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: savedNDAData?.disclosingParty && savedNDAData?.receivingParty ? 'Complete' : 'In progress', dueDate: '—' },
+      { id: '2', title: 'Send for Signature', type: 'Sign', team: 'External', assignee: savedNDAData?.receivingParty || 'Receiving Party', assigneeInitials: savedNDAData?.receivingParty?.substring(0, 2).toUpperCase() || 'RP', status: 'Not started', dueDate: '—' },
+    ],
+    documents: [
+      { id: '1', name: 'Non-Disclosure Agreement', status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: new Date().toLocaleDateString('en-US') },
+    ],
+    supplementalDocs: [],
+    attentionItems: (!savedNDAData?.disclosingParty || !savedNDAData?.receivingParty) ? [
+      { id: '1', item: 'Complete Required Fields', description: 'Fill in all required fields before sending for signature', riskLevel: 'Medium' as const },
+    ] : [],
+    activity: [
+      { id: '1', icon: 'edit' as const, user: 'You', action: 'Created NDA draft', time: 'Just now' },
+    ],
+  } : null;
+  
   // Get per-agreement data or fall back to first agreement's data
-  const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
+  const workspaceData = ndaWorkspaceData || AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
   const currentTasks = workspaceData.tasks;
   const currentDocuments = workspaceData.documents;
   const currentSupplementalDocs = workspaceData.supplementalDocs;
@@ -2434,9 +2493,13 @@ function WorkspaceView({ agreement, onClose }: { agreement: Agreement; onClose: 
                           </Inline>
                         </td>
                         <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <Inline gap="small" align="center">
-                            <Button kind="secondary" size="small">View</Button>
+                        <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
+                          <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                            {isNDADraft && doc.status === 'Draft' ? (
+                              <Button kind="primary" size="small" onClick={onEditNDA}>Edit</Button>
+                            ) : (
+                              <Button kind="secondary" size="small">View</Button>
+                            )}
                             <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                           </Inline>
                         </td>
@@ -2833,6 +2896,8 @@ export default function App() {
   const [showDealWorkspace, setShowDealWorkspace] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
   const [showNDAModal, setShowNDAModal] = useState(false);
+  const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
+  const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
 
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
@@ -3272,13 +3337,59 @@ export default function App() {
       <AgreementDetailView onClose={() => setShowAgreementDetail(false)} />
     )}
     {showDealWorkspace && selectedAgreement && (
-      <WorkspaceView agreement={selectedAgreement} onClose={() => {
-        setShowDealWorkspace(false);
-        setSelectedAgreement(null);
-      }} />
+      <WorkspaceView 
+        agreement={selectedAgreement} 
+        onClose={() => {
+          setShowDealWorkspace(false);
+          setSelectedAgreement(null);
+        }}
+        onEditNDA={() => {
+          setShowNDAModal(true);
+        }}
+        savedNDAData={savedNDAData}
+      />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} />
-    <InstantNDAModal open={showNDAModal} onClose={() => setShowNDAModal(false)} />
+    <InstantNDAModal 
+      open={showNDAModal} 
+      onClose={() => setShowNDAModal(false)} 
+      initialData={savedNDAData}
+      onSave={(data) => {
+        // Save the NDA data
+        setSavedNDAData(data);
+        
+        // Create or find the NDA agreement - use a fixed ID for the draft NDA
+        const ndaId = 'nda-draft';
+        setNdaAgreementId(ndaId);
+        
+        // Create a draft NDA agreement object
+        const ndaAgreement: Agreement = {
+          id: ndaId,
+          name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
+          party: data.receivingParty || 'Receiving Party',
+          partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
+          status: 'Draft',
+          statusIcon: 'clock',
+          statusKind: 'neutral',
+          statusSub: 'In Progress',
+          dealValue: '—',
+          agreementType: 'NDA',
+          termLength: `${data.duration} months`,
+          closeDate: data.effectiveDate || '—',
+          date: new Date().toLocaleDateString('en-GB'),
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          action: 'Edit',
+          documentsCount: 1,
+          tasksCount: 1,
+          tasksPending: 1,
+        };
+        
+        // Close the NDA modal and open the workspace
+        setShowNDAModal(false);
+        setSelectedAgreement(ndaAgreement);
+        setShowDealWorkspace(true);
+      }}
+    />
     </>
   );
 }
