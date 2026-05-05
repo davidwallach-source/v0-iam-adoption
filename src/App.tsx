@@ -233,7 +233,7 @@ function InstantNDAModal({ open, onClose, onSave, initialData }: InstantNDAModal
   const [highlightData, setHighlightData] = useState(true);
   
   // Reset form when initialData changes (opening with new data)
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       setDisclosingParty(initialData?.disclosingParty || '');
       setReceivingParty(initialData?.receivingParty || '');
