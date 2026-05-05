@@ -44,11 +44,11 @@ import {
 interface StartNewModalProps {
   open: boolean;
   onClose: () => void;
+  onStartNDA: () => void;
 }
 
-function StartNewModal({ open, onClose }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartNDA }: StartNewModalProps) {
   const [search, setSearch] = useState('');
-  const [showNDAModal, setShowNDAModal] = useState(false);
 
   const agreements = [
     { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
@@ -187,7 +187,8 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
                     size="small"
                     onClick={() => {
                       if (item.id === 'nda') {
-                        setShowNDAModal(true);
+                        onClose();
+                        onStartNDA();
                       }
                     }}
                   >Start</Button>
@@ -198,8 +199,6 @@ function StartNewModal({ open, onClose }: StartNewModalProps) {
         </div>
       </div>
 
-      {/* Instant NDA Modal */}
-      <InstantNDAModal open={showNDAModal} onClose={() => setShowNDAModal(false)} />
     </Modal>
   );
 }
@@ -2833,6 +2832,7 @@ export default function App() {
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
   const [showDealWorkspace, setShowDealWorkspace] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
+  const [showNDAModal, setShowNDAModal] = useState(false);
 
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
@@ -3277,7 +3277,8 @@ export default function App() {
         setSelectedAgreement(null);
       }} />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} />
+    <InstantNDAModal open={showNDAModal} onClose={() => setShowNDAModal(false)} />
     </>
   );
 }
