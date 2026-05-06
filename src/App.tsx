@@ -45,15 +45,16 @@ interface StartNewModalProps {
   open: boolean;
   onClose: () => void;
   onStartNDA: () => void;
+  onStartPurchase: () => void;
 }
 
-function StartNewModal({ open, onClose, onStartNDA }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartNDA, onStartPurchase }: StartNewModalProps) {
   const [search, setSearch] = useState('');
 
   const agreements = [
     { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
     { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
-    { id: 'purchase', title: 'Purchase Request', description: 'Initiate a purchase with a new or existing vendor.' },
+    { id: 'purchase', title: 'Purchase Agreement', description: 'Initiate a purchase with a new or existing vendor.' },
     { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
   ];
 
@@ -189,6 +190,9 @@ function StartNewModal({ open, onClose, onStartNDA }: StartNewModalProps) {
                       if (item.id === 'nda') {
                         onClose();
                         onStartNDA();
+                      } else if (item.id === 'purchase') {
+                        onClose();
+                        onStartPurchase();
                       }
                     }}
                   >Start</Button>
@@ -491,6 +495,327 @@ function InstantNDAModal({ open, onClose, onSave, initialData }: InstantNDAModal
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
             <Button kind="secondary" size="medium" onClick={handleSave}>Save</Button>
             <Button kind="primary" size="medium">Send for Signature</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════
+   PurchaseRequestModal Component
+   ═══════════════════════════════════════ */
+
+interface PurchaseFormData {
+  title: string;
+  vendor: string;
+  collaborators: string[];
+  description: string;
+  documentSource: '1st-party' | '3rd-party' | '';
+  additionalRequirements: {
+    warranty: boolean;
+    compliance: boolean;
+    specifications: boolean;
+  };
+}
+
+interface PurchaseRequestModalProps {
+  open: boolean;
+  onClose: () => void;
+  onNext: (data: PurchaseFormData) => void;
+}
+
+const VENDOR_OPTIONS = [
+  'Globex Industries',
+  'Apex Manufacturing Co.',
+  'DataVault Technologies',
+  'NovaSoft Solutions',
+  'Horizon Analytics',
+  'TerraScale Inc.',
+];
+
+function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalProps) {
+  const [title, setTitle] = useState('');
+  const [vendor, setVendor] = useState('');
+  const [vendorOpen, setVendorOpen] = useState(false);
+  const [description, setDescription] = useState('');
+  const [documentSource, setDocumentSource] = useState<'1st-party' | '3rd-party' | ''>('');
+  const [requirements, setRequirements] = useState({
+    warranty: false,
+    compliance: false,
+    specifications: false,
+  });
+
+  if (!open) return null;
+
+  const filteredVendors = VENDOR_OPTIONS.filter(v =>
+    v.toLowerCase().includes(vendor.toLowerCase())
+  );
+
+  const handleNext = () => {
+    onNext({
+      title,
+      vendor,
+      collaborators: ['Carlton Banks'],
+      description,
+      documentSource,
+      additionalRequirements: requirements,
+    });
+  };
+
+  const fieldLabelStyle: React.CSSProperties = {
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#130032',
+    marginBottom: 6,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+  };
+
+  const requiredStar: React.CSSProperties = {
+    color: '#C0392B',
+    fontWeight: 600,
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid var(--ink-border-subtle)',
+    borderRadius: 6,
+    fontSize: 14,
+    fontFamily: 'var(--ink-font-family)',
+    color: '#130032',
+    background: 'white',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 1100,
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--ink-bg-color-default)',
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 24px',
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        background: 'white',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--ink-text-secondary)' }}>
+          <span
+            style={{ cursor: 'pointer', color: 'var(--ink-text-secondary)' }}
+            onClick={onClose}
+          >Start New</span>
+          <Icon name="chevron-right" size={14} color="var(--ink-text-secondary)" />
+          <span style={{ color: '#130032', fontWeight: 500 }}>Purchase Request</span>
+        </div>
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', alignItems: 'center' }}
+          aria-label="Close"
+        >
+          <Icon name="close" size={20} color="var(--ink-text-secondary)" />
+        </button>
+      </div>
+
+      {/* Scrollable body */}
+      <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', padding: '48px 24px' }}>
+        <div style={{ width: '100%', maxWidth: 600 }}>
+          {/* Title */}
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: '#130032', margin: '0 0 8px 0' }}>Purchase Request</h1>
+          <p style={{ fontSize: 14, color: 'var(--ink-text-secondary)', margin: '0 0 40px 0' }}>Initiate a procurement workflow</p>
+
+          {/* Title field */}
+          <div style={{ marginBottom: 28 }}>
+            <label style={fieldLabelStyle}>
+              Title <span style={requiredStar}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              placeholder="Name of purchase request"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+          </div>
+
+          {/* Vendors field */}
+          <div style={{ marginBottom: 28, position: 'relative' }}>
+            <label style={fieldLabelStyle}>
+              Vendors <span style={requiredStar}>*</span>
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                style={{ ...inputStyle, paddingRight: 36 }}
+                placeholder="Select or type"
+                value={vendor}
+                onChange={e => { setVendor(e.target.value); setVendorOpen(true); }}
+                onFocus={() => setVendorOpen(true)}
+                onBlur={() => setTimeout(() => setVendorOpen(false), 150)}
+              />
+              <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <Icon name="chevron-down" size={16} color="var(--ink-text-secondary)" />
+              </div>
+            </div>
+            {vendorOpen && filteredVendors.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: 'white',
+                border: '1px solid var(--ink-border-subtle)',
+                borderRadius: 6,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                zIndex: 10,
+                marginTop: 4,
+              }}>
+                {filteredVendors.map(v => (
+                  <div
+                    key={v}
+                    onMouseDown={() => { setVendor(v); setVendorOpen(false); }}
+                    style={{
+                      padding: '10px 14px',
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      color: '#130032',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--ink-neutral-fade-5)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >{v}</div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Collaborators field */}
+          <div style={{ marginBottom: 28 }}>
+            <label style={fieldLabelStyle}>
+              Collaborators <span style={requiredStar}>*</span>
+            </label>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '8px 14px',
+              border: '1px solid var(--ink-border-subtle)',
+              borderRadius: 6,
+              background: 'white',
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'var(--ink-purple-fade-10)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--ink-purple-100)',
+                flexShrink: 0,
+              }}>CB</div>
+              <span style={{ fontSize: 14, color: '#130032' }}>Carlton Banks</span>
+            </div>
+          </div>
+
+          {/* Purchase Description */}
+          <div style={{ marginBottom: 28 }}>
+            <label style={fieldLabelStyle}>Purchase Description</label>
+            <textarea
+              style={{
+                ...inputStyle,
+                height: 100,
+                resize: 'vertical',
+              } as React.CSSProperties}
+              placeholder="Briefly describe purchase request"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
+          </div>
+
+          {/* Document Source */}
+          <div style={{ marginBottom: 28 }}>
+            <label style={{ ...fieldLabelStyle, marginBottom: 12 }}>Document Source</label>
+            {(['1st-party', '3rd-party'] as const).map(opt => (
+              <label
+                key={opt}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, cursor: 'pointer', fontSize: 14, color: '#130032' }}
+              >
+                <div
+                  onClick={() => setDocumentSource(opt)}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    border: `2px solid ${documentSource === opt ? 'var(--ink-purple-100)' : 'var(--ink-neutral-40)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {documentSource === opt && (
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-purple-100)' }} />
+                  )}
+                </div>
+                <span onClick={() => setDocumentSource(opt)}>
+                  {opt === '1st-party' ? '1st party (Fontara)' : '3rd party (from vendor)'}
+                </span>
+              </label>
+            ))}
+          </div>
+
+          {/* Additional Purchase Requirements */}
+          <div style={{ marginBottom: 40 }}>
+            <label style={{ ...fieldLabelStyle, marginBottom: 12 }}>Additional Purchase Requirements</label>
+            {([
+              { key: 'warranty', label: 'Warranty or support' },
+              { key: 'compliance', label: 'Compliance certifications' },
+              { key: 'specifications', label: 'Detailed specifications or project milestones' },
+            ] as const).map(({ key, label }) => (
+              <label
+                key={key}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, cursor: 'pointer', fontSize: 14, color: '#130032' }}
+              >
+                <div
+                  onClick={() => setRequirements(prev => ({ ...prev, [key]: !prev[key] }))}
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 3,
+                    border: `2px solid ${requirements[key] ? 'var(--ink-purple-100)' : 'var(--ink-neutral-40)'}`,
+                    background: requirements[key] ? 'var(--ink-purple-100)' : 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {requirements[key] && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                <span onClick={() => setRequirements(prev => ({ ...prev, [key]: !prev[key] }))}>{label}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* Footer buttons */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <Button kind="secondary" size="medium" onClick={onClose}>Back</Button>
+            <Button kind="primary" size="medium" onClick={handleNext} disabled={!title || !vendor}>Next</Button>
           </div>
         </div>
       </div>
@@ -2900,6 +3225,7 @@ export default function App() {
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
@@ -3351,7 +3677,36 @@ export default function App() {
         savedNDAData={savedNDAData}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} />
+    <PurchaseRequestModal
+      open={showPurchaseModal}
+      onClose={() => setShowPurchaseModal(false)}
+      onNext={(data) => {
+        setShowPurchaseModal(false);
+        const purchaseAgreement: Agreement = {
+          id: `purchase-${Date.now()}`,
+          name: data.title || 'Purchase Agreement (Draft)',
+          party: data.vendor || 'Vendor',
+          partyLogo: data.vendor ? data.vendor.substring(0, 2).toUpperCase() : 'PA',
+          status: 'Draft',
+          statusIcon: 'clock',
+          statusKind: 'neutral',
+          statusSub: 'In Progress',
+          dealValue: '—',
+          agreementType: 'Purchase Agreement',
+          termLength: '—',
+          closeDate: '—',
+          date: new Date().toLocaleDateString('en-GB'),
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          action: 'Edit',
+          documentsCount: data.documentSource === '3rd-party' ? 0 : 1,
+          tasksCount: 2,
+          tasksPending: 2,
+        };
+        setSelectedAgreement(purchaseAgreement);
+        setShowDealWorkspace(true);
+      }}
+    />
     <InstantNDAModal 
       open={showNDAModal} 
       onClose={() => setShowNDAModal(false)} 
