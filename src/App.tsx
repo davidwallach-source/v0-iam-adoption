@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������══════════════
+/* ═══════════════════════���������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2598,8 +2598,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 marginBottom: 'var(--ink-spacing-300)',
               }}>
                 <Inline justify="between" align="flex-start">
-                  <Inline gap="medium" align="center">
-                    <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--ink-cobalt-80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: 'var(--ink-font-size-sm)' }}>{agreement.partyLogo || agreement.party.substring(0, 2).toUpperCase()}</div>
+                  <Inline gap="medium" align="center" style={{ flex: 1 }}>
                     <div>
                       <Inline gap="small" align="center">
                         <Text size="sm" weight="semibold">{agreement.party}</Text>
