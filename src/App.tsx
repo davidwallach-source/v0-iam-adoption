@@ -693,7 +693,7 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
   tasks: DealTask[];
   documents: DealDocument[];
   supplementalDocs: DealDocument[];
-  attentionItems: { id: string; item: string; description: string; riskLevel: 'High' | 'Medium' }[];
+  attentionItems: { id: string; item: string; description: string; riskLevel: 'High' | 'Medium'; alertMessage?: string }[];
   activity: { id: string; icon: IconName; user: string; action: string; time: string; isAI?: boolean }[];
 }> = {
   // ═══ COMPLEX: Globex Enterprise Platform (id: 1) ═══
@@ -720,7 +720,7 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '7', name: 'Insurance Certificate (COI)', owner: 'Globex Industries', ownerInitials: 'GI', dateModified: '4/12/2026' },
     ],
     attentionItems: [
-      { id: '1', item: 'DPA Comments Outstanding', description: '8 comments need resolution before signing', riskLevel: 'High' },
+      { id: '1', item: 'DPA Comments Outstanding', description: '8 comments need resolution before signing', riskLevel: 'High', alertMessage: 'Resolve DPA Comments is due today. Would you like to send Laura Chen a reminder?' },
       { id: '2', item: 'Liability Cap Negotiation', description: 'Globex requesting 3x annual contract value', riskLevel: 'High' },
       { id: '3', item: 'Vendor Profile Incomplete', description: 'Insurance documentation missing', riskLevel: 'Medium' },
     ],
@@ -753,7 +753,7 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '6', name: 'ISO 9001 Certification', owner: 'Apex Manufacturing', ownerInitials: 'AM', dateModified: '1/15/2026' },
     ],
     attentionItems: [
-      { id: '1', item: 'Budget Approval Pending', description: 'Finance review required for $1.6M commitment', riskLevel: 'High' },
+      { id: '1', item: 'Budget Approval Pending', description: 'Finance review required for $1.6M commitment', riskLevel: 'High', alertMessage: 'Finance Budget Approval is due tomorrow. Would you like to send Marcus Webb a reminder?' },
       { id: '2', item: 'Supplier Certifications', description: 'ISO 9001 certification expires in 60 days', riskLevel: 'Medium' },
     ],
     activity: [
@@ -2279,10 +2279,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 <>
                   <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
                   
-                  {/* Alert banner - show for high priority items */}
-                  {currentAttentionItems.some(item => item.riskLevel === 'High') && (
+                  {/* Alert banner - only show when an item has an explicit alertMessage */}
+                  {currentAttentionItems.some(item => item.alertMessage) && (
                     <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-                      {currentAttentionItems.find(item => item.riskLevel === 'High')?.item} requires attention. Would you like to take action?
+                      {currentAttentionItems.find(item => item.alertMessage)?.alertMessage}
                     </Alert>
                   )}
 
@@ -2363,10 +2363,12 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
 
         {activeTab === 'tasks' && (
           <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
-            {/* Alert banner */}
-            <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-300)' }}>
-              Finance Approval is due tomorrow. Would you like to send Frank Finance a reminder?
-            </Alert>
+            {/* Alert banner - only show when a task is due soon */}
+            {currentTasks.some(task => task.isDueSoon) && (
+              <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-300)' }}>
+                {currentTasks.find(task => task.isDueSoon)?.title} is due soon. Would you like to send {currentTasks.find(task => task.isDueSoon)?.assignee} a reminder?
+              </Alert>
+            )}
 
             <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
 
