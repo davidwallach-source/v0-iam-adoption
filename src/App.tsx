@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ════════════════════════��══════════════
+/* ═══════════════════════�����══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2456,20 +2456,34 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   } : null;
   
   // Generate Purchase Agreement workspace data for new purchase agreements
+  const todayFormatted = new Date().toLocaleDateString('en-US');
   const purchaseWorkspaceData = isPurchaseDraft ? {
     tasks: [
-      { id: '1', title: 'Draft Purchase Agreement', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
-      { id: '2', title: 'Internal Review', type: 'Review', team: 'Legal', assignee: 'Legal Team', assigneeInitials: 'LT', status: 'Not started', dueDate: '—' },
-      { id: '3', title: 'Send to Vendor', type: 'Sign', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
+      { id: '1', title: 'Complete Purchase Request Form', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
+      { id: '2', title: 'Draft Services Agreement', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
+      { id: '3', title: 'Prepare Statement of Work', type: 'Form', team: 'Sender', assignee: 'Carlton Banks', assigneeInitials: 'CB', status: 'Not started', dueDate: '—' },
+      { id: '4', title: 'Legal Review', type: 'Review', team: 'Legal', assignee: 'Legal Team', assigneeInitials: 'LT', status: 'Not started', dueDate: '—' },
+      { id: '5', title: 'Finance Approval', type: 'Approval', team: 'Finance', assignee: 'Finance Team', assigneeInitials: 'FT', status: 'Not started', dueDate: '—' },
+      { id: '6', title: 'Collect Vendor Insurance Certificate', type: 'Request', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
+      { id: '7', title: 'Send for Vendor Signature', type: 'Sign', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
+      { id: '8', title: 'Execute Agreement', type: 'Sign', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
     ],
     documents: [
-      { id: '1', name: 'Purchase Agreement', status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: new Date().toLocaleDateString('en-US') },
+      { id: '1', name: 'Purchase Request Form.docx', status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
+      { id: '2', name: `${agreement.party} - Services Agreement.docx`, status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
+      { id: '3', name: `${agreement.party} - NDA.docx`, status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
+      { id: '4', name: 'Statement of Work.docx', status: 'Draft', owner: 'Carlton Banks', ownerInitials: 'CB', dateModified: todayFormatted },
+      { id: '5', name: 'Certificate of Insurance.pdf', status: 'Pending', owner: agreement.party, ownerInitials: agreement.partyLogo, dateModified: '—' },
     ],
-    supplementalDocs: [],
+    supplementalDocs: [
+      { id: '6', name: 'Vendor Onboarding Checklist', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
+      { id: '7', name: 'Standard Terms & Conditions', owner: 'Legal Team', ownerInitials: 'LT', dateModified: todayFormatted },
+    ],
     attentionItems: [], // No attention items for a brand new agreement
     activity: [
       { id: '1', icon: 'edit' as const, user: 'You', action: 'Created purchase agreement', time: 'Just now' },
       { id: '2', icon: 'users' as const, user: 'You', action: 'Added Carlton Banks as collaborator', time: 'Just now' },
+      { id: '3', icon: 'document' as const, user: 'System', action: 'Generated document package from template', time: 'Just now' },
     ],
   } : null;
   
