@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������══════════════
+/* ═══════════════════════�����������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2629,10 +2629,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                           <img src="/icons/feature-gate.svg" alt="history" style={{ width: 14, height: 14 }} />
                           View History
                         </button>
-                      </Inline>
-                      <Inline gap="small" align="center">
-                        <StatusLight kind={agreement.statusKind === 'success' ? 'success' : 'info'} />
-                        <Text size="xs" color="secondary">OPP-{agreement.id.padStart(4, '0')}</Text>
                       </Inline>
                     </div>
                   </Inline>
