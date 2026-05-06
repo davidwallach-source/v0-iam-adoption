@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����══════════════
+/* ═══════════════════════�������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2603,7 +2603,33 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                     <div>
                       <Inline gap="small" align="center">
                         <Text size="sm" weight="semibold">{agreement.party}</Text>
-                        <Icon name="chevron-down" size={16} />
+                        <button
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            padding: '6px 12px',
+                            background: 'var(--ink-bg-color-secondary)',
+                            border: '1px solid var(--ink-border-subtle)',
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: 'var(--ink-text-secondary)',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background = 'var(--ink-neutral-fade-5)';
+                            e.currentTarget.style.borderColor = 'var(--ink-border-default)';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background = 'var(--ink-bg-color-secondary)';
+                            e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
+                          }}
+                        >
+                          <img src="/icons/feature-gate.svg" alt="history" style={{ width: 14, height: 14 }} />
+                          View History
+                        </button>
                       </Inline>
                       <Inline gap="small" align="center">
                         <StatusLight kind={agreement.statusKind === 'success' ? 'success' : 'info'} />
