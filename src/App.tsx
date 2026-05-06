@@ -615,7 +615,7 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
             onClick={onClose}
           >Start New</span>
           <Icon name="chevron-right" size={14} color="var(--ink-text-secondary)" />
-          <span style={{ color: '#130032', fontWeight: 500 }}>Purchase Request</span>
+          <span style={{ color: '#130032', fontWeight: 500 }}>Purchase Agreement</span>
         </div>
         <button
           onClick={onClose}
@@ -630,7 +630,7 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', padding: '48px 24px' }}>
         <div style={{ width: '100%', maxWidth: 600 }}>
           {/* Title */}
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: '#130032', margin: '0 0 8px 0' }}>Purchase Request</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: '#130032', margin: '0 0 8px 0' }}>Purchase Agreement</h1>
           <p style={{ fontSize: 14, color: 'var(--ink-text-secondary)', margin: '0 0 40px 0' }}>Initiate a procurement workflow</p>
 
           {/* Title field */}
@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════════════════════
+/* ════════════════════════��══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1429,7 +1429,7 @@ const navigatorColumns: any[] = [
   },
 ];
 
-/* ══════════════════════════════════�������������������════
+/* ══════════════════════════════════���������������������════
    Parties Data (matches real DocuSign)
    ═══════════════════════════════════════ */
 
@@ -2433,8 +2433,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const fadeIn = useFadeIn(0, 250);
   
-  // Check if this is the NDA draft
+  // Check if this is a draft agreement
   const isNDADraft = agreement.id === 'nda-draft';
+  const isPurchaseDraft = agreement.id.startsWith('purchase-');
   
   // Generate NDA-specific workspace data if this is a draft NDA
   const ndaWorkspaceData = isNDADraft ? {
@@ -2454,8 +2455,26 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
     ],
   } : null;
   
+  // Generate Purchase Agreement workspace data for new purchase agreements
+  const purchaseWorkspaceData = isPurchaseDraft ? {
+    tasks: [
+      { id: '1', title: 'Draft Purchase Agreement', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
+      { id: '2', title: 'Internal Review', type: 'Review', team: 'Legal', assignee: 'Legal Team', assigneeInitials: 'LT', status: 'Not started', dueDate: '—' },
+      { id: '3', title: 'Send to Vendor', type: 'Sign', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
+    ],
+    documents: [
+      { id: '1', name: 'Purchase Agreement', status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: new Date().toLocaleDateString('en-US') },
+    ],
+    supplementalDocs: [],
+    attentionItems: [], // No attention items for a brand new agreement
+    activity: [
+      { id: '1', icon: 'edit' as const, user: 'You', action: 'Created purchase agreement', time: 'Just now' },
+      { id: '2', icon: 'users' as const, user: 'You', action: 'Added Carlton Banks as collaborator', time: 'Just now' },
+    ],
+  } : null;
+  
   // Get per-agreement data or fall back to first agreement's data
-  const workspaceData = ndaWorkspaceData || AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
+  const workspaceData = ndaWorkspaceData || purchaseWorkspaceData || AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
   const currentTasks = workspaceData.tasks;
   const currentDocuments = workspaceData.documents;
   const currentSupplementalDocs = workspaceData.supplementalDocs;
