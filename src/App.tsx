@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������══════════════
+/* ═══════════════════════���������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2606,12 +2606,8 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
         </svg>
       )}
       {crown && (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8, flexShrink: 0 }} aria-label="Feature gated">
-          <path d="M1.5 12.5h13v1.5h-13v-1.5z" fill="#8B6BE8"/>
-          <path d="M1.5 11.5l2-5 2.5 2.5L8 5l2 4 2.5-2.5 2 5H1.5z" fill="#8B6BE8"/>
-          <circle cx="8" cy="4.5" r="1" fill="#8B6BE8"/>
-          <circle cx="2" cy="7" r="1" fill="#8B6BE8"/>
-          <circle cx="14" cy="7" r="1" fill="#8B6BE8"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 8, flexShrink: 0 }} aria-label="Feature gated" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.29 11.36L17.51 10.07L16.46 16H7.54L6.49 10.07L9.71 11.36L12 7.76M12 4L9 9L4 7L6 18H18L20 7L15 9L12 4Z" fill="#4C00FB"/>
         </svg>
       )}
     </div>
