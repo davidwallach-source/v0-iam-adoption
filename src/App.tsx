@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������══════════════
+/* ═══════════════════════���������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2523,10 +2523,8 @@ function AddMenu() {
               }}>
                 <MenuRow
                   icon={
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M2 4h12M2 8h8M2 12h5" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round"/>
-                      <circle cx="13" cy="11" r="2.5" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
-                      <path d="M13 9.5V11l1 1" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round"/>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
                   label="Upload request"
@@ -2534,10 +2532,8 @@ function AddMenu() {
                 />
                 <MenuRow
                   icon={
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <circle cx="8" cy="5" r="2.5" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
-                      <path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
-                      <path d="M11.5 9.5l1 1 2-2" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6V18H4V6H20ZM21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM13 15C13 13.35 11.65 12 10 12H8C6.35 12 5 13.35 5 15V16H7V15C7 14.45 7.45 14 8 14H10C10.55 14 11 14.45 11 15V16H13V15ZM11 9C11 7.9 10.1 7 9 7C7.9 7 7 7.9 7 9C7 10.1 7.9 11 9 11C10.1 11 11 10.1 11 9ZM19 8H14V10H19V8ZM19 12H14V14H19V12Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
                   label="Identity verification"
@@ -2546,14 +2542,11 @@ function AddMenu() {
                 <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
                 <MenuRow
                   icon={
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="1" y="3" width="5" height="4" rx="1" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
-                      <rect x="10" y="9" width="5" height="4" rx="1" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
-                      <path d="M6 5h2.5a1.5 1.5 0 0 1 1.5 1.5v3" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
-                      <path d="M9 8.5l1 1-1 1" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
-                  label="Task Chain: Fill form → Payment"
+                  label="Fill form → Payment"
                   onClick={() => { setOpen(false); setTasksOpen(false); }}
                 />
               </div>
