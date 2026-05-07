@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������══════════════
+/* ═══════════════════════�����������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2431,6 +2431,16 @@ function AddMenu() {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const tasksCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openTasks = () => {
+    if (tasksCloseTimer.current) clearTimeout(tasksCloseTimer.current);
+    setTasksOpen(true);
+  };
+
+  const closeTasks = () => {
+    tasksCloseTimer.current = setTimeout(() => setTasksOpen(false), 150);
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -2443,21 +2453,6 @@ function AddMenu() {
     if (open) document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
-
-  const menuItemStyle = (hovered: boolean): React.CSSProperties => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '9px 14px',
-    fontSize: 14,
-    color: '#130032',
-    cursor: 'pointer',
-    background: hovered ? 'var(--ink-neutral-fade-5)' : 'transparent',
-    transition: 'background 0.15s',
-    userSelect: 'none',
-    borderRadius: 6,
-    whiteSpace: 'nowrap' as const,
-  });
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -2494,8 +2489,8 @@ function AddMenu() {
           {/* Tasks — with nested submenu */}
           <div
             style={{ position: 'relative' }}
-            onMouseEnter={() => setTasksOpen(true)}
-            onMouseLeave={() => setTasksOpen(false)}
+            onMouseEnter={openTasks}
+            onMouseLeave={closeTasks}
           >
             <MenuRow
               icon={
@@ -2509,10 +2504,13 @@ function AddMenu() {
             />
 
             {tasksOpen && (
-              <div style={{
+              <div
+                onMouseEnter={openTasks}
+                onMouseLeave={closeTasks}
+                style={{
                 position: 'absolute',
                 top: 0,
-                right: 'calc(100% + 6px)',
+                right: 'calc(100% + 2px)',
                 background: 'white',
                 border: '1px solid var(--ink-border-subtle)',
                 borderRadius: 8,
@@ -2521,6 +2519,15 @@ function AddMenu() {
                 minWidth: 220,
                 padding: 4,
               }}>
+                {/* Invisible bridge to cover gap between panels */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '100%',
+                  width: 10,
+                  height: '100%',
+                  background: 'transparent',
+                }} />
                 <MenuRow
                   icon={
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
