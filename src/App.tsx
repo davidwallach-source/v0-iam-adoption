@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������══════════════
+/* ═══════════════════════�������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2546,7 +2546,7 @@ function AddMenu() {
                       <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
-                  label="Know Your Customer Workflow"
+                  label="Wire Transfer Request"
                   onClick={() => { setOpen(false); setTasksOpen(false); }}
                 />
                 <MenuRow
@@ -2607,7 +2607,11 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
       )}
       {crown && (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8, flexShrink: 0 }} aria-label="Feature gated">
-          <path d="M2 12h12v1.5H2V12ZM2 10.5l2.5-6 3.5 3.5 2-4 2 4 3.5-3.5 2.5 6H2Z" fill="#8B6BE8"/>
+          <path d="M1.5 12.5h13v1.5h-13v-1.5z" fill="#8B6BE8"/>
+          <path d="M1.5 11.5l2-5 2.5 2.5L8 5l2 4 2.5-2.5 2 5H1.5z" fill="#8B6BE8"/>
+          <circle cx="8" cy="4.5" r="1" fill="#8B6BE8"/>
+          <circle cx="2" cy="7" r="1" fill="#8B6BE8"/>
+          <circle cx="14" cy="7" r="1" fill="#8B6BE8"/>
         </svg>
       )}
     </div>
