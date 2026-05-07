@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������══════════════
+/* ═══════════════════════�����������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2546,7 +2546,17 @@ function AddMenu() {
                       <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
-                  label="Fill form → Payment"
+                  label="Know Your Customer Workflow"
+                  onClick={() => { setOpen(false); setTasksOpen(false); }}
+                />
+                <MenuRow
+                  icon={
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                    </svg>
+                  }
+                  label="Custom Workflow"
+                  crown
                   onClick={() => { setOpen(false); setTasksOpen(false); }}
                 />
               </div>
@@ -2558,11 +2568,12 @@ function AddMenu() {
   );
 }
 
-function MenuRow({ icon, label, onClick, chevron }: {
+function MenuRow({ icon, label, onClick, chevron, crown }: {
   icon: React.ReactNode;
   label: string;
   onClick?: () => void;
   chevron?: boolean;
+  crown?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -2592,6 +2603,11 @@ function MenuRow({ icon, label, onClick, chevron }: {
       {chevron && (
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginLeft: 8, flexShrink: 0 }}>
           <path d="M5 3l4 4-4 4" stroke="#9CA3AF" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {crown && (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8, flexShrink: 0 }} aria-label="Feature gated">
+          <path d="M2 12h12v1.5H2V12ZM2 10.5l2.5-6 3.5 3.5 2-4 2 4 3.5-3.5 2.5 6H2Z" fill="#8B6BE8"/>
         </svg>
       )}
     </div>
