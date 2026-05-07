@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������══════════════
+/* ═══════════════════════�������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2427,6 +2427,184 @@ interface WorkspaceViewProps {
   savedNDAData?: NDAFormData | null;
 }
 
+function AddMenu() {
+  const [open, setOpen] = useState(false);
+  const [tasksOpen, setTasksOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setTasksOpen(false);
+      }
+    }
+    if (open) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  const menuItemStyle = (hovered: boolean): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '9px 14px',
+    fontSize: 14,
+    color: '#130032',
+    cursor: 'pointer',
+    background: hovered ? 'var(--ink-neutral-fade-5)' : 'transparent',
+    transition: 'background 0.15s',
+    userSelect: 'none',
+    borderRadius: 6,
+    whiteSpace: 'nowrap' as const,
+  });
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <Button kind="primary" onClick={() => { setOpen(o => !o); setTasksOpen(false); }}>Add</Button>
+
+      {open && (
+        <div style={{
+          position: 'absolute',
+          top: 'calc(100% + 6px)',
+          right: 0,
+          background: 'white',
+          border: '1px solid var(--ink-border-subtle)',
+          borderRadius: 8,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+          zIndex: 200,
+          minWidth: 180,
+          padding: 4,
+        }}>
+          {/* Document */}
+          <MenuRow
+            icon={
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 1z" stroke="#6B7280" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
+                <path d="M9 1v5h5" stroke="#6B7280" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
+              </svg>
+            }
+            label="Document"
+            onClick={() => { setOpen(false); setTasksOpen(false); }}
+          />
+
+          {/* Divider */}
+          <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+
+          {/* Tasks — with nested submenu */}
+          <div
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setTasksOpen(true)}
+            onMouseLeave={() => setTasksOpen(false)}
+          >
+            <MenuRow
+              icon={
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
+                  <path d="M5 8l2 2 4-4" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+              label="Tasks"
+              chevron
+            />
+
+            {tasksOpen && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                right: 'calc(100% + 6px)',
+                background: 'white',
+                border: '1px solid var(--ink-border-subtle)',
+                borderRadius: 8,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                zIndex: 201,
+                minWidth: 220,
+                padding: 4,
+              }}>
+                <MenuRow
+                  icon={
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M2 4h12M2 8h8M2 12h5" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round"/>
+                      <circle cx="13" cy="11" r="2.5" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
+                      <path d="M13 9.5V11l1 1" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round"/>
+                    </svg>
+                  }
+                  label="Upload request"
+                  onClick={() => { setOpen(false); setTasksOpen(false); }}
+                />
+                <MenuRow
+                  icon={
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <circle cx="8" cy="5" r="2.5" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
+                      <path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                      <path d="M11.5 9.5l1 1 2-2" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  }
+                  label="Identity verification"
+                  onClick={() => { setOpen(false); setTasksOpen(false); }}
+                />
+                <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+                <MenuRow
+                  icon={
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="1" y="3" width="5" height="4" rx="1" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
+                      <rect x="10" y="9" width="5" height="4" rx="1" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
+                      <path d="M6 5h2.5a1.5 1.5 0 0 1 1.5 1.5v3" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                      <path d="M9 8.5l1 1-1 1" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  }
+                  label="Task Chain: Fill form → Payment"
+                  onClick={() => { setOpen(false); setTasksOpen(false); }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MenuRow({ icon, label, onClick, chevron }: {
+  icon: React.ReactNode;
+  label: string;
+  onClick?: () => void;
+  chevron?: boolean;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 10,
+        padding: '9px 14px',
+        fontSize: 14,
+        color: '#130032',
+        cursor: 'pointer',
+        background: hovered ? 'var(--ink-neutral-fade-5)' : 'transparent',
+        transition: 'background 0.15s',
+        borderRadius: 6,
+        whiteSpace: 'nowrap',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {icon}
+        <span>{label}</span>
+      </div>
+      {chevron && (
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginLeft: 8, flexShrink: 0 }}>
+          <path d="M5 3l4 4-4 4" stroke="#9CA3AF" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+    </div>
+  );
+}
+
 function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
@@ -2563,7 +2741,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
-            <Button kind="primary">Add</Button>
+            <AddMenu />
           </Inline>
         </div>
 
