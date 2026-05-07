@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������══════════════
+/* ═══════════════════════�������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2622,10 +2622,8 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
         </svg>
       )}
       {crown && (
-        <svg width="16" height="16" viewBox="0 0 32 32" fill="none" style={{ marginLeft: 8, flexShrink: 0 }} aria-label="Feature gated" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="16" cy="16" r="16" fill="#4200CA"/>
-          <circle cx="16" cy="16" r="15.5" stroke="#130032" strokeOpacity="0.15"/>
-          <path d="M18.29 15.36L21.51 14.07L20.46 20H11.54L10.49 14.07L13.71 15.36L16 11.76M16 8L13 13L8 11L10 22H22L24 11L19 13L16 8Z" fill="white"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 8, flexShrink: 0 }} aria-label="Feature gated" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.29 11.36L17.51 10.07L16.46 16H7.54L6.49 10.07L9.71 11.36L12 7.76M12 4L9 9L4 7L6 18H18L20 7L15 9L12 4Z" fill="#4C00FB"/>
         </svg>
       )}
     </div>
@@ -2831,11 +2829,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                             e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
                           }}
                         >
-                          <svg width="14" height="14" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="16" cy="16" r="16" fill="#4200CA"/>
-                            <circle cx="16" cy="16" r="15.5" stroke="#130032" strokeOpacity="0.15"/>
-                            <path d="M18.29 15.36L21.51 14.07L20.46 20H11.54L10.49 14.07L13.71 15.36L16 11.76M16 8L13 13L8 11L10 22H22L24 11L19 13L16 8Z" fill="white"/>
-                          </svg>
+                          <img src="/icons/feature-gate.svg" alt="history" style={{ width: 14, height: 14 }} />
                           View History
                         </button>
                       </Inline>
