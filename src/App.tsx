@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������══════════════
+/* ═══════════════════════���������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2571,7 +2571,7 @@ function AddMenu() {
                       <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
-                  label="Custome Task"
+                  label="Custom Task"
                   crown
                   onClick={() => { setOpen(false); setTasksOpen(false); }}
                 />
