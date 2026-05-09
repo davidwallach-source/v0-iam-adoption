@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2833,10 +2833,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                     <div>
                       <Text size="xs" color="secondary">Party</Text>
                       <Text size="sm" weight="semibold">{agreement.party}</Text>
-                      <Inline gap="small" align="center" style={{ marginTop: 6 }}>
+                      <Button kind="secondary" size="small" style={{ marginTop: 6 }}>
                         <img src="/icons/feature-gate.svg" alt="" style={{ width: 16, height: 16 }} />
-                        <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 12, color: 'var(--ink-cobalt-80)', textDecoration: 'none' }}>View History</a>
-                      </Inline>
+                        View History
+                      </Button>
                     </div>
                     <div>
                       <Text size="xs" color="secondary">Deal Value</Text>
