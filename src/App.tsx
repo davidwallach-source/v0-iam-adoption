@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2632,6 +2632,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
 
 function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
+  const [sidebarTab, setSidebarTab] = useState<'activity' | 'messages'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const [partyExpanded, setPartyExpanded] = useState(false);
@@ -3010,30 +3011,77 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             </div>
 
             {/* Activity sidebar */}
-            <div style={{ padding: 'var(--ink-spacing-300)', borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)' }}>
-              <Inline justify="between" align="center" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-                <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>ACTIVITY</Text>
-                <IconButton icon="filter" variant="tertiary" size="small" aria-label="Filter" />
-              </Inline>
-              <Stack gap="medium">
-                {currentActivity.map((item) => (
-                  <Inline key={item.id} gap="medium" align="flex-start">
-                    <div style={{
-                      width: 32, height: 32, borderRadius: '50%',
-                      background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <Text size="sm">
-                        <strong>{item.user}</strong> {item.action}
-                      </Text>
-                      <Text size="xs" color="secondary">{item.time}</Text>
-                    </div>
-                  </Inline>
+            <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
+              {/* Sidebar tabs */}
+              <div style={{ display: 'flex', borderBottom: '1px solid var(--ink-border-subtle)', padding: '0 var(--ink-spacing-300)' }}>
+                {(['activity', 'messages'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setSidebarTab(tab)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '14px 4px',
+                      marginRight: 24,
+                      fontSize: 'var(--ink-font-size-sm)',
+                      fontWeight: sidebarTab === tab ? 600 : 400,
+                      color: sidebarTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
+                      borderBottom: sidebarTab === tab ? '2px solid var(--ink-text-default)' : '2px solid transparent',
+                      marginBottom: -1,
+                      transition: 'color 0.15s',
+                    }}
+                  >
+                    {tab === 'activity' ? 'Activity' : 'Messages'}
+                  </button>
                 ))}
-              </Stack>
+              </div>
+
+              {/* Activity tab content */}
+              {sidebarTab === 'activity' && (
+                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1 }}>
+                  <Stack gap="medium">
+                    {currentActivity.map((item) => (
+                      <Inline key={item.id} gap="medium" align="flex-start">
+                        <div style={{
+                          width: 32, height: 32, borderRadius: '50%',
+                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <Text size="sm">
+                            <strong>{item.user}</strong> {item.action}
+                          </Text>
+                          <Text size="xs" color="secondary">{item.time}</Text>
+                        </div>
+                      </Inline>
+                    ))}
+                  </Stack>
+                </div>
+              )}
+
+              {/* Messages tab content */}
+              {sidebarTab === 'messages' && (
+                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-200)' }}>
+                  {[
+                    { initials: 'LL', name: 'Leona Legal', time: '2h ago', text: 'I\'ve reviewed the DPA — a few clauses need attention before we can move forward.' },
+                    { initials: 'SS', name: 'Shawn Security', time: '4h ago', text: 'Security terms look good on our end. Approved.' },
+                    { initials: 'PP', name: 'Patricia P.', time: '6h ago', text: 'Can we get an updated version of the AI Addendum for review?' },
+                  ].map((msg, i) => (
+                    <div key={i}>
+                      <Inline gap="small" align="center" style={{ marginBottom: 4 }}>
+                        <Avatar initials={msg.initials} size="small" />
+                        <Text size="sm" weight="semibold">{msg.name}</Text>
+                        <Text size="xs" color="secondary">{msg.time}</Text>
+                      </Inline>
+                      <Text size="sm" color="secondary" style={{ paddingLeft: 32 }}>{msg.text}</Text>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
