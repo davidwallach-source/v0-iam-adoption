@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2350,7 +2350,7 @@ const DETAIL_TABS = [
 
 /* ═══════════════════════════════════════
    Deal Workspace View (Draft / In Progress)
-   ═══════════════════════════════════════ */
+   ══════════════════════════════��════════ */
 
 interface DealTask {
   id: string;
@@ -2791,7 +2791,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             alignItems: 'center',
             gap: 12,
             padding: '12px 20px',
-            background: 'var(--ink-purple-10, #F3EEFF)',
+            background: '#E9E6FD',
             margin: '0 var(--ink-spacing-200)',
             borderRadius: 8,
           }}>
@@ -2800,13 +2800,15 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
               <path d="M8 2L9.5 6.5L14 8L9.5 9.5L8 14L6.5 9.5L2 8L6.5 6.5L8 2Z" fill="#7C3AED"/>
             </svg>
             {/* Alert text */}
-            <Text size="sm" style={{ flex: 1 }}>
+            <Text size="sm">
               {currentAttentionItems.find(item => item.alertMessage)?.alertMessage || `${currentAttentionItems[0]?.item} needs your attention.`}
             </Text>
-            {/* CTA button */}
+            {/* CTA button - right next to text */}
             <Button kind="secondary" size="small">Draft reminder</Button>
+            {/* Spacer to push right side content */}
+            <div style={{ flex: 1 }} />
             {/* Right side: counter, divider, View All, close */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Text size="sm" color="secondary">1 of {currentAttentionItems.length} alerts</Text>
               <span style={{ width: 1, height: 16, background: 'var(--ink-border-subtle)' }} />
               <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 14, color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>View All</a>
@@ -2955,6 +2957,47 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 </table>
               </div>
 
+              {/* Supplemental documents - only show if there are any */}
+              {currentSupplementalDocs.length > 0 && (
+                <>
+                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)', marginTop: 'var(--ink-spacing-300)' }}>Supplemental Documents</div>
+
+                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}></th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Provided By</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Added</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentSupplementalDocs.map((doc) => (
+                          <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}></td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <Inline gap="small" align="center">
+                                <Avatar initials={doc.ownerInitials} size="small" />
+                                <Text size="sm">{doc.owner}</Text>
+                              </Inline>
+                            </td>
+                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <Inline gap="small" align="center">
+                                <Button kind="secondary" size="small">View</Button>
+                                <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                              </Inline>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
 
             </div>
 
