@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1425,7 +1425,7 @@ const navigatorColumns: any[] = [
     sortable: true,
     width: '140px',
     alignment: 'right',
-    cell: (row: NavigatorAgreement) => row.expirationDate || '—',
+    cell: (row: NavigatorAgreement) => row.expirationDate || '���',
   },
 ];
 
@@ -2634,7 +2634,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
-  const [partyExpanded, setPartyExpanded] = useState(true);
+  const [partyExpanded, setPartyExpanded] = useState(false);
+  const [alertDismissed, setAlertDismissed] = useState(false);
   const fadeIn = useFadeIn(0, 250);
   
   // Check if this is a draft agreement
@@ -2784,8 +2785,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           </Inline>
         </div>
 
-        {/* Alert banner - only show when there are attention items */}
-        {currentAttentionItems.length > 0 && (
+        {/* Alert banner - only show when there are attention items and not dismissed */}
+        {currentAttentionItems.length > 0 && !alertDismissed && (
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -2813,6 +2814,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
               <span style={{ width: 1, height: 16, background: 'var(--ink-border-subtle)' }} />
               <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 14, color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>View All</a>
               <button
+                onClick={() => setAlertDismissed(true)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-label="Dismiss alert"
               >
