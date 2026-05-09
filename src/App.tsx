@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -3022,14 +3022,14 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      padding: '14px 4px',
+                      padding: '14px 4px 12px 4px',
                       marginRight: 24,
                       fontSize: 'var(--ink-font-size-sm)',
                       fontWeight: sidebarTab === tab ? 600 : 400,
                       color: sidebarTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
-                      borderBottom: sidebarTab === tab ? '2px solid var(--ink-text-default)' : '2px solid transparent',
-                      marginBottom: -1,
+                      borderBottom: sidebarTab === tab ? '2px solid var(--ink-text-default)' : 'none',
                       transition: 'color 0.15s',
+                      position: 'relative',
                     }}
                   >
                     {tab === 'activity' ? 'Activity' : 'Messages'}
