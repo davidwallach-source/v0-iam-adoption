@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������══════════════
+/* ═══════════════════════�����������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2789,157 +2789,140 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', background: 'var(--ink-bg-color-secondary)' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
-            {/* Main content */}
-            <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
-              {/* Deal info card */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 280px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
+
+            {/* LEFT — Activity */}
+            <div style={{ padding: 'var(--ink-spacing-300)', borderRight: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)' }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                <Text size="sm" weight="semibold">Activity</Text>
+                <Button kind="secondary" size="small">View all</Button>
+              </Inline>
               <div style={{
                 background: 'var(--ink-white-100)',
                 border: '1px solid var(--ink-neutral-fade-10)',
                 borderRadius: 'var(--ink-radius-size-s)',
-                padding: '24px 16px',
-                marginBottom: 'var(--ink-spacing-300)',
+                padding: '20px',
               }}>
-                <Inline justify="between" align="flex-start">
-                  <Inline gap="medium" align="center" style={{ flex: 1 }}>
-                    <div>
-                      <Inline gap="small" align="center">
-                        <Text size="sm" weight="semibold">{agreement.party}</Text>
-                        <button
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            padding: '6px 12px',
-                            background: 'var(--ink-bg-color-secondary)',
-                            border: '1px solid var(--ink-border-subtle)',
-                            borderRadius: 6,
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            fontWeight: 500,
-                            color: 'var(--ink-text-secondary)',
-                            transition: 'all 0.2s',
-                          }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.background = 'var(--ink-neutral-fade-5)';
-                            e.currentTarget.style.borderColor = 'var(--ink-border-default)';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.background = 'var(--ink-bg-color-secondary)';
-                            e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
-                          }}
-                        >
-                          <img src="/icons/feature-gate.svg" alt="history" style={{ width: 20, height: 20 }} />
-                          View History
-                        </button>
-                      </Inline>
-                    </div>
-                  </Inline>
-                </Inline>
-                <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
-                  <div>
-                    <Text size="xs" color="secondary">Deal Value</Text>
-                    <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
-                  </div>
-                  <div>
-                    <Text size="xs" color="secondary">Agreement Type</Text>
-                    <Text size="sm">{agreement.agreementType || '—'}</Text>
-                  </div>
-                  <div>
-                    <Text size="xs" color="secondary">Term Length</Text>
-                    <Text size="sm">{agreement.termLength || '—'}</Text>
-                  </div>
-                  <div>
-                    <Text size="xs" color="secondary">Anticipated Close</Text>
-                    <Text size="sm">{agreement.closeDate || '—'}</Text>
-                  </div>
-                </Grid>
+                <Stack gap="medium">
+                  {currentActivity.map((item) => (
+                    <Inline key={item.id} gap="medium" align="flex-start">
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <Text size="sm">
+                          <strong>{item.user}</strong> {item.action}
+                        </Text>
+                        <Text size="xs" color="secondary">{item.time}</Text>
+                      </div>
+                    </Inline>
+                  ))}
+                </Stack>
               </div>
-
-              {/* Needs Attention - only show if there are items */}
-              {currentAttentionItems.length > 0 && (
-                <>
-                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
-                  
-                  {/* Alert banner - only show when an item has an explicit alertMessage */}
-                  {currentAttentionItems.some(item => item.alertMessage) && (
-                    <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-                      {currentAttentionItems.find(item => item.alertMessage)?.alertMessage}
-                    </Alert>
-                  )}
-
-                  {/* Attention items table */}
-                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentAttentionItems.map((item) => (
-                          <tr key={item.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{item.item}</td>
-                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{item.description}</td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
-                            </td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <Button kind={item.riskLevel === 'High' ? 'secondary' : 'primary'} size="small">
-                                {item.riskLevel === 'High' ? 'Remind' : 'View'}
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-
-              {/* No attention items message for simple agreements */}
-              {currentAttentionItems.length === 0 && (
-                <div style={{ 
-                  padding: 'var(--ink-spacing-300)', 
-                  background: 'var(--ink-bg-color-secondary)', 
-                  borderRadius: 8,
-                  textAlign: 'center'
-                }}>
-                  <Icon name="status-check" size={24} color="var(--ink-green-80)" style={{ marginBottom: 8 }} />
-                  <Text size="sm" color="secondary">No items need attention right now</Text>
-                </div>
-              )}
             </div>
 
-            {/* Activity sidebar */}
-            <div style={{ padding: 'var(--ink-spacing-300)', borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)' }}>
+            {/* CENTER — Documents */}
+            <div style={{ padding: 'var(--ink-spacing-300)', borderRight: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)' }}>
               <Inline justify="between" align="center" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-                <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>ACTIVITY</Text>
-                <IconButton icon="filter" variant="tertiary" size="small" aria-label="Filter" />
+                <Text size="sm" weight="semibold">Documents</Text>
+                <Button kind="secondary" size="small" onClick={() => setActiveTab('documents')}>View all</Button>
               </Inline>
+              <div style={{
+                background: 'var(--ink-white-100)',
+                border: '1px solid var(--ink-neutral-fade-10)',
+                borderRadius: 'var(--ink-radius-size-s)',
+                overflow: 'hidden',
+              }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                      <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Title</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'right', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Last modified</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentDocuments.slice(0, 5).map((doc) => (
+                      <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                        <td style={{ padding: '12px 16px' }}>
+                          <Inline gap="small" align="center">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+                              <rect x="3" y="1" width="14" height="18" rx="2" fill="#E8F0FE" stroke="#4285F4" strokeWidth="1.2"/>
+                              <path d="M6 7h8M6 10h8M6 13h5" stroke="#4285F4" strokeWidth="1.2" strokeLinecap="round"/>
+                            </svg>
+                            <Text size="sm">{doc.name}</Text>
+                          </Inline>
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                          <Text size="sm" color="secondary">{doc.dateModified}</Text>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* RIGHT — Party details */}
+            <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
+              {/* Party name + View History */}
+              <Inline justify="between" align="flex-start" style={{ marginBottom: 4 }}>
+                <Text size="sm" weight="semibold">{agreement.party}</Text>
+              </Inline>
+              <button
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '5px 10px',
+                  background: 'var(--ink-bg-color-secondary)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: 'var(--ink-text-secondary)',
+                  marginBottom: 'var(--ink-spacing-300)',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'var(--ink-neutral-fade-5)';
+                  e.currentTarget.style.borderColor = 'var(--ink-border-default)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'var(--ink-bg-color-secondary)';
+                  e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
+                }}
+              >
+                <img src="/icons/feature-gate.svg" alt="history" style={{ width: 20, height: 20 }} />
+                View History
+              </button>
+
+              {/* Metadata stack */}
               <Stack gap="medium">
-                {currentActivity.map((item) => (
-                  <Inline key={item.id} gap="medium" align="flex-start">
-                    <div style={{
-                      width: 32, height: 32, borderRadius: '50%',
-                      background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <Text size="sm">
-                        <strong>{item.user}</strong> {item.action}
-                      </Text>
-                      <Text size="xs" color="secondary">{item.time}</Text>
-                    </div>
-                  </Inline>
-                ))}
+                <div>
+                  <Text size="xs" color="secondary">Deal Value</Text>
+                  <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
+                </div>
+                <div>
+                  <Text size="xs" color="secondary">Agreement type</Text>
+                  <Text size="sm">{agreement.agreementType || '—'}</Text>
+                </div>
+                <div>
+                  <Text size="xs" color="secondary">Term length</Text>
+                  <Text size="sm">{agreement.termLength || '—'}</Text>
+                </div>
+                <div>
+                  <Text size="xs" color="secondary">Anticipated close</Text>
+                  <Text size="sm">{agreement.closeDate || '—'}</Text>
+                </div>
               </Stack>
             </div>
+
           </div>
         )}
 
