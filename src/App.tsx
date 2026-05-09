@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2806,59 +2806,38 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 padding: '16px',
                 marginBottom: 'var(--ink-spacing-300)',
               }}>
-                <Inline justify="between" align="center">
-                  <Inline gap="small" align="center">
-                    <Text size="sm" weight="semibold">{agreement.party}</Text>
-                    <button
-                      onClick={() => setPartyExpanded(prev => !prev)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 4,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 4,
-                        transition: 'background 0.15s',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'var(--ink-neutral-fade-5)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      aria-label={partyExpanded ? 'Collapse party details' : 'Expand party details'}
-                    >
-                      <Icon name={partyExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
-                    </button>
-                  </Inline>
+                <Inline gap="small" align="center">
+                  <Text size="sm" weight="semibold">Summary</Text>
                   <button
+                    onClick={() => setPartyExpanded(prev => !prev)}
                     style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 4,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 6,
-                      padding: '6px 12px',
-                      background: 'var(--ink-bg-color-secondary)',
-                      border: '1px solid var(--ink-border-subtle)',
-                      borderRadius: 6,
-                      cursor: 'pointer',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: 'var(--ink-text-secondary)',
-                      transition: 'all 0.2s',
+                      justifyContent: 'center',
+                      borderRadius: 4,
+                      transition: 'background 0.15s',
                     }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = 'var(--ink-neutral-fade-5)';
-                      e.currentTarget.style.borderColor = 'var(--ink-border-default)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'var(--ink-bg-color-secondary)';
-                      e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
-                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--ink-neutral-fade-5)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    aria-label={partyExpanded ? 'Collapse summary' : 'Expand summary'}
                   >
-                    <img src="/icons/feature-gate.svg" alt="history" style={{ width: 20, height: 20 }} />
-                    View History
+                    <Icon name={partyExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
                   </button>
                 </Inline>
                 {partyExpanded && (
-                  <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
+                  <Grid columns={5} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
+                    <div>
+                      <Text size="xs" color="secondary">Party</Text>
+                      <Text size="sm" weight="semibold">{agreement.party}</Text>
+                      <Inline gap="small" align="center" style={{ marginTop: 6 }}>
+                        <img src="/icons/feature-gate.svg" alt="" style={{ width: 16, height: 16 }} />
+                        <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 12, color: 'var(--ink-cobalt-80)', textDecoration: 'none' }}>View History</a>
+                      </Inline>
+                    </div>
                     <div>
                       <Text size="xs" color="secondary">Deal Value</Text>
                       <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
