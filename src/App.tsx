@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2631,7 +2631,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
 }
 
 function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: WorkspaceViewProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const [partyExpanded, setPartyExpanded] = useState(false);
@@ -2842,7 +2842,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
         <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0, paddingTop: 'var(--ink-spacing-100)' }}>
           <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
           <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-          <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
         </div>
       </div>
 
@@ -3124,38 +3123,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             </div>
           </div>
         )}
-
-        {activeTab === 'documents' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
-            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
-
-            {/* Documents table */}
-            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden', marginBottom: 'var(--ink-spacing-300)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                <thead>
-                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Status</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Owner</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Modified</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentDocuments.map((doc) => {
-                    const isChild = !!doc.parentId;
-                    const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
-                    if (isChild && !isParentExpanded) return null;
-                    
-                    return (
-                      <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
-                          <Inline gap="small" align="center">
-                            {doc.isParent && (
-                              <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-                                <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
-                              </button>
-                            )}
+      </div>
+    </div>
+  );
+}
                             <Text size="sm">{doc.name}</Text>
                             {doc.commentCount && (
                               <AlertBadge value={doc.commentCount} kind="emphasis" />
