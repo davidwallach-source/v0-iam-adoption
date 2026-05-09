@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������══════════════
+/* ═══════════════════════�������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2874,67 +2874,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 )}
               </div>
 
-              {/* Needs Attention - only show if there are items */}
-              {currentAttentionItems.length > 0 && (
-                <>
-                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
-                  
-                  {/* Alert banner - only show when an item has an explicit alertMessage */}
-                  {currentAttentionItems.some(item => item.alertMessage) && (
-                    <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-                      {currentAttentionItems.find(item => item.alertMessage)?.alertMessage}
-                    </Alert>
-                  )}
-
-                  {/* Attention items table */}
-                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentAttentionItems.map((item) => (
-                          <tr key={item.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{item.item}</td>
-                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{item.description}</td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
-                            </td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <Button kind={item.riskLevel === 'High' ? 'secondary' : 'primary'} size="small">
-                                {item.riskLevel === 'High' ? 'Remind' : 'View'}
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-
-              {/* No attention items message for simple agreements */}
-              {currentAttentionItems.length === 0 && (
-                <div style={{ 
-                  padding: 'var(--ink-spacing-300)', 
-                  background: 'var(--ink-bg-color-secondary)', 
-                  borderRadius: 8,
-                  textAlign: 'center',
-                  marginBottom: 'var(--ink-spacing-300)',
-                }}>
-                  <Icon name="status-check" size={24} color="var(--ink-green-80)" style={{ marginBottom: 8 }} />
-                  <Text size="sm" color="secondary">No items need attention right now</Text>
-                </div>
-              )}
-
               {/* Documents table */}
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
-              <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+              <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden', marginBottom: 'var(--ink-spacing-300)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                   <thead>
                     <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
@@ -2992,6 +2934,64 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                   </tbody>
                 </table>
               </div>
+
+              {/* Needs Attention - only show if there are items */}
+              {currentAttentionItems.length > 0 && (
+                <>
+                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Needs Attention</div>
+                  
+                  {/* Alert banner - only show when an item has an explicit alertMessage */}
+                  {currentAttentionItems.some(item => item.alertMessage) && (
+                    <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                      {currentAttentionItems.find(item => item.alertMessage)?.alertMessage}
+                    </Alert>
+                  )}
+
+                  {/* Attention items table */}
+                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Item</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Description</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Risk Level</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentAttentionItems.map((item) => (
+                          <tr key={item.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{item.item}</td>
+                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{item.description}</td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <span style={getRiskBadgeStyle(item.riskLevel)}>{item.riskLevel}</span>
+                            </td>
+                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <Button kind={item.riskLevel === 'High' ? 'secondary' : 'primary'} size="small">
+                                {item.riskLevel === 'High' ? 'Remind' : 'View'}
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
+              {/* No attention items message for simple agreements */}
+              {currentAttentionItems.length === 0 && (
+                <div style={{ 
+                  padding: 'var(--ink-spacing-300)', 
+                  background: 'var(--ink-bg-color-secondary)', 
+                  borderRadius: 8,
+                  textAlign: 'center',
+                  marginBottom: 'var(--ink-spacing-300)',
+                }}>
+                  <Icon name="status-check" size={24} color="var(--ink-green-80)" style={{ marginBottom: 8 }} />
+                  <Text size="sm" color="secondary">No items need attention right now</Text>
+                </div>
+              )}
             </div>
 
             {/* Activity sidebar */}
