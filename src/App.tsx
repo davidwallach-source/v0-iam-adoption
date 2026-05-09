@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2350,7 +2350,7 @@ const DETAIL_TABS = [
 
 /* ═══════════════════════════════════════
    Deal Workspace View (Draft / In Progress)
-   ══════════════════════════════��════════ */
+   ══════════════════════════════����════════ */
 
 interface DealTask {
   id: string;
@@ -2837,37 +2837,29 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
               {/* Deal info card */}
-              <div style={{
-                background: 'var(--ink-white-100)',
-                border: '1px solid var(--ink-neutral-fade-10)',
-                borderRadius: 'var(--ink-radius-size-s)',
-                padding: '16px',
-                marginBottom: 'var(--ink-spacing-300)',
-              }}>
-                <Inline gap="small" align="center">
-                  <Text size="sm" weight="semibold">Summary</Text>
-                  <button
-                    onClick={() => setPartyExpanded(prev => !prev)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: 4,
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--ink-neutral-fade-5)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    aria-label={partyExpanded ? 'Collapse summary' : 'Expand summary'}
-                  >
-                    <Icon name={partyExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
-                  </button>
-                </Inline>
-                {partyExpanded && (
-                  <Grid columns={5} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
+              {/* Summary section header — outside the card, matches Documents heading style */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>
+                Summary
+                <button
+                  onClick={() => setPartyExpanded(prev => !prev)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4, transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--ink-neutral-fade-5)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  aria-label={partyExpanded ? 'Collapse summary' : 'Expand summary'}
+                >
+                  <Icon name={partyExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
+                </button>
+              </div>
+
+              {partyExpanded && (
+                <div style={{
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-neutral-fade-10)',
+                  borderRadius: 'var(--ink-radius-size-s)',
+                  padding: '16px',
+                  marginBottom: 'var(--ink-spacing-300)',
+                }}>
+                  <Grid columns={5} gap="large">
                     <div>
                       <Text size="xs" color="secondary">Party</Text>
                       <Text size="sm" weight="semibold">{agreement.party}</Text>
@@ -2893,8 +2885,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                       <Text size="sm">{agreement.closeDate || '—'}</Text>
                     </div>
                   </Grid>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Documents table */}
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
