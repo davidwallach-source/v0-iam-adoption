@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2754,11 +2754,15 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
     }}>
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'var(--ink-bg-color-canvas-page)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-        {/* Actions row ��� back arrow far left, actions far right, both outside constraint */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: 'var(--ink-spacing-100) var(--ink-spacing-200)' }}>
+        {/* Header row — back arrow + title on left, actions on right */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: 'var(--ink-spacing-150) var(--ink-spacing-200)', gap: 12 }}>
           <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, flexShrink: 0 }}>
             <Icon name="arrow-left" size={20} />
           </button>
+          <Inline gap="medium" align="center">
+            <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
+            <Badge kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : 'emphasis'}>{agreement.status}</Badge>
+          </Inline>
           <div style={{ flex: 1 }} />
           <Inline gap="small" align="center">
             <div style={{ display: 'flex' }}>
@@ -2768,14 +2772,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             </div>
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
             <AddMenu />
-          </Inline>
-        </div>
-
-        {/* Title row — constrained */}
-        <div style={{ ...innerStyle, paddingBottom: 'var(--ink-spacing-150)' }}>
-          <Inline gap="medium" align="center">
-            <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
-            <Badge kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : 'emphasis'}>{agreement.status}</Badge>
           </Inline>
         </div>
 
