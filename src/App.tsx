@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -3127,86 +3127,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
     </div>
   );
 }
-                            <Text size="sm">{doc.name}</Text>
-                            {doc.commentCount && (
-                              <AlertBadge value={doc.commentCount} kind="emphasis" />
-                            )}
-                          </Inline>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <Inline gap="small" align="center">
-                            <Avatar initials={doc.ownerInitials} size="small" />
-                            <Text size="sm">{doc.owner}</Text>
-                          </Inline>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                        <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
-                          <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                            {isNDADraft && doc.status === 'Draft' ? (
-                              <Button kind="primary" size="small" onClick={onEditNDA}>Edit</Button>
-                            ) : (
-                              <Button kind="secondary" size="small">View</Button>
-                            )}
-                            <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                          </Inline>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Supplemental documents - only show if there are any */}
-            {currentSupplementalDocs.length > 0 && (
-              <>
-                <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
-
-                {/* Supplemental documents table - info-only documents without status */}
-                <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}></th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Provided By</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Added</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentSupplementalDocs.map((doc) => (
-                        <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}></td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <Inline gap="small" align="center">
-                              <Avatar initials={doc.ownerInitials} size="small" />
-                              <Text size="sm">{doc.owner}</Text>
-                            </Inline>
-                          </td>
-                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <Inline gap="small" align="center">
-                              <Button kind="secondary" size="small">View</Button>
-                              <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                            </Inline>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 function AgreementDetailView({ onClose }: { onClose: () => void }) {
