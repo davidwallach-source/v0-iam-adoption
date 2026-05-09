@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������������══════════════
+/* ═══════════════════════�������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2761,7 +2761,16 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           </button>
           <Inline gap="medium" align="center">
             <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
-            <Badge kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : 'emphasis'}>{agreement.status}</Badge>
+            <Inline gap="small" align="center">
+              <span style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: agreement.statusKind === 'success' ? 'var(--ink-green-80)' : agreement.statusKind === 'warning' ? 'var(--ink-orange-80)' : '#D946EF',
+                flexShrink: 0,
+              }} />
+              <Text size="sm" style={{ color: agreement.statusKind === 'success' ? 'var(--ink-green-80)' : agreement.statusKind === 'warning' ? 'var(--ink-orange-80)' : '#D946EF' }}>{agreement.status}</Text>
+            </Inline>
           </Inline>
           <div style={{ flex: 1 }} />
           <Inline gap="small" align="center">
