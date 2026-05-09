@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������������������������������══════════════
+/* ═══════════════════════�������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2785,8 +2785,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           </Inline>
         </div>
 
-        {/* Alert banner - only show when there are attention items and not dismissed */}
-        {currentAttentionItems.length > 0 && !alertDismissed && (
+        {/* Alert banner - only show when there is an item with an explicit alertMessage */}
+        {currentAttentionItems.some(item => item.alertMessage) && !alertDismissed && (
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -2810,7 +2810,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             <div style={{ flex: 1 }} />
             {/* Right side: counter, divider, View All, close */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Text size="sm" color="secondary">1 of {currentAttentionItems.length} alerts</Text>
+              <Text size="sm" color="secondary">1 of {currentAttentionItems.filter(item => item.alertMessage).length} alerts</Text>
               <span style={{ width: 1, height: 16, background: 'var(--ink-border-subtle)' }} />
               <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 14, color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>View All</a>
               <button
