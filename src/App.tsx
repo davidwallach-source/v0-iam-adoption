@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������══════════════
+/* ═══════════════════════���������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2853,7 +2853,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                   </button>
                 </Inline>
                 {partyExpanded && (
-                  <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)', paddingTop: 'var(--ink-spacing-200)', borderTop: '1px solid var(--ink-border-subtle)' }}>
+                  <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
                     <div>
                       <Text size="xs" color="secondary">Deal Value</Text>
                       <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
