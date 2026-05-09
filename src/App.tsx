@@ -869,7 +869,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������══════════════
+/* ═══════════════════════�����������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -2634,6 +2634,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
+  const [partyExpanded, setPartyExpanded] = useState(true);
   const fadeIn = useFadeIn(0, 250);
   
   // Check if this is a draft agreement
@@ -2797,63 +2798,80 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 background: 'var(--ink-white-100)',
                 border: '1px solid var(--ink-neutral-fade-10)',
                 borderRadius: 'var(--ink-radius-size-s)',
-                padding: '24px 16px',
+                padding: '16px',
                 marginBottom: 'var(--ink-spacing-300)',
               }}>
-                <Inline justify="between" align="flex-start">
-                  <Inline gap="medium" align="center" style={{ flex: 1 }}>
-                    <div>
-                      <Inline gap="small" align="center">
-                        <Text size="sm" weight="semibold">{agreement.party}</Text>
-                        <button
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            padding: '6px 12px',
-                            background: 'var(--ink-bg-color-secondary)',
-                            border: '1px solid var(--ink-border-subtle)',
-                            borderRadius: 6,
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            fontWeight: 500,
-                            color: 'var(--ink-text-secondary)',
-                            transition: 'all 0.2s',
-                          }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.background = 'var(--ink-neutral-fade-5)';
-                            e.currentTarget.style.borderColor = 'var(--ink-border-default)';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.background = 'var(--ink-bg-color-secondary)';
-                            e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
-                          }}
-                        >
-                          <img src="/icons/feature-gate.svg" alt="history" style={{ width: 20, height: 20 }} />
-                          View History
-                        </button>
-                      </Inline>
-                    </div>
+                <Inline justify="between" align="center">
+                  <Inline gap="small" align="center">
+                    <Text size="sm" weight="semibold">{agreement.party}</Text>
+                    <button
+                      onClick={() => setPartyExpanded(prev => !prev)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 4,
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--ink-neutral-fade-5)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      aria-label={partyExpanded ? 'Collapse party details' : 'Expand party details'}
+                    >
+                      <Icon name={partyExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
+                    </button>
                   </Inline>
+                  <button
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '6px 12px',
+                      background: 'var(--ink-bg-color-secondary)',
+                      border: '1px solid var(--ink-border-subtle)',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: 'var(--ink-text-secondary)',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'var(--ink-neutral-fade-5)';
+                      e.currentTarget.style.borderColor = 'var(--ink-border-default)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'var(--ink-bg-color-secondary)';
+                      e.currentTarget.style.borderColor = 'var(--ink-border-subtle)';
+                    }}
+                  >
+                    <img src="/icons/feature-gate.svg" alt="history" style={{ width: 20, height: 20 }} />
+                    View History
+                  </button>
                 </Inline>
-                <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)' }}>
-                  <div>
-                    <Text size="xs" color="secondary">Deal Value</Text>
-                    <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
-                  </div>
-                  <div>
-                    <Text size="xs" color="secondary">Agreement Type</Text>
-                    <Text size="sm">{agreement.agreementType || '—'}</Text>
-                  </div>
-                  <div>
-                    <Text size="xs" color="secondary">Term Length</Text>
-                    <Text size="sm">{agreement.termLength || '—'}</Text>
-                  </div>
-                  <div>
-                    <Text size="xs" color="secondary">Anticipated Close</Text>
-                    <Text size="sm">{agreement.closeDate || '—'}</Text>
-                  </div>
-                </Grid>
+                {partyExpanded && (
+                  <Grid columns={4} gap="large" style={{ marginTop: 'var(--ink-spacing-200)', paddingTop: 'var(--ink-spacing-200)', borderTop: '1px solid var(--ink-border-subtle)' }}>
+                    <div>
+                      <Text size="xs" color="secondary">Deal Value</Text>
+                      <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" color="secondary">Agreement Type</Text>
+                      <Text size="sm">{agreement.agreementType || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" color="secondary">Term Length</Text>
+                      <Text size="sm">{agreement.termLength || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" color="secondary">Anticipated Close</Text>
+                      <Text size="sm">{agreement.closeDate || '—'}</Text>
+                    </div>
+                  </Grid>
+                )}
               </div>
 
               {/* Needs Attention - only show if there are items */}
@@ -2906,12 +2924,74 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                   padding: 'var(--ink-spacing-300)', 
                   background: 'var(--ink-bg-color-secondary)', 
                   borderRadius: 8,
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  marginBottom: 'var(--ink-spacing-300)',
                 }}>
                   <Icon name="status-check" size={24} color="var(--ink-green-80)" style={{ marginBottom: 8 }} />
                   <Text size="sm" color="secondary">No items need attention right now</Text>
                 </div>
               )}
+
+              {/* Documents table */}
+              <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
+              <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Status</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Owner</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Modified</th>
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentDocuments.map((doc) => {
+                      const isChild = !!doc.parentId;
+                      const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
+                      if (isChild && !isParentExpanded) return null;
+                      
+                      return (
+                        <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                          <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
+                            <Inline gap="small" align="center">
+                              {doc.isParent && (
+                                <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+                                  <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
+                                </button>
+                              )}
+                              <Text size="sm">{doc.name}</Text>
+                              {doc.commentCount && (
+                                <AlertBadge value={doc.commentCount} kind="emphasis" />
+                              )}
+                            </Inline>
+                          </td>
+                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                          </td>
+                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <Inline gap="small" align="center">
+                              <Avatar initials={doc.ownerInitials} size="small" />
+                              <Text size="sm">{doc.owner}</Text>
+                            </Inline>
+                          </td>
+                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                          <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
+                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                              {isNDADraft && doc.status === 'Draft' ? (
+                                <Button kind="primary" size="small" onClick={onEditNDA}>Edit</Button>
+                              ) : (
+                                <Button kind="secondary" size="small">View</Button>
+                              )}
+                              <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                            </Inline>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Activity sidebar */}
