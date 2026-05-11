@@ -1302,7 +1302,7 @@ const AGREEMENTS_DATA: Agreement[] = [
   // Medium: Software license renewal with updated terms
   { id: '5', name: 'Horizon Analytics Renewal', party: 'Horizon Analytics', partyLogo: 'HA', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Approval', dealValue: '$185K', agreementType: 'License Renewal', termLength: '12 months', closeDate: 'May 10, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 2, tasksCount: 4, tasksPending: 1 },
   
-  // ═══ SIMPLE DEALS — Single document, 1-2 people ═══
+  // ═══ SIMPLE DEALS �� Single document, 1-2 people ═══
   
   // Simple: Standard NDA for sales prospect
   { id: '6', name: 'Sterling Industries NDA', party: 'Sterling Industries', partyLogo: 'SI', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: 'Awaiting Signature', dealValue: '—', agreementType: 'NDA', termLength: '24 months', closeDate: 'Apr 28, 2026', date: '19/4/2026', time: '15:30', action: 'Edit', documentsCount: 1, tasksCount: 1, tasksPending: 1 },
@@ -1878,7 +1878,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═══════════════════════════════════════
+/* ═══��═══════════════════════════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -2944,12 +2944,11 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
 }
 
 function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: WorkspaceViewProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'documents'>('overview');
-  const [sidebarTab, setSidebarTab] = useState<'activity' | 'messages'>('activity');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
+  const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
-  const [partyExpanded, setPartyExpanded] = useState(false);
-  const [alertDismissed, setAlertDismissed] = useState(false);
+  const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
   const fadeIn = useFadeIn(0, 250);
   
   // Check if this is a draft agreement
@@ -3099,64 +3098,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           </Inline>
         </div>
 
-        {/* Alert banner - only show when there is an item with an explicit alertMessage */}
-        {currentAttentionItems.some(item => item.alertMessage) && !alertDismissed && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '12px 20px',
-            background: '#E9E6FD',
-            margin: '0 var(--ink-spacing-200)',
-            borderRadius: 8,
-          }}>
-            {/* Iris icon */}
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-              <path d="M8 2L9.5 6.5L14 8L9.5 9.5L8 14L6.5 9.5L2 8L6.5 6.5L8 2Z" fill="#7C3AED"/>
-            </svg>
-            {/* Alert text */}
-            <Text size="sm">
-              {currentAttentionItems.find(item => item.alertMessage)?.alertMessage || `${currentAttentionItems[0]?.item} needs your attention.`}
-            </Text>
-            {/* CTA button - right next to text */}
-            <Button kind="secondary" size="small">Draft reminder</Button>
-            {/* Spacer to push right side content */}
-            <div style={{ flex: 1 }} />
-            {/* Right side: counter, divider, View All, close */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Text size="sm" color="secondary">1 of {currentAttentionItems.filter(item => item.alertMessage).length} alerts</Text>
-              <span style={{ width: 1, height: 16, background: 'var(--ink-border-subtle)' }} />
-              <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 14, color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>View All</a>
-              <button
-                onClick={() => setAlertDismissed(true)}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  cursor: 'pointer', 
-                  padding: 4, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  color: 'var(--ink-text-secondary)',
-                  transition: 'color 0.15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--ink-text-default)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-text-secondary)'}
-                aria-label="Dismiss alert"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Tabs — constrained, no top border */}
         <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0, paddingTop: 'var(--ink-spacing-100)' }}>
           <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
           <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-          <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
         </div>
       </div>
 
@@ -3166,168 +3111,204 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
-              {/* Deal info card */}
-              {/* Summary section header — outside the card, matches Documents heading style */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>
-                Summary
-                <button
-                  onClick={() => setPartyExpanded(prev => !prev)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4, transition: 'background 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--ink-neutral-fade-5)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  aria-label={partyExpanded ? 'Collapse summary' : 'Expand summary'}
-                >
-                  <Icon name={partyExpanded ? 'chevron-down' : 'chevron-right'} size={16} />
-                </button>
-              </div>
 
-              {partyExpanded && (
-                <div style={{
-                  background: 'var(--ink-white-100)',
-                  border: '1px solid var(--ink-neutral-fade-10)',
-                  borderRadius: 'var(--ink-radius-size-s)',
-                  padding: '16px',
-                  marginBottom: 'var(--ink-spacing-300)',
-                }}>
-                  <Grid columns={5} gap="large">
-                    <div>
-                      <Text size="xs" color="secondary">Party</Text>
-                      <Text size="sm" weight="semibold">{agreement.party}</Text>
-                      <Button kind="secondary" size="small" style={{ marginTop: 6 }}>
-                        <img src="/icons/feature-gate.svg" alt="" style={{ width: 16, height: 16 }} />
-                        View History
-                      </Button>
-                    </div>
-                    <div>
-                      <Text size="xs" color="secondary">Deal Value</Text>
-                      <Text size="sm" weight="semibold">{agreement.dealValue || '—'}</Text>
-                    </div>
-                    <div>
-                      <Text size="xs" color="secondary">Agreement Type</Text>
-                      <Text size="sm">{agreement.agreementType || '—'}</Text>
-                    </div>
-                    <div>
-                      <Text size="xs" color="secondary">Term Length</Text>
-                      <Text size="sm">{agreement.termLength || '—'}</Text>
-                    </div>
-                    <div>
-                      <Text size="xs" color="secondary">Anticipated Close</Text>
-                      <Text size="sm">{agreement.closeDate || '—'}</Text>
-                    </div>
-                  </Grid>
+              {/* Needs Attention section */}
+              {currentAttentionItems.length > 0 && (
+                <div style={{ marginBottom: 'var(--ink-spacing-400)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Needs Attention</Text>
+                    <Button kind="tertiary" size="small">View all</Button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(currentAttentionItems.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
+                    {currentAttentionItems.slice(0, 3).map((item) => (
+                      <div key={item.id} style={{
+                        background: 'var(--ink-white-100)',
+                        border: '1px solid var(--ink-border-subtle)',
+                        borderRadius: 8,
+                        padding: '14px 16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {item.alertMessage ? (
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                                <path d="M8 2L9.5 6.5L14 8L9.5 9.5L8 14L6.5 9.5L2 8L6.5 6.5L8 2Z" fill="#7C3AED"/>
+                              </svg>
+                            ) : item.riskLevel === 'High' ? (
+                              <Icon name="alert" size={16} color="var(--ink-red-80)" />
+                            ) : (
+                              <Icon name="comment" size={16} color="var(--ink-neutral-80)" />
+                            )}
+                            {item.alertMessage && (
+                              <span style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: 'var(--ink-orange-100)',
+                                background: 'var(--ink-orange-10)',
+                                border: '1px solid var(--ink-orange-30)',
+                                borderRadius: 4,
+                                padding: '2px 6px',
+                              }}>Due today</span>
+                            )}
+                          </div>
+                          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                        </div>
+                        <Text size="sm" weight="semibold">{item.item}</Text>
+                        <Text size="xs" color="secondary">{item.description}</Text>
+                        {item.alertMessage && (
+                          <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 'var(--ink-font-size-xs)', color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>Send a reminder</a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Documents table */}
-              <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)', marginTop: '20px' }}>Documents</div>
-              <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden', marginBottom: 'var(--ink-spacing-300)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Status</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Owner</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Modified</th>
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentDocuments.map((doc) => {
-                      const isChild = !!doc.parentId;
-                      const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
-                      if (isChild && !isParentExpanded) return null;
-                      
-                      return (
-                        <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                          <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
-                            <Inline gap="small" align="center">
-                              {doc.isParent && (
-                                <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-                                  <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
-                                </button>
-                              )}
-                              <Text size="sm">{doc.name}</Text>
-                              {doc.commentCount && (
-                                <AlertBadge value={doc.commentCount} kind="emphasis" />
-                              )}
-                            </Inline>
-                          </td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
-                          </td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <Inline gap="small" align="center">
-                              <Avatar initials={doc.ownerInitials} size="small" />
-                              <Text size="sm">{doc.owner}</Text>
-                            </Inline>
-                          </td>
-                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
-                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                              {isNDADraft && doc.status === 'Draft' ? (
-                                <Button kind="primary" size="small" onClick={onEditNDA}>Edit</Button>
-                              ) : (
-                                <Button kind="secondary" size="small">View</Button>
-                              )}
-                              <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                            </Inline>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              {/* Documents section with Negotiating / Supplemental sub-tabs */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                  {/* Negotiating / Supplemental toggle */}
+                  <div style={{
+                    display: 'flex',
+                    background: 'var(--ink-bg-color-secondary)',
+                    border: '1px solid var(--ink-border-subtle)',
+                    borderRadius: 6,
+                    padding: 2,
+                    gap: 2,
+                  }}>
+                    {(['negotiating', 'supplemental'] as const).map((sub) => (
+                      <button
+                        key={sub}
+                        onClick={() => setDocSubTab(sub)}
+                        style={{
+                          background: docSubTab === sub ? 'var(--ink-white-100)' : 'transparent',
+                          border: docSubTab === sub ? '1px solid var(--ink-border-subtle)' : '1px solid transparent',
+                          borderRadius: 4,
+                          padding: '4px 12px',
+                          fontSize: 'var(--ink-font-size-sm)',
+                          fontWeight: docSubTab === sub ? 600 : 400,
+                          color: docSubTab === sub ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
+                          cursor: 'pointer',
+                          fontFamily: 'var(--ink-font-family-default)',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {sub === 'negotiating' ? 'Negotiating' : 'Supplemental'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Supplemental documents - only show if there are any */}
-              {currentSupplementalDocs.length > 0 && (
-                <>
-                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)', marginTop: 'var(--ink-spacing-300)' }}>Supplemental Documents</div>
-
+                {/* Negotiating documents table */}
+                {docSubTab === 'negotiating' && (
                   <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
                         <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}></th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Provided By</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Added</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '40%' }}>
+                            <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
+                          </th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>Status</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Added by</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '18%' }}>
+                            <Inline gap="xsmall" align="center">Last modified <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
+                          </th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', width: '6%' }}></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {currentSupplementalDocs.map((doc) => (
-                          <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}></td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <Inline gap="small" align="center">
-                                <Avatar initials={doc.ownerInitials} size="small" />
-                                <Text size="sm">{doc.owner}</Text>
-                              </Inline>
-                            </td>
-                            <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                            <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <Inline gap="small" align="center">
-                                <Button kind="secondary" size="small">View</Button>
+                        {currentDocuments.map((doc) => {
+                          const isChild = !!doc.parentId;
+                          const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
+                          if (isChild && !isParentExpanded) return null;
+                          return (
+                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
+                                <Inline gap="small" align="center">
+                                  {doc.isParent && (
+                                    <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', flexShrink: 0 }}>
+                                      <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
+                                    </button>
+                                  )}
+                                  <Text size="sm">{doc.name}</Text>
+                                  {doc.commentCount && (
+                                    <AlertBadge value={doc.commentCount} kind="emphasis" />
+                                  )}
+                                </Inline>
+                              </td>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                              </td>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                <Inline gap="small" align="center">
+                                  <Avatar initials={doc.ownerInitials} size="small" />
+                                  <Text size="sm">{doc.owner}</Text>
+                                </Inline>
+                              </td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.dateModified}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                              </Inline>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
-                </>
-              )}
+                )}
 
+                {/* Supplemental documents table */}
+                {docSubTab === 'supplemental' && (
+                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                    {currentSupplementalDocs.length === 0 ? (
+                      <div style={{ padding: 'var(--ink-spacing-400)', textAlign: 'center' }}>
+                        <Text size="sm" color="secondary">No supplemental documents</Text>
+                      </div>
+                    ) : (
+                      <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                        <thead>
+                          <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '40%' }}>Document</th>
+                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '24%' }}>Provided By</th>
+                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '24%' }}>Date Added</th>
+                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', width: '12%' }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentSupplementalDocs.map((doc) => (
+                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                <Inline gap="small" align="center">
+                                  <Avatar initials={doc.ownerInitials} size="small" />
+                                  <Text size="sm">{doc.owner}</Text>
+                                </Inline>
+                              </td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                <Inline gap="small" align="center">
+                                  <Button kind="secondary" size="small">View</Button>
+                                  <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                </Inline>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Activity sidebar */}
+            {/* Right sidebar */}
             <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
               {/* Sidebar tabs */}
               <div style={{ display: 'flex', borderBottom: '1px solid var(--ink-border-subtle)', padding: '0 var(--ink-spacing-300)' }}>
-                {(['activity', 'messages'] as const).map((tab) => (
+                {(['activity', 'details'] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setSidebarTab(tab)}
@@ -3345,14 +3326,14 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                       position: 'relative',
                     }}
                   >
-                    {tab === 'activity' ? 'Activity' : 'Messages'}
+                    {tab === 'activity' ? 'Activity' : 'Details'}
                   </button>
                 ))}
               </div>
 
               {/* Activity tab content */}
               {sidebarTab === 'activity' && (
-                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1 }}>
+                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, overflowY: 'auto' }}>
                   <Stack gap="medium">
                     {currentActivity.map((item) => (
                       <Inline key={item.id} gap="medium" align="flex-start">
@@ -3376,23 +3357,42 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 </div>
               )}
 
-              {/* Messages tab content */}
-              {sidebarTab === 'messages' && (
-                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-200)' }}>
-                  {[
-                    { initials: 'LL', name: 'Leona Legal', time: '2h ago', text: 'I\'ve reviewed the DPA — a few clauses need attention before we can move forward.' },
-                    { initials: 'SS', name: 'Shawn Security', time: '4h ago', text: 'Security terms look good on our end. Approved.' },
-                    { initials: 'PP', name: 'Patricia P.', time: '6h ago', text: 'Can we get an updated version of the AI Addendum for review?' },
-                  ].map((msg, i) => (
-                    <div key={i}>
-                      <Inline gap="small" align="center" style={{ marginBottom: 4 }}>
-                        <Avatar initials={msg.initials} size="small" />
-                        <Text size="sm" weight="semibold">{msg.name}</Text>
-                        <Text size="xs" color="secondary">{msg.time}</Text>
-                      </Inline>
-                      <Text size="sm" color="secondary" style={{ paddingLeft: 32 }}>{msg.text}</Text>
+              {/* Details tab content */}
+              {sidebarTab === 'details' && (
+                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, overflowY: 'auto' }}>
+                  <Stack gap="medium">
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Party</Text>
+                      <Text size="sm">{agreement.party}</Text>
                     </div>
-                  ))}
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Agreement Type</Text>
+                      <Text size="sm">{agreement.agreementType || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Deal Value</Text>
+                      <Text size="sm">{agreement.dealValue || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Term Length</Text>
+                      <Text size="sm">{agreement.termLength || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Anticipated Close</Text>
+                      <Text size="sm">{agreement.closeDate || '—'}</Text>
+                    </div>
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Status</Text>
+                      <Inline gap="xsmall" align="center">
+                        <span style={{
+                          width: 8, height: 8, borderRadius: '50%',
+                          background: agreement.statusKind === 'success' ? 'var(--ink-green-80)' : agreement.statusKind === 'warning' ? 'var(--ink-orange-80)' : '#D946EF',
+                          flexShrink: 0,
+                        }} />
+                        <Text size="sm">{agreement.status}</Text>
+                      </Inline>
+                    </div>
+                  </Stack>
                 </div>
               )}
             </div>
@@ -3486,114 +3486,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           </div>
         )}
 
-        {activeTab === 'documents' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
-            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Documents</div>
 
-            {/* Documents table */}
-            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden', marginBottom: 'var(--ink-spacing-300)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                <thead>
-                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Status</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Owner</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Modified</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentDocuments.map((doc) => {
-                    const isChild = !!doc.parentId;
-                    const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
-                    if (isChild && !isParentExpanded) return null;
-                    
-                    return (
-                      <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                        <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
-                          <Inline gap="small" align="center">
-                            {doc.isParent && (
-                              <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-                                <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
-                              </button>
-                            )}
-                            <Text size="sm">{doc.name}</Text>
-                            {doc.commentCount && (
-                              <AlertBadge value={doc.commentCount} kind="emphasis" />
-                            )}
-                          </Inline>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                          <Inline gap="small" align="center">
-                            <Avatar initials={doc.ownerInitials} size="small" />
-                            <Text size="sm">{doc.owner}</Text>
-                          </Inline>
-                        </td>
-                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                        <td style={{ padding: 'var(--ink-spacing-150)', textAlign: 'right' }}>
-                          <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                            {isNDADraft && doc.status === 'Draft' ? (
-                              <Button kind="primary" size="small" onClick={onEditNDA}>Edit</Button>
-                            ) : (
-                              <Button kind="secondary" size="small">View</Button>
-                            )}
-                            <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                          </Inline>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Supplemental documents - only show if there are any */}
-            {currentSupplementalDocs.length > 0 && (
-              <>
-                <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Supplemental Documents</div>
-
-                {/* Supplemental documents table - info-only documents without status */}
-                <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>Document</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}></th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Provided By</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Date Added</th>
-                        <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentSupplementalDocs.map((doc) => (
-                        <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}></td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <Inline gap="small" align="center">
-                              <Avatar initials={doc.ownerInitials} size="small" />
-                              <Text size="sm">{doc.owner}</Text>
-                            </Inline>
-                          </td>
-                          <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
-                          <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                            <Inline gap="small" align="center">
-                              <Button kind="secondary" size="small">View</Button>
-                              <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                            </Inline>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
