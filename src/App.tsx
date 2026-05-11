@@ -1878,7 +1878,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═══��═══════════════════════════════════
+/* ══����═══════════════════════════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -3363,7 +3363,13 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                   <Stack gap="medium">
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Party</Text>
-                      <Text size="sm">{agreement.party}</Text>
+                      <Text size="sm" style={{ marginBottom: 8 }}>{agreement.party}</Text>
+                      <Button kind="secondary" size="small" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                          <path d="M14.29 11.36L17.51 10.07L16.46 16H7.54L6.49 10.07L9.71 11.36L12 7.76M12 4L9 9L4 7L6 18H18L20 7L15 9L12 4Z" fill="#4C00FB"/>
+                        </svg>
+                        View History
+                      </Button>
                     </div>
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Agreement Type</Text>
