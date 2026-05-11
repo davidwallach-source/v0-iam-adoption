@@ -46,9 +46,10 @@ interface StartNewModalProps {
   onClose: () => void;
   onStartNDA: () => void;
   onStartPurchase: () => void;
+  onStartRequest: () => void;
 }
 
-function StartNewModal({ open, onClose, onStartNDA, onStartPurchase }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequest }: StartNewModalProps) {
   const [search, setSearch] = useState('');
 
   const agreements = [
@@ -193,6 +194,9 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase }: StartNewM
                       } else if (item.id === 'purchase') {
                         onClose();
                         onStartPurchase();
+                      } else if (item.id === 'legal') {
+                        onClose();
+                        onStartRequest();
                       }
                     }}
                   >Start</Button>
@@ -208,6 +212,315 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase }: StartNewM
 }
 
 
+
+/* ═══════════════════════════════════════
+   AgreementRequestModal Component
+   ═══════════════════════════════════════ */
+
+interface AgreementRequestFormData {
+  requestType: string;
+  impact: string;
+  urgency: string;
+  category: string;
+  description: string;
+  purpose: string;
+}
+
+interface AgreementRequestModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: AgreementRequestFormData) => void;
+}
+
+const REQUEST_TYPE_OPTIONS = [
+  'New Agreement',
+  'Amendment',
+  'Renewal',
+  'Termination',
+  'Review Request',
+];
+
+const IMPACT_OPTIONS = [
+  '-- None --',
+  'Low',
+  'Medium',
+  'High',
+  'Critical',
+];
+
+const URGENCY_OPTIONS = [
+  '-- None --',
+  'Low',
+  'Medium',
+  'High',
+  'Critical',
+];
+
+const CATEGORY_OPTIONS = [
+  'Software - Video',
+  'Software - Productivity',
+  'Software - Security',
+  'Hardware - Computing',
+  'Hardware - Networking',
+  'Professional Services',
+  'Consulting',
+  'Licensing',
+  'Other',
+];
+
+const PURPOSE_OPTIONS = [
+  'New Purchase',
+  'Renewal',
+  'Upgrade',
+  'Replacement',
+  'Expansion',
+  'Pilot/Trial',
+];
+
+function AgreementRequestModal({ open, onClose, onSubmit }: AgreementRequestModalProps) {
+  const [requestType, setRequestType] = useState('');
+  const [impact, setImpact] = useState('');
+  const [urgency, setUrgency] = useState('');
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [purpose, setPurpose] = useState('');
+
+  // Dropdown open states
+  const [requestTypeOpen, setRequestTypeOpen] = useState(false);
+  const [impactOpen, setImpactOpen] = useState(false);
+  const [urgencyOpen, setUrgencyOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [purposeOpen, setPurposeOpen] = useState(false);
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    onSubmit({
+      requestType,
+      impact,
+      urgency,
+      category,
+      description,
+      purpose,
+    });
+  };
+
+  const fieldLabelStyle: React.CSSProperties = {
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#130032',
+    marginBottom: 6,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+  };
+
+  const requiredStar: React.CSSProperties = {
+    color: '#C0392B',
+    fontWeight: 600,
+  };
+
+  const selectStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid var(--ink-border-subtle)',
+    borderRadius: 6,
+    fontSize: 14,
+    fontFamily: 'var(--ink-font-family)',
+    color: '#130032',
+    background: 'white',
+    outline: 'none',
+    boxSizing: 'border-box',
+    cursor: 'pointer',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'relative' as const,
+  };
+
+  const dropdownStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    background: 'white',
+    border: '1px solid var(--ink-border-subtle)',
+    borderRadius: 6,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    zIndex: 10,
+    maxHeight: 200,
+    overflowY: 'auto',
+    marginTop: 4,
+  };
+
+  const dropdownItemStyle: React.CSSProperties = {
+    padding: '10px 14px',
+    fontSize: 14,
+    cursor: 'pointer',
+    color: '#130032',
+  };
+
+  const textareaStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid var(--ink-border-subtle)',
+    borderRadius: 6,
+    fontSize: 14,
+    fontFamily: 'var(--ink-font-family)',
+    color: '#130032',
+    background: 'white',
+    outline: 'none',
+    boxSizing: 'border-box',
+    minHeight: 100,
+    resize: 'vertical',
+  };
+
+  const renderDropdown = (
+    label: string,
+    value: string,
+    placeholder: string,
+    options: string[],
+    isOpen: boolean,
+    setIsOpen: (open: boolean) => void,
+    onChange: (value: string) => void,
+    required: boolean = false
+  ) => (
+    <div style={{ marginBottom: 20 }}>
+      <label style={fieldLabelStyle}>
+        {label}
+        {required && <span style={requiredStar}>*</span>}
+      </label>
+      <div style={{ position: 'relative' }}>
+        <button
+          type="button"
+          style={selectStyle}
+          onClick={() => setIsOpen(!isOpen)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+        >
+          <span style={{ color: value ? '#130032' : 'var(--ink-neutral-60)' }}>
+            {value || placeholder}
+          </span>
+          <Icon name="chevron-down" size={16} color="var(--ink-neutral-60)" />
+        </button>
+        {isOpen && (
+          <div style={dropdownStyle}>
+            {options.map((option) => (
+              <div
+                key={option}
+                style={{
+                  ...dropdownItemStyle,
+                  backgroundColor: value === option ? 'var(--ink-neutral-fade-5)' : 'transparent',
+                }}
+                onMouseDown={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--ink-neutral-fade-5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = value === option ? 'var(--ink-neutral-fade-5)' : 'transparent';
+                }}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <Modal open={open} onClose={onClose} size="full">
+      {/* Header bar */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        padding: '16px 24px',
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        background: 'white',
+        borderRadius: '16px 16px 0 0',
+      }}>
+        <Text size="sm" weight="medium" style={{ color: '#130032' }}>New Request</Text>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 4,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label="Close"
+        >
+          <Icon name="close" size={20} color="var(--ink-neutral-60)" />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div style={{
+        padding: '80px 40px 40px',
+        maxWidth: 560,
+        margin: '0 auto',
+      }}>
+        {/* Title */}
+        <h2 style={{
+          margin: '0 0 8px 0',
+          fontSize: 28,
+          fontWeight: 500,
+          fontFamily: 'var(--ink-font-family)',
+          color: '#130032',
+        }}>New Agreement Request</h2>
+        <p style={{
+          margin: '0 0 32px 0',
+          fontSize: 14,
+          color: 'var(--ink-neutral-60)',
+          fontFamily: 'var(--ink-font-family)',
+        }}>Get help on agreements, from other departments</p>
+
+        {/* Form fields */}
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          {renderDropdown('Request type', requestType, 'Select or type...', REQUEST_TYPE_OPTIONS, requestTypeOpen, setRequestTypeOpen, setRequestType, true)}
+          {renderDropdown('Impact', impact, '-- None --', IMPACT_OPTIONS, impactOpen, setImpactOpen, setImpact, true)}
+          {renderDropdown('Urgency', urgency, '-- None --', URGENCY_OPTIONS, urgencyOpen, setUrgencyOpen, setUrgency, true)}
+          {renderDropdown('Category', category, 'Select or type...', CATEGORY_OPTIONS, categoryOpen, setCategoryOpen, setCategory, true)}
+
+          {/* Description */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={fieldLabelStyle}>Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Briefly describe purchase request"
+              style={textareaStyle}
+            />
+          </div>
+
+          {renderDropdown('Purpose', purpose, 'Select or type...', PURPOSE_OPTIONS, purposeOpen, setPurposeOpen, setPurpose, true)}
+
+          {/* Action buttons */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 12,
+            marginTop: 32,
+          }}>
+            <Button kind="secondary" size="medium" onClick={onClose}>Back</Button>
+            <Button kind="primary" size="medium" onClick={handleSubmit}>Submit</Button>
+          </div>
+        </form>
+      </div>
+    </Modal>
+  );
+}
 
 /* ═══════════════════════════════════════
    InstantNDAModal Component
@@ -869,7 +1182,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������������������������������������══════════════
+/* ═══════════════════════�������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -3625,8 +3938,9 @@ export default function App() {
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-
+const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
+  
   /* ── Sync hash ↔ state ── */
   useEffect(() => {
     const onHashChange = () => {
@@ -4077,7 +4391,7 @@ export default function App() {
         savedNDAData={savedNDAData}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} />
     <PurchaseRequestModal
       open={showPurchaseModal}
       onClose={() => setShowPurchaseModal(false)}
@@ -4145,6 +4459,16 @@ export default function App() {
         setShowNDAModal(false);
         setSelectedAgreement(ndaAgreement);
         setShowDealWorkspace(true);
+      }}
+    />
+    <AgreementRequestModal
+      open={showAgreementRequestModal}
+      onClose={() => setShowAgreementRequestModal(false)}
+      onSubmit={(data) => {
+        // For now, just close the modal
+        // In a real implementation, this would create a new request
+        console.log('Agreement Request submitted:', data);
+        setShowAgreementRequestModal(false);
       }}
     />
     </>
