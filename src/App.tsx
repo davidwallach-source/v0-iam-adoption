@@ -1302,7 +1302,7 @@ const AGREEMENTS_DATA: Agreement[] = [
   // Medium: Software license renewal with updated terms
   { id: '5', name: 'Horizon Analytics Renewal', party: 'Horizon Analytics', partyLogo: 'HA', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Approval', dealValue: '$185K', agreementType: 'License Renewal', termLength: '12 months', closeDate: 'May 10, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 2, tasksCount: 4, tasksPending: 1 },
   
-  // ═══ SIMPLE DEALS �� Single document, 1-2 people ═══
+  // ═══ SIMPLE DEALS ��� Single document, 1-2 people ═══
   
   // Simple: Standard NDA for sales prospect
   { id: '6', name: 'Sterling Industries NDA', party: 'Sterling Industries', partyLogo: 'SI', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: 'Awaiting Signature', dealValue: '—', agreementType: 'NDA', termLength: '24 months', closeDate: 'Apr 28, 2026', date: '19/4/2026', time: '15:30', action: 'Edit', documentsCount: 1, tasksCount: 1, tasksPending: 1 },
@@ -1878,7 +1878,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ══����═══════════════════════════════════
+/* ══�����═══════════════════════════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -3166,11 +3166,11 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                 </div>
               )}
 
-              {/* Documents section with Negotiating / Supplemental sub-tabs */}
+              {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                  {/* Negotiating / Supplemental toggle */}
+                  {/* Primary / Supplemental toggle */}
                   <div style={{
                     display: 'flex',
                     background: 'var(--ink-bg-color-secondary)',
@@ -3196,7 +3196,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                           transition: 'all 0.15s',
                         }}
                       >
-                        {sub === 'negotiating' ? 'Negotiating' : 'Supplemental'}
+                        {sub === 'negotiating' ? 'Primary' : 'Supplemental'}
                       </button>
                     ))}
                   </div>
