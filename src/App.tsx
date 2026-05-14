@@ -1336,7 +1336,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═��═════════════════════════════════════
+/* ═���═════════════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -2831,7 +2831,438 @@ interface WorkspaceViewProps {
   savedNDAData?: NDAFormData | null;
 }
 
-function AddMenu() {
+/* ═══════════════════════════════════════
+   PrepareScreen Component (Signature Request Flow)
+   ═══════════════════════════════════════ */
+
+interface PrepareScreenProps {
+  open: boolean;
+  onClose: () => void;
+  preselectedDocs?: string[];
+}
+
+interface Recipient {
+  id: string;
+  name: string;
+  email: string;
+  role: 'signer' | 'viewer' | 'approver';
+}
+
+function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenProps) {
+  const [docsExpanded, setDocsExpanded] = useState(true);
+  const [recipientsExpanded, setRecipientsExpanded] = useState(true);
+  const [messageExpanded, setMessageExpanded] = useState(true);
+  
+  const [documents, setDocuments] = useState<string[]>(preselectedDocs);
+  const [recipients, setRecipients] = useState<Recipient[]>([
+    { id: '1', name: 'Marco Corcoran', email: 'marco.corcoran@dsxtr.com', role: 'signer' }
+  ]);
+  const [signingOrder, setSigningOrder] = useState(false);
+  const [customMessage, setCustomMessage] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('Offer Letter');
+  const [emailMessage, setEmailMessage] = useState('Hello,\n\nPlease sign the included docs. Thank you and I look forward to you joining the team!\n\n- Alex');
+  const [reminderDays, setReminderDays] = useState('2');
+
+  // Update documents when preselectedDocs changes
+  useEffect(() => {
+    if (preselectedDocs.length > 0) {
+      setDocuments(preselectedDocs);
+    }
+  }, [preselectedDocs]);
+
+  if (!open) return null;
+
+  const sectionHeaderStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    cursor: 'pointer',
+    paddingBottom: 16,
+  };
+
+  const sectionTitleStyle: React.CSSProperties = {
+    fontSize: 28,
+    fontWeight: 500,
+    fontFamily: 'var(--ink-font-family)',
+    color: '#130032',
+    margin: 0,
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid var(--ink-border-subtle)',
+    borderRadius: 6,
+    fontSize: 14,
+    fontFamily: 'var(--ink-font-family)',
+    color: '#130032',
+    background: 'white',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const addRecipient = () => {
+    setRecipients([...recipients, {
+      id: String(Date.now()),
+      name: '',
+      email: '',
+      role: 'signer',
+    }]);
+  };
+
+  const updateRecipient = (id: string, field: keyof Recipient, value: string) => {
+    setRecipients(recipients.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const removeRecipient = (id: string) => {
+    setRecipients(recipients.filter(r => r.id !== id));
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'white',
+      zIndex: 500,
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Top bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 24px',
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close"
+          >
+            <Icon name="close" size={20} color="var(--ink-text-default)" />
+          </button>
+          <span style={{ width: 1, height: 20, background: 'var(--ink-border-subtle)' }} />
+          <Text size="sm" weight="medium">Please Sign: Your Envelope Name Here</Text>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Button kind="tertiary" size="small">Advanced Options</Button>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Help"
+          >
+            <Icon name="help" size={20} color="var(--ink-text-secondary)" />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '40px 80px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+
+          {/* Add documents section */}
+          <section style={{ marginBottom: 40 }}>
+            <div style={sectionHeaderStyle} onClick={() => setDocsExpanded(!docsExpanded)}>
+              <h2 style={sectionTitleStyle}>Add documents</h2>
+              <Icon name={docsExpanded ? 'chevron-up' : 'chevron-down'} size={20} color="var(--ink-text-secondary)" />
+            </div>
+            {docsExpanded && (
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                {/* Show preselected documents as cards */}
+                {documents.map((docName, idx) => (
+                  <div key={idx} style={{
+                    width: 200,
+                    border: '1px solid var(--ink-border-subtle)',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      height: 140,
+                      background: 'var(--ink-bg-color-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 16,
+                    }}>
+                      <Icon name="file" size={40} color="var(--ink-text-secondary)" />
+                    </div>
+                    <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ink-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 2 }}>{docName}</Text>
+                        <Text size="xs" color="secondary">1 page</Text>
+                      </div>
+                      <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                    </div>
+                  </div>
+                ))}
+
+                {/* Upload dropzone */}
+                <div style={{
+                  width: 200,
+                  minHeight: 200,
+                  border: '2px dashed var(--ink-border-subtle)',
+                  borderRadius: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 12,
+                  padding: 24,
+                  cursor: 'pointer',
+                  transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--ink-cobalt-60)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'}
+                >
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 8,
+                    background: 'var(--ink-bg-color-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
+                  </div>
+                  <Text size="sm" color="secondary" style={{ textAlign: 'center' }}>Drag documents here or</Text>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Button kind="primary" size="small">Upload</Button>
+                    <button style={{
+                      background: 'var(--ink-cobalt-80)',
+                      border: 'none',
+                      borderLeft: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '0 6px 6px 0',
+                      padding: '6px 8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginLeft: -1,
+                    }}>
+                      <Icon name="chevron-down" size={14} color="white" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <div style={{ height: 1, background: 'var(--ink-border-subtle)', marginBottom: 40 }} />
+
+          {/* Add recipients section */}
+          <section style={{ marginBottom: 40 }}>
+            <div style={sectionHeaderStyle} onClick={() => setRecipientsExpanded(!recipientsExpanded)}>
+              <h2 style={sectionTitleStyle}>Add recipients</h2>
+              <Icon name={recipientsExpanded ? 'chevron-up' : 'chevron-down'} size={20} color="var(--ink-text-secondary)" />
+            </div>
+            {recipientsExpanded && (
+              <>
+                {/* Options row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={signingOrder}
+                      onChange={(e) => setSigningOrder(e.target.checked)}
+                      style={{ width: 16, height: 16, accentColor: 'var(--ink-cobalt-80)' }}
+                    />
+                    <Text size="sm">Set signing order</Text>
+                  </label>
+                  <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 14, color: 'var(--ink-cobalt-80)', textDecoration: 'none' }}>View</a>
+                  <span style={{ width: 1, height: 16, background: 'var(--ink-border-subtle)' }} />
+                  <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 14, color: 'var(--ink-cobalt-80)', textDecoration: 'none' }}>Import bulk list</a>
+                </div>
+
+                {/* Recipients list */}
+                {recipients.map((recipient) => (
+                  <div key={recipient.id} style={{
+                    borderLeft: '3px solid var(--ink-orange-60)',
+                    background: 'var(--ink-bg-color-default)',
+                    padding: '16px 20px',
+                    marginBottom: 16,
+                    borderRadius: '0 8px 8px 0',
+                  }}>
+                    <div style={{ display: 'flex', gap: 24 }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6, color: '#130032' }}>Name</label>
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            type="text"
+                            value={recipient.name}
+                            onChange={(e) => updateRecipient(recipient.id, 'name', e.target.value)}
+                            style={inputStyle}
+                          />
+                          <button style={{
+                            position: 'absolute',
+                            right: 8,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 4,
+                          }}>
+                            <Icon name="contacts" size={16} color="var(--ink-text-secondary)" />
+                          </button>
+                        </div>
+                        <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6, marginTop: 12, color: '#130032' }}>Email</label>
+                        <input
+                          type="email"
+                          value={recipient.email}
+                          onChange={(e) => updateRecipient(recipient.id, 'email', e.target.value)}
+                          style={inputStyle}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, paddingTop: 28 }}>
+                        <Button kind="tertiary" size="small" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Icon name="edit" size={14} />
+                          Needs to Sign
+                          <Icon name="chevron-down" size={14} />
+                        </Button>
+                        <Button kind="tertiary" size="small" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          Customize
+                          <Icon name="chevron-down" size={14} />
+                        </Button>
+                        <IconButton
+                          icon="delete"
+                          variant="tertiary"
+                          size="small"
+                          aria-label="Remove recipient"
+                          onClick={() => removeRecipient(recipient.id)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add recipient button */}
+                <Button kind="secondary" size="small" onClick={addRecipient} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Icon name="user-add" size={16} />
+                  Add Recipient
+                  <Icon name="chevron-down" size={14} />
+                </Button>
+              </>
+            )}
+          </section>
+
+          <div style={{ height: 1, background: 'var(--ink-border-subtle)', marginBottom: 40 }} />
+
+          {/* Add message section */}
+          <section style={{ marginBottom: 40 }}>
+            <div style={sectionHeaderStyle} onClick={() => setMessageExpanded(!messageExpanded)}>
+              <h2 style={sectionTitleStyle}>Add message</h2>
+              <Icon name={messageExpanded ? 'chevron-up' : 'chevron-down'} size={20} color="var(--ink-text-secondary)" />
+            </div>
+            {messageExpanded && (
+              <>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 20 }}>
+                  <input
+                    type="checkbox"
+                    checked={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.checked)}
+                    style={{ width: 16, height: 16, accentColor: 'var(--ink-cobalt-80)' }}
+                  />
+                  <Text size="sm">Custom email and language for each recipient</Text>
+                </label>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6, color: '#130032' }}>
+                    Email Subject <span style={{ color: '#C0392B' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <Text size="xs" color="secondary" style={{ marginTop: 4 }}>Characters remaining: {100 - emailSubject.length}</Text>
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6, color: '#130032' }}>Email Message</label>
+                  <textarea
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    style={{
+                      ...inputStyle,
+                      minHeight: 120,
+                      resize: 'vertical',
+                    }}
+                  />
+                  <Text size="xs" color="secondary" style={{ marginTop: 4 }}>Characters remaining: {1000 - emailMessage.length}</Text>
+                </div>
+
+                <div style={{ height: 1, background: 'var(--ink-border-subtle)', marginBottom: 20 }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Text size="sm" weight="semibold">Send a reminder every</Text>
+                  <select
+                    value={reminderDays}
+                    onChange={(e) => setReminderDays(e.target.value)}
+                    style={{
+                      padding: '6px 12px',
+                      border: '1px solid var(--ink-border-subtle)',
+                      borderRadius: 6,
+                      fontSize: 14,
+                      fontFamily: 'var(--ink-font-family)',
+                      background: 'white',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="1">1 day</option>
+                    <option value="2">2 days</option>
+                    <option value="3">3 days</option>
+                    <option value="5">5 days</option>
+                    <option value="7">7 days</option>
+                  </select>
+                </div>
+              </>
+            )}
+          </section>
+
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: 12,
+        padding: '16px 24px',
+        borderTop: '1px solid var(--ink-border-subtle)',
+        background: 'white',
+        flexShrink: 0,
+      }}>
+        <Button kind="secondary" size="medium">Send Now</Button>
+        <Button kind="primary" size="medium">Next</Button>
+      </div>
+    </div>
+  );
+}
+
+interface AddMenuProps {
+  onSignatureRequest?: () => void;
+}
+
+function AddMenu({ onSignatureRequest }: AddMenuProps) {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -2898,7 +3329,7 @@ function AddMenu() {
               </svg>
             }
             label="Signature Request"
-            onClick={() => { setOpen(false); setTasksOpen(false); }}
+            onClick={() => { setOpen(false); setTasksOpen(false); onSignatureRequest?.(); }}
           />
 
           {/* Other Tasks — with nested submenu (excludes Signature Request) */}
@@ -3043,6 +3474,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
+  const [showPrepare, setShowPrepare] = useState(false);
+  const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const fadeIn = useFadeIn(0, 250);
   
   // Check if this is a draft agreement
@@ -3188,7 +3621,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
-            <AddMenu />
+            <AddMenu onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }} />
           </Inline>
         </div>
 
@@ -3318,7 +3751,14 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                     <Button kind="secondary" size="small">
                       Send for Approval
                     </Button>
-                    <Button kind="primary" size="small">
+                    <Button kind="primary" size="small" onClick={() => {
+                      // Get the names of selected documents
+                      const selectedDocNames = currentDocuments
+                        .filter(doc => selectedDocs.has(doc.id))
+                        .map(doc => doc.name);
+                      setPreparePreselectedDocs(selectedDocNames);
+                      setShowPrepare(true);
+                    }}>
                       Send for Signature
                     </Button>
                   </div>
@@ -3647,6 +4087,13 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
 
 
       </div>
+
+      {/* Prepare Screen for Signature Request flow */}
+      <PrepareScreen
+        open={showPrepare}
+        onClose={() => setShowPrepare(false)}
+        preselectedDocs={preparePreselectedDocs}
+      />
     </div>
   );
 }
