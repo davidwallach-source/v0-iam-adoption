@@ -205,6 +205,97 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
             ))}
           </div>
         </div>
+
+        {/* Other Tasks section */}
+        <div>
+          <p style={{
+            margin: '0 0 12px 0',
+            fontSize: 14,
+            fontWeight: 600,
+            fontFamily: 'var(--ink-font-family)',
+            color: '#130032',
+          }}>Other Tasks</p>
+
+          <div style={{ display: 'flex', gap: 12 }}>
+            {[
+              {
+                label: 'Send an Agreement',
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1.5" y="3.5" width="15" height="11" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                    <path d="M1.5 5.5L9 10.5L16.5 5.5" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+              },
+              {
+                label: 'Sign a Document',
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2.5" y="1.5" width="11" height="15" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                    <path d="M10.5 1.5V5.5H14.5" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 11.5L13.5 10L15.5 12L14 13.5L12 11.5Z" stroke="#6B6B80" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M13.5 10L15 8.5L16.5 10L15 11.5" stroke="#6B6B80" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 13.5L11 16L13.5 15.5" stroke="#6B6B80" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+              },
+              {
+                label: 'Use a Template',
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1.5" y="1.5" width="15" height="15" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                    <path d="M1.5 6.5H16.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                    <path d="M7 6.5V16.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                  </svg>
+                ),
+              },
+              {
+                label: 'Create a Form',
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1.5" y="4.5" width="15" height="9" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                    <path d="M5 9H13" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round"/>
+                    <path d="M5 12H9" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round"/>
+                  </svg>
+                ),
+              },
+            ].map((task) => (
+              <button
+                key={task.label}
+                style={{
+                  flex: '1 1 0',
+                  minWidth: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '14px 16px',
+                  border: '1px solid var(--ink-neutral-fade-10)',
+                  borderRadius: 8,
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--ink-font-family)',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  color: '#130032',
+                  textAlign: 'left',
+                  transition: 'border-color 0.15s, background 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--ink-neutral-fade-30)';
+                  e.currentTarget.style.background = 'var(--ink-neutral-fade-3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--ink-neutral-fade-10)';
+                  e.currentTarget.style.background = 'white';
+                }}
+              >
+                <span style={{ flexShrink: 0 }}>{task.icon}</span>
+                {task.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
       </div>
 
     </Modal>
@@ -1878,7 +1969,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ══�����═══════════════════════════════════
+/* ═�������═══════════════════════════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
