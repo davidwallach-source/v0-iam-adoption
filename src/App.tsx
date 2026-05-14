@@ -1336,7 +1336,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═══════════════════════════════════════
+/* ═��═════════════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -3040,6 +3040,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [taskSearch, setTaskSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
+  const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const fadeIn = useFadeIn(0, 250);
   
   // Check if this is a draft agreement
@@ -3293,13 +3294,55 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                   </div>
                 </div>
 
-                {/* Negotiating documents table */}
+                {/* Bulk actions bar - shown when documents are selected */}
+                {selectedDocs.size > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '10px 16px',
+                    background: 'var(--ink-cobalt-10)',
+                    border: '1px solid var(--ink-cobalt-30)',
+                    borderRadius: 8,
+                    marginBottom: 'var(--ink-spacing-200)',
+                  }}>
+                    <Text size="sm" weight="semibold" style={{ color: 'var(--ink-cobalt-100)' }}>
+                      {selectedDocs.size} selected
+                    </Text>
+                    <div style={{ flex: 1 }} />
+                    <Button kind="secondary" size="small" onClick={() => setSelectedDocs(new Set())}>
+                      Clear
+                    </Button>
+                    <Button kind="secondary" size="small">
+                      Send for Approval
+                    </Button>
+                    <Button kind="primary" size="small">
+                      Send for Signature
+                    </Button>
+                  </div>
+                )}
+
+                {/* Primary documents table */}
                 {docSubTab === 'negotiating' && (
                   <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
                         <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '40%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', width: '5%' }}>
+                            <input
+                              type="checkbox"
+                              checked={currentDocuments.length > 0 && currentDocuments.every(doc => selectedDocs.has(doc.id))}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedDocs(new Set(currentDocuments.map(doc => doc.id)));
+                                } else {
+                                  setSelectedDocs(new Set());
+                                }
+                              }}
+                              style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                            />
+                          </th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>
                             <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>Status</th>
@@ -3315,8 +3358,25 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                           const isChild = !!doc.parentId;
                           const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
                           if (isChild && !isParentExpanded) return null;
+                          const isSelected = selectedDocs.has(doc.id);
                           return (
-                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    const newSelected = new Set(selectedDocs);
+                                    if (e.target.checked) {
+                                      newSelected.add(doc.id);
+                                    } else {
+                                      newSelected.delete(doc.id);
+                                    }
+                                    setSelectedDocs(newSelected);
+                                  }}
+                                  style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                                />
+                              </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   {doc.isParent && (
