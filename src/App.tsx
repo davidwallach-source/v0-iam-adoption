@@ -3907,7 +3907,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                <Inline gap="xsmall" align="center" style={{ justifyContent: 'flex-end' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
                                   <Button
                                     kind="secondary"
                                     size="small"
@@ -3915,7 +3915,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     {doc.status === 'Executed' ? 'View' : 'Edit'}
                                   </Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                                </Inline>
+                                </div>
                               </td>
                             </tr>
                           );
