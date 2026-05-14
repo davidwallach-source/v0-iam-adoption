@@ -1336,7 +1336,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═���═════════════════════════════════════
+/* ═������════════════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -2985,83 +2985,152 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
               <Icon name={docsExpanded ? 'chevron-up' : 'chevron-down'} size={20} color="var(--ink-text-secondary)" />
             </div>
             {docsExpanded && (
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                {/* Show preselected documents as cards */}
-                {documents.map((docName, idx) => (
-                  <div key={idx} style={{
-                    width: 200,
-                    border: '1px solid var(--ink-border-subtle)',
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                  }}>
-                    <div style={{
-                      height: 140,
-                      background: 'var(--ink-bg-color-secondary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 16,
-                    }}>
-                      <Icon name="file" size={40} color="var(--ink-text-secondary)" />
-                    </div>
-                    <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ink-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 2 }}>{docName}</Text>
-                        <Text size="xs" color="secondary">1 page</Text>
-                      </div>
-                      <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                    </div>
-                  </div>
-                ))}
-
-                {/* Upload dropzone */}
+              documents.length === 0 ? (
+                /* Empty state — full-width dropzone */
                 <div style={{
-                  width: 200,
-                  minHeight: 200,
-                  border: '2px dashed var(--ink-border-subtle)',
-                  borderRadius: 8,
+                  width: '100%',
+                  padding: '48px 24px',
+                  background: 'var(--ink-bg-color-secondary)',
+                  borderRadius: 10,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
-                  padding: 24,
+                  gap: 16,
                   cursor: 'pointer',
-                  transition: 'border-color 0.15s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--ink-cobalt-60)'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'}
-                >
+                }}>
+                  {/* Upload icon in rounded pill */}
                   <div style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 8,
-                    background: 'var(--ink-bg-color-secondary)',
+                    width: 52,
+                    height: 52,
+                    borderRadius: 14,
+                    background: '#D5D3DC',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                    <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M13 6.5V16H11V6.5L7.5 10L6.09 8.59L12 2.68L17.91 8.59L16.5 10L13 6.5ZM4 18H20V20H4V18Z" fill="#130032"/>
+                    </svg>
                   </div>
-                  <Text size="sm" color="secondary" style={{ textAlign: 'center' }}>Drag documents here or</Text>
+                  <Text size="sm" weight="medium" style={{ color: '#130032' }}>Drop your files here or</Text>
+                  {/* Upload button with chevron */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Button kind="primary" size="small">Upload</Button>
+                    <button style={{
+                      background: 'var(--ink-cobalt-80)',
+                      border: 'none',
+                      borderRadius: '6px 0 0 6px',
+                      padding: '10px 20px',
+                      cursor: 'pointer',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: 'white',
+                      fontFamily: 'var(--ink-font-family)',
+                    }}>
+                      Upload
+                    </button>
                     <button style={{
                       background: 'var(--ink-cobalt-80)',
                       border: 'none',
                       borderLeft: '1px solid rgba(255,255,255,0.3)',
                       borderRadius: '0 6px 6px 0',
-                      padding: '6px 8px',
+                      padding: '10px 10px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      marginLeft: -1,
                     }}>
                       <Icon name="chevron-down" size={14} color="white" />
                     </button>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* Has documents — card grid + small add tile */
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                  {documents.map((docName, idx) => (
+                    <div key={idx} style={{
+                      width: 200,
+                      border: '1px solid var(--ink-border-subtle)',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        height: 140,
+                        background: 'var(--ink-bg-color-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 16,
+                      }}>
+                        <Icon name="file" size={40} color="var(--ink-text-secondary)" />
+                      </div>
+                      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ink-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 2 }}>{docName}</Text>
+                          <Text size="xs" color="secondary">1 page</Text>
+                        </div>
+                        <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Small add tile */}
+                  <div style={{
+                    width: 200,
+                    minHeight: 200,
+                    border: '2px dashed var(--ink-border-subtle)',
+                    borderRadius: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 12,
+                    padding: 24,
+                    cursor: 'pointer',
+                    transition: 'border-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--ink-cobalt-60)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'}
+                  >
+                    <div style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 8,
+                      background: 'var(--ink-bg-color-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
+                    </div>
+                    <Text size="sm" color="secondary" style={{ textAlign: 'center' }}>Drag documents here or</Text>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <button style={{
+                        background: 'var(--ink-cobalt-80)',
+                        border: 'none',
+                        borderRadius: '6px 0 0 6px',
+                        padding: '7px 14px',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: 'white',
+                        fontFamily: 'var(--ink-font-family)',
+                      }}>Upload</button>
+                      <button style={{
+                        background: 'var(--ink-cobalt-80)',
+                        border: 'none',
+                        borderLeft: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '0 6px 6px 0',
+                        padding: '7px 8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}>
+                        <Icon name="chevron-down" size={14} color="white" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
             )}
           </section>
 
