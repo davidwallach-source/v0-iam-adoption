@@ -3855,15 +3855,14 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                             />
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '35%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '45%' }}>
                             <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>Status</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>Added by</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '18%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '18%' }}>Status</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '22%' }}>
                             <Inline gap="xsmall" align="center">Last modified <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', width: '6%' }}></th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', width: '15%' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3906,15 +3905,17 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                <Inline gap="small" align="center">
-                                  <Avatar initials={doc.ownerInitials} size="small" />
-                                  <Text size="sm">{doc.owner}</Text>
-                                </Inline>
-                              </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                <Inline gap="xsmall" align="center" style={{ justifyContent: 'flex-end' }}>
+                                  <Button
+                                    kind="secondary"
+                                    size="small"
+                                  >
+                                    {doc.status === 'Executed' ? 'View' : 'Edit'}
+                                  </Button>
+                                  <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                </Inline>
                               </td>
                             </tr>
                           );
