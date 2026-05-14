@@ -3911,6 +3911,11 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   <Button
                                     kind="secondary"
                                     size="small"
+                                    onClick={() => {
+                                      if (doc.status !== 'Executed' && isNDADraft && onEditNDA) {
+                                        onEditNDA();
+                                      }
+                                    }}
                                   >
                                     {doc.status === 'Executed' ? 'View' : 'Edit'}
                                   </Button>
