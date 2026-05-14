@@ -2890,7 +2890,18 @@ function AddMenu() {
           {/* Divider */}
           <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
 
-          {/* Tasks — with nested submenu */}
+          {/* Signature Request — top-level */}
+          <MenuRow
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.41 17.9989L5.41 16.9983H8.24L18.11 7.12285C18.7 6.53252 19 5.76209 19 4.99166C19 4.22123 18.7 3.46081 18.11 2.88049C17.52 2.29016 16.76 2 15.99 2C15.22 2 14.45 2.29016 13.87 2.88049L4 12.756V15.5875L2 17.5887V20H22V17.9989H4.41ZM5.9 13.5364L15.21 4.22123C15.42 4.01112 15.69 3.90106 15.99 3.90106C16.29 3.90106 16.56 4.01112 16.77 4.22123C16.98 4.43135 17.09 4.7015 17.09 5.00167C17.09 5.30183 16.98 5.57198 16.77 5.7821L7.46 15.0973H5.9V13.5364Z" fill="#130032" fillOpacity="0.9"/>
+              </svg>
+            }
+            label="Signature Request"
+            onClick={() => { setOpen(false); setTasksOpen(false); }}
+          />
+
+          {/* Other Tasks — with nested submenu (excludes Signature Request) */}
           <div
             style={{ position: 'relative' }}
             onMouseEnter={openTasks}
@@ -2903,7 +2914,7 @@ function AddMenu() {
                   <path d="M5 8l2 2 4-4" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               }
-              label="Tasks"
+              label="Other Tasks"
               chevron
             />
 
@@ -2912,18 +2923,18 @@ function AddMenu() {
                 onMouseEnter={openTasks}
                 onMouseLeave={closeTasks}
                 style={{
-                position: 'absolute',
-                top: 0,
-                right: 'calc(100% + 2px)',
-                background: 'white',
-                border: '1px solid var(--ink-border-subtle)',
-                borderRadius: 8,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-                zIndex: 201,
-                minWidth: 220,
-                padding: 4,
-              }}>
-                {/* Invisible bridge to cover gap between panels */}
+                  position: 'absolute',
+                  top: 0,
+                  right: 'calc(100% + 2px)',
+                  background: 'white',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 8,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                  zIndex: 201,
+                  minWidth: 220,
+                  padding: 4,
+                }}>
+                {/* Invisible bridge to prevent hover gap */}
                 <div style={{
                   position: 'absolute',
                   top: 0,
@@ -2932,15 +2943,6 @@ function AddMenu() {
                   height: '100%',
                   background: 'transparent',
                 }} />
-                <MenuRow
-                  icon={
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4.41 17.9989L5.41 16.9983H8.24L18.11 7.12285C18.7 6.53252 19 5.76209 19 4.99166C19 4.22123 18.7 3.46081 18.11 2.88049C17.52 2.29016 16.76 2 15.99 2C15.22 2 14.45 2.29016 13.87 2.88049L4 12.756V15.5875L2 17.5887V20H22V17.9989H4.41ZM5.9 13.5364L15.21 4.22123C15.42 4.01112 15.69 3.90106 15.99 3.90106C16.29 3.90106 16.56 4.01112 16.77 4.22123C16.98 4.43135 17.09 4.7015 17.09 5.00167C17.09 5.30183 16.98 5.57198 16.77 5.7821L7.46 15.0973H5.9V13.5364Z" fill="#130032" fill-opacity="0.9"/>
-                    </svg>
-                  }
-                  label="Signature Request"
-                  onClick={() => { setOpen(false); setTasksOpen(false); }}
-                />
                 <MenuRow
                   icon={
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
