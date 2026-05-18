@@ -2925,7 +2925,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
       position: 'fixed',
       inset: 0,
       background: 'white',
-      zIndex: 500,
+      zIndex: 1100,
       display: 'flex',
       flexDirection: 'column',
     }}>
@@ -3579,7 +3579,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
       { id: '2', title: 'Draft Services Agreement', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
       { id: '3', title: 'Prepare Statement of Work', type: 'Form', team: 'Sender', assignee: 'Carlton Banks', assigneeInitials: 'CB', status: 'Not started', dueDate: '—' },
       { id: '4', title: 'Legal Review', type: 'Review', team: 'Legal', assignee: 'Legal Team', assigneeInitials: 'LT', status: 'Not started', dueDate: '—' },
-      { id: '5', title: 'Finance Approval', type: 'Approval', team: 'Finance', assignee: 'Finance Team', assigneeInitials: 'FT', status: 'Not started', dueDate: '��' },
+      { id: '5', title: 'Finance Approval', type: 'Approval', team: 'Finance', assignee: 'Finance Team', assigneeInitials: 'FT', status: 'Not started', dueDate: '����' },
       { id: '6', title: 'Collect Vendor Insurance Certificate', type: 'Request', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
       { id: '7', title: 'Send for Vendor Signature', type: 'Sign', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
       { id: '8', title: 'Execute Agreement', type: 'Sign', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
