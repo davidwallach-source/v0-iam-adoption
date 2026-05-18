@@ -3322,8 +3322,8 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
         background: 'white',
         flexShrink: 0,
       }}>
-        <Button kind="secondary" size="medium">Send Now</Button>
-        <Button kind="primary" size="medium">Next</Button>
+        <Button kind="secondary" size="medium">Next</Button>
+        <Button kind="primary" size="medium">Send Now</Button>
       </div>
     </div>
   );
