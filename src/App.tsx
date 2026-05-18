@@ -1440,10 +1440,10 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '8', title: 'Sign Data Processing Agreement', type: 'Sign', team: 'External', assignee: 'Globex Industries', assigneeInitials: 'GI', status: 'Not started', dueDate: '5/12/26' },
     ],
     documents: [
-      { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 5, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/24/2026', isParent: true },
-      { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 8, status: 'In Review', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/23/2026', parentId: '1' },
-      { id: '3', name: 'Security & Compliance Addendum', commentCount: 2, status: 'In Review', owner: 'Priya Sharma', ownerInitials: 'PS', dateModified: '4/22/2026', parentId: '1' },
-      { id: '4', name: 'Service Level Agreement (SLA)', status: 'In Review', owner: 'David Kim', ownerInitials: 'DK', dateModified: '4/20/2026', parentId: '1' },
+    { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 5, status: 'In Review', dateModified: '4/24/2026' },
+    { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 8, status: 'In Review', dateModified: '4/23/2026' },
+    { id: '3', name: 'Security & Compliance Addendum', commentCount: 2, status: 'In Review', dateModified: '4/22/2026' },
+    { id: '4', name: 'Service Level Agreement (SLA)', status: 'In Review', dateModified: '4/20/2026' },
       { id: '5', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '3/10/2026' },
     ],
     supplementalDocs: [
@@ -1474,9 +1474,9 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '6', title: 'Sign Supply Agreement', type: 'Sign', team: 'Procurement', assignee: 'Sarah Martinez', assigneeInitials: 'SM', status: 'Not started', dueDate: '5/8/26' },
     ],
     documents: [
-      { id: '1', name: 'Supply Agreement', commentCount: 4, status: 'In Review', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '4/23/2026', isParent: true },
-      { id: '2', name: 'Quality Standards Exhibit', commentCount: 1, status: 'In Review', owner: 'Robert Yang', ownerInitials: 'RY', dateModified: '4/22/2026', parentId: '1' },
-      { id: '3', name: 'Pricing Schedule', status: 'In Review', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '4/21/2026', parentId: '1' },
+    { id: '1', name: 'Supply Agreement', commentCount: 4, status: 'In Review', dateModified: '4/23/2026' },
+    { id: '2', name: 'Quality Standards Exhibit', commentCount: 1, status: 'In Review', dateModified: '4/22/2026' },
+    { id: '3', name: 'Pricing Schedule', status: 'In Review', dateModified: '4/21/2026' },
       { id: '4', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Sarah Martinez', ownerInitials: 'SM', dateModified: '3/15/2026' },
     ],
     supplementalDocs: [
@@ -1503,9 +1503,9 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '4', title: 'Vendor Counter-signature', type: 'Sign', team: 'External', assignee: 'DataVault Technologies', assigneeInitials: 'DV', status: 'Not started', dueDate: '4/28/26' },
     ],
     documents: [
-      { id: '1', name: 'Master Service Agreement', status: 'Executed', owner: 'Jennifer Mills', ownerInitials: 'JM', dateModified: '4/20/2026', isParent: true },
-      { id: '2', name: 'Data Processing Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '4/22/2026', parentId: '1' },
-      { id: '3', name: 'Security Addendum', commentCount: 1, status: 'In Review', owner: 'Priya Sharma', ownerInitials: 'PS', dateModified: '4/24/2026', parentId: '1' },
+    { id: '1', name: 'Master Service Agreement', status: 'Executed', dateModified: '4/20/2026' },
+    { id: '2', name: 'Data Processing Agreement', status: 'Executed', dateModified: '4/22/2026' },
+    { id: '3', name: 'Security Addendum', commentCount: 1, status: 'In Review', dateModified: '4/24/2026' },
     ],
     supplementalDocs: [
       { id: '4', name: 'SOC 2 Type II Report', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '4/1/2026' },
@@ -1528,8 +1528,8 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '2', title: 'Sign Statement of Work', type: 'Sign', team: 'Procurement', assignee: 'David Kim', assigneeInitials: 'DK', status: 'Not started', dueDate: '5/1/26' },
     ],
     documents: [
-      { id: '1', name: 'Statement of Work', commentCount: 2, status: 'In Review', owner: 'David Kim', ownerInitials: 'DK', dateModified: '4/21/2026', isParent: true },
-      { id: '2', name: 'Rate Card & Fee Schedule', status: 'In Review', owner: 'Marcus Webb', ownerInitials: 'MW', dateModified: '4/20/2026', parentId: '1' },
+    { id: '1', name: 'Statement of Work', commentCount: 2, status: 'In Review', dateModified: '4/21/2026' },
+    { id: '2', name: 'Rate Card & Fee Schedule', status: 'In Review', dateModified: '4/20/2026' },
     ],
     supplementalDocs: [],
     attentionItems: [
@@ -1548,8 +1548,8 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '2', title: 'Sign License Renewal', type: 'Sign', team: 'IT', assignee: 'Kevin Park', assigneeInitials: 'KP', status: 'Not started', dueDate: '5/5/26' },
     ],
     documents: [
-      { id: '1', name: 'License Renewal Agreement', status: 'In Review', owner: 'Kevin Park', ownerInitials: 'KP', dateModified: '4/20/2026', isParent: true },
-      { id: '2', name: 'Updated Pricing Schedule', status: 'In Review', owner: 'Marcus Webb', ownerInitials: 'MW', dateModified: '4/19/2026', parentId: '1' },
+    { id: '1', name: 'License Renewal Agreement', status: 'In Review', dateModified: '4/20/2026' },
+    { id: '2', name: 'Updated Pricing Schedule', status: 'In Review', dateModified: '4/19/2026' },
     ],
     supplementalDocs: [
       { id: '3', name: 'Original License Agreement (Reference)', owner: 'Kevin Park', ownerInitials: 'KP', dateModified: '5/10/2025' },
@@ -2677,7 +2677,7 @@ function AdminPage() {
   );
 }
 
-/* ═══════════════════════�����═══════════════
+/* ═══════════════════════�������═══════════════
    Footer
    ══════════���������════════════════════════════ */
 
@@ -2792,10 +2792,10 @@ const DEAL_TASKS: DealTask[] = [
 ];
 
 const DEAL_DOCUMENTS: DealDocument[] = [
-  { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 3, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/15/2026', isParent: true },
-  { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 2, status: 'In Review', owner: 'Leona Legal', ownerInitials: 'LL', dateModified: '3/20/2026', parentId: '1' },
-  { id: '3', name: 'Security Terms', status: 'In Review', owner: 'Sam Sales', ownerInitials: 'SS', dateModified: '3/22/2026', parentId: '1' },
-  { id: '4', name: 'AI Addendum', commentCount: 5, status: 'In Review', owner: 'Patricia Procurement', ownerInitials: 'PP', dateModified: '3/23/2026', parentId: '1' },
+    { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 3, status: 'In Review', dateModified: '3/15/2026' },
+    { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 2, status: 'In Review', dateModified: '3/20/2026' },
+    { id: '3', name: 'Security Terms', status: 'In Review', dateModified: '3/22/2026' },
+    { id: '4', name: 'AI Addendum', commentCount: 5, status: 'In Review', dateModified: '3/23/2026' },
 ];
 
 const SUPPLEMENTAL_DOCUMENTS: DealDocument[] = [
@@ -3542,84 +3542,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1']));
-  const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
-  const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
-  const [showPrepare, setShowPrepare] = useState(false);
-  const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
-  const fadeIn = useFadeIn(0, 250);
-  
-  // Check if this is a draft agreement
-  const isNDADraft = agreement.id === 'nda-draft';
-  const isPurchaseDraft = agreement.id.startsWith('purchase-');
-  
-  // Generate NDA-specific workspace data if this is a draft NDA
-  const ndaWorkspaceData = isNDADraft ? {
-    tasks: [
-      { id: '1', title: 'Complete NDA Form Fields', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: savedNDAData?.disclosingParty && savedNDAData?.receivingParty ? 'Complete' : 'In progress', dueDate: '—' },
-      { id: '2', title: 'Send for Signature', type: 'Sign', team: 'External', assignee: savedNDAData?.receivingParty || 'Receiving Party', assigneeInitials: savedNDAData?.receivingParty?.substring(0, 2).toUpperCase() || 'RP', status: 'Not started', dueDate: '—' },
-    ],
-    documents: [
-      { id: '1', name: 'Non-Disclosure Agreement', status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: new Date().toLocaleDateString('en-US') },
-    ],
-    supplementalDocs: [],
-    attentionItems: (!savedNDAData?.disclosingParty || !savedNDAData?.receivingParty) ? [
-      { id: '1', item: 'Complete Required Fields', description: 'Fill in all required fields before sending for signature', riskLevel: 'Medium' as const },
-    ] : [],
-    activity: [
-      { id: '1', icon: 'edit' as const, user: 'You', action: 'Created NDA draft', time: 'Just now' },
-    ],
-  } : null;
-  
-  // Generate Purchase Agreement workspace data for new purchase agreements
-  const todayFormatted = new Date().toLocaleDateString('en-US');
-  const purchaseWorkspaceData = isPurchaseDraft ? {
-    tasks: [
-      { id: '1', title: 'Complete Purchase Request Form', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
-      { id: '2', title: 'Draft Services Agreement', type: 'Form', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
-      { id: '3', title: 'Prepare Statement of Work', type: 'Form', team: 'Sender', assignee: 'Carlton Banks', assigneeInitials: 'CB', status: 'Not started', dueDate: '—' },
-      { id: '4', title: 'Legal Review', type: 'Review', team: 'Legal', assignee: 'Legal Team', assigneeInitials: 'LT', status: 'Not started', dueDate: '—' },
-      { id: '5', title: 'Finance Approval', type: 'Approval', team: 'Finance', assignee: 'Finance Team', assigneeInitials: 'FT', status: 'Not started', dueDate: '����' },
-      { id: '6', title: 'Collect Vendor Insurance Certificate', type: 'Request', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
-      { id: '7', title: 'Send for Vendor Signature', type: 'Sign', team: 'External', assignee: agreement.party, assigneeInitials: agreement.partyLogo, status: 'Not started', dueDate: '—' },
-      { id: '8', title: 'Execute Agreement', type: 'Sign', team: 'Sender', assignee: 'You', assigneeInitials: 'YO', status: 'Not started', dueDate: '—' },
-    ],
-    documents: [
-      { id: '1', name: 'Purchase Request Form.docx', status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
-      { id: '2', name: `${agreement.party} - Services Agreement.docx`, status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
-      { id: '3', name: `${agreement.party} - NDA.docx`, status: 'Draft', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
-      { id: '4', name: 'Statement of Work.docx', status: 'Draft', owner: 'Carlton Banks', ownerInitials: 'CB', dateModified: todayFormatted },
-      { id: '5', name: 'Certificate of Insurance.pdf', status: 'Pending', owner: agreement.party, ownerInitials: agreement.partyLogo, dateModified: '—' },
-    ],
-    supplementalDocs: [
-      { id: '6', name: 'Vendor Onboarding Checklist', owner: 'You', ownerInitials: 'YO', dateModified: todayFormatted },
-      { id: '7', name: 'Standard Terms & Conditions', owner: 'Legal Team', ownerInitials: 'LT', dateModified: todayFormatted },
-    ],
-    attentionItems: [], // No attention items for a brand new agreement
-    activity: [
-      { id: '1', icon: 'edit' as const, user: 'You', action: 'Created purchase agreement', time: 'Just now' },
-      { id: '2', icon: 'users' as const, user: 'You', action: 'Added Carlton Banks as collaborator', time: 'Just now' },
-      { id: '3', icon: 'document' as const, user: 'System', action: 'Generated document package from template', time: 'Just now' },
-    ],
-  } : null;
-  
-  // Get per-agreement data or fall back to first agreement's data
-  const workspaceData = ndaWorkspaceData || purchaseWorkspaceData || AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
-  const currentTasks = workspaceData.tasks;
-  const currentDocuments = workspaceData.documents;
-  const currentSupplementalDocs = workspaceData.supplementalDocs;
-  const currentAttentionItems = workspaceData.attentionItems;
-  const currentActivity = workspaceData.activity;
-
-  const toggleGroup = (id: string) => {
-    const newExpanded = new Set(expandedGroups);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedGroups(newExpanded);
-  };
 
   const tabStyle = (isActive: boolean): CSSProperties => ({
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
@@ -3867,9 +3789,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                       </thead>
                       <tbody>
                         {currentDocuments.map((doc) => {
-                          const isChild = !!doc.parentId;
-                          const isParentExpanded = !doc.parentId || expandedGroups.has(doc.parentId);
-                          if (isChild && !isParentExpanded) return null;
                           const isSelected = selectedDocs.has(doc.id);
                           return (
                             <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent' }}>
@@ -3889,13 +3808,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                                 />
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: isChild ? 'calc(var(--ink-spacing-150) + 24px)' : 'var(--ink-spacing-150)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
-                                  {doc.isParent && (
-                                    <button onClick={() => toggleGroup(doc.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', flexShrink: 0 }}>
-                                      <Icon name={expandedGroups.has(doc.id) ? 'chevron-down' : 'chevron-right'} size={16} />
-                                    </button>
-                                  )}
                                   <Text size="sm">{doc.name}</Text>
                                   {doc.commentCount && (
                                     <AlertBadge value={doc.commentCount} kind="emphasis" />
