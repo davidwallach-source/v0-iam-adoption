@@ -3551,14 +3551,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   // Determine if this is an NDA draft
   const isNDADraft = agreement.id === 'nda-draft';
 
-  // Get workspace data based on agreement type
-  const workspaceData = isNDADraft ? ndaWorkspaceData : (
-    agreement.type === 'Purchase' ? purchaseWorkspaceData :
-    agreement.type === 'Request' ? requestWorkspaceData :
-    agreementWorkspaceData[agreement.id as keyof typeof agreementWorkspaceData] || fontaraData
-  );
-
-  const currentDocuments = docSubTab === 'negotiating' ? workspaceData.primaryDocuments : workspaceData.supplementalDocuments;
+  // Get workspace data for the agreement
+  const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
+  
+  const currentDocuments = docSubTab === 'negotiating' ? workspaceData.documents : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   const tabStyle = (isActive: boolean): CSSProperties => ({
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
