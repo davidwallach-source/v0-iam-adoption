@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════���������═══�����������══════════════════════════════
+/* ════����������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3919,73 +3919,99 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                           // Handle envelope rows
                           if ('isEnvelope' in item && item.isEnvelope) {
                             const envelope = item;
-                            const docNames = envelope.documents.map(d => d.name).join(', ');
+                            const envelopeDocNames = envelope.documentNames || envelope.documents.map(d => d.name);
                             return (
-                              <tr key={`env-${envelope.envelopeId}`} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                  <input
-                                    type="checkbox"
-                                    style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
-                                  />
-                                </td>
-                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                  <Inline gap="small" align="center">
-                                    <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
-                                    <div>
-                                      <Tooltip text={envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')} location="below">
-                                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                                          <Text size="sm" weight="medium">
-                                            {envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
-                                          </Text>
-                                        </div>
-                                      </Tooltip>
-                                      <Text size="xs" color="secondary">Sent to: {envelope.waitingFor || envelope.signatureProgress?.waitingFor || 'recipient'}</Text>
-                                    </div>
-                                  </Inline>
-                                </td>
-                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                  {envelope.signatureProgress && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 180 }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                                        <div style={{
-                                          width: 8,
-                                          height: 8,
-                                          borderRadius: '50%',
-                                          background: 'var(--ink-cobalt-80)',
-                                          flexShrink: 0,
-                                        }} />
-                                        <div style={{
-                                          flex: 1,
-                                          height: 2,
-                                          background: 'var(--ink-border-subtle)',
-                                          position: 'relative',
-                                        }}>
-                                          <div style={{
-                                            position: 'absolute',
-                                            left: 0,
-                                            top: 0,
-                                            height: '100%',
-                                            width: `${(envelope.signatureProgress.signed / envelope.signatureProgress.total) * 100}%`,
-                                            background: 'var(--ink-cobalt-80)',
-                                          }} />
-                                        </div>
+                              <React.Fragment key={`env-${envelope.envelopeId}`}>
+                                {/* Envelope parent row */}
+                                <tr style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                    <input
+                                      type="checkbox"
+                                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                                    />
+                                  </td>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                    <Inline gap="small" align="center">
+                                      <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
+                                      <div>
+                                        <Tooltip text={envelopeDocNames.join(', ')} location="below">
+                                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
+                                            <Text size="sm" weight="medium">
+                                              {envelopeDocNames.join(', ')}
+                                            </Text>
+                                          </div>
+                                        </Tooltip>
+                                        <Text size="xs" color="secondary">Sent to: {envelope.waitingFor || envelope.signatureProgress?.waitingFor || 'recipient'}</Text>
                                       </div>
-                                      <Text size="xs" style={{ color: '#130032' }}>
-                                        Waiting for {envelope.signatureProgress.waitingFor}
-                                      </Text>
-                                    </div>
-                                  )}
-                                </td>
-                                <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
-                                  {envelope.documents[0]?.dateModified}
-                                </td>
-                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                  <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                    <Button kind="secondary" size="small">View</Button>
-                                    <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
-                                  </Inline>
-                                </td>
-                              </tr>
+                                    </Inline>
+                                  </td>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                    {envelope.signatureProgress && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 180 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                          <div style={{
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            background: 'var(--ink-cobalt-80)',
+                                            flexShrink: 0,
+                                          }} />
+                                          <div style={{
+                                            flex: 1,
+                                            height: 2,
+                                            background: 'var(--ink-border-subtle)',
+                                            position: 'relative',
+                                          }}>
+                                            <div style={{
+                                              position: 'absolute',
+                                              left: 0,
+                                              top: 0,
+                                              height: '100%',
+                                              width: `${(envelope.signatureProgress.signed / envelope.signatureProgress.total) * 100}%`,
+                                              background: 'var(--ink-cobalt-80)',
+                                            }} />
+                                          </div>
+                                        </div>
+                                        <Text size="xs" style={{ color: '#130032' }}>
+                                          Waiting for {envelope.signatureProgress.waitingFor}
+                                        </Text>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
+                                    {envelope.documents[0]?.dateModified}
+                                  </td>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                    <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                      <Button kind="secondary" size="small">View</Button>
+                                      <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                    </Inline>
+                                  </td>
+                                </tr>
+                                {/* Nested document rows */}
+                                {envelopeDocNames.map((docName, docIdx) => (
+                                  <tr key={`env-${envelope.envelopeId}-doc-${docIdx}`} style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                      {/* Empty checkbox cell for alignment */}
+                                    </td>
+                                    <td style={{ padding: 'var(--ink-spacing-150)', paddingLeft: 'var(--ink-spacing-400)' }}>
+                                      <Inline gap="small" align="center">
+                                        <Icon name="file" size={14} color="var(--ink-text-secondary)" />
+                                        <Text size="sm" color="secondary">{docName}</Text>
+                                      </Inline>
+                                    </td>
+                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                      {/* Status inherited from envelope */}
+                                    </td>
+                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                      {/* Date inherited from envelope */}
+                                    </td>
+                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                      {/* No actions for nested docs */}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </React.Fragment>
                             );
                           }
                           
