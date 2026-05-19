@@ -1889,7 +1889,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════════��������══════════════════════════════
+/* ════════���������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3916,8 +3916,11 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   <Inline gap="small" align="center">
                                     <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
                                     <div>
-                                      <div title={envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}>
-                                        <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
+                                      <div 
+                                        title={envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
+                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300, cursor: 'default' }}
+                                      >
+                                        <Text size="sm" weight="medium">
                                           {envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
                                         </Text>
                                       </div>
