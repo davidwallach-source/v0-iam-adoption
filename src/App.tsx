@@ -1889,7 +1889,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════════�����══════════════════════════════
+/* ════════������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3919,7 +3919,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                       <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
                                         {envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
                                       </Text>
-                                      <Text size="xs" color="secondary">{envelope.documentNames?.length || envelope.documents.length} documents</Text>
+                                      <Text size="xs" color="secondary">Sent to: {envelope.waitingFor || envelope.signatureProgress?.waitingFor || 'recipient'}</Text>
                                     </div>
                                   </Inline>
                                 </td>
