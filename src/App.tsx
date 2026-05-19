@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef, type CSSProperties } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════����������═══�����������══════════════════════════════
+/* ════�����������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
