@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══���═�����������═══�����������══════════════════════════════
+/* ══�����═�����������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -4708,6 +4708,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       { id: 'home',       label: 'Home',        active: activeTab === 'home',       onClick: () => handleTabClick('home') },
       { id: 'agreements', label: 'Agreements',   active: activeTab === 'agreements', onClick: () => handleTabClick('agreements') },
       { id: 'templates',  label: 'Templates',    active: activeTab === 'templates',  onClick: () => handleTabClick('templates') },
+      { id: 'insights',   label: 'Insights',     active: activeTab === 'insights',   onClick: () => handleTabClick('insights') },
       { id: 'admin',      label: 'Admin',        active: activeTab === 'admin',      onClick: () => handleTabClick('admin') },
     ],
     showSettings: true,
