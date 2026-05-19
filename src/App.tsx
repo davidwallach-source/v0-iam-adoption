@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════��═══�����������══════════════════════════════
+/* ════���═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -4266,7 +4266,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                     <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
-                          <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
+                          <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : task.type === 'Sign' ? 'pen-signature' : 'upload'} size={16} color="var(--ink-text-secondary)" />
                           <div>
                             <Text size="sm">{task.title}</Text>
                             <Text size="xs" color="secondary">{task.type}</Text>
