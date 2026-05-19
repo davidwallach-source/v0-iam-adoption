@@ -1505,7 +1505,8 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
     documents: [
     { id: '1', name: 'Master Service Agreement', status: 'Executed', dateModified: '4/20/2026' },
     { id: '2', name: 'Data Processing Agreement', status: 'Executed', dateModified: '4/22/2026' },
-    { id: '3', name: 'Security Addendum', commentCount: 1, status: 'In Review', dateModified: '4/24/2026' },
+    { id: '3', name: 'Security Addendum', commentCount: 1, status: 'Pending Signature', dateModified: '4/24/2026', signatureProgress: { signed: 2, total: 4, waitingFor: 'Bruce Wallach' }, envelopeId: 'env-001' },
+    { id: '4', name: 'AI Terms Addendum', status: 'Pending Signature', dateModified: '4/24/2026', signatureProgress: { signed: 2, total: 4, waitingFor: 'Bruce Wallach' }, envelopeId: 'env-001' },
     ],
     supplementalDocs: [
       { id: '4', name: 'SOC 2 Type II Report', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '4/1/2026' },
@@ -2774,12 +2775,18 @@ interface DealDocument {
   id: string;
   name: string;
   commentCount?: number;
-  status: 'In Review' | 'Executed';
-  owner: string;
-  ownerInitials: string;
+  status: 'In Review' | 'Executed' | 'Pending Signature' | 'Draft';
+  owner?: string;
+  ownerInitials?: string;
   dateModified: string;
   isParent?: boolean;
   parentId?: string;
+  signatureProgress?: {
+    signed: number;
+    total: number;
+    waitingFor: string;
+  };
+  envelopeId?: string;
 }
 
 const DEAL_TASKS: DealTask[] = [
@@ -3565,6 +3572,38 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const currentDocuments = docSubTab === 'negotiating' ? workspaceData.documents : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
+
+  // Group documents by envelope - documents with same envelopeId become a single envelope row
+  const processedDocuments = useMemo(() => {
+    const envelopeMap = new Map<string, DealDocument[]>();
+    const standalone: DealDocument[] = [];
+    
+    currentDocuments.forEach(doc => {
+      if (doc.envelopeId) {
+        const existing = envelopeMap.get(doc.envelopeId) || [];
+        existing.push(doc);
+        envelopeMap.set(doc.envelopeId, existing);
+      } else {
+        standalone.push(doc);
+      }
+    });
+    
+    // Convert envelopes to envelope rows
+    const envelopeRows: (DealDocument | { isEnvelope: true; envelopeId: string; documents: DealDocument[]; signatureProgress: DealDocument['signatureProgress'] })[] = [];
+    
+    envelopeMap.forEach((docs, envId) => {
+      envelopeRows.push({
+        isEnvelope: true,
+        envelopeId: envId,
+        documents: docs,
+        signatureProgress: docs[0]?.signatureProgress, // Use first doc's progress
+      });
+    });
+    
+    return [...standalone, ...envelopeRows];
+  }, [currentDocuments]);
+
+  const currentSupplementalDocs = workspaceData.supplementalDocs;
   const tabStyle = (isActive: boolean): CSSProperties => ({
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
     border: 'none',
@@ -3583,6 +3622,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
     if (status === 'Complete') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
     if (status === 'In Review') return { background: 'var(--ink-cobalt-20)', color: 'var(--ink-cobalt-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
     if (status === 'Executed') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    if (status === 'Pending Signature') return { background: 'var(--ink-yellow-20)', color: 'var(--ink-yellow-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
     return {};
   };
 
@@ -3810,7 +3850,76 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                         </tr>
                       </thead>
                       <tbody>
-                        {currentDocuments.map((doc) => {
+                        {processedDocuments.map((item, idx) => {
+                          // Handle envelope rows
+                          if ('isEnvelope' in item && item.isEnvelope) {
+                            const envelope = item;
+                            const docNames = envelope.documents.map(d => d.name).join(', ');
+                            return (
+                              <tr key={`env-${envelope.envelopeId}`} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <input
+                                    type="checkbox"
+                                    style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                                  />
+                                </td>
+                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <Inline gap="small" align="center">
+                                    <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
+                                    <div>
+                                      <Text size="sm" weight="medium">Signature Request</Text>
+                                      <Text size="xs" color="secondary">{envelope.documents.length} documents</Text>
+                                    </div>
+                                  </Inline>
+                                </td>
+                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  {envelope.signatureProgress && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 180 }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                        <div style={{
+                                          width: 8,
+                                          height: 8,
+                                          borderRadius: '50%',
+                                          background: 'var(--ink-cobalt-80)',
+                                          flexShrink: 0,
+                                        }} />
+                                        <div style={{
+                                          flex: 1,
+                                          height: 2,
+                                          background: 'var(--ink-border-subtle)',
+                                          position: 'relative',
+                                        }}>
+                                          <div style={{
+                                            position: 'absolute',
+                                            left: 0,
+                                            top: 0,
+                                            height: '100%',
+                                            width: `${(envelope.signatureProgress.signed / envelope.signatureProgress.total) * 100}%`,
+                                            background: 'var(--ink-cobalt-80)',
+                                          }} />
+                                        </div>
+                                      </div>
+                                      <Text size="xs" style={{ color: '#130032' }}>
+                                        Waiting for {envelope.signatureProgress.waitingFor}
+                                      </Text>
+                                    </div>
+                                  )}
+                                </td>
+                                <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
+                                  {envelope.documents[0]?.dateModified}
+                                </td>
+                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                    <Button kind="secondary" size="small">View</Button>
+                                    <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                  </Inline>
+                                </td>
+                              </tr>
+                            );
+                          }
+                          
+                          // Handle regular document rows
+                          const doc = item as DealDocument;
                           const isSelected = selectedDocs.has(doc.id);
                           return (
                             <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent' }}>
@@ -3839,7 +3948,41 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                 </Inline>
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                                {doc.signatureProgress ? (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 180 }}>
+                                    {/* Progress bar */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                      <div style={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: '50%',
+                                        background: 'var(--ink-cobalt-80)',
+                                        flexShrink: 0,
+                                      }} />
+                                      <div style={{
+                                        flex: 1,
+                                        height: 2,
+                                        background: 'var(--ink-border-subtle)',
+                                        position: 'relative',
+                                      }}>
+                                        <div style={{
+                                          position: 'absolute',
+                                          left: 0,
+                                          top: 0,
+                                          height: '100%',
+                                          width: `${(doc.signatureProgress.signed / doc.signatureProgress.total) * 100}%`,
+                                          background: 'var(--ink-cobalt-80)',
+                                        }} />
+                                      </div>
+                                    </div>
+                                    {/* Waiting text */}
+                                    <Text size="xs" style={{ color: '#130032' }}>
+                                      Waiting for {doc.signatureProgress.waitingFor}
+                                    </Text>
+                                  </div>
+                                ) : (
+                                  <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                                )}
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
