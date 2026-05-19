@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════��������═══�����������══════════════════════════════
+/* ════���������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3610,7 +3610,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const currentDocuments = docSubTab === 'negotiating' ? workspaceData.documents : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
-  const currentTasks = useMemo(() => [...workspaceData.tasks, ...sentTasks], [workspaceData.tasks, sentTasks]);
+  const currentTasks = useMemo(() => [...[...sentTasks].reverse(), ...workspaceData.tasks], [workspaceData.tasks, sentTasks]);
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
