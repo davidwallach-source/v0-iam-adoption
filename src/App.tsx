@@ -1889,7 +1889,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ═══════════════════════════════════════
+/* ════════��══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -2848,6 +2848,7 @@ interface PrepareScreenProps {
   open: boolean;
   onClose: () => void;
   preselectedDocs?: string[];
+  onSend?: (documents: string[], recipients: Recipient[]) => void;
 }
 
 interface Recipient {
@@ -2857,7 +2858,7 @@ interface Recipient {
   role: 'signer' | 'viewer' | 'approver';
 }
 
-function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenProps) {
+function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareScreenProps) {
   const [docsExpanded, setDocsExpanded] = useState(true);
   const [recipientsExpanded, setRecipientsExpanded] = useState(true);
   const [messageExpanded, setMessageExpanded] = useState(true);
@@ -3338,7 +3339,12 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
         flexShrink: 0,
       }}>
         <Button kind="secondary" size="medium">Save</Button>
-        <Button kind="primary" size="medium">Next</Button>
+        <Button kind="primary" size="medium" onClick={() => {
+          if (onSend) {
+            onSend(documents, recipients);
+          }
+          onClose();
+        }}>Next</Button>
       </div>
     </div>
   );
@@ -3562,6 +3568,21 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [showPrepare, setShowPrepare] = useState(false);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
+  const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
+
+  // Handler for when documents are sent for signature
+  const handleSendForSignature = (documentNames: string[], recipients: { name: string }[]) => {
+    const envelopeId = `env-${Date.now()}`;
+    const recipientNames = recipients.map(r => r.name);
+    setSentEnvelopes(prev => [...prev, {
+      envelopeId,
+      documents: documentNames,
+      recipients: recipientNames,
+      sentAt: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+    }]);
+    // Clear selection after sending
+    setSelectedDocs(new Set());
+  };
 
   // Determine if this is an NDA draft
   const isNDADraft = agreement.id === 'nda-draft';
@@ -3574,11 +3595,20 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const currentActivity = workspaceData.activity;
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
+  // Also handle newly sent envelopes from user actions
   const processedDocuments = useMemo(() => {
     const envelopeMap = new Map<string, DealDocument[]>();
     const standalone: DealDocument[] = [];
     
+    // Get all document names that have been sent in envelopes
+    const sentDocNames = new Set(sentEnvelopes.flatMap(env => env.documents));
+    
     currentDocuments.forEach(doc => {
+      // Skip documents that have been sent
+      if (sentDocNames.has(doc.name)) {
+        return;
+      }
+      
       if (doc.envelopeId) {
         const existing = envelopeMap.get(doc.envelopeId) || [];
         existing.push(doc);
@@ -3588,20 +3618,37 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
       }
     });
     
-    // Convert envelopes to envelope rows
-    const envelopeRows: (DealDocument | { isEnvelope: true; envelopeId: string; documents: DealDocument[]; signatureProgress: DealDocument['signatureProgress'] })[] = [];
+    // Convert existing envelopes to envelope rows
+    type EnvelopeRow = { isEnvelope: true; envelopeId: string; documents: DealDocument[]; signatureProgress: DealDocument['signatureProgress']; documentNames?: string[]; waitingFor?: string };
+    const envelopeRows: (DealDocument | EnvelopeRow)[] = [];
     
     envelopeMap.forEach((docs, envId) => {
       envelopeRows.push({
         isEnvelope: true,
         envelopeId: envId,
         documents: docs,
-        signatureProgress: docs[0]?.signatureProgress, // Use first doc's progress
+        signatureProgress: docs[0]?.signatureProgress,
+      });
+    });
+    
+    // Add newly sent envelopes as envelope rows
+    sentEnvelopes.forEach(sent => {
+      envelopeRows.push({
+        isEnvelope: true,
+        envelopeId: sent.envelopeId,
+        documents: [],
+        documentNames: sent.documents,
+        signatureProgress: {
+          signed: 0,
+          total: sent.recipients.length,
+          waitingFor: sent.recipients[0] || 'recipient',
+        },
+        waitingFor: sent.recipients[0],
       });
     });
     
     return [...standalone, ...envelopeRows];
-  }, [currentDocuments]);
+  }, [currentDocuments, sentEnvelopes]);
 
   const currentSupplementalDocs = workspaceData.supplementalDocs;
   const tabStyle = (isActive: boolean): CSSProperties => ({
@@ -3868,7 +3915,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
                                     <div>
                                       <Text size="sm" weight="medium">Signature Request</Text>
-                                      <Text size="xs" color="secondary">{envelope.documents.length} documents</Text>
+                                      <Text size="xs" color="secondary">{envelope.documentNames?.length || envelope.documents.length} documents</Text>
                                     </div>
                                   </Inline>
                                 </td>
@@ -4250,6 +4297,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
         open={showPrepare}
         onClose={() => setShowPrepare(false)}
         preselectedDocs={preparePreselectedDocs}
+        onSend={handleSendForSignature}
       />
     </div>
   );
