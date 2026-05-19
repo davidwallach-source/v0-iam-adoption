@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════�������═══�����������══════════════════════════════
+/* ════��������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3572,6 +3572,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [showPrepare, setShowPrepare] = useState(false);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
+  const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
 
   // Handler for when documents are sent for signature
   const handleSendForSignature = (documentNames: string[], recipients: { name: string }[]) => {
@@ -3583,6 +3584,19 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
       recipients: recipientNames,
       sentAt: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
     }]);
+    // Create a new Sign task for each recipient
+    const newTask: DealTask = {
+      id: `task-sign-${Date.now()}`,
+      title: `Sign ${documentNames.join(', ')}`,
+      type: 'Sign',
+      team: 'External',
+      assignee: recipientNames[0] || 'Recipient',
+      assigneeInitials: (recipientNames[0] || 'R').split(' ').map(n => n[0]).join('').toUpperCase(),
+      status: 'Not started',
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+      isDueSoon: false,
+    };
+    setSentTasks(prev => [...prev, newTask]);
     // Clear selection after sending
     setSelectedDocs(new Set());
   };
@@ -3596,7 +3610,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const currentDocuments = docSubTab === 'negotiating' ? workspaceData.documents : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
-  const currentTasks = workspaceData.tasks;
+  const currentTasks = useMemo(() => [...workspaceData.tasks, ...sentTasks], [workspaceData.tasks, sentTasks]);
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
