@@ -3050,37 +3050,30 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
                 <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                   {documents.map((docName, idx) => (
                     <div key={idx} style={{
-                      width: 200,
+                      width: 220,
                       border: '1px solid var(--ink-border-subtle)',
-                      borderRadius: 8,
+                      borderRadius: 12,
                       overflow: 'hidden',
+                      background: 'white',
                     }}>
                       <div style={{
-                        height: 140,
-                        background: 'var(--ink-bg-color-secondary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: 16,
-                      }}>
-                        <Icon name="file" size={40} color="var(--ink-text-secondary)" />
-                      </div>
-                      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ink-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div>
-                          <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 2 }}>{docName}</Text>
-                          <Text size="xs" color="secondary">1 page</Text>
-                        </div>
-                        <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                        height: 160,
+                        background: 'white',
+                        borderRadius: '12px 12px 0 0',
+                      }} />
+                      <div style={{ padding: '16px 20px' }}>
+                        <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 4, color: '#130032' }}>{docName}</Text>
+                        <Text size="xs" color="secondary">1 page</Text>
                       </div>
                     </div>
                   ))}
 
                   {/* Small add tile */}
                   <div style={{
-                    width: 200,
-                    minHeight: 200,
+                    width: 220,
+                    minHeight: 220,
                     border: '2px dashed var(--ink-border-subtle)',
-                    borderRadius: 8,
+                    borderRadius: 12,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -3093,17 +3086,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--ink-cobalt-60)'}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'}
                   >
-                    <div style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 8,
-                      background: 'var(--ink-bg-color-secondary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                      <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
-                    </div>
+                    <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
                     <Text size="sm" color="secondary" style={{ textAlign: 'center' }}>Drag documents here or</Text>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <button style={{
