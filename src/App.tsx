@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════�����������═══�����������══════════════════════════════
+/* ══���═�����������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3937,7 +3937,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                         <Tooltip text={envelopeDocNames.join(', ')} location="below">
                                           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
                                             <Text size="sm" weight="medium">
-                                              {envelopeDocNames.join(', ')}
+                                              Document Packet
                                             </Text>
                                           </div>
                                         </Tooltip>
