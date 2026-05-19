@@ -3060,6 +3060,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
                         height: 160,
                         background: 'white',
                         borderRadius: '12px 12px 0 0',
+                        borderBottom: '1px solid var(--ink-border-subtle)',
                       }} />
                       <div style={{ padding: '16px 20px' }}>
                         <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 4, color: '#130032' }}>{docName}</Text>
