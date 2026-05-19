@@ -1889,7 +1889,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════════���══════════════════════════════
+/* ════════����══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -2963,7 +2963,9 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
             <Icon name="close" size={20} color="var(--ink-text-default)" />
           </button>
           <span style={{ width: 1, height: 20, background: 'var(--ink-border-subtle)' }} />
-          <Text size="sm" weight="medium">Please Sign: Your Envelope Name Here</Text>
+          <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 600 }}>
+            Please Sign: {documents.length > 0 ? documents.join(', ') : 'Your Envelope Name Here'}
+          </Text>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Button kind="tertiary" size="small">Advanced Options</Button>
