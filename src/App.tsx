@@ -1594,6 +1594,21 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '1', icon: 'edit', user: 'David Kim', action: 'Created purchase order', time: '1 day ago' },
     ],
   },
+  
+  // ═══ INSTANT NDA DRAFT (id: nda-draft) ═══
+  'nda-draft': {
+    tasks: [
+      { id: '1', title: 'Send NDA for Signature', type: 'Sign', team: 'Legal', assignee: 'You', assigneeInitials: 'ME', status: 'Not started', dueDate: '—' },
+    ],
+    documents: [
+      { id: '1', name: 'Non-Disclosure Agreement', status: 'Draft', dateModified: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) },
+    ],
+    supplementalDocs: [],
+    attentionItems: [],
+    activity: [
+      { id: '1', icon: 'edit', user: 'You', action: 'Created NDA draft', time: 'Just now' },
+    ],
+  },
 };
 
 // Natural language relative dates from dd/mm/yyyy strings
@@ -1890,7 +1905,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�����═�����������═══�����������══════════════════════════════
+/* ══�������═�����������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3688,6 +3703,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
     if (status === 'In Review') return { background: 'var(--ink-cobalt-20)', color: 'var(--ink-cobalt-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
     if (status === 'Executed') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
     if (status === 'Pending Signature') return { background: 'var(--ink-yellow-20)', color: 'var(--ink-yellow-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
+    if (status === 'Draft') return { background: 'var(--ink-fuchsia-20)', color: 'var(--ink-fuchsia-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
     return {};
   };
 
