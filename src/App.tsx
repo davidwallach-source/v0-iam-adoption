@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════����═══�����������══════════════════════════════
+/* ════�����═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -4266,7 +4266,11 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                     <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
-                          <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : task.type === 'Sign' ? 'send' : 'upload'} size={16} color="var(--ink-text-secondary)" />
+                          {task.type === 'Sign' ? (
+                            <img src="/icon-sign.svg" alt="Sign" style={{ width: 16, height: 16, opacity: 0.6 }} />
+                          ) : (
+                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
+                          )}
                           <div>
                             <Text size="sm">{task.title}</Text>
                             <Text size="xs" color="secondary">{task.type}</Text>
@@ -4656,7 +4660,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
   
-  /* ��─ Sync hash ↔ state ── */
+  /* ���� Sync hash ↔ state ── */
   useEffect(() => {
     const onHashChange = () => {
       setActiveTab(getTabFromHash());
