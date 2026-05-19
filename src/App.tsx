@@ -3058,10 +3058,34 @@ function PrepareScreen({ open, onClose, preselectedDocs = [] }: PrepareScreenPro
                     }}>
                       <div style={{
                         height: 160,
-                        background: 'white',
+                        background: '#fafafa',
                         borderRadius: '12px 12px 0 0',
                         borderBottom: '1px solid var(--ink-border-subtle)',
-                      }} />
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 20,
+                      }}>
+                        {/* Document page mockup */}
+                        <div style={{
+                          width: 90,
+                          height: 120,
+                          background: 'white',
+                          borderRadius: 4,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+                          padding: '12px 10px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 6,
+                        }}>
+                          {/* Title line */}
+                          <div style={{ height: 5, background: '#c8c6d0', borderRadius: 3, width: '70%' }} />
+                          {/* Text lines */}
+                          {[100, 85, 90, 75, 80, 65, 90, 70].map((w, i) => (
+                            <div key={i} style={{ height: 3, background: '#e2e0e8', borderRadius: 2, width: `${w}%` }} />
+                          ))}
+                        </div>
+                      </div>
                       <div style={{ padding: '16px 20px' }}>
                         <Text size="sm" weight="medium" style={{ display: 'block', marginBottom: 4, color: '#130032' }}>{docName}</Text>
                         <Text size="xs" color="secondary">1 page</Text>
