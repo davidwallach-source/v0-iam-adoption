@@ -1889,7 +1889,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════════���������══════════════════════════════
+/* ════════����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3918,9 +3918,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     <div>
                                       <div 
                                         title={envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
-                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300, cursor: 'default' }}
+                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300, cursor: 'default', pointerEvents: 'auto' }}
+                                        onMouseEnter={(e) => console.log("[v0] Hover - title:", e.currentTarget.title)}
                                       >
-                                        <Text size="sm" weight="medium">
+                                        <Text size="sm" weight="medium" style={{ pointerEvents: 'none' }}>
                                           {envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
                                         </Text>
                                       </div>
