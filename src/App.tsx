@@ -3556,6 +3556,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   
   const currentDocuments = docSubTab === 'negotiating' ? workspaceData.documents : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
+  const currentActivity = workspaceData.activity;
   const tabStyle = (isActive: boolean): CSSProperties => ({
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
     border: 'none',
