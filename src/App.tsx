@@ -1890,7 +1890,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════������═══�����������══════════════════════════════
+/* ════�������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -4222,24 +4222,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             )}
 
             <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
-
-            {/* Team progress cards */}
-            <Grid columns={4} gap="medium" style={{ marginBottom: 'var(--ink-spacing-300)' }}>
-              {TEAM_PROGRESS.map((team) => (
-                <div key={team.team} style={{
-                  background: 'var(--ink-white-100)',
-                  border: '1px solid var(--ink-neutral-fade-10)',
-                  borderRadius: 'var(--ink-radius-size-s)',
-                  padding: '24px 16px',
-                }}>
-                  <ProgressBar 
-                    value={(team.completed / team.total) * 100}
-                    label={team.team}
-                  />
-                  <Text size="xs" color="secondary" style={{ marginTop: 'var(--ink-spacing-100)' }}>{team.completed} of {team.total} complete</Text>
-                </div>
-              ))}
-            </Grid>
 
             {/* Search and filters */}
             <Inline gap="medium" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
