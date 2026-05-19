@@ -1889,7 +1889,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ════════����══════════════════════════════
+/* ════════�����══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -2964,7 +2964,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
           </button>
           <span style={{ width: 1, height: 20, background: 'var(--ink-border-subtle)' }} />
           <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 600 }}>
-            Please Sign: {documents.length > 0 ? documents.join(', ') : 'Your Envelope Name Here'}
+            Signature Request: {documents.length > 0 ? documents.join(', ') : 'Your Envelope Name Here'}
           </Text>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -3917,7 +3917,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
                                     <div>
                                       <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                                        Please Sign: {envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
+                                        {envelope.documentNames?.join(', ') || envelope.documents.map(d => d.name).join(', ')}
                                       </Text>
                                       <Text size="xs" color="secondary">{envelope.documentNames?.length || envelope.documents.length} documents</Text>
                                     </div>
