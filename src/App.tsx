@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, type CSSProperties } from 'react';
-import { createPortal } from 'react-dom';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -30,6 +29,7 @@ import {
   Chip,
   StatusLight,
   Tooltip,
+  Drawer,
   Link,
   ProgressBar,
   SearchInput,
@@ -4356,76 +4356,51 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
       />
 
       {/* Party History Panel */}
-      {showPartyHistory && createPortal(
-        <>
-          {/* Backdrop */}
-          <div 
-            onClick={() => setShowPartyHistory(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 680,
-              bottom: 0,
-              background: 'rgba(0,0,0,0.3)',
-              zIndex: 49999,
-            }}
-          />
-          {/* Panel */}
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: 680,
-            background: 'var(--ink-bg-color-secondary)',
-            boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
-            zIndex: 50000,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}>
-          {/* Header */}
-          <div style={{ 
-            padding: 'var(--ink-spacing-200) var(--ink-spacing-300)', 
-            borderBottom: '1px solid var(--ink-border-subtle)',
-            background: 'var(--ink-white-100)',
-          }}>
-            <Inline gap="medium" align="center" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
-              <IconButton icon="x" variant="tertiary" size="small" aria-label="Close" onClick={() => setShowPartyHistory(false)} />
-              <Heading as="h2" size="sm">{agreement.party}</Heading>
-              <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/></svg>
-                AI-Assisted
-              </Badge>
-              <Badge kind="success" size="small">Active</Badge>
-            </Inline>
-            {/* Tabs */}
-            <Inline gap="medium">
-              {(['overview', 'agreements', 'obligations', 'details'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setPartyHistoryTab(tab)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '8px 0',
-                    fontSize: 'var(--ink-font-size-sm)',
-                    fontWeight: partyHistoryTab === tab ? 600 : 400,
-                    color: partyHistoryTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
-                    borderBottom: partyHistoryTab === tab ? '2px solid var(--ink-cobalt-80)' : '2px solid transparent',
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
-            </Inline>
-          </div>
+      <Drawer
+        open={showPartyHistory}
+        onClose={() => setShowPartyHistory(false)}
+        position="right"
+        customSize="680px"
+        zIndex={99999}
+        showCloseButton={false}
+        title={
+          <Inline gap="medium" align="center">
+            <Heading as="h2" size="sm">{agreement.party}</Heading>
+            <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/></svg>
+              AI-Assisted
+            </Badge>
+            <Badge kind="success" size="small">Active</Badge>
+          </Inline>
+        }
+      >
+        <div style={{ marginTop: '-16px' }}>
+          {/* Tabs */}
+          <Inline gap="medium" style={{ marginBottom: 'var(--ink-spacing-200)', borderBottom: '1px solid var(--ink-border-subtle)', paddingBottom: 0 }}>
+            {(['overview', 'agreements', 'obligations', 'details'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setPartyHistoryTab(tab)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '8px 0',
+                  fontSize: 'var(--ink-font-size-sm)',
+                  fontWeight: partyHistoryTab === tab ? 600 : 400,
+                  color: partyHistoryTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
+                  borderBottom: partyHistoryTab === tab ? '2px solid var(--ink-cobalt-80)' : '2px solid transparent',
+                  cursor: 'pointer',
+                  textTransform: 'capitalize',
+                  marginBottom: '-1px',
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </Inline>
 
           {/* Content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--ink-spacing-300)' }}>
+          <div style={{ background: 'var(--ink-bg-color-secondary)', margin: '-24px', marginTop: 0, padding: 'var(--ink-spacing-300)' }}>
             {partyHistoryTab === 'overview' && (
               <Stack gap="large">
                 {/* Negotiation History */}
@@ -4588,8 +4563,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             )}
           </div>
         </div>
-        </>
-      , document.body)}
+      </Drawer>
     </div>
   );
 }
