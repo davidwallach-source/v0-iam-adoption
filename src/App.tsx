@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -4355,20 +4356,35 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
       />
 
       {/* Party History Panel */}
-      {showPartyHistory && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: 680,
-          background: 'var(--ink-bg-color-secondary)',
-          boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
-          zIndex: 50000,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}>
+      {showPartyHistory && createPortal(
+        <>
+          {/* Backdrop */}
+          <div 
+            onClick={() => setShowPartyHistory(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 680,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.3)',
+              zIndex: 49999,
+            }}
+          />
+          {/* Panel */}
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 680,
+            background: 'var(--ink-bg-color-secondary)',
+            boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
+            zIndex: 50000,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}>
           {/* Header */}
           <div style={{ 
             padding: 'var(--ink-spacing-200) var(--ink-spacing-300)', 
@@ -4572,23 +4588,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             )}
           </div>
         </div>
-      )}
-
-      {/* Backdrop for Party History Panel */}
-      {showPartyHistory && (
-        <div 
-          onClick={() => setShowPartyHistory(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 680,
-            bottom: 0,
-        background: 'rgba(0,0,0,0.3)',
-        zIndex: 49999,
-          }}
-        />
-      )}
+        </>
+      , document.body)}
     </div>
   );
 }
