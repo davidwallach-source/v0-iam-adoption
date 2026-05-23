@@ -3588,6 +3588,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
+  const [showPartyHistory, setShowPartyHistory] = useState(false);
+  const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
 
   // Handler for when documents are sent for signature
   const handleSendForSignature = (documentNames: string[], recipients: { name: string }[]) => {
@@ -4227,7 +4229,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Party</Text>
                       <Text size="sm" style={{ marginBottom: 8 }}>{agreement.party}</Text>
-                      <Button kind="secondary" size="small" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Button kind="secondary" size="small" style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={() => setShowPartyHistory(true)}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
                           <path d="M14.29 11.36L17.51 10.07L16.46 16H7.54L6.49 10.07L9.71 11.36L12 7.76M12 4L9 9L4 7L6 18H18L20 7L15 9L12 4Z" fill="#4C00FB"/>
                         </svg>
@@ -4351,6 +4353,242 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
         preselectedDocs={preparePreselectedDocs}
         onSend={handleSendForSignature}
       />
+
+      {/* Party History Panel */}
+      {showPartyHistory && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: 680,
+          background: 'var(--ink-bg-color-secondary)',
+          boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          {/* Header */}
+          <div style={{ 
+            padding: 'var(--ink-spacing-200) var(--ink-spacing-300)', 
+            borderBottom: '1px solid var(--ink-border-subtle)',
+            background: 'var(--ink-white-100)',
+          }}>
+            <Inline gap="medium" align="center" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
+              <IconButton icon="x" variant="tertiary" size="small" aria-label="Close" onClick={() => setShowPartyHistory(false)} />
+              <Heading as="h2" size="sm">{agreement.party}</Heading>
+              <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/></svg>
+                AI-Assisted
+              </Badge>
+              <Badge kind="success" size="small">Active</Badge>
+            </Inline>
+            {/* Tabs */}
+            <Inline gap="medium">
+              {(['overview', 'agreements', 'obligations', 'details'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setPartyHistoryTab(tab)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '8px 0',
+                    fontSize: 'var(--ink-font-size-sm)',
+                    fontWeight: partyHistoryTab === tab ? 600 : 400,
+                    color: partyHistoryTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
+                    borderBottom: partyHistoryTab === tab ? '2px solid var(--ink-cobalt-80)' : '2px solid transparent',
+                    cursor: 'pointer',
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </Inline>
+          </div>
+
+          {/* Content */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--ink-spacing-300)' }}>
+            {partyHistoryTab === 'overview' && (
+              <Stack gap="large">
+                {/* Negotiation History */}
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
+                  <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-100)' }}>
+                    <div>
+                      <Text size="md" weight="semibold">Negotiation History</Text>
+                      <Text size="xs" color="secondary">Previous positions and outcomes with this party</Text>
+                    </div>
+                    <Inline gap="small">
+                      <Button kind="secondary" size="small">View all</Button>
+                      <IconButton icon="chevron-left" variant="tertiary" size="small" aria-label="Previous" />
+                      <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="Next" />
+                    </Inline>
+                  </Inline>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 'var(--ink-spacing-200)' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--ink-border-subtle)' }}>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Term</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Previous Position</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Agreed Position</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Outcome</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { term: 'Liability cap', count: 4, prev: '2x annual contract value', agreed: '3x annual contract value', outcome: 'Accepted with CFO approval' },
+                        { term: 'Data retention', count: 3, prev: '90 days', agreed: '180 days', outcome: 'Accepted with DPA amendm...' },
+                        { term: 'Indemnification', count: 2, prev: 'Mutual', agreed: 'Enhanced vendor indemnification', outcome: 'Accepted' },
+                        { term: 'Payment Terms', count: 1, prev: 'Net 30', agreed: 'Net 60', outcome: 'Accepted' },
+                      ].map((row, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--ink-border-subtle)' }}>
+                          <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)' }}>
+                            <Inline gap="xsmall" align="center">
+                              {row.term}
+                              <span style={{ background: 'var(--ink-cobalt-80)', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>{row.count}</span>
+                            </Inline>
+                          </td>
+                          <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{row.prev}</td>
+                          <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{row.agreed}</td>
+                          <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)' }}>
+                            <Inline gap="xsmall" align="center">
+                              <Icon name="status-check" size={16} color="var(--ink-green-80)" />
+                              <span style={{ color: 'var(--ink-text-secondary)' }}>{row.outcome}</span>
+                            </Inline>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Two-column grid */}
+                <Grid columns={2} gap="medium">
+                  {/* Non-standard Terms */}
+                  <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
+                    <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                      <Text size="md" weight="semibold">Non-standard Terms</Text>
+                      <IconButton icon="dots-horizontal" variant="tertiary" size="small" aria-label="More" />
+                    </Inline>
+                    <Stack gap="medium">
+                      <div>
+                        <Inline align="center" style={{ justifyContent: 'space-between' }}>
+                          <Text size="sm" weight="medium">Net 60 day payment terms</Text>
+                          <Badge kind="error" size="small">High risk</Badge>
+                        </Inline>
+                        <Text size="xs" color="secondary">Standard is net 30</Text>
+                      </div>
+                      <div>
+                        <Inline align="center" style={{ justifyContent: 'space-between' }}>
+                          <Text size="sm" weight="medium">Unlimited liability for data breach</Text>
+                          <Badge kind="error" size="small">High risk</Badge>
+                        </Inline>
+                        <Text size="xs" color="secondary">Standard cap is 2x ACV</Text>
+                      </div>
+                    </Stack>
+                  </div>
+
+                  {/* Renewing Agreements */}
+                  <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
+                    <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                      <Text size="md" weight="semibold">Renewing Agreements</Text>
+                      <IconButton icon="dots-horizontal" variant="tertiary" size="small" aria-label="More" />
+                    </Inline>
+                    <Inline gap="large" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
+                      <div>
+                        <Text size="xs" color="secondary">Renewing Agreements</Text>
+                        <Text size="xl" weight="semibold">1</Text>
+                        <Text size="xs" color="secondary">in the next year</Text>
+                      </div>
+                      <div>
+                        <Text size="xs" color="secondary">Total Value</Text>
+                        <Text size="xl" weight="semibold">—</Text>
+                      </div>
+                    </Inline>
+                    <div>
+                      <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 4 }}>
+                        <Text size="xs">NDA</Text>
+                        <Text size="xs" color="secondary">Auto-renew</Text>
+                      </Inline>
+                      <div style={{ height: 6, background: 'var(--ink-cobalt-20)', borderRadius: 3, position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '95%', background: 'var(--ink-cobalt-80)', borderRadius: 3 }} />
+                        <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, background: 'var(--ink-cobalt-80)', borderRadius: '50%', border: '2px solid white' }} />
+                      </div>
+                    </div>
+                  </div>
+                </Grid>
+
+                {/* Bottom two-column grid */}
+                <Grid columns={2} gap="medium">
+                  {/* Obligations */}
+                  <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
+                    <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                      <Text size="md" weight="semibold">Obligations</Text>
+                      <IconButton icon="dots-horizontal" variant="tertiary" size="small" aria-label="More" />
+                    </Inline>
+                    <div>
+                      <Text size="xs" color="secondary">Payments due</Text>
+                      <Text size="xs" color="secondary">Total Value</Text>
+                    </div>
+                    <Text size="xl" weight="semibold" style={{ margin: 'var(--ink-spacing-100) 0' }}>0</Text>
+                    <Text size="xl" weight="semibold">—</Text>
+                    <Text size="xs" color="secondary" style={{ marginTop: 'var(--ink-spacing-150)' }}>in the next 60 days</Text>
+                  </div>
+
+                  {/* Latest Activity */}
+                  <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
+                    <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                      <Text size="md" weight="semibold">Latest Activity</Text>
+                      <IconButton icon="dots-horizontal" variant="tertiary" size="small" aria-label="More" />
+                    </Inline>
+                    <Stack gap="small">
+                      {[
+                        { icon: 'upload', text: 'Momentum Driver MSA redlines.docx', action: 'uploaded', date: 'May 11, 2026' },
+                        { icon: 'file', text: 'Momentum Driver MSA.docx', action: 'was created', date: 'May 1, 2026' },
+                        { icon: 'status-check', text: 'Request for Proposal.docx', action: 'was completed', date: 'Apr 23, 2026' },
+                        { icon: 'status-check', text: 'NDA.docx', action: 'was completed', date: 'Jan 1, 2026' },
+                      ].map((item, i) => (
+                        <Inline key={i} gap="small" align="start">
+                          <Icon name={item.icon as 'upload' | 'file' | 'status-check'} size={16} color="var(--ink-text-secondary)" style={{ marginTop: 2 }} />
+                          <div style={{ flex: 1 }}>
+                            <Text size="sm">
+                              <span style={{ color: 'var(--ink-cobalt-80)', textDecoration: 'underline', cursor: 'pointer' }}>{item.text}</span>
+                              {' '}{item.action}
+                            </Text>
+                          </div>
+                          <Text size="xs" color="secondary">{item.date}</Text>
+                        </Inline>
+                      ))}
+                    </Stack>
+                  </div>
+                </Grid>
+              </Stack>
+            )}
+
+            {partyHistoryTab !== 'overview' && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
+                <Text size="sm" color="secondary">Content for {partyHistoryTab} tab coming soon</Text>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Backdrop for Party History Panel */}
+      {showPartyHistory && (
+        <div 
+          onClick={() => setShowPartyHistory(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 680,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.3)',
+            zIndex: 999,
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -4715,7 +4953,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     if (tabId === 'insights') setInsightsSidebarView('overview');
   }, []);
 
-  /* ── GlobalNav — matches production DocuSign comp ── */
+  /* ── GlobalNav — matches production DocuSign comp ─��� */
   const globalNavConfig = {
     logo: <img src="/docusign-logo.svg" alt="DocuSign" />,
     showAppSwitcher: false,
