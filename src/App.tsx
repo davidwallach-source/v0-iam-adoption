@@ -4364,7 +4364,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
           width: 680,
           background: 'var(--ink-bg-color-secondary)',
           boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
-          zIndex: 1000,
+          zIndex: 50000,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -4584,8 +4584,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
             left: 0,
             right: 680,
             bottom: 0,
-            background: 'rgba(0,0,0,0.3)',
-            zIndex: 999,
+        background: 'rgba(0,0,0,0.3)',
+        zIndex: 49999,
           }}
         />
       )}
