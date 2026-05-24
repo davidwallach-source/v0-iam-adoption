@@ -4362,45 +4362,44 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
         position="right"
         customSize="680px"
         zIndex={99999}
-        showCloseButton={false}
         title={
-          <Inline gap="medium" align="center">
-            <Heading as="h2" size="sm">{agreement.party}</Heading>
-            <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/></svg>
-              AI-Assisted
-            </Badge>
-            <Badge kind="success" size="small">Active</Badge>
-          </Inline>
+          <div style={{ width: '100%' }}>
+            <Inline gap="medium" align="center" style={{ marginBottom: 12 }}>
+              <Heading as="h2" size="sm">{agreement.party}</Heading>
+              <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/></svg>
+                AI-Assisted
+              </Badge>
+              <Badge kind="success" size="small">Active</Badge>
+            </Inline>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid var(--ink-border-subtle)', marginBottom: 0 }}>
+              {(['overview', 'agreements', 'obligations', 'details'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setPartyHistoryTab(tab)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '8px 0',
+                    fontSize: 'var(--ink-font-size-sm)',
+                    fontWeight: partyHistoryTab === tab ? 600 : 400,
+                    color: partyHistoryTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
+                    borderBottom: partyHistoryTab === tab ? '2px solid var(--ink-cobalt-80)' : '2px solid transparent',
+                    cursor: 'pointer',
+                    textTransform: 'capitalize',
+                    marginBottom: '-1px',
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
         }
       >
-        <div style={{ marginTop: '-16px' }}>
-          {/* Tabs */}
-          <Inline gap="medium" style={{ marginBottom: 'var(--ink-spacing-200)', borderBottom: '1px solid var(--ink-border-subtle)', paddingBottom: 0 }}>
-            {(['overview', 'agreements', 'obligations', 'details'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setPartyHistoryTab(tab)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '8px 0',
-                  fontSize: 'var(--ink-font-size-sm)',
-                  fontWeight: partyHistoryTab === tab ? 600 : 400,
-                  color: partyHistoryTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
-                  borderBottom: partyHistoryTab === tab ? '2px solid var(--ink-cobalt-80)' : '2px solid transparent',
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  marginBottom: '-1px',
-                }}
-              >
-                {tab}
-              </button>
-            ))}
-          </Inline>
-
           {/* Content */}
-          <div style={{ background: 'var(--ink-bg-color-secondary)', margin: '-24px', marginTop: 0, padding: 'var(--ink-spacing-300)' }}>
+          <div style={{ background: 'var(--ink-bg-color-secondary)', padding: 'var(--ink-spacing-300)' }}>
             {partyHistoryTab === 'overview' && (
               <Stack gap="large">
                 {/* Negotiation History */}
@@ -4562,7 +4561,6 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
               </div>
             )}
           </div>
-        </div>
       </Drawer>
     </div>
   );
