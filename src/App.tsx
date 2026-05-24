@@ -4113,7 +4113,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                       }
                                     }}
                                   >
-                                    {doc.status === 'Executed' ? 'View' : 'Edit'}
+                                    View
                                   </Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
