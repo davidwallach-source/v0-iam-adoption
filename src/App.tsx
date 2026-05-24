@@ -4363,11 +4363,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
         customSize="680px"
         zIndex={99999}
         title={
-          <div style={{ width: '100%', paddingLeft: 24 }}>
+          <div style={{ width: '100%', paddingLeft: 24, paddingTop: 20 }}>
             <Inline gap="medium" align="center" style={{ marginBottom: 12 }}>
               <Heading as="h2" size="sm">{agreement.party}</Heading>
               <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2Z"/></svg>
                 AI-Assisted
               </Badge>
               <Badge kind="success" size="small">Active</Badge>
