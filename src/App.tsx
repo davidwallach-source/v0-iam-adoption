@@ -4002,7 +4002,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   </td>
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                     <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                      <Button kind="secondary" size="small">View</Button>
+                                  <Button kind="secondary" size="small" onClick={() => window.open('https://v0-navigation-redesign-ni.vercel.app/', '_blank')}>View</Button>
                                       <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                     </Inline>
                                   </td>
@@ -4107,10 +4107,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     kind="secondary"
                                     size="small"
                                     onClick={() => {
-                                      // For NDA drafts, clicking Edit reopens the NDA modal
-                                      if (doc.status !== 'Executed' && isNDADraft && onEditNDA) {
-                                        onEditNDA();
-                                      }
+                                      window.open('https://v0-navigation-redesign-ni.vercel.app/', '_blank');
                                     }}
                                   >
                                     View
