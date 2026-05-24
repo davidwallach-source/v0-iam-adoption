@@ -4434,7 +4434,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                           <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)' }}>
                             <Inline gap="xsmall" align="center">
                               {row.term}
-                              <span style={{ background: 'var(--ink-cobalt-80)', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, paddingLeft: 4 }}>{row.count}</span>
+                              <span style={{ background: 'var(--ink-cobalt-80)', color: 'white', borderRadius: '50%', width: 18, height: 18, minWidth: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, marginLeft: 4, flexShrink: 0 }}>{row.count}</span>
                             </Inline>
                           </td>
                           <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-secondary)' }}>{row.prev}</td>
