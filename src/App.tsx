@@ -4363,7 +4363,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
         customSize="680px"
         zIndex={99999}
         title={
-          <div style={{ width: '100%' }}>
+          <div style={{ width: '100%', paddingLeft: 24 }}>
             <Inline gap="medium" align="center" style={{ marginBottom: 12 }}>
               <Heading as="h2" size="sm">{agreement.party}</Heading>
               <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -4373,7 +4373,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
               <Badge kind="success" size="small">Active</Badge>
             </Inline>
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid var(--ink-border-subtle)', marginBottom: 0 }}>
+            <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid var(--ink-border-subtle)', marginBottom: 0, paddingLeft: 24, marginLeft: -24 }}>
               {(['overview', 'agreements', 'obligations', 'details'] as const).map((tab) => (
                 <button
                   key={tab}
