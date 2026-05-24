@@ -4463,14 +4463,14 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                       <div>
                         <Inline align="center" style={{ justifyContent: 'space-between' }}>
                           <Text size="sm" weight="medium">Net 60 day payment terms</Text>
-                          <Badge kind="error" size="small">High risk</Badge>
+                          <Badge kind="alert" size="small">High risk</Badge>
                         </Inline>
                         <Text size="xs" color="secondary">Standard is net 30</Text>
                       </div>
                       <div>
                         <Inline align="center" style={{ justifyContent: 'space-between' }}>
                           <Text size="sm" weight="medium">Unlimited liability for data breach</Text>
-                          <Badge kind="error" size="small">High risk</Badge>
+                          <Badge kind="alert" size="small">High risk</Badge>
                         </Inline>
                         <Text size="xs" color="secondary">Standard cap is 2x ACV</Text>
                       </div>
