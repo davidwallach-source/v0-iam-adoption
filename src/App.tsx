@@ -633,10 +633,11 @@ interface InstantNDAModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (data: NDAFormData) => void;
+  onSendForSignature?: (data: NDAFormData) => void;
   initialData?: NDAFormData | null;
 }
 
-function InstantNDAModal({ open, onClose, onSave, initialData }: InstantNDAModalProps) {
+function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialData }: InstantNDAModalProps) {
   const [disclosingParty, setDisclosingParty] = useState(initialData?.disclosingParty || '');
   const [receivingParty, setReceivingParty] = useState(initialData?.receivingParty || '');
   const [effectiveDate, setEffectiveDate] = useState(initialData?.effectiveDate || '');
@@ -902,7 +903,24 @@ function InstantNDAModal({ open, onClose, onSave, initialData }: InstantNDAModal
           {/* Footer buttons */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
             <Button kind="secondary" size="medium" onClick={handleSave}>Save</Button>
-            <Button kind="primary" size="medium">Send for Signature</Button>
+            <Button 
+              kind="primary" 
+              size="medium" 
+              onClick={() => {
+                const formData = {
+                  disclosingParty,
+                  receivingParty,
+                  effectiveDate,
+                  duration,
+                  authorizedSigner,
+                };
+                if (onSendForSignature) {
+                  onSendForSignature(formData);
+                }
+              }}
+            >
+              Send for Signature
+            </Button>
           </div>
         </div>
       </div>
@@ -5514,6 +5532,42 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setShowNDAModal(false);
         setSelectedAgreement(ndaAgreement);
         setShowDealWorkspace(true);
+      }}
+      onSendForSignature={(data) => {
+        // Save the NDA data
+        setSavedNDAData(data);
+        
+        // Create the NDA agreement
+        const ndaId = 'nda-draft';
+        setNdaAgreementId(ndaId);
+        
+        const ndaAgreement: Agreement = {
+          id: ndaId,
+          name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
+          party: data.receivingParty || 'Receiving Party',
+          partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
+          status: 'Draft',
+          statusIcon: 'clock',
+          statusKind: 'neutral',
+          statusSub: 'In Progress',
+          dealValue: '—',
+          agreementType: 'NDA',
+          termLength: `${data.duration} months`,
+          closeDate: data.effectiveDate || '—',
+          date: new Date().toLocaleDateString('en-GB'),
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          action: 'Edit',
+          documentsCount: 1,
+          tasksCount: 1,
+          tasksPending: 1,
+        };
+        
+        // Close the NDA modal, navigate to the Prepare tab
+        setShowNDAModal(false);
+        setSelectedAgreement(ndaAgreement);
+        setShowDealWorkspace(true);
+        // Navigate to Prepare tab by setting the hash
+        setTimeout(() => window.location.hash = '#workspace/nda-draft/agreements', 0);
       }}
     />
     <AgreementRequestModal
