@@ -5562,12 +5562,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           tasksPending: 1,
         };
         
-        // Close the NDA modal, navigate to the Prepare tab
+        // Close the NDA modal and open Prepare screen
         setShowNDAModal(false);
-        setSelectedAgreement(ndaAgreement);
-        setShowDealWorkspace(true);
-        // Navigate to Prepare tab by setting the hash
-        setTimeout(() => window.location.hash = '#workspace/nda-draft/agreements', 0);
+        setShowRootPrepare(true);
       }}
     />
     <AgreementRequestModal
