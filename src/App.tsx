@@ -3653,7 +3653,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         signatureProgress: { 
           signed: 0, 
           total: 1, 
-          waitingFor: savedNDAData?.authorizedSigner || 'Recipient' 
+          waitingFor: savedNDAData?.receivingParty || 'Recipient' 
         },
       }));
     }
@@ -5209,7 +5209,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const isNavigatorView = sidebarView === 'completed';
   const isRequestsView = sidebarView === 'requests';
 
-  /* ── Navigator filtered data ── */
+  /* ─��� Navigator filtered data ── */
   const filteredNavigator = useMemo(() => {
     if (!search) return NAVIGATOR_DATA;
     const q = search.toLowerCase();
