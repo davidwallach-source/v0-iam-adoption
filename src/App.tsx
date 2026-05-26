@@ -2698,7 +2698,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════════════════════════════════════ */
+   ═══════���═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -2873,6 +2873,7 @@ interface WorkspaceViewProps {
   onClose: () => void;
   onEditNDA?: () => void;
   savedNDAData?: NDAFormData | null;
+  ndaSentForSignature?: boolean;
 }
 
 /* ═══════════════════════════════════════
@@ -3596,7 +3597,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -3643,7 +3644,19 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
   // Get workspace data for the agreement
   const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
   
-  const currentDocuments = docSubTab === 'negotiating' ? workspaceData.documents : workspaceData.supplementalDocs;
+  // Update NDA document status if sent for signature
+  const modifiedDocuments = useMemo(() => {
+    if (isNDADraft && ndaSentForSignature) {
+      return workspaceData.documents.map(doc => ({
+        ...doc,
+        status: 'Sent' as const,
+        signatureProgress: { completed: 0, total: 1 },
+      }));
+    }
+    return workspaceData.documents;
+  }, [workspaceData.documents, isNDADraft, ndaSentForSignature]);
+  
+  const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
   const currentTasks = useMemo(() => [...[...sentTasks].reverse(), ...workspaceData.tasks], [workspaceData.tasks, sentTasks]);
@@ -4021,12 +4034,12 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                     <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                     <Button kind="secondary" size="small" onClick={() => {
-                                      if (isNDADraft && onEditNDA) {
+                                      if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
                                         window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
                                       }
-                                    }}>{isNDADraft ? 'Edit' : 'View'}</Button>
+                                    }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                       <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                     </Inline>
                                   </td>
@@ -4131,14 +4144,14 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     kind="secondary"
                                     size="small"
                                     onClick={() => {
-                                      if (isNDADraft && onEditNDA) {
+                                      if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
                                         window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
                                       }
                                     }}
                                   >
-                                    {isNDADraft ? 'Edit' : 'View'}
+                                    {isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}
                                   </Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
@@ -4182,12 +4195,12 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   <Button kind="secondary" size="small" onClick={() => {
-                                    if (isNDADraft && onEditNDA) {
+                                    if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                       onEditNDA();
                                     } else {
                                       window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
                                     }
-                                  }}>{isNDADraft ? 'Edit' : 'View'}</Button>
+                                  }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
                               </td>
@@ -5009,6 +5022,8 @@ export default function App() {
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
+  const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
+  const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
@@ -5462,6 +5477,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setShowNDAModal(true);
         }}
         savedNDAData={savedNDAData}
+        ndaSentForSignature={ndaSentForSignature}
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => setShowRootPrepare(true)} />
@@ -5562,8 +5578,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           tasksPending: 1,
         };
         
-        // Close the NDA modal and open Prepare screen
+        // Close the NDA modal and open Prepare screen with NDA document
         setShowNDAModal(false);
+        setRootPreparePreselectedDocs(['Non-Disclosure Agreement']);
         setShowRootPrepare(true);
       }}
     />
@@ -5577,8 +5594,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     />
     <PrepareScreen
       open={showRootPrepare}
-      onClose={() => setShowRootPrepare(false)}
-      preselectedDocs={[]}
+      onClose={() => {
+        setShowRootPrepare(false);
+        setRootPreparePreselectedDocs([]);
+      }}
+      preselectedDocs={rootPreparePreselectedDocs}
+      onSend={() => {
+        // Mark NDA as sent for signature
+        setNdaSentForSignature(true);
+        setShowRootPrepare(false);
+        setRootPreparePreselectedDocs([]);
+      }}
     />
     </>
   );
