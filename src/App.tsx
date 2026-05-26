@@ -2698,7 +2698,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════���═══════════════════════════════ */
+   ═══════�����═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -2875,6 +2875,7 @@ interface WorkspaceViewProps {
   savedNDAData?: NDAFormData | null;
   ndaSentForSignature?: boolean;
   ndaRecipientName?: string;
+  uploadedDocAgreement?: { documents: string[], recipientName: string } | null;
 }
 
 /* ═══════════════════════════════════════
@@ -3075,7 +3076,9 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
                       fontWeight: 500,
                       color: 'white',
                       fontFamily: 'var(--ink-font-family)',
-                    }}>
+                    }}
+                    onClick={() => setDocuments([...documents, 'Master Service Agreement'])}
+                    >
                       Upload
                     </button>
                     <button style={{
@@ -3171,7 +3174,9 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
                         fontWeight: 500,
                         color: 'white',
                         fontFamily: 'var(--ink-font-family)',
-                      }}>Upload</button>
+                      }}
+                      onClick={() => setDocuments([...documents, 'Master Service Agreement'])}
+                      >Upload</button>
                       <button style={{
                         background: 'var(--ink-cobalt-80)',
                         border: 'none',
@@ -3598,7 +3603,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -3645,6 +3650,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   // Get workspace data for the agreement
   const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
   
+  // Check if this is an uploaded document agreement
+  const isUploadedDocAgreement = agreement.id === 'uploaded-doc';
+
   // Update NDA document status if sent for signature
   const modifiedDocuments = useMemo(() => {
     if (isNDADraft && ndaSentForSignature) {
@@ -3658,8 +3666,24 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         },
       }));
     }
+    
+    // For uploaded document agreements, create documents with sent status
+    if (isUploadedDocAgreement && uploadedDocAgreement) {
+      return uploadedDocAgreement.documents.map((docName, idx) => ({
+        id: `uploaded-${idx}`,
+        name: docName,
+        status: 'Pending Signature' as const,
+        lastModified: new Date().toLocaleDateString('en-US'),
+        signatureProgress: {
+          signed: 0,
+          total: 1,
+          waitingFor: uploadedDocAgreement.recipientName || 'Recipient'
+        },
+      }));
+    }
+    
     return workspaceData.documents;
-  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData]);
+  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement]);
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
@@ -5030,6 +5054,7 @@ export default function App() {
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
+  const [uploadedDocAgreement, setUploadedDocAgreement] = useState<{ documents: string[], recipientName: string } | null>(null);
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
@@ -5485,6 +5510,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         savedNDAData={savedNDAData}
         ndaSentForSignature={ndaSentForSignature}
         ndaRecipientName={ndaRecipientName}
+        uploadedDocAgreement={uploadedDocAgreement}
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => setShowRootPrepare(true)} />
@@ -5607,12 +5633,48 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       }}
       preselectedDocs={rootPreparePreselectedDocs}
       onSend={(documents, recipients) => {
-        // Capture the first recipient's name for the document status
-        if (recipients && recipients.length > 0) {
-          setNdaRecipientName(recipients[0].name);
+        const recipientName = recipients && recipients.length > 0 ? recipients[0].name : '';
+        
+        // Check if this is an NDA flow (preselected docs contain NDA)
+        const isNDAFlow = rootPreparePreselectedDocs.some(doc => doc.toLowerCase().includes('nda') || doc.toLowerCase().includes('non-disclosure'));
+        
+        if (isNDAFlow) {
+          // NDA flow - just mark as sent
+          setNdaRecipientName(recipientName);
+          setNdaSentForSignature(true);
+        } else {
+          // Uploaded document flow - create a new agreement space
+          const docName = documents && documents.length > 0 ? documents[0] : 'Master Service Agreement';
+          
+          // Store the uploaded document info
+          setUploadedDocAgreement({ documents: documents || [], recipientName });
+          
+          // Create a new agreement for the uploaded document
+          const uploadedAgreement: Agreement = {
+            id: 'uploaded-doc',
+            name: docName,
+            party: recipientName || 'Recipient',
+            partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
+            status: 'Pending Signature',
+            statusIcon: 'clock',
+            statusKind: 'neutral',
+            statusSub: 'Awaiting signature',
+            dealValue: '—',
+            agreementType: 'Service Agreement',
+            termLength: '12 months',
+            closeDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            date: new Date().toLocaleDateString('en-GB'),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            action: 'View',
+            documentsCount: documents?.length || 1,
+            tasksCount: 1,
+            tasksPending: 1,
+          };
+          
+          setSelectedAgreement(uploadedAgreement);
+          setShowDealWorkspace(true);
         }
-        // Mark NDA as sent for signature
-        setNdaSentForSignature(true);
+        
         setShowRootPrepare(false);
         setRootPreparePreselectedDocs([]);
       }}
