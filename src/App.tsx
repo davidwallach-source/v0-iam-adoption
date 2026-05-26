@@ -4100,9 +4100,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                   )}
                                 </Inline>
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)', maxWidth: 0 }}>
                                 {doc.signatureProgress ? (
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 180 }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                     {/* Progress bar */}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
                                       <div style={{
@@ -4129,7 +4129,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                       </div>
                                     </div>
                                     {/* Waiting text */}
-                                    <Text size="xs" style={{ color: '#130032' }}>
+                                    <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                       Waiting for {doc.signatureProgress.waitingFor}
                                     </Text>
                                   </div>
