@@ -4002,7 +4002,13 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   </td>
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                     <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                  <Button kind="secondary" size="small" onClick={() => window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank')}>View</Button>
+                                    <Button kind="secondary" size="small" onClick={() => {
+                                      if (isNDADraft) {
+                                        setShowInstantNDAModal(true);
+                                      } else {
+                                        window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                      }
+                                    }}>{isNDADraft ? 'Edit' : 'View'}</Button>
                                       <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                     </Inline>
                                   </td>
@@ -4107,10 +4113,16 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     kind="secondary"
                                     size="small"
                                     onClick={() => {
-                                      window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                      if (isNDADraft) {
+                                        // For Instant NDA drafts, open the NDA modal to continue editing
+                                        setShowInstantNDAModal(true);
+                                      } else {
+                                        // For other documents, open the document viewer
+                                        window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                      }
                                     }}
                                   >
-                                    View
+                                    {isNDADraft ? 'Edit' : 'View'}
                                   </Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
@@ -4154,8 +4166,12 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   <Button kind="secondary" size="small" onClick={() => {
-                                    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
-                                  }}>View</Button>
+                                    if (isNDADraft) {
+                                      setShowInstantNDAModal(true);
+                                    } else {
+                                      window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                    }
+                                  }}>{isNDADraft ? 'Edit' : 'View'}</Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
                               </td>
