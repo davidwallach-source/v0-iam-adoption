@@ -234,11 +234,11 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
                 label: 'Sign a Document',
                 icon: (
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2.5" y="1.5" width="11" height="15" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
-                    <path d="M10.5 1.5V5.5H14.5" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 11.5L13.5 10L15.5 12L14 13.5L12 11.5Z" stroke="#6B6B80" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.5 10L15 8.5L16.5 10L15 11.5" stroke="#6B6B80" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 13.5L11 16L13.5 15.5" stroke="#6B6B80" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                    <rect x="2.5" y="1.5" width="11" height="15" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
+                    <path d="M10.5 1.5V5.5H14.5" stroke="#130032" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 11.5L13.5 10L15.5 12L14 13.5L12 11.5Z" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M13.5 10L15 8.5L16.5 10L15 11.5" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 13.5L11 16L13.5 15.5" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 ),
               },
@@ -246,9 +246,9 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
                 label: 'Use a Template',
                 icon: (
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="1.5" width="15" height="15" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
-                    <path d="M1.5 6.5H16.5" stroke="#6B6B80" strokeWidth="1.25"/>
-                    <path d="M7 6.5V16.5" stroke="#6B6B80" strokeWidth="1.25"/>
+                    <rect x="1.5" y="1.5" width="15" height="15" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
+                    <path d="M1.5 6.5H16.5" stroke="#130032" strokeWidth="1.25"/>
+                    <path d="M7 6.5V16.5" stroke="#130032" strokeWidth="1.25"/>
                   </svg>
                 ),
               },
@@ -256,9 +256,9 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
                 label: 'Create a Form',
                 icon: (
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="4.5" width="15" height="9" rx="1.5" stroke="#6B6B80" strokeWidth="1.25"/>
-                    <path d="M5 9H13" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round"/>
-                    <path d="M5 12H9" stroke="#6B6B80" strokeWidth="1.25" strokeLinecap="round"/>
+                    <rect x="1.5" y="4.5" width="15" height="9" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
+                    <path d="M5 9H13" stroke="#130032" strokeWidth="1.25" strokeLinecap="round"/>
+                    <path d="M5 12H9" stroke="#130032" strokeWidth="1.25" strokeLinecap="round"/>
                   </svg>
                 ),
               },
