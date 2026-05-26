@@ -3077,7 +3077,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
                       color: 'white',
                       fontFamily: 'var(--ink-font-family)',
                     }}
-                    onClick={() => setDocuments([...documents, 'Master Service Agreement'])}
+                    onClick={() => setDocuments([...documents, 'Lease Agreement'])}
                     >
                       Upload
                     </button>
@@ -3175,7 +3175,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
                         color: 'white',
                         fontFamily: 'var(--ink-font-family)',
                       }}
-                      onClick={() => setDocuments([...documents, 'Master Service Agreement'])}
+                      onClick={() => setDocuments([...documents, 'Lease Agreement'])}
                       >Upload</button>
                       <button style={{
                         background: 'var(--ink-cobalt-80)',
@@ -5644,7 +5644,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setNdaSentForSignature(true);
         } else {
           // Uploaded document flow - create a new agreement space
-          const docName = documents && documents.length > 0 ? documents[0] : 'Master Service Agreement';
+          const docName = documents && documents.length > 0 ? documents[0] : 'Lease Agreement';
           
           // Store the uploaded document info
           setUploadedDocAgreement({ documents: documents || [], recipientName });
