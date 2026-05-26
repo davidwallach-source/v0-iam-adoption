@@ -3441,8 +3441,8 @@ function AddMenu({ onSignatureRequest }: AddMenuProps) {
           <MenuRow
             icon={
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 1z" stroke="#6B7280" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
-                <path d="M9 1v5h5" stroke="#6B7280" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
+                <path d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 1z" stroke="#130032" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
+                <path d="M9 1v5h5" stroke="#130032" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
               </svg>
             }
             label="Document"
@@ -3472,8 +3472,8 @@ function AddMenu({ onSignatureRequest }: AddMenuProps) {
             <MenuRow
               icon={
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="#6B7280" strokeWidth="1.3" fill="none"/>
-                  <path d="M5 8l2 2 4-4" stroke="#6B7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="#130032" strokeWidth="1.3" fill="none"/>
+                  <path d="M5 8l2 2 4-4" stroke="#130032" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               }
               label="Other Tasks"
