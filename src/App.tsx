@@ -3649,12 +3649,16 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
     if (isNDADraft && ndaSentForSignature) {
       return workspaceData.documents.map(doc => ({
         ...doc,
-        status: 'Sent' as const,
-        signatureProgress: { completed: 0, total: 1 },
+        status: 'Pending Signature' as const,
+        signatureProgress: { 
+          signed: 0, 
+          total: 1, 
+          waitingFor: savedNDAData?.authorizedSigner || 'Recipient' 
+        },
       }));
     }
     return workspaceData.documents;
-  }, [workspaceData.documents, isNDADraft, ndaSentForSignature]);
+  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, savedNDAData]);
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
