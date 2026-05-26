@@ -4003,8 +4003,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                     <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                     <Button kind="secondary" size="small" onClick={() => {
-                                      if (isNDADraft) {
-                                        setShowInstantNDAModal(true);
+                                      if (isNDADraft && onEditNDA) {
+                                        onEditNDA();
                                       } else {
                                         window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
                                       }
@@ -4113,11 +4113,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     kind="secondary"
                                     size="small"
                                     onClick={() => {
-                                      if (isNDADraft) {
-                                        // For Instant NDA drafts, open the NDA modal to continue editing
-                                        setShowInstantNDAModal(true);
+                                      if (isNDADraft && onEditNDA) {
+                                        onEditNDA();
                                       } else {
-                                        // For other documents, open the document viewer
                                         window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
                                       }
                                     }}
@@ -4166,8 +4164,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   <Button kind="secondary" size="small" onClick={() => {
-                                    if (isNDADraft) {
-                                      setShowInstantNDAModal(true);
+                                    if (isNDADraft && onEditNDA) {
+                                      onEditNDA();
                                     } else {
                                       window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
                                     }
