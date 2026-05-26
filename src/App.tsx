@@ -2874,6 +2874,7 @@ interface WorkspaceViewProps {
   onEditNDA?: () => void;
   savedNDAData?: NDAFormData | null;
   ndaSentForSignature?: boolean;
+  ndaRecipientName?: string;
 }
 
 /* ═══════════════════════════════════════
@@ -3597,7 +3598,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -3653,12 +3654,12 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         signatureProgress: { 
           signed: 0, 
           total: 1, 
-          waitingFor: savedNDAData?.receivingParty || 'Recipient' 
+          waitingFor: ndaRecipientName || savedNDAData?.receivingParty || 'Recipient' 
         },
       }));
     }
     return workspaceData.documents;
-  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, savedNDAData]);
+  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData]);
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
@@ -5027,6 +5028,7 @@ export default function App() {
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
+  const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
@@ -5482,6 +5484,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         }}
         savedNDAData={savedNDAData}
         ndaSentForSignature={ndaSentForSignature}
+        ndaRecipientName={ndaRecipientName}
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => setShowRootPrepare(true)} />
@@ -5603,7 +5606,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setRootPreparePreselectedDocs([]);
       }}
       preselectedDocs={rootPreparePreselectedDocs}
-      onSend={() => {
+      onSend={(documents, recipients) => {
+        // Capture the first recipient's name for the document status
+        if (recipients && recipients.length > 0) {
+          setNdaRecipientName(recipients[0].name);
+        }
         // Mark NDA as sent for signature
         setNdaSentForSignature(true);
         setShowRootPrepare(false);
