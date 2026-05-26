@@ -4107,7 +4107,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                                     kind="secondary"
                                     size="small"
                                     onClick={() => {
-                                      window.open(`https://v0-navigation-redesign-ni.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                      window.open(`https://v0.app/chat/doc-preview-ingest-from-iam-adoption-7ysXJbeHCWI?document=${encodeURIComponent(doc.name)}`, '_blank');
                                     }}
                                   >
                                     View
@@ -4153,7 +4153,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData }: Workspac
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
-                                  <Button kind="secondary" size="small">View</Button>
+                                  <Button kind="secondary" size="small" onClick={() => {
+                                    window.open(`https://v0.app/chat/doc-preview-ingest-from-iam-adoption-7ysXJbeHCWI?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                  }}>View</Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
                               </td>
