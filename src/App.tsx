@@ -3688,7 +3688,25 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
-  const currentTasks = useMemo(() => [...[...sentTasks].reverse(), ...workspaceData.tasks], [workspaceData.tasks, sentTasks]);
+  const currentTasks = useMemo(() => {
+    // For uploaded document agreements (e.g., Lease Agreement from Signature Request flow), show only Sign task
+    if (isUploadedDocAgreement && uploadedDocAgreement) {
+      const docName = uploadedDocAgreement.documents[0] || 'Lease Agreement';
+      const taskName = docName.toLowerCase().includes('lease') ? 'Sign Lease' : `Sign ${docName}`;
+      return [{
+        id: 'sign-uploaded',
+        title: taskName,
+        type: 'Sign' as const,
+        team: '',
+        assignee: '--',
+        assigneeInitials: '--',
+        status: 'Unassigned',
+        dueDate: '--',
+        isDueSoon: false,
+      }];
+    }
+    return [...[...sentTasks].reverse(), ...workspaceData.tasks];
+  }, [workspaceData.tasks, sentTasks, isUploadedDocAgreement, uploadedDocAgreement]);
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
@@ -4368,7 +4386,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                 <thead>
                   <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
+                    {!isUploadedDocAgreement && (
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
+                    )}
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
@@ -4391,12 +4411,18 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                           </div>
                         </Inline>
                       </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
+                      {!isUploadedDocAgreement && (
+                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
+                      )}
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          <Avatar initials={task.assigneeInitials} size="small" />
-                          <Text size="sm">{task.assignee}</Text>
-                        </Inline>
+                        {task.assignee === '--' ? (
+                          <Text size="sm">--</Text>
+                        ) : (
+                          <Inline gap="small" align="center">
+                            <Avatar initials={task.assigneeInitials} size="small" />
+                            <Text size="sm">{task.assignee}</Text>
+                          </Inline>
+                        )}
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <span style={getStatusBadgeStyle(task.status)}>{task.status}</span>
@@ -4406,7 +4432,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Button kind={task.isDueSoon ? 'primary' : 'secondary'} size="small">
-                          {task.isDueSoon ? 'Remind' : 'View'}
+                          {task.status === 'Unassigned' ? 'Assign' : task.isDueSoon ? 'Remind' : 'View'}
                         </Button>
                       </td>
                     </tr>
