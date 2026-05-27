@@ -3454,10 +3454,7 @@ function AddMenu({ onSignatureRequest }: AddMenuProps) {
             onClick={() => { setOpen(false); setTasksOpen(false); }}
           />
 
-          {/* Divider */}
-          <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
-
-          {/* Signature Request — top-level */}
+          {/* Signature Request */}
           <MenuRow
             icon={
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3468,7 +3465,21 @@ function AddMenu({ onSignatureRequest }: AddMenuProps) {
             onClick={() => { setOpen(false); setTasksOpen(false); onSignatureRequest?.(); }}
           />
 
-          {/* Other Tasks — with nested submenu (excludes Signature Request) */}
+          {/* Form */}
+          <MenuRow
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 9V15H6V9H18ZM20 7H4V17H20V7ZM19 3H5V5H19V3ZM14 19H5V21H14V19ZM10 11H8V13H10V11ZM13 11H11V13H13V11ZM16 11H14V13H16V11Z" fill="#130032" fillOpacity="0.9"/>
+              </svg>
+            }
+            label="Form"
+            onClick={() => { setOpen(false); setTasksOpen(false); }}
+          />
+
+          {/* Divider */}
+          <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+
+          {/* Other Tasks — with nested submenu */}
           <div
             style={{ position: 'relative' }}
             onMouseEnter={openTasks}
