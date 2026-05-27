@@ -3693,9 +3693,23 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
   const currentTasks = useMemo(() => {
-    // For NDA agreements sent for signature, include the Sign NDA task from sentTasks
+    // For NDA agreements sent for signature, create Sign NDA task
     if (isNDADraft && ndaSentForSignature) {
-      return [...[...sentTasks].reverse(), ...workspaceData.tasks];
+      const ndaRecipientInitials = ndaRecipientName 
+        ? ndaRecipientName.split(' ').map(n => n[0]).join('').toUpperCase()
+        : 'RP';
+      const signNdaTask = {
+        id: 'sign-nda',
+        title: 'Sign NDA',
+        type: 'Sign' as const,
+        team: '',
+        assignee: ndaRecipientName || 'Recipient',
+        assigneeInitials: ndaRecipientInitials,
+        status: 'In progress',
+        dueDate: '--',
+        isDueSoon: false,
+      };
+      return [signNdaTask, ...[...sentTasks].reverse()];
     }
     
     // For uploaded document agreements (e.g., Lease Agreement from Signature Request flow), show only Sign task
@@ -5735,21 +5749,6 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           addNewAgreement(sentNdaAgreement);
           setSelectedAgreement(sentNdaAgreement);
           setShowDealWorkspace(true);
-          // Add Sign NDA task
-          const ndaRecipientInitials = recipientName 
-            ? recipientName.split(' ').map(n => n[0]).join('').toUpperCase()
-            : 'RP';
-          setSentTasks(prev => [...prev, {
-            id: 'sign-nda',
-            title: 'Sign NDA',
-            type: 'Sign' as const,
-            team: '',
-            assignee: recipientName || 'Recipient',
-            assigneeInitials: ndaRecipientInitials,
-            status: 'In progress',
-            dueDate: '--',
-            isDueSoon: false,
-          }]);
         } else {
           // Uploaded document flow - create a new agreement space
           const docName = documents && documents.length > 0 ? documents[0] : 'Lease Agreement';
