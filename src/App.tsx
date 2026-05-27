@@ -2698,7 +2698,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�����������═══════════════════════════════ */
+   ═══════�������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -5088,6 +5088,11 @@ export default function App() {
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
   const [showDealWorkspace, setShowDealWorkspace] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
+  const [agreementsList, setAgreementsList] = useState<Agreement[]>(AGREEMENTS_DATA);
+
+  const addNewAgreement = (agreement: Agreement) => {
+    setAgreementsList(prev => [agreement, ...prev.filter(a => a.id !== agreement.id)]);
+  };
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
@@ -5243,17 +5248,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const viewAgreements = useMemo(() => {
     switch (sidebarView) {
       case 'drafts':
-        return AGREEMENTS_DATA.filter(a => a.status === 'Draft');
+        return agreementsList.filter(a => a.status === 'Draft');
       case 'in-progress':
-        return AGREEMENTS_DATA.filter(a => ['Negotiation', 'In Review', 'Pending Signature'].includes(a.status));
+        return agreementsList.filter(a => ['Negotiation', 'In Review', 'Pending Signature'].includes(a.status));
       case 'completed':
-        return AGREEMENTS_DATA.filter(a => a.status === 'Executed');
+        return agreementsList.filter(a => a.status === 'Executed');
       case 'deleted':
-        return AGREEMENTS_DATA.filter(a => ['Expired', 'Voided'].includes(a.status));
+        return agreementsList.filter(a => ['Expired', 'Voided'].includes(a.status));
       default:
-        return AGREEMENTS_DATA;
+        return agreementsList;
     }
-  }, [sidebarView]);
+  }, [sidebarView, agreementsList]);
 
   const filteredAgreements = useMemo(() => {
     if (!search) return viewAgreements;
@@ -5581,6 +5586,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         };
         setSelectedAgreement(purchaseAgreement);
         setShowDealWorkspace(true);
+        addNewAgreement(purchaseAgreement);
       }}
     />
     <InstantNDAModal 
@@ -5621,6 +5627,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setShowNDAModal(false);
         setSelectedAgreement(ndaAgreement);
         setShowDealWorkspace(true);
+        addNewAgreement(ndaAgreement);
       }}
       onSendForSignature={(data) => {
         // Save the NDA data
@@ -5679,9 +5686,32 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         const isNDAFlow = rootPreparePreselectedDocs.some(doc => doc.toLowerCase().includes('nda') || doc.toLowerCase().includes('non-disclosure'));
         
         if (isNDAFlow) {
-          // NDA flow - just mark as sent
+          // NDA flow - mark as sent and add to agreements list
           setNdaRecipientName(recipientName);
           setNdaSentForSignature(true);
+          const sentNdaAgreement: Agreement = {
+            id: 'nda-draft',
+            name: savedNDAData?.receivingParty ? `NDA - ${savedNDAData.receivingParty}` : 'Non-Disclosure Agreement',
+            party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
+            partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
+            status: 'Pending Signature',
+            statusIcon: 'clock',
+            statusKind: 'neutral',
+            statusSub: 'Awaiting signature',
+            dealValue: '—',
+            agreementType: 'NDA',
+            termLength: savedNDAData?.duration ? `${savedNDAData.duration} months` : '—',
+            closeDate: savedNDAData?.effectiveDate || '—',
+            date: new Date().toLocaleDateString('en-GB'),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            action: 'View',
+            documentsCount: 1,
+            tasksCount: 1,
+            tasksPending: 1,
+          };
+          addNewAgreement(sentNdaAgreement);
+          setSelectedAgreement(sentNdaAgreement);
+          setShowDealWorkspace(true);
         } else {
           // Uploaded document flow - create a new agreement space
           const docName = documents && documents.length > 0 ? documents[0] : 'Lease Agreement';
@@ -5713,6 +5743,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           
           setSelectedAgreement(uploadedAgreement);
           setShowDealWorkspace(true);
+          addNewAgreement(uploadedAgreement);
         }
         
         setShowRootPrepare(false);
