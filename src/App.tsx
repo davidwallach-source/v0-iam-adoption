@@ -1390,45 +1390,28 @@ interface Agreement {
 const AGREEMENTS_DATA: Agreement[] = [
   // ═══ COMPLEX DEALS — Multiple documents, many stakeholders, various task types ═══
   
-  // Complex: Enterprise software procurement with multiple docs and approvals
-  { id: '1', name: 'Globex Enterprise Platform', party: 'Globex Industries', partyLogo: 'GI', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Legal Review', dealValue: '$2.8M', agreementType: 'Enterprise License', termLength: '36 months', closeDate: 'Jun 30, 2026', date: '24/4/2026', time: '14:30', action: 'Edit', documentsCount: 6, tasksCount: 14, tasksPending: 5 },
+  { id: '1', name: 'Globex Enterprise Platform', party: 'Globex Industries', partyLogo: 'GI', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Legal Review', dealValue: '$2.8M', agreementType: 'Enterprise License', termLength: '36 months', closeDate: 'Jun 30, 2026', date: '24/4/2026', time: '14:30', action: 'Edit', documentsCount: 6, tasksCount: 14, tasksPending: 5 },
   
-  // Complex: Major vendor onboarding with compliance requirements
-  { id: '2', name: 'Apex Manufacturing Supply Agreement', party: 'Apex Manufacturing Co.', partyLogo: 'AM', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Procurement Review', dealValue: '$1.6M', agreementType: 'Supply Agreement', termLength: '24 months', closeDate: 'May 20, 2026', date: '23/4/2026', time: '11:20', action: 'Edit', documentsCount: 5, tasksCount: 11, tasksPending: 4 },
+  { id: '2', name: 'Apex Manufacturing Supply Agreement', party: 'Apex Manufacturing Co.', partyLogo: 'AM', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Procurement Review', dealValue: '$1.6M', agreementType: 'Supply Agreement', termLength: '24 months', closeDate: 'May 20, 2026', date: '23/4/2026', time: '11:20', action: 'Edit', documentsCount: 5, tasksCount: 11, tasksPending: 4 },
   
-  // Complex: SaaS deal with security and DPA requirements
-  { id: '3', name: 'DataVault Cloud Services MSA', party: 'DataVault Technologies', partyLogo: 'DV', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: '2 of 4 signed', dealValue: '$920K', agreementType: 'SaaS License', termLength: '36 months', closeDate: 'May 5, 2026', date: '22/4/2026', time: '16:45', action: 'Edit', documentsCount: 4, tasksCount: 9, tasksPending: 2 },
+  { id: '3', name: 'DataVault Cloud Services MSA', party: 'DataVault Technologies', partyLogo: 'DV', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: '2 of 4 signed', dealValue: '$920K', agreementType: 'SaaS License', termLength: '36 months', closeDate: 'May 5, 2026', date: '22/4/2026', time: '16:45', action: 'Edit', documentsCount: 4, tasksCount: 9, tasksPending: 2 },
   
-  // ═══ MEDIUM COMPLEXITY — 2-3 documents, moderate stakeholders ═══
+  { id: '4', name: 'Pinnacle Consulting SOW', party: 'Pinnacle Advisory Group', partyLogo: 'PA', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Rate Negotiation', dealValue: '$340K', agreementType: 'Statement of Work', termLength: '6 months', closeDate: 'May 15, 2026', date: '21/4/2026', time: '09:15', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 2 },
   
-  // Medium: Professional services engagement
-  { id: '4', name: 'Pinnacle Consulting SOW', party: 'Pinnacle Advisory Group', partyLogo: 'PA', status: 'Negotiation', statusIcon: 'clock', statusKind: 'info', statusSub: 'Rate Negotiation', dealValue: '$340K', agreementType: 'Statement of Work', termLength: '6 months', closeDate: 'May 15, 2026', date: '21/4/2026', time: '09:15', action: 'Edit', documentsCount: 2, tasksCount: 5, tasksPending: 2 },
+  { id: '5', name: 'Horizon Analytics Renewal', party: 'Horizon Analytics', partyLogo: 'HA', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Approval', dealValue: '$185K', agreementType: 'License Renewal', termLength: '12 months', closeDate: 'May 10, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 2, tasksCount: 4, tasksPending: 1 },
   
-  // Medium: Software license renewal with updated terms
-  { id: '5', name: 'Horizon Analytics Renewal', party: 'Horizon Analytics', partyLogo: 'HA', status: 'In Review', statusIcon: 'clock', statusKind: 'info', statusSub: 'Finance Approval', dealValue: '$185K', agreementType: 'License Renewal', termLength: '12 months', closeDate: 'May 10, 2026', date: '20/4/2026', time: '13:00', action: 'Edit', documentsCount: 2, tasksCount: 4, tasksPending: 1 },
+  { id: '6', name: 'Sterling Industries NDA', party: 'Sterling Industries', partyLogo: 'SI', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Awaiting Signature', dealValue: '—', agreementType: 'NDA', termLength: '24 months', closeDate: 'Apr 28, 2026', date: '19/4/2026', time: '15:30', action: 'Edit', documentsCount: 1, tasksCount: 1, tasksPending: 1 },
   
-  // ═══ SIMPLE DEALS ��� Single document, 1-2 people ═══
+  { id: '7', name: 'OfficePro Supply Order', party: 'OfficePro Supplies', partyLogo: 'OP', status: 'In Progress', statusIcon: 'clock', statusKind: 'info', statusSub: 'Preparing', dealValue: '$12K', agreementType: 'Purchase Order', termLength: 'One-time', closeDate: 'Apr 30, 2026', date: '18/4/2026', time: '10:00', action: 'Edit', documentsCount: 1, tasksCount: 2, tasksPending: 2 },
   
-  // Simple: Standard NDA for sales prospect
-  { id: '6', name: 'Sterling Industries NDA', party: 'Sterling Industries', partyLogo: 'SI', status: 'Pending Signature', statusIcon: 'clock', statusKind: 'warning', statusSub: 'Awaiting Signature', dealValue: '—', agreementType: 'NDA', termLength: '24 months', closeDate: 'Apr 28, 2026', date: '19/4/2026', time: '15:30', action: 'Edit', documentsCount: 1, tasksCount: 1, tasksPending: 1 },
+  { id: '8', name: 'Quantum Systems Integration', party: 'Quantum Systems Inc.', partyLogo: 'QS', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$3.2M', agreementType: 'Enterprise License', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 16, tasksPending: 0 },
   
-  // Simple: Quick PO for office supplies
-  { id: '7', name: 'OfficePro Supply Order', party: 'OfficePro Supplies', partyLogo: 'OP', status: 'Draft', statusIcon: 'clock', statusKind: 'neutral', statusSub: 'Preparing', dealValue: '$12K', agreementType: 'Purchase Order', termLength: 'One-time', closeDate: 'Apr 30, 2026', date: '18/4/2026', time: '10:00', action: 'Edit', documentsCount: 1, tasksCount: 2, tasksPending: 2 },
+  { id: '9', name: 'Velocity Logistics Partnership', party: 'Velocity Logistics', partyLogo: 'VL', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$480K', agreementType: 'Partnership Agreement', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 3, tasksCount: 6, tasksPending: 0 },
   
-  // ═══ EXECUTED — Completed deals of varying complexity ═══
+  { id: '10', name: 'TechBridge Solutions NDA', party: 'TechBridge Solutions', partyLogo: 'TB', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '—', agreementType: 'NDA', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 1, tasksCount: 2, tasksPending: 0 },
   
-  // Complex executed: Full enterprise deal
-  { id: '8', name: 'Quantum Systems Integration', party: 'Quantum Systems Inc.', partyLogo: 'QS', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$3.2M', agreementType: 'Enterprise License', termLength: '36 months', date: '15/4/2026', time: '10:30', action: 'Download', documentsCount: 7, tasksCount: 16, tasksPending: 0 },
-  
-  // Medium executed: Vendor partnership
-  { id: '9', name: 'Velocity Logistics Partnership', party: 'Velocity Logistics', partyLogo: 'VL', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '$480K', agreementType: 'Partnership Agreement', termLength: '24 months', date: '10/4/2026', time: '14:15', action: 'Download', documentsCount: 3, tasksCount: 6, tasksPending: 0 },
-  
-  // Simple executed: Completed NDA
-  { id: '10', name: 'TechBridge Solutions NDA', party: 'TechBridge Solutions', partyLogo: 'TB', status: 'Executed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Active', dealValue: '—', agreementType: 'NDA', termLength: '12 months', date: '5/4/2026', time: '09:45', action: 'Download', documentsCount: 1, tasksCount: 2, tasksPending: 0 },
-  
-  // ═══ EXPIRED / VOIDED ═══
-  { id: '11', name: 'Legacy Vendor NDA', party: 'Legacy Vendor Corp.', partyLogo: 'LV', status: 'Expired', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'Term Ended', dealValue: '—', agreementType: 'NDA', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 2, tasksPending: 0 },
-  { id: '12', name: 'Cancelled RFP Response', party: 'Metro Government', partyLogo: 'MG', status: 'Voided', statusIcon: 'status-void', statusKind: 'neutral', statusSub: 'RFP Withdrawn', dealValue: '$750K', agreementType: 'RFP Response', termLength: '—', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 4, tasksPending: 0 },
+  { id: '11', name: 'Legacy Vendor NDA', party: 'Legacy Vendor Corp.', partyLogo: 'LV', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'Term Ended', dealValue: '—', agreementType: 'NDA', termLength: '12 months', date: '1/3/2026', time: '12:00', action: 'Copy', documentsCount: 1, tasksCount: 2, tasksPending: 0 },
+  { id: '12', name: 'Cancelled RFP Response', party: 'Metro Government', partyLogo: 'MG', status: 'Completed', statusIcon: 'status-check', statusKind: 'success', statusSub: 'RFP Withdrawn', dealValue: '$750K', agreementType: 'RFP Response', termLength: '—', date: '15/2/2026', time: '16:20', action: 'Copy', documentsCount: 2, tasksCount: 4, tasksPending: 0 },
 ];
 
 // Per-agreement data for workspace views
@@ -1659,8 +1642,11 @@ const agreementColumns = [
     width: '15%',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center">
-        <Icon name={row.statusIcon} size={14} color={row.statusKind === 'success' ? 'var(--ink-green-80)' : row.statusKind === 'warning' ? 'var(--ink-orange-80)' : 'var(--ink-neutral-60)'} />
-        <Text size="sm">{row.status}</Text>
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+          background: row.status === 'Completed' ? 'var(--ink-green-80)' : 'var(--ink-cobalt-80)',
+        }} />
+        <Text size="sm" style={{ color: row.status === 'Completed' ? 'var(--ink-green-80)' : 'var(--ink-cobalt-80)' }}>{row.status}</Text>
       </Inline>
     ),
   },
@@ -1717,7 +1703,7 @@ const agreementColumns = [
     width: 'auto',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
-        <Button kind="secondary" size="small">{row.status === 'Executed' ? 'View' : 'Edit'}</Button>
+        <Button kind="secondary" size="small">{row.status === 'Completed' ? 'View' : 'Edit'}</Button>
         <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
       </Inline>
     ),
@@ -5281,18 +5267,30 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   /* ── View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
+    let list: Agreement[];
     switch (sidebarView) {
       case 'drafts':
-        return agreementsList.filter(a => a.status === 'Draft');
+        list = agreementsList.filter(a => a.status === 'Draft');
+        break;
       case 'in-progress':
-        return agreementsList.filter(a => ['Negotiation', 'In Review', 'Pending Signature'].includes(a.status));
+        list = agreementsList.filter(a => a.status === 'In Progress');
+        break;
       case 'completed':
-        return agreementsList.filter(a => a.status === 'Executed');
+        list = agreementsList.filter(a => a.status === 'Completed');
+        break;
       case 'deleted':
-        return agreementsList.filter(a => ['Expired', 'Voided'].includes(a.status));
+        list = agreementsList.filter(a => ['Expired', 'Voided'].includes(a.status));
+        break;
       default:
-        return agreementsList;
+        list = agreementsList;
     }
+    // Sort: In Progress first, then Completed
+    return [...list].sort((a, b) => {
+      if (a.status === b.status) return 0;
+      if (a.status === 'In Progress') return -1;
+      if (b.status === 'In Progress') return 1;
+      return 0;
+    });
   }, [sidebarView, agreementsList]);
 
   const filteredAgreements = useMemo(() => {
