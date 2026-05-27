@@ -2905,9 +2905,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
 
   // Update documents when preselectedDocs changes
   useEffect(() => {
-    if (preselectedDocs.length > 0) {
-      setDocuments(preselectedDocs);
-    }
+    setDocuments(preselectedDocs);
   }, [preselectedDocs]);
 
   if (!open) return null;
@@ -5373,7 +5371,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     overview: 'Overview', dashboards: 'Dashboards', reports: 'Reports',
   };
 
-  /* ── Templates content ── */
+  /* ��─ Templates content ── */
   const templatesContent = (
     <AgreementTableView
       pageHeader={
