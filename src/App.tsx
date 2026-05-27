@@ -2273,7 +2273,7 @@ function HomePage() {
         {/* Action buttons row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 56 }}>
           {[
-            { icon: 'plus' as const,      label: 'Start',            onClick: () => { setRootPreparePreselectedDocs([]); setShowStartModal(true); } },
+            { icon: 'plus' as const,      label: 'Start',            onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
             { icon: 'send' as const,      label: 'Get\nSignatures',  onClick: () => {} },
             { icon: 'edit' as const,      label: 'Sign a\nDocument', onClick: () => {} },
             { icon: 'templates' as const, label: 'Use\nTemplate',    onClick: () => {} },
@@ -5179,7 +5179,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const agreementsSidebar = {
     headerLabel: 'Start',
     headerIcon: 'plus' as const,
-    onHeaderClick: () => { setRootPreparePreselectedDocs([]); setShowStartModal(true); },
+    onHeaderClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
     activeItemId: sidebarView,
     sections: [
       {
