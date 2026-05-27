@@ -3388,9 +3388,10 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
 
 interface AddMenuProps {
   onSignatureRequest?: () => void;
+  onAddWireTransfer?: () => void;
 }
 
-function AddMenu({ onSignatureRequest }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer }: AddMenuProps) {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -3539,7 +3540,7 @@ function AddMenu({ onSignatureRequest }: AddMenuProps) {
                     </svg>
                   }
                   label="Wire Transfer Request"
-                  onClick={() => { setOpen(false); setTasksOpen(false); }}
+                  onClick={() => { setOpen(false); setTasksOpen(false); onAddWireTransfer?.(); }}
                 />
                 <MenuRow
                   icon={
@@ -3844,7 +3845,27 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
-            <AddMenu onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }} />
+            <AddMenu 
+              onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }} 
+              onAddWireTransfer={() => {
+                const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
+                const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
+                const dueDate = new Date();
+                dueDate.setDate(dueDate.getDate() + 7);
+                const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
+                setSentTasks(prev => [...prev, {
+                  id: `wire-transfer-${Date.now()}`,
+                  title: 'Wire Transfer',
+                  type: 'Upload' as const,
+                  team: '',
+                  assignee: recipientName,
+                  assigneeInitials: recipientInitials,
+                  status: 'In progress',
+                  dueDate: formattedDueDate,
+                  isDueSoon: false,
+                }]);
+              }}
+            />
           </Inline>
         </div>
 
