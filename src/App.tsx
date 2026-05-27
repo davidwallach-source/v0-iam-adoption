@@ -3703,7 +3703,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         team: '',
         assignee: uploadedDocAgreement.recipientName || 'Recipient',
         assigneeInitials: recipientInitials,
-        status: 'In Progress',
+        status: 'In progress',
         dueDate: '--',
         isDueSoon: false,
       }];
