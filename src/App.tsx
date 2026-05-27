@@ -2698,7 +2698,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�����═══════════════════════════════ */
+   ═══════�������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -3839,7 +3839,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
 
               {/* Needs Attention section */}
-              {currentAttentionItems.length > 0 && (
+              {currentAttentionItems.length > 0 && !isNDADraft && !isUploadedDocAgreement && (
                 <div style={{ marginBottom: 'var(--ink-spacing-400)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                     <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Needs Attention</Text>
