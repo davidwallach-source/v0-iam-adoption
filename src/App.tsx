@@ -5595,7 +5595,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         uploadedDocAgreement={uploadedDocAgreement}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => setShowRootPrepare(true)} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
     <PurchaseRequestModal
       open={showPurchaseModal}
       onClose={() => setShowPurchaseModal(false)}
