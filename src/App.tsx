@@ -3700,7 +3700,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       const recipientInitials = uploadedDocAgreement.recipientName 
         ? uploadedDocAgreement.recipientName.split(' ').map(n => n[0]).join('').toUpperCase()
         : 'RC';
-      return [{
+      const signTask = {
         id: 'sign-uploaded',
         title: taskName,
         type: 'Sign' as const,
@@ -3710,7 +3710,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         status: 'In progress',
         dueDate: '--',
         isDueSoon: false,
-      }];
+      };
+      // Include any additional tasks added via Add menu (like Wire Transfer)
+      return [signTask, ...[...sentTasks].reverse()];
     }
     return [...[...sentTasks].reverse(), ...workspaceData.tasks];
   }, [workspaceData.tasks, sentTasks, isUploadedDocAgreement, uploadedDocAgreement]);
