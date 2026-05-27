@@ -3693,14 +3693,17 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
     if (isUploadedDocAgreement && uploadedDocAgreement) {
       const docName = uploadedDocAgreement.documents[0] || 'Lease Agreement';
       const taskName = docName.toLowerCase().includes('lease') ? 'Sign Lease' : `Sign ${docName}`;
+      const recipientInitials = uploadedDocAgreement.recipientName 
+        ? uploadedDocAgreement.recipientName.split(' ').map(n => n[0]).join('').toUpperCase()
+        : 'RC';
       return [{
         id: 'sign-uploaded',
         title: taskName,
         type: 'Sign' as const,
         team: '',
-        assignee: '--',
-        assigneeInitials: '--',
-        status: 'Unassigned',
+        assignee: uploadedDocAgreement.recipientName || 'Recipient',
+        assigneeInitials: recipientInitials,
+        status: 'In Progress',
         dueDate: '--',
         isDueSoon: false,
       }];
@@ -4431,8 +4434,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Button kind={task.isDueSoon ? 'primary' : 'secondary'} size="small">
-                          {task.status === 'Unassigned' ? 'Assign' : task.isDueSoon ? 'Remind' : 'View'}
+                        <Button kind="secondary" size="small">
+                          {task.status === 'In Progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
                         </Button>
                       </td>
                     </tr>
