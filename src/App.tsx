@@ -126,14 +126,6 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
 
         {/* Agreements section */}
         <div style={{ marginBottom: 32 }}>
-          <p style={{
-            margin: '0 0 10px 0',
-            fontSize: 20,
-            fontWeight: 400,
-            fontFamily: 'var(--ink-font-family)',
-            color: '#130032',
-          }}>Agreements</p>
-          
           <div style={{
             display: 'flex',
             gap: 12,
@@ -217,7 +209,7 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
             fontWeight: 600,
             fontFamily: 'var(--ink-font-family)',
             color: '#130032',
-          }}>Other Tasks</p>
+          }}>Other</p>
 
           <div style={{ display: 'flex', gap: 12 }}>
             {[
@@ -2698,7 +2690,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������═══════════════════════════════ */
+   ═══════���������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
