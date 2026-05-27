@@ -3693,6 +3693,11 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const currentAttentionItems = workspaceData.attentionItems;
   const currentActivity = workspaceData.activity;
   const currentTasks = useMemo(() => {
+    // For NDA agreements sent for signature, include the Sign NDA task from sentTasks
+    if (isNDADraft && ndaSentForSignature) {
+      return [...[...sentTasks].reverse(), ...workspaceData.tasks];
+    }
+    
     // For uploaded document agreements (e.g., Lease Agreement from Signature Request flow), show only Sign task
     if (isUploadedDocAgreement && uploadedDocAgreement) {
       const docName = uploadedDocAgreement.documents[0] || 'Lease Agreement';
@@ -3715,7 +3720,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       return [signTask, ...[...sentTasks].reverse()];
     }
     return [...[...sentTasks].reverse(), ...workspaceData.tasks];
-  }, [workspaceData.tasks, sentTasks, isUploadedDocAgreement, uploadedDocAgreement]);
+  }, [workspaceData.tasks, sentTasks, isNDADraft, ndaSentForSignature, isUploadedDocAgreement, uploadedDocAgreement]);
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
@@ -4415,7 +4420,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                 <thead>
                   <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
-                    {!isUploadedDocAgreement && (
+                    {!isUploadedDocAgreement && !isNDADraft && (
                       <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
                     )}
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
@@ -4443,7 +4448,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                           </div>
                         </Inline>
                       </td>
-                      {!isUploadedDocAgreement && (
+                      {!isUploadedDocAgreement && !isNDADraft && (
                         <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
                       )}
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
@@ -5730,6 +5735,21 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           addNewAgreement(sentNdaAgreement);
           setSelectedAgreement(sentNdaAgreement);
           setShowDealWorkspace(true);
+          // Add Sign NDA task
+          const ndaRecipientInitials = recipientName 
+            ? recipientName.split(' ').map(n => n[0]).join('').toUpperCase()
+            : 'RP';
+          setSentTasks(prev => [...prev, {
+            id: 'sign-nda',
+            title: 'Sign NDA',
+            type: 'Sign' as const,
+            team: '',
+            assignee: recipientName || 'Recipient',
+            assigneeInitials: ndaRecipientInitials,
+            status: 'In progress',
+            dueDate: '--',
+            isDueSoon: false,
+          }]);
         } else {
           // Uploaded document flow - create a new agreement space
           const docName = documents && documents.length > 0 ? documents[0] : 'Lease Agreement';
