@@ -1517,7 +1517,7 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
     ],
   },
   
-  // ═══ MEDIUM: Pinnacle Consulting SOW (id: 4) ═══
+  // ��══ MEDIUM: Pinnacle Consulting SOW (id: 4) ═══
   '4': {
     tasks: [
       { id: '1', title: 'Approve Rate Card', type: 'Approval', team: 'Finance', assignee: 'Marcus Webb', assigneeInitials: 'MW', status: 'In progress', dueDate: '4/26/26', isDueSoon: true },
@@ -2693,7 +2693,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ══════════���������════════════════════════════ */
+   ═════════�����������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -5602,9 +5602,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           name: data.title || 'Purchase Agreement (Draft)',
           party: data.vendor || 'Vendor',
           partyLogo: data.vendor ? data.vendor.substring(0, 2).toUpperCase() : 'PA',
-          status: 'Draft',
+          status: 'In Progress',
           statusIcon: 'clock',
-          statusKind: 'neutral',
+          statusKind: 'info',
           statusSub: 'In Progress',
           dealValue: '—',
           agreementType: 'Purchase Agreement',
@@ -5640,9 +5640,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
-          status: 'Draft',
+          status: 'In Progress',
           statusIcon: 'clock',
-          statusKind: 'neutral',
+          statusKind: 'info',
           statusSub: 'In Progress',
           dealValue: '—',
           agreementType: 'NDA',
@@ -5675,9 +5675,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
-          status: 'Draft',
+          status: 'In Progress',
           statusIcon: 'clock',
-          statusKind: 'neutral',
+          statusKind: 'info',
           statusSub: 'In Progress',
           dealValue: '—',
           agreementType: 'NDA',
@@ -5727,9 +5727,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             name: savedNDAData?.receivingParty ? `NDA - ${savedNDAData.receivingParty}` : 'Non-Disclosure Agreement',
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
-            status: 'Pending Signature',
+            status: 'In Progress',
             statusIcon: 'clock',
-            statusKind: 'neutral',
+            statusKind: 'info',
             statusSub: 'Awaiting signature',
             dealValue: '—',
             agreementType: 'NDA',
@@ -5758,9 +5758,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             name: docName,
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
-            status: 'Pending Signature',
+            status: 'In Progress',
             statusIcon: 'clock',
-            statusKind: 'neutral',
+            statusKind: 'info',
             statusSub: 'Awaiting signature',
             dealValue: '—',
             agreementType: 'Service Agreement',
