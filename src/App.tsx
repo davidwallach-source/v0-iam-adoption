@@ -3014,17 +3014,24 @@ function DocumentUpload({ open, onClose, onContinue }: DocumentUploadProps) {
                     justifyContent: 'center',
                     padding: 20,
                   }}>
+                    {/* Document page mockup */}
                     <div style={{
                       width: 90,
                       height: 120,
                       background: 'white',
-                      border: '1px solid var(--ink-border-subtle)',
                       borderRadius: 4,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+                      padding: '12px 10px',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      gap: 6,
                     }}>
-                      <Icon name="file" size={28} color="var(--ink-text-secondary)" />
+                      {/* Title line */}
+                      <div style={{ height: 5, background: '#c8c6d0', borderRadius: 3, width: '70%' }} />
+                      {/* Text lines */}
+                      {[100, 85, 90, 75, 80, 65, 90, 70].map((w, i) => (
+                        <div key={i} style={{ height: 3, background: '#e2e0e8', borderRadius: 2, width: `${w}%` }} />
+                      ))}
                     </div>
                   </div>
                   <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
