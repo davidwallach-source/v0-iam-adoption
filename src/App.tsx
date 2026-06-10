@@ -2975,7 +2975,7 @@ function DocumentUpload({ open, onClose, onContinue }: DocumentUploadProps) {
                   color: 'white',
                   fontFamily: 'var(--ink-font-family)',
                 }}
-                onClick={() => setDocuments([...documents, 'Untitled Document'])}
+                onClick={() => setDocuments([...documents, 'Master Procurement Agreement'])}
                 >
                   Upload
                 </button>
