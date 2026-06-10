@@ -1426,7 +1426,7 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
   attentionItems: { id: string; item: string; description: string; riskLevel: 'High' | 'Medium'; alertMessage?: string }[];
   activity: { id: string; icon: IconName; user: string; action: string; time: string; isAI?: boolean }[];
 }> = {
-  // ═══ COMPLEX: Globex Enterprise Platform (id: 1) ═══
+  // ���══ COMPLEX: Globex Enterprise Platform (id: 1) ═══
   '1': {
     tasks: [
       { id: '1', title: 'Legal Review of MSA Terms', type: 'Approval', team: 'Legal', assignee: 'Laura Chen', assigneeInitials: 'LC', status: 'In progress', dueDate: '4/28/26' },
@@ -2975,7 +2975,7 @@ function DocumentUpload({ open, onClose, onContinue }: DocumentUploadProps) {
                   color: 'white',
                   fontFamily: 'var(--ink-font-family)',
                 }}
-                onClick={() => setDocuments([...documents, 'Master Procurement Agreement'])}
+                onClick={() => setDocuments([...documents, 'New Vendor Contract'])}
                 >
                   Upload
                 </button>
