@@ -46,13 +46,14 @@ import {
 interface StartNewModalProps {
   open: boolean;
   onClose: () => void;
+  onStartBlank: () => void;
   onStartNDA: () => void;
   onStartPurchase: () => void;
   onStartRequest: () => void;
   onSignatureRequest: () => void;
 }
 
-function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
   const [search, setSearch] = useState('');
 
   const agreements = [
@@ -183,7 +184,10 @@ function StartNewModal({ open, onClose, onStartNDA, onStartPurchase, onStartRequ
                     kind="secondary" 
                     size="small"
                     onClick={() => {
-                      if (item.id === 'nda') {
+                      if (item.id === 'blank') {
+                        onClose();
+                        onStartBlank();
+                      } else if (item.id === 'nda') {
                         onClose();
                         onStartNDA();
                       } else if (item.id === 'purchase') {
@@ -1517,7 +1521,7 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
     ],
   },
   
-  // ��══ MEDIUM: Pinnacle Consulting SOW (id: 4) ═══
+  // ���══ MEDIUM: Pinnacle Consulting SOW (id: 4) ═══
   '4': {
     tasks: [
       { id: '1', title: 'Approve Rate Card', type: 'Approval', team: 'Finance', assignee: 'Marcus Webb', assigneeInitials: 'MW', status: 'In progress', dueDate: '4/26/26', isDueSoon: true },
@@ -2693,7 +2697,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ═════════�����������════════════════════════════ */
+   ════════�������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -2859,6 +2863,210 @@ interface WorkspaceViewProps {
 /* ═══════════════════════════════════════
    PrepareScreen Component (Signature Request Flow)
    ═══════════════════════════════════════ */
+
+interface DocumentUploadProps {
+  open: boolean;
+  onClose: () => void;
+  onContinue?: (documents: string[]) => void;
+}
+
+function DocumentUpload({ open, onClose, onContinue }: DocumentUploadProps) {
+  const [documents, setDocuments] = useState<string[]>([]);
+
+  if (!open) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'white',
+      zIndex: 1100,
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Top bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 24px',
+        borderBottom: '1px solid var(--ink-border-subtle)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close"
+          >
+            <Icon name="close" size={20} color="var(--ink-text-default)" />
+          </button>
+          <span style={{ width: 1, height: 20, background: 'var(--ink-border-subtle)' }} />
+          <Text size="sm" weight="medium">Document Upload</Text>
+        </div>
+        <Button
+          kind="primary"
+          size="small"
+          disabled={documents.length === 0}
+          onClick={() => onContinue?.(documents)}
+        >
+          Continue
+        </Button>
+      </div>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '40px 80px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h1 style={{
+            fontSize: 28,
+            fontWeight: 500,
+            fontFamily: 'var(--ink-font-family)',
+            color: '#130032',
+            margin: '0 0 24px 0',
+          }}>Document Upload</h1>
+
+          {documents.length === 0 ? (
+            /* Empty state — full-width dropzone */
+            <div style={{
+              width: '100%',
+              padding: '48px 24px',
+              background: 'var(--ink-bg-color-secondary)',
+              borderRadius: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 16,
+              cursor: 'pointer',
+            }}>
+              {/* Upload icon in rounded pill */}
+              <div style={{
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                background: '#D5D3DC',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 6.5V16H11V6.5L7.5 10L6.09 8.59L12 2.68L17.91 8.59L16.5 10L13 6.5ZM4 18H20V20H4V18Z" fill="#130032"/>
+                </svg>
+              </div>
+              <Text size="sm" weight="medium" style={{ color: '#130032' }}>Drop your files here or</Text>
+              {/* Upload button with chevron */}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <button style={{
+                  background: 'var(--ink-cobalt-80)',
+                  border: 'none',
+                  borderRadius: '6px 0 0 6px',
+                  padding: '10px 20px',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: 'white',
+                  fontFamily: 'var(--ink-font-family)',
+                }}
+                onClick={() => setDocuments([...documents, 'Untitled Document'])}
+                >
+                  Upload
+                </button>
+                <button style={{
+                  background: 'var(--ink-cobalt-80)',
+                  border: 'none',
+                  borderLeft: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '0 6px 6px 0',
+                  padding: '10px 10px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}>
+                  <Icon name="chevron-down" size={14} color="white" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Has documents — card grid + small add tile */
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              {documents.map((docName, idx) => (
+                <div key={idx} style={{
+                  width: 220,
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  background: 'white',
+                }}>
+                  <div style={{
+                    height: 160,
+                    background: '#fafafa',
+                    borderRadius: '12px 12px 0 0',
+                    borderBottom: '1px solid var(--ink-border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 20,
+                  }}>
+                    <div style={{
+                      width: 90,
+                      height: 120,
+                      background: 'white',
+                      border: '1px solid var(--ink-border-subtle)',
+                      borderRadius: 4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Icon name="file" size={28} color="var(--ink-text-secondary)" />
+                    </div>
+                  </div>
+                  <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{docName}</Text>
+                    <button
+                      onClick={() => setDocuments(documents.filter((_, i) => i !== idx))}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex' }}
+                      aria-label={`Remove ${docName}`}
+                    >
+                      <Icon name="trash" size={16} color="var(--ink-text-secondary)" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {/* Small add tile */}
+              <button
+                onClick={() => setDocuments([...documents, 'Untitled Document'])}
+                style={{
+                  width: 220,
+                  height: 210,
+                  border: '1px dashed var(--ink-border-subtle)',
+                  borderRadius: 12,
+                  background: 'var(--ink-bg-color-secondary)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                }}
+                aria-label="Add another document"
+              >
+                <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
+                <Text size="sm" weight="medium" style={{ color: 'var(--ink-text-secondary)' }}>Add document</Text>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface PrepareScreenProps {
   open: boolean;
@@ -5120,6 +5328,7 @@ export default function App() {
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
+  const [showDocumentUpload, setShowDocumentUpload] = useState(false);
   const [uploadedDocAgreement, setUploadedDocAgreement] = useState<{ documents: string[], recipientName: string } | null>(null);
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
@@ -5591,7 +5800,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         uploadedDocAgreement={uploadedDocAgreement}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
+
+    <DocumentUpload
+      open={showDocumentUpload}
+      onClose={() => setShowDocumentUpload(false)}
+      onContinue={(docs) => {
+        setShowDocumentUpload(false);
+        setRootPreparePreselectedDocs(docs);
+        setShowRootPrepare(true);
+      }}
+    />
     <PurchaseRequestModal
       open={showPurchaseModal}
       onClose={() => setShowPurchaseModal(false)}
