@@ -55,6 +55,13 @@ interface StartNewModalProps {
 
 function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
   const [search, setSearch] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadFile = () => {
+    onClose();
+    // Open the Document Preview screen (same as the View CTA in an Agreement Space)
+    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('New Vendor Contract')}`, '_blank');
+  };
 
   const agreements = [
     { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
@@ -180,25 +187,70 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                 
                 {/* Start button */}
                 <div style={{ marginTop: 12 }}>
-                  <Button 
-                    kind="secondary" 
-                    size="small"
-                    onClick={() => {
-                      if (item.id === 'blank') {
-                        onClose();
-                        onStartBlank();
-                      } else if (item.id === 'nda') {
-                        onClose();
-                        onStartNDA();
-                      } else if (item.id === 'purchase') {
-                        onClose();
-                        onStartPurchase();
-                      } else if (item.id === 'legal') {
-                        onClose();
-                        onStartRequest();
-                      }
-                    }}
-                  >Start</Button>
+                  {item.id === 'blank' ? (
+                    /* Upload split button — matches the one on Prepare */
+                    <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          background: 'var(--ink-cobalt-80)',
+                          border: 'none',
+                          borderRadius: '6px 0 0 6px',
+                          padding: '8px 18px',
+                          cursor: 'pointer',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          color: 'white',
+                          fontFamily: 'var(--ink-font-family)',
+                        }}
+                      >
+                        Upload
+                      </button>
+                      <button
+                        aria-label="Upload options"
+                        style={{
+                          background: 'var(--ink-cobalt-80)',
+                          border: 'none',
+                          borderLeft: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '0 6px 6px 0',
+                          padding: '8px 8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Icon name="chevron-down" size={14} color="white" />
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleUploadFile();
+                          }
+                          e.target.value = '';
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <Button 
+                      kind="secondary" 
+                      size="small"
+                      onClick={() => {
+                        if (item.id === 'nda') {
+                          onClose();
+                          onStartNDA();
+                        } else if (item.id === 'purchase') {
+                          onClose();
+                          onStartPurchase();
+                        } else if (item.id === 'legal') {
+                          onClose();
+                          onStartRequest();
+                        }
+                      }}
+                    >Start</Button>
+                  )}
                 </div>
               </div>
             ))}
