@@ -47,22 +47,21 @@ interface StartNewModalProps {
   open: boolean;
   onClose: () => void;
   onStartBlank: () => void;
-  onPreviewDocument: () => void;
   onStartNDA: () => void;
   onStartPurchase: () => void;
   onStartRequest: () => void;
   onSignatureRequest: () => void;
 }
 
-function StartNewModal({ open, onClose, onStartBlank, onPreviewDocument, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
   const [search, setSearch] = useState('');
   const [showFilePicker, setShowFilePicker] = useState(false);
 
   const handleUploadFile = () => {
     setShowFilePicker(false);
     onClose();
-    // Open the Document Preview screen (same one accessed from the View CTA in an Agreement Space)
-    onPreviewDocument();
+    // Open the Document Preview screen (same as the View CTA in an Agreement Space)
+    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('New Vendor Contract')}`, '_blank');
   };
 
   const agreements = [
@@ -2991,168 +2990,6 @@ interface WorkspaceViewProps {
 }
 
 /* ═══════════════════════════════════════
-   DocumentPreview Component (Local Doc Viewer)
-   ═══════════════════════════════════════ */
-
-interface DocumentPreviewProps {
-  open: boolean;
-  onClose: () => void;
-  title?: string;
-}
-
-function DocumentPreview({ open, onClose, title = 'New Vendor Contract' }: DocumentPreviewProps) {
-  if (!open) return null;
-
-  const sections: { heading: string; body: string }[] = [
-    {
-      heading: '1. Parties and Purpose',
-      body: 'This New Vendor Contract ("Contract") is entered into as of February 1, 2026 ("Effective Date") by and between Northwind Trading Co., a Delaware corporation ("Company"), and Brightline Supply Partners LLC, an Oregon limited liability company ("Vendor"). The purpose of this Contract is to establish the terms under which Vendor will supply goods and related services to Company in support of Company\u2019s procurement operations.',
-    },
-    {
-      heading: '2. Goods and Services',
-      body: 'Vendor shall furnish the goods, materials, and services described in Exhibit A ("Deliverables") in accordance with the specifications, quantities, and delivery schedule set forth therein. Vendor warrants that all Deliverables shall be new, free from defects in material and workmanship, and shall conform to the agreed specifications. Company may, upon written notice, request reasonable changes to the scope, with pricing adjustments handled through a mutually signed change order.',
-    },
-    {
-      heading: '3. Pricing and Payment Terms',
-      body: 'Company shall pay Vendor the unit prices listed in Exhibit B. Total committed spend for the initial year shall not exceed $480,000 USD. Invoices are payable net forty-five (45) days from receipt of a valid, undisputed invoice. Pricing shall remain firm for the Initial Term; any increase upon renewal shall not exceed the lesser of three percent (3%) or the change in CPI, and requires sixty (60) days prior written notice.',
-    },
-    {
-      heading: '4. Delivery, Title, and Risk of Loss',
-      body: 'Vendor shall deliver Deliverables DDP (Delivered Duty Paid) to Company\u2019s designated facilities per the schedule in Exhibit A. Title and risk of loss pass to Company upon acceptance at the delivery location. Time is of the essence; Vendor shall notify Company promptly of any anticipated delay, and Company may procure substitute goods at Vendor\u2019s expense for material delays exceeding ten (10) business days.',
-    },
-    {
-      heading: '5. Term and Termination',
-      body: 'This Contract commences on the Effective Date and continues for twelve (12) months ("Initial Term"), renewing automatically for successive twelve (12) month terms unless either party gives sixty (60) days written notice of non-renewal. Either party may terminate for material breach upon thirty (30) days written notice if the breach remains uncured. Company may terminate for convenience upon thirty (30) days notice, paying only for conforming Deliverables accepted prior to termination.',
-    },
-    {
-      heading: '6. Warranties and Compliance',
-      body: 'Vendor represents and warrants that it holds all licenses required to perform, that the Deliverables do not infringe any third-party rights, and that it shall comply with all applicable laws, including anti-bribery, export control, and labor regulations. Vendor shall maintain commercially reasonable insurance and provide certificates of coverage upon request.',
-    },
-    {
-      heading: '7. Confidentiality',
-      body: 'Each party shall protect the other\u2019s Confidential Information using no less than reasonable care and shall use it solely to perform under this Contract. This obligation survives termination for a period of three (3) years. Confidential Information excludes information that is publicly available, independently developed, or rightfully received from a third party without restriction.',
-    },
-    {
-      heading: '8. Governing Law',
-      body: 'This Contract shall be governed by the laws of the State of Delaware, without regard to conflict of laws principles. The parties shall attempt in good faith to resolve disputes through negotiation, and failing that, through binding arbitration administered in Wilmington, Delaware. This Contract constitutes the entire agreement between the parties and supersedes all prior understandings relating to its subject matter.',
-    },
-  ];
-
-  return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'var(--ink-bg-color-secondary)',
-      zIndex: 1200,
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      {/* Top bar */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '12px 24px',
-        borderBottom: '1px solid var(--ink-border-subtle)',
-        background: 'white',
-        flexShrink: 0,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 4,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            aria-label="Close preview"
-          >
-            <Icon name="close" size={20} color="var(--ink-text-default)" />
-          </button>
-          <span style={{ width: 1, height: 20, background: 'var(--ink-border-subtle)' }} />
-          <Icon name="file" size={16} color="var(--ink-cobalt-80)" />
-          <Text size="sm" weight="medium">{title}</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Button kind="secondary" size="small" onClick={onClose}>Close</Button>
-          <Button kind="primary" size="small">Download</Button>
-        </div>
-      </div>
-
-      {/* Scrollable document */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '40px 24px' }}>
-        <div style={{
-          maxWidth: 800,
-          margin: '0 auto',
-          background: 'white',
-          borderRadius: 8,
-          boxShadow: '0 1px 8px rgba(0,0,0,0.08)',
-          padding: '64px 72px',
-        }}>
-          <h1 style={{
-            fontSize: 26,
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            textAlign: 'center',
-            color: '#130032',
-            margin: '0 0 8px 0',
-            fontFamily: 'var(--ink-font-family)',
-          }}>NEW VENDOR CONTRACT</h1>
-          <p style={{ textAlign: 'center', color: 'var(--ink-text-secondary)', margin: '0 0 4px 0', fontSize: 14 }}>
-            Northwind Trading Co. &amp; Brightline Supply Partners LLC
-          </p>
-          <p style={{ textAlign: 'center', color: 'var(--ink-text-secondary)', margin: '0 0 40px 0', fontSize: 13 }}>
-            Effective Date: February 1, 2026
-          </p>
-
-          {sections.map((s) => (
-            <div key={s.heading} style={{ marginBottom: 28 }}>
-              <h2 style={{
-                fontSize: 16,
-                fontWeight: 600,
-                color: '#130032',
-                margin: '0 0 8px 0',
-                fontFamily: 'var(--ink-font-family)',
-              }}>{s.heading}</h2>
-              <p style={{
-                fontSize: 14,
-                lineHeight: 1.7,
-                color: 'var(--ink-text-default)',
-                margin: 0,
-              }}>{s.body}</p>
-            </div>
-          ))}
-
-          {/* Signature block */}
-          <div style={{
-            marginTop: 48,
-            paddingTop: 24,
-            borderTop: '1px solid var(--ink-border-subtle)',
-            display: 'flex',
-            gap: 48,
-            flexWrap: 'wrap',
-          }}>
-            {['NORTHWIND TRADING CO. (Company)', 'BRIGHTLINE SUPPLY PARTNERS LLC (Vendor)'].map((party) => (
-              <div key={party} style={{ flex: 1, minWidth: 220 }}>
-                <Text size="xs" weight="medium" style={{ display: 'block', marginBottom: 24 }}>{party}</Text>
-                <div style={{ borderBottom: '1px solid var(--ink-text-secondary)', marginBottom: 6 }} />
-                <Text size="xs" color="secondary">Signature</Text>
-                <div style={{ borderBottom: '1px solid var(--ink-text-secondary)', margin: '24px 0 6px 0' }} />
-                <Text size="xs" color="secondary">Name &amp; Title</Text>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════
    PrepareScreen Component (Signature Request Flow)
    ═══════════════════════════════════════ */
 
@@ -5628,7 +5465,6 @@ export default function App() {
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
   const [showDocumentUpload, setShowDocumentUpload] = useState(false);
-  const [showDocumentPreview, setShowDocumentPreview] = useState(false);
   const [uploadedDocAgreement, setUploadedDocAgreement] = useState<{ documents: string[], recipientName: string } | null>(null);
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
@@ -6100,10 +5936,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         uploadedDocAgreement={uploadedDocAgreement}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onPreviewDocument={() => setShowDocumentPreview(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
-
-    <DocumentPreview open={showDocumentPreview} onClose={() => setShowDocumentPreview(false)} title="New Vendor Contract" />
-
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
 
     <DocumentUpload
       open={showDocumentUpload}
