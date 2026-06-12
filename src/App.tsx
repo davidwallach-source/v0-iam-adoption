@@ -193,14 +193,14 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         style={{
-                          background: 'var(--ink-cobalt-80)',
-                          border: 'none',
+                          background: 'var(--ink-cta-bg-color-secondary-default)',
+                          border: '1px solid var(--ink-cta-border-color-secondary-default)',
                           borderRadius: '6px 0 0 6px',
                           padding: '8px 18px',
                           cursor: 'pointer',
                           fontSize: 13,
                           fontWeight: 500,
-                          color: 'white',
+                          color: 'var(--ink-cta-font-color-secondary)',
                           fontFamily: 'var(--ink-font-family)',
                         }}
                       >
@@ -209,9 +209,9 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                       <button
                         aria-label="Upload options"
                         style={{
-                          background: 'var(--ink-cobalt-80)',
-                          border: 'none',
-                          borderLeft: '1px solid rgba(255,255,255,0.3)',
+                          background: 'var(--ink-cta-bg-color-secondary-default)',
+                          border: '1px solid var(--ink-cta-border-color-secondary-default)',
+                          borderLeft: 'none',
                           borderRadius: '0 6px 6px 0',
                           padding: '8px 8px',
                           cursor: 'pointer',
@@ -219,7 +219,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                           alignItems: 'center',
                         }}
                       >
-                        <Icon name="chevron-down" size={14} color="white" />
+                        <Icon name="chevron-down" size={14} color="var(--ink-cta-font-color-secondary)" />
                       </button>
                       <input
                         ref={fileInputRef}
@@ -2826,7 +2826,7 @@ const DETAIL_TABS = [
 
 /* ═══════════════════════════════════════
    Deal Workspace View (Draft / In Progress)
-   ══════════════════════════════����════════ */
+   ══════════════════════════════����═══════�� */
 
 interface DealTask {
   id: string;
