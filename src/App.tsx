@@ -196,7 +196,11 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                           background: 'var(--ink-cta-bg-color-secondary-default)',
                           border: '1px solid var(--ink-cta-border-color-secondary-default)',
                           borderRadius: '6px 0 0 6px',
-                          padding: '8px 18px',
+                          height: 32,
+                          padding: '0 18px',
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          alignItems: 'center',
                           cursor: 'pointer',
                           fontSize: 13,
                           fontWeight: 500,
@@ -213,7 +217,9 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                           border: '1px solid var(--ink-cta-border-color-secondary-default)',
                           borderLeft: 'none',
                           borderRadius: '0 6px 6px 0',
-                          padding: '8px 8px',
+                          height: 32,
+                          padding: '0 8px',
+                          boxSizing: 'border-box',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
@@ -1420,7 +1426,7 @@ type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
    a specific transaction between parties.
-   ═══════════════════════════════════════ */
+   ════���══════════════════════════════════ */
 
 interface Agreement {
   id: string;
@@ -2824,7 +2830,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -5589,7 +5595,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     return NAVIGATOR_DATA.filter(a => a.fileName.toLowerCase().includes(q) || a.parties.some(p => p.toLowerCase().includes(q)));
   }, [search]);
 
-  /* ── Requests filtered data ── */
+  /* ── Requests filtered data ���─ */
   const filteredRequests = useMemo(() => {
     if (!search) return REQUESTS_DATA;
     const q = search.toLowerCase();
