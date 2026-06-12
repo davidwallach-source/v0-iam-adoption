@@ -55,10 +55,9 @@ interface StartNewModalProps {
 
 function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
   const [search, setSearch] = useState('');
-  const [showFilePicker, setShowFilePicker] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadFile = () => {
-    setShowFilePicker(false);
     onClose();
     // Open the Document Preview screen (same as the View CTA in an Agreement Space)
     window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('New Vendor Contract')}`, '_blank');
@@ -189,19 +188,19 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                 {/* Start button */}
                 <div style={{ marginTop: 12 }}>
                   {item.id === 'blank' ? (
-                    /* Upload split button — secondary, matches the one on Prepare */
+                    /* Upload split button — matches the one on Prepare */
                     <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                       <button
-                        onClick={() => setShowFilePicker(true)}
+                        onClick={() => fileInputRef.current?.click()}
                         style={{
-                          background: 'var(--ink-cta-bg-color-secondary-default)',
-                          border: '1px solid var(--ink-cta-border-color-secondary-default)',
-                          borderRadius: '4px 0 0 4px',
+                          background: 'var(--ink-cobalt-80)',
+                          border: 'none',
+                          borderRadius: '6px 0 0 6px',
                           padding: '8px 18px',
                           cursor: 'pointer',
                           fontSize: 13,
                           fontWeight: 500,
-                          color: 'var(--ink-cta-font-color-secondary)',
+                          color: 'white',
                           fontFamily: 'var(--ink-font-family)',
                         }}
                       >
@@ -209,21 +208,30 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                       </button>
                       <button
                         aria-label="Upload options"
-                        onClick={() => setShowFilePicker(true)}
                         style={{
-                          background: 'var(--ink-cta-bg-color-secondary-default)',
-                          border: '1px solid var(--ink-cta-border-color-secondary-default)',
-                          borderLeft: 'none',
-                          borderRadius: '0 4px 4px 0',
+                          background: 'var(--ink-cobalt-80)',
+                          border: 'none',
+                          borderLeft: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '0 6px 6px 0',
                           padding: '8px 8px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          color: 'var(--ink-cta-font-color-secondary)',
                         }}
                       >
-                        <Icon name="chevron-down" size={14} color="var(--ink-cta-font-color-secondary)" />
+                        <Icon name="chevron-down" size={14} color="white" />
                       </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleUploadFile();
+                          }
+                          e.target.value = '';
+                        }}
+                      />
                     </div>
                   ) : (
                     <Button 
@@ -341,91 +349,6 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
         </div>
 
       </div>
-
-      {/* Prototype file picker (not a real OS file picker) */}
-      {showFilePicker && (
-        <div
-          onClick={() => setShowFilePicker(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.4)',
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: 560,
-              maxWidth: '90vw',
-              background: 'white',
-              borderRadius: 10,
-              boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {/* Title bar */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '12px 16px',
-              borderBottom: '1px solid var(--ink-border-subtle)',
-              background: '#f5f5f7',
-            }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#febc2e' }} />
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#28c840' }} />
-              <Text size="sm" weight="medium" style={{ marginLeft: 8 }}>Choose a file to upload</Text>
-            </div>
-
-            {/* File list */}
-            <div style={{ padding: 12, maxHeight: 320, overflowY: 'auto' }}>
-              <button
-                onClick={handleUploadFile}
-                onDoubleClick={handleUploadFile}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '10px 12px',
-                  border: '1px solid var(--ink-border-subtle)',
-                  borderRadius: 8,
-                  background: 'white',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <Icon name="file" size={22} color="var(--ink-cobalt-80)" />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <Text size="sm" weight="medium">New Vendor Contract.pdf</Text>
-                  <Text size="xs" color="secondary">PDF Document · 248 KB</Text>
-                </div>
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: 8,
-              padding: '12px 16px',
-              borderTop: '1px solid var(--ink-border-subtle)',
-              background: '#f5f5f7',
-            }}>
-              <Button kind="secondary" size="small" onClick={() => setShowFilePicker(false)}>Cancel</Button>
-              <Button kind="primary" size="small" onClick={handleUploadFile}>Open</Button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </Modal>
   );
@@ -1845,7 +1768,7 @@ const agreementColumns = [
 
 /* ═══════════════════════════════════════
    Navigator (Completed) Data — matches Navigator view
-   ═══════════════════════════════���═══════ */
+   ═══════════════════════════════════════ */
 
 interface NavigatorAgreement {
   id: string;
@@ -2903,7 +2826,7 @@ const DETAIL_TABS = [
 
 /* ═══════════════════════════════════════
    Deal Workspace View (Draft / In Progress)
-   ══════════════════════════════����═══════�� */
+   ══════════════════════════════����════════ */
 
 interface DealTask {
   id: string;
