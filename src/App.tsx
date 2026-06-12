@@ -51,16 +51,17 @@ interface StartNewModalProps {
   onStartPurchase: () => void;
   onStartRequest: () => void;
   onSignatureRequest: () => void;
+  onPreviewDocument?: (documentName: string) => void;
 }
 
-function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest, onPreviewDocument }: StartNewModalProps) {
   const [search, setSearch] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadFile = () => {
     onClose();
-    // Open the Document Preview screen (same as the View CTA in an Agreement Space)
-    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('New Vendor Contract')}`, '_blank');
+    // Open the local Document Preview screen (same as the View CTA in an Agreement Space)
+    onPreviewDocument?.('New Vendor Contract');
   };
 
   const agreements = [
@@ -2826,7 +2827,7 @@ const DETAIL_TABS = [
 
 /* ═══════════════════════════════════════
    Deal Workspace View (Draft / In Progress)
-   ══════════════════════════════����════════ */
+   ══════════════════════════════����═══════�� */
 
 interface DealTask {
   id: string;
@@ -2902,6 +2903,325 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
+/* ═══════════════════════════════════════
+   DocumentPreview Component (Local Doc Viewer)
+   Renders full document content for ANY document name, in an
+   editor-style chrome. Replaces the external preview prototype so
+   previews are fully reliable and self-contained.
+   ═══════════════════════════════════════ */
+
+interface DocSection {
+  heading: string;
+  body: string;
+}
+
+interface DocContent {
+  title: string;       // Big centered title (e.g. "NEW VENDOR CONTRACT")
+  fileName: string;    // Shown in the top bar (e.g. "New Vendor Contract.docx")
+  parties: string;     // Subtitle line under the title
+  effectiveDate: string;
+  pages: number;
+  sections: DocSection[];
+  signatories: string[];
+}
+
+function buildDocContent(name: string): DocContent {
+  const key = name.toLowerCase();
+
+  // Known, fully authored documents.
+  if (key.includes('data processing') || key.includes('dpa')) {
+    return {
+      title: 'DATA PROCESSING AGREEMENT',
+      fileName: 'Data Processing Agreement.docx',
+      parties: 'Acme Corporation & Globex Industries',
+      effectiveDate: 'January 15, 2026',
+      pages: 24,
+      sections: [
+        { heading: 'Introduction', body: 'This Data Processing Agreement ("DPA") forms part of the Master Services Agreement between Acme Corporation ("Data Controller") and Globex Industries ("Data Processor") and governs the processing of personal data by Data Processor on behalf of Data Controller.' },
+        { heading: '1. Definitions', body: '"Personal Data" means any information relating to an identified or identifiable natural person. "Processing" means any operation performed on Personal Data, including collection, storage, use, disclosure, or deletion. "Data Subject" means the individual to whom Personal Data relates.' },
+        { heading: '2. Processing Details', body: 'Data Processor shall process Personal Data only in accordance with Data Controller\u2019s documented instructions, including with regard to transfers of Personal Data to a third country, unless required to do so by applicable law.' },
+        { heading: '3. Security Measures', body: 'Data Processor shall implement appropriate technical and organizational measures to ensure a level of security appropriate to the risk, including encryption of Personal Data, ongoing confidentiality, integrity, availability, and resilience of processing systems.' },
+        { heading: '4. Sub-processing', body: 'Data Processor shall not engage another processor without prior specific or general written authorization of the Data Controller. Where Data Processor engages a sub-processor, the same data protection obligations shall be imposed on that sub-processor.' },
+        { heading: '5. Data Subject Rights', body: 'Data Processor shall assist Data Controller by appropriate technical and organizational measures, insofar as possible, for the fulfilment of the Data Controller\u2019s obligation to respond to requests for exercising the Data Subject\u2019s rights.' },
+      ],
+      signatories: ['ACME CORPORATION (Data Controller)', 'GLOBEX INDUSTRIES (Data Processor)'],
+    };
+  }
+
+  if ((key.includes('master') && key.includes('service')) || key.includes('msa')) {
+    return {
+      title: 'MASTER SERVICES AGREEMENT',
+      fileName: 'Master Services Agreement.docx',
+      parties: 'Acme Corporation & Initech LLC',
+      effectiveDate: 'January 1, 2026',
+      pages: 18,
+      sections: [
+        { heading: '1. Scope of Services', body: 'This Master Services Agreement ("Agreement") governs the provision of professional services described in one or more Statements of Work executed by the parties. Each Statement of Work is incorporated into and made part of this Agreement.' },
+        { heading: '2. Fees and Payment', body: 'Client shall pay the fees set forth in each Statement of Work. Undisputed invoices are payable within thirty (30) days of receipt. Late payments accrue interest at one and one-half percent (1.5%) per month or the maximum rate permitted by law.' },
+        { heading: '3. Term and Termination', body: 'This Agreement commences on the Effective Date and continues until terminated. Either party may terminate for material breach upon thirty (30) days written notice if the breach remains uncured.' },
+        { heading: '4. Intellectual Property', body: 'Each party retains all right, title, and interest in its pre-existing intellectual property. Deliverables created under a Statement of Work are assigned to Client upon full payment.' },
+        { heading: '5. Confidentiality', body: 'Each party shall protect the other\u2019s Confidential Information using no less than reasonable care and shall use it solely to perform under this Agreement.' },
+        { heading: '6. Limitation of Liability', body: 'Except for breaches of confidentiality, neither party shall be liable for indirect, incidental, or consequential damages. Each party\u2019s aggregate liability shall not exceed the fees paid in the twelve (12) months preceding the claim.' },
+      ],
+      signatories: ['ACME CORPORATION (Client)', 'INITECH LLC (Service Provider)'],
+    };
+  }
+
+  if (key.includes('non-disclosure') || key.includes('nda') || key.includes('confidential')) {
+    return {
+      title: 'MUTUAL NON-DISCLOSURE AGREEMENT',
+      fileName: 'Non-Disclosure Agreement.docx',
+      parties: 'Acme Corporation & Receiving Party',
+      effectiveDate: 'February 1, 2026',
+      pages: 6,
+      sections: [
+        { heading: '1. Purpose', body: 'The parties wish to explore a potential business relationship and, in connection with this opportunity, each party may disclose certain confidential and proprietary information to the other.' },
+        { heading: '2. Definition of Confidential Information', body: '"Confidential Information" means any non-public information disclosed by one party to the other, whether orally, in writing, or by inspection of tangible objects, that is designated as confidential or that reasonably should be understood to be confidential.' },
+        { heading: '3. Obligations', body: 'The receiving party shall hold the Confidential Information in strict confidence, shall not disclose it to any third party, and shall use it solely for the purpose of evaluating the potential business relationship.' },
+        { heading: '4. Term', body: 'The obligations of confidentiality shall survive for a period of three (3) years from the date of disclosure, notwithstanding any termination of discussions between the parties.' },
+        { heading: '5. Return of Materials', body: 'Upon request, the receiving party shall promptly return or destroy all materials containing Confidential Information and certify such destruction in writing.' },
+      ],
+      signatories: ['ACME CORPORATION (Disclosing Party)', 'RECEIVING PARTY'],
+    };
+  }
+
+  // Vendor / purchase / procurement style contracts (incl. "New Vendor Contract").
+  if (key.includes('vendor') || key.includes('purchase') || key.includes('procurement') || key.includes('supply') || key.includes('order')) {
+    return {
+      title: 'NEW VENDOR CONTRACT',
+      fileName: `${name}.docx`,
+      parties: 'Northwind Trading Co. & Brightline Supply Partners LLC',
+      effectiveDate: 'February 1, 2026',
+      pages: 12,
+      sections: [
+        { heading: '1. Parties and Purpose', body: 'This New Vendor Contract ("Contract") is entered into as of February 1, 2026 ("Effective Date") by and between Northwind Trading Co., a Delaware corporation ("Company"), and Brightline Supply Partners LLC, an Oregon limited liability company ("Vendor"). The purpose of this Contract is to establish the terms under which Vendor will supply goods and related services to Company in support of Company\u2019s procurement operations.' },
+        { heading: '2. Goods and Services', body: 'Vendor shall furnish the goods, materials, and services described in Exhibit A ("Deliverables") in accordance with the specifications, quantities, and delivery schedule set forth therein. Vendor warrants that all Deliverables shall be new, free from defects in material and workmanship, and shall conform to the agreed specifications.' },
+        { heading: '3. Pricing and Payment Terms', body: 'Company shall pay Vendor the unit prices listed in Exhibit B. Total committed spend for the initial year shall not exceed $480,000 USD. Invoices are payable net forty-five (45) days from receipt of a valid, undisputed invoice. Pricing shall remain firm for the Initial Term.' },
+        { heading: '4. Delivery, Title, and Risk of Loss', body: 'Vendor shall deliver Deliverables DDP (Delivered Duty Paid) to Company\u2019s designated facilities per the schedule in Exhibit A. Title and risk of loss pass to Company upon acceptance at the delivery location. Time is of the essence.' },
+        { heading: '5. Term and Termination', body: 'This Contract commences on the Effective Date and continues for twelve (12) months ("Initial Term"), renewing automatically for successive twelve (12) month terms unless either party gives sixty (60) days written notice of non-renewal. Company may terminate for convenience upon thirty (30) days notice.' },
+        { heading: '6. Warranties and Compliance', body: 'Vendor represents and warrants that it holds all licenses required to perform, that the Deliverables do not infringe any third-party rights, and that it shall comply with all applicable laws, including anti-bribery, export control, and labor regulations.' },
+        { heading: '7. Confidentiality', body: 'Each party shall protect the other\u2019s Confidential Information using no less than reasonable care and shall use it solely to perform under this Contract. This obligation survives termination for a period of three (3) years.' },
+        { heading: '8. Governing Law', body: 'This Contract shall be governed by the laws of the State of Delaware, without regard to conflict of laws principles. This Contract constitutes the entire agreement between the parties and supersedes all prior understandings relating to its subject matter.' },
+      ],
+      signatories: ['NORTHWIND TRADING CO. (Company)', 'BRIGHTLINE SUPPLY PARTNERS LLC (Vendor)'],
+    };
+  }
+
+  // Generic fallback — still renders a complete, plausible agreement for any name.
+  return {
+    title: name.toUpperCase(),
+    fileName: `${name}.docx`,
+    parties: 'Acme Corporation & Counterparty',
+    effectiveDate: 'January 1, 2026',
+    pages: 8,
+    sections: [
+      { heading: '1. Agreement', body: `This ${name} ("Agreement") is entered into between Acme Corporation ("Company") and the counterparty identified herein. The parties agree to the terms and conditions set forth below as of the Effective Date.` },
+      { heading: '2. Obligations', body: 'Each party shall perform its respective obligations in good faith and in accordance with the standards of care customary in the relevant industry, and shall comply with all applicable laws and regulations.' },
+      { heading: '3. Term', body: 'This Agreement commences on the Effective Date and continues until the obligations described herein are fully performed, unless earlier terminated in accordance with its terms.' },
+      { heading: '4. Confidentiality', body: 'Each party shall protect the other\u2019s Confidential Information using no less than reasonable care and shall use it solely to perform under this Agreement.' },
+      { heading: '5. Governing Law', body: 'This Agreement shall be governed by the laws of the State of Delaware and constitutes the entire agreement between the parties with respect to its subject matter.' },
+    ],
+    signatories: ['ACME CORPORATION (Company)', 'COUNTERPARTY'],
+  };
+}
+
+interface DocumentPreviewProps {
+  open: boolean;
+  onClose: () => void;
+  documentName: string;
+}
+
+function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) {
+  const [showAiPanel, setShowAiPanel] = useState(true);
+  if (!open) return null;
+
+  const doc = buildDocContent(documentName || 'Document');
+
+  const toolbarBtn: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 4,
+    padding: '6px 10px', borderRadius: 6, border: '1px solid var(--ink-border-subtle)',
+    background: 'white', cursor: 'pointer', fontSize: 13, color: 'var(--ink-text-default)',
+    fontFamily: 'var(--ink-font-family)',
+  };
+  const iconBtn: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 32, height: 32, borderRadius: 6, border: 'none',
+    background: 'transparent', cursor: 'pointer', color: 'var(--ink-text-default)',
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'var(--ink-bg-color-secondary)',
+      zIndex: 1200, display: 'flex', flexDirection: 'column',
+    }}>
+      {/* ── Top bar ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '10px 20px', borderBottom: '1px solid var(--ink-border-subtle)',
+        background: 'white', flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          <button onClick={onClose} style={iconBtn} aria-label="Back">
+            <Icon name="arrow-left" size={20} color="var(--ink-text-default)" />
+          </button>
+          <Icon name="document" size={18} color="var(--ink-cobalt-80)" />
+          <Text size="sm" weight="medium" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {doc.fileName}
+          </Text>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px',
+            borderRadius: 12, background: 'var(--ink-bg-color-secondary)',
+            border: '1px solid var(--ink-border-subtle)', fontSize: 12, color: 'var(--ink-text-secondary)',
+          }}>version 4.0</span>
+          <span style={{
+            padding: '2px 10px', borderRadius: 12, background: '#FFF4E5',
+            color: '#8A5A00', fontSize: 12, fontWeight: 500,
+          }}>In Review</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button style={iconBtn} aria-label="Comments"><Icon name="comment" size={18} color="var(--ink-text-default)" /></button>
+          <button
+            style={iconBtn}
+            aria-label="Toggle AI panel"
+            onClick={() => setShowAiPanel((v) => !v)}
+          >
+            <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
+          </button>
+          <Button kind="primary" size="small">Send for Signature</Button>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 8, padding: '8px 20px',
+        borderBottom: '1px solid var(--ink-border-subtle)', background: 'white',
+        flexShrink: 0, overflowX: 'auto',
+      }}>
+        <button style={{ ...toolbarBtn, gap: 6 }}>
+          <Icon name="edit" size={14} color="var(--ink-text-default)" /> Editing
+          <Icon name="chevron-down" size={14} color="var(--ink-text-secondary)" />
+        </button>
+        <span style={{ width: 1, height: 22, background: 'var(--ink-border-subtle)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--ink-text-secondary)' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: 34, height: 28, border: '1px solid var(--ink-border-subtle)',
+            borderRadius: 6, color: 'var(--ink-text-default)',
+          }}>1</span>
+          <span>/ {doc.pages}</span>
+        </div>
+        <span style={{ width: 1, height: 22, background: 'var(--ink-border-subtle)' }} />
+        <button style={toolbarBtn}>Body Text <Icon name="chevron-down" size={14} color="var(--ink-text-secondary)" /></button>
+        <button style={toolbarBtn}>Arial <Icon name="chevron-down" size={14} color="var(--ink-text-secondary)" /></button>
+        <button style={toolbarBtn}>12 <Icon name="chevron-down" size={14} color="var(--ink-text-secondary)" /></button>
+        <span style={{ width: 1, height: 22, background: 'var(--ink-border-subtle)' }} />
+        <button style={iconBtn} aria-label="Bold"><Icon name="bold" size={16} color="var(--ink-text-default)" /></button>
+        <button style={iconBtn} aria-label="Italic"><Icon name="italics" size={16} color="var(--ink-text-default)" /></button>
+        <button style={iconBtn} aria-label="Underline"><Icon name="underline" size={16} color="var(--ink-text-default)" /></button>
+        <button style={iconBtn} aria-label="Link"><Icon name="link" size={16} color="var(--ink-text-default)" /></button>
+        <span style={{ width: 1, height: 22, background: 'var(--ink-border-subtle)' }} />
+        <button style={iconBtn} aria-label="Align"><Icon name="text-align-start" size={16} color="var(--ink-text-default)" /></button>
+        <button style={iconBtn} aria-label="Bulleted list"><Icon name="bulleted-list" size={16} color="var(--ink-text-default)" /></button>
+      </div>
+
+      {/* ── Body: canvas + AI panel ── */}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        {/* Document canvas */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
+          <div style={{
+            maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 8,
+            boxShadow: '0 1px 8px rgba(0,0,0,0.08)', padding: '64px 72px',
+          }}>
+            <h1 style={{
+              fontSize: 24, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center',
+              color: '#130032', margin: '0 0 8px 0', fontFamily: 'var(--ink-font-family)',
+            }}>{doc.title}</h1>
+            <p style={{ textAlign: 'center', color: 'var(--ink-text-secondary)', margin: '0 0 4px 0', fontSize: 14 }}>
+              {doc.parties}
+            </p>
+            <p style={{ textAlign: 'center', color: 'var(--ink-text-secondary)', margin: '0 0 40px 0', fontSize: 13 }}>
+              Effective Date: {doc.effectiveDate}
+            </p>
+
+            {doc.sections.map((s) => (
+              <div key={s.heading} style={{ marginBottom: 26 }}>
+                <h2 style={{
+                  fontSize: 16, fontWeight: 600, color: '#130032',
+                  margin: '0 0 8px 0', fontFamily: 'var(--ink-font-family)',
+                }}>{s.heading}</h2>
+                <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-text-default)', margin: 0 }}>{s.body}</p>
+              </div>
+            ))}
+
+            {/* Signature block */}
+            <div style={{
+              marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--ink-border-subtle)',
+              display: 'flex', gap: 48, flexWrap: 'wrap',
+            }}>
+              {doc.signatories.map((party) => (
+                <div key={party} style={{ flex: 1, minWidth: 220 }}>
+                  <Text size="xs" weight="medium" style={{ display: 'block', marginBottom: 24 }}>{party}</Text>
+                  <div style={{ borderBottom: '1px solid var(--ink-text-secondary)', marginBottom: 6 }} />
+                  <Text size="xs" color="secondary">Signature</Text>
+                  <div style={{ borderBottom: '1px solid var(--ink-text-secondary)', margin: '24px 0 6px 0' }} />
+                  <Text size="xs" color="secondary">Name &amp; Title</Text>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* AI-Assisted side panel */}
+        {showAiPanel && (
+          <div style={{
+            width: 340, flexShrink: 0, borderLeft: '1px solid var(--ink-border-subtle)',
+            background: 'white', display: 'flex', flexDirection: 'column',
+          }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 16px', borderBottom: '1px solid var(--ink-border-subtle)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
+                <Text size="sm" weight="medium">AI-Assisted</Text>
+              </div>
+              <button style={iconBtn} aria-label="Close AI panel" onClick={() => setShowAiPanel(false)}>
+                <Icon name="close" size={18} color="var(--ink-text-default)" />
+              </button>
+            </div>
+            <div style={{ padding: '20px 16px', flex: 1, overflowY: 'auto' }}>
+              <Text size="md" weight="medium" style={{ display: 'block', marginBottom: 4 }}>Hello, Larry</Text>
+              <Text size="sm" color="secondary" style={{ display: 'block', marginBottom: 20 }}>
+                What would you like to know?
+              </Text>
+              <Text size="xs" weight="medium" color="secondary" style={{ display: 'block', marginBottom: 12 }}>
+                My shortcuts
+              </Text>
+              {['Summarize this document', 'Suggest changes against Playbook', 'Insert Clause', 'Compare Documents'].map((s) => (
+                <button key={s} style={{
+                  display: 'block', width: '100%', textAlign: 'left', marginBottom: 8,
+                  padding: '10px 12px', borderRadius: 8, border: '1px solid var(--ink-border-subtle)',
+                  background: 'white', cursor: 'pointer', fontSize: 13, color: 'var(--ink-text-default)',
+                  fontFamily: 'var(--ink-font-family)',
+                }}>{s}</button>
+              ))}
+            </div>
+            <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ink-border-subtle)' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
+                borderRadius: 10, border: '1px solid var(--ink-border-subtle)',
+              }}>
+                <Icon name="plus" size={16} color="var(--ink-text-secondary)" />
+                <Text size="sm" color="secondary">Type something...</Text>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface WorkspaceViewProps {
   agreement: Agreement;
   onClose: () => void;
@@ -2910,6 +3230,7 @@ interface WorkspaceViewProps {
   ndaSentForSignature?: boolean;
   ndaRecipientName?: string;
   uploadedDocAgreement?: { documents: string[], recipientName: string } | null;
+  onPreviewDocument?: (documentName: string) => void;
 }
 
 /* ═══════════════════════════════════════
@@ -3858,7 +4179,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -4383,7 +4704,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                       if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
-                                        window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                        onPreviewDocument?.(doc.name);
                                       }
                                     }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                       <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
@@ -4493,7 +4814,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                       if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
-                                        window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                        onPreviewDocument?.(doc.name);
                                       }
                                     }}
                                   >
@@ -4544,7 +4865,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                     if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                       onEditNDA();
                                     } else {
-                                      window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                      onPreviewDocument?.(doc.name);
                                     }
                                   }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
@@ -5392,6 +5713,7 @@ export default function App() {
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
+  const [previewDocName, setPreviewDocName] = useState<string | null>(null);
   
   /* ���� Sync hash ↔ state ── */
   useEffect(() => {
@@ -5857,9 +6179,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         ndaSentForSignature={ndaSentForSignature}
         ndaRecipientName={ndaRecipientName}
         uploadedDocAgreement={uploadedDocAgreement}
+        onPreviewDocument={(name) => setPreviewDocName(name)}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => setPreviewDocName(name)} />
+
+    <DocumentPreview
+      open={previewDocName !== null}
+      documentName={previewDocName ?? ''}
+      onClose={() => setPreviewDocName(null)}
+    />
 
     <DocumentUpload
       open={showDocumentUpload}
