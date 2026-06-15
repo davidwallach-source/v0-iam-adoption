@@ -1519,7 +1519,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* ═══════════���═══════���═══════════════════
+/* ��══════════���═══════���═══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
