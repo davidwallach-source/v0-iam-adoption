@@ -51,20 +51,19 @@ interface StartNewModalProps {
   onStartPurchase: () => void;
   onStartRequest: () => void;
   onSignatureRequest: () => void;
+  onPreviewDocument?: (documentName: string) => void;
 }
 
-function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
+function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest, onPreviewDocument }: StartNewModalProps) {
   const [search, setSearch] = useState('');
   const [showFilePicker, setShowFilePicker] = useState(false);
 
   const handleSelectFile = () => {
     setShowFilePicker(false);
     onClose();
-    // Hand off to the document preview prototype (same mechanism as the View CTA
-    // in an Agreement Space). That prototype renders documents by name; the
-    // "Master Service Agreement (MSA)" is its B2B procurement contract
-    // (Acme as Buyer, Globex as Supplier), which fits this vendor-contract flow.
-    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('Master Service Agreement (MSA)')}`, '_blank');
+    // Open the in-app document preview with the New Vendor MSA loaded
+    // (same preview screen the View CTA opens in an Agreement Space).
+    onPreviewDocument?.('New Vendor MSA');
   };
 
   const agreements = [
@@ -3007,6 +3006,336 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
+/* ═══════════════════════════════════════
+   DocumentPreview Component (merged in-app document editor)
+   Replaces the external v0-doc-preview prototype. Renders any
+   document by name in an editor-style chrome with tracked changes
+   and an AI-Assisted panel. Fully self-contained / controllable.
+   ═══════════════════════════════════════ */
+
+type DocRunKind = 'del' | 'ins' | 'mark';
+interface DocRun { text: string; kind?: DocRunKind; }
+type DocStatus = 'approved' | 'redlined' | 'pending';
+interface DocClause { num: string; heading: string; status: DocStatus; runs: DocRun[]; }
+interface DocData {
+  fileName: string;
+  title: string;
+  parties: string;
+  effectiveDate: string;
+  pages: number;
+  summary: string;
+  clauses: DocClause[];
+}
+
+const t = (text: string): DocRun => ({ text });
+
+const DOC_LIBRARY: Record<string, DocData> = {
+  msa: {
+    fileName: 'New Vendor MSA.docx',
+    title: 'MASTER SERVICES AGREEMENT',
+    parties: 'Acme Corporation & Globex Industries',
+    effectiveDate: 'January 15, 2026',
+    pages: 24,
+    summary: 'This Master Services Agreement (MSA), effective as of January 15, 2026, is between Acme Corporation (Buyer) and Globex Industries (Supplier). It governs the procurement of cloud infrastructure, custom software development, and technical consulting services, including payment terms, IP ownership, confidentiality, and data protection.',
+    clauses: [
+      { num: '1', heading: 'Definitions', status: 'approved', runs: [
+        t('This Master Services Agreement ("Agreement") is entered into as of January 15, 2026 ("Effective Date") by and between Acme Corporation, a Delaware corporation ("Buyer"), and Globex Industries, a California corporation ("Supplier"). "Services" shall mean the cloud infrastructure, software development, and technical consulting services described in Exhibit A. "Confidential Information" means any information disclosed by either party that is marked as confidential or would reasonably be considered confidential.'),
+      ]},
+      { num: '2', heading: 'Scope of Services', status: 'redlined', runs: [
+        t('Supplier shall provide the '),
+        { text: 'Services as described in Exhibit A', kind: 'mark' },
+        t(', attached hereto and incorporated by reference. The Services shall include: (a) Cloud infrastructure provisioning and management; (b) Custom software development per specifications in Exhibit B; (c) Technical consulting and advisory services; (d) 24/7 monitoring and incident response. Supplier shall assign '),
+        { text: 'dedicated resources', kind: 'del' },
+        { text: 'dedicated full-time resources with minimum 3 years experience', kind: 'ins' },
+        t(' to perform the Services and '),
+        { text: 'shall not subcontract any portion', kind: 'del' },
+        { text: 'shall not subcontract any material portion exceeding 20%', kind: 'ins' },
+        t(' without prior written consent of Buyer.'),
+      ]},
+      { num: '3', heading: 'Term and Termination', status: 'pending', runs: [
+        t('This Agreement shall commence on the Effective Date and continue for an initial term of three (3) years, automatically renewing for successive one-year terms unless either party provides ninety (90) days written notice of non-renewal. Either party may terminate this Agreement for material breach upon thirty (30) days written notice if such breach remains uncured. Upon termination, Supplier shall promptly return or destroy all Buyer materials and provide reasonable transition assistance.'),
+      ]},
+      { num: '4', heading: 'Compensation and Payment', status: 'redlined', runs: [
+        t('Buyer shall pay Supplier the fees set forth in Exhibit C. Total committed spend for the initial term shall not exceed '),
+        { text: '$1,200,000', kind: 'del' },
+        { text: '$960,000', kind: 'ins' },
+        t(' USD. Undisputed invoices are payable '),
+        { text: 'net thirty (30) days', kind: 'del' },
+        { text: 'net forty-five (45) days', kind: 'ins' },
+        t(' from receipt. Late payments accrue interest at one and one-half percent (1.5%) per month or the maximum rate permitted by law. Pricing shall remain firm for the initial term.'),
+      ]},
+      { num: '5', heading: 'Intellectual Property', status: 'approved', runs: [
+        t('Each party retains all right, title, and interest in its pre-existing intellectual property. Deliverables created specifically for Buyer under a Statement of Work shall be deemed "work made for hire" and assigned to Buyer upon full payment. Supplier retains ownership of its underlying tools, libraries, and know-how, and grants Buyer a perpetual, non-exclusive license to use such materials as embedded in the Deliverables.'),
+      ]},
+      { num: '6', heading: 'Confidentiality', status: 'approved', runs: [
+        t("Each party agrees to hold the other party's Confidential Information in strict confidence and not to disclose it to any third party without prior written consent. The receiving party shall protect Confidential Information using the same degree of care it uses to protect its own confidential information, but no less than reasonable care. This obligation shall survive termination of this Agreement for a period of five (5) years."),
+      ]},
+      { num: '7', heading: 'Limitation of Liability', status: 'redlined', runs: [
+        t('EXCEPT FOR BREACHES OF CONFIDENTIALITY OR INTELLECTUAL PROPERTY OBLIGATIONS, NEITHER PARTY SHALL BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES. THE TOTAL AGGREGATE LIABILITY OF EITHER PARTY SHALL NOT EXCEED '),
+        { text: 'THE TOTAL FEES PAID', kind: 'del' },
+        { text: 'TWO TIMES (2X) THE TOTAL FEES PAID', kind: 'ins' },
+        t(' OR PAYABLE UNDER THIS AGREEMENT DURING THE TWELVE (12) MONTH PERIOD PRECEDING THE CLAIM. This limitation shall apply regardless of the form of action or theory of liability.'),
+      ]},
+      { num: '8', heading: 'Indemnification', status: 'pending', runs: [
+        t("Supplier shall indemnify, defend, and hold harmless Buyer from any third-party claims arising from: (a) Supplier's negligence or willful misconduct; (b) infringement of intellectual property rights; (c) breach of confidentiality obligations; or (d) violation of applicable laws. Buyer shall indemnify Supplier from claims arising from Buyer's use of the Services in violation of this Agreement. The indemnified party shall provide prompt notice and reasonable cooperation."),
+      ]},
+      { num: '9', heading: 'Data Protection', status: 'approved', runs: [
+        t('Supplier shall comply with all applicable data protection laws including GDPR, CCPA, and any successor legislation. Supplier shall implement appropriate technical and organizational measures to protect personal data. In the event of a data breach, Supplier shall notify Buyer within seventy-two (72) hours. Supplier shall process personal data only as instructed by Buyer and shall enter into a separate Data Processing Agreement as set forth in Exhibit D.'),
+      ]},
+      { num: '10', heading: 'Governing Law and Dispute Resolution', status: 'approved', runs: [
+        t('This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws provisions. Any dispute arising under this Agreement shall first be submitted to good-faith mediation. If mediation fails within sixty (60) days, either party may submit the dispute to binding arbitration in Wilmington, Delaware under the rules of the American Arbitration Association.'),
+      ]},
+    ],
+  },
+  dpa: {
+    fileName: 'Data Processing Agreement.docx',
+    title: 'DATA PROCESSING AGREEMENT',
+    parties: 'Acme Corporation & Globex Industries',
+    effectiveDate: 'January 15, 2026',
+    pages: 12,
+    summary: 'This Data Processing Agreement (DPA) governs the processing of personal data by Globex Industries (Data Processor) on behalf of Acme Corporation (Data Controller), covering security measures, sub-processors, data subject rights, and international transfers.',
+    clauses: [
+      { num: '1', heading: 'Processing of Personal Data', status: 'approved', runs: [
+        t("Data Processor shall process Personal Data only in accordance with Data Controller's documented instructions. The categories of Personal Data processed include: contact information, account credentials, usage data, and transaction records. Processing shall be limited to the purposes necessary to provide the Services."),
+      ]},
+      { num: '2', heading: 'Security Measures', status: 'approved', runs: [
+        t('Data Processor shall implement appropriate technical and organizational measures to ensure a level of security appropriate to the risk, including: encryption of Personal Data, regular security assessments, access controls, and employee training on data protection.'),
+      ]},
+      { num: '3', heading: 'Sub-processors', status: 'redlined', runs: [
+        t('Data Processor shall not engage any sub-processor without prior '),
+        { text: 'written authorization', kind: 'del' },
+        { text: 'specific written authorization', kind: 'ins' },
+        t(' from Data Controller. Data Processor shall maintain a list of approved sub-processors and notify Data Controller of any intended changes.'),
+      ]},
+      { num: '4', heading: 'Data Subject Rights', status: 'approved', runs: [
+        t('Data Processor shall assist Data Controller in responding to requests from Data Subjects exercising their rights under applicable data protection law, including rights of access, rectification, erasure, and data portability.'),
+      ]},
+      { num: '5', heading: 'International Data Transfers', status: 'pending', runs: [
+        t('Data Processor shall not transfer Personal Data to any country outside the European Economic Area without appropriate safeguards, such as Standard Contractual Clauses or binding corporate rules approved by a supervisory authority.'),
+      ]},
+    ],
+  },
+  addendum: {
+    fileName: 'Security & Compliance Addendum.docx',
+    title: 'SECURITY & COMPLIANCE ADDENDUM',
+    parties: 'Acme Corporation & Globex Industries',
+    effectiveDate: 'January 15, 2026',
+    pages: 8,
+    summary: 'This Security & Compliance Addendum sets out the security standards, data privacy commitments, incident response obligations, and audit rights applicable to Globex Industries as a supplier to Acme Corporation.',
+    clauses: [
+      { num: '1', heading: 'Security Standards', status: 'approved', runs: [
+        t('Supplier shall maintain SOC 2 Type II certification at all times during the term of this Agreement. All data shall be encrypted in transit using TLS 1.3 and at rest using AES-256 encryption. Supplier shall conduct annual security audits by independent third parties and provide audit reports to Buyer upon request. Multi-factor authentication shall be required for all administrative access to systems containing Buyer data.'),
+      ]},
+      { num: '2', heading: 'Data Privacy', status: 'approved', runs: [
+        t("Supplier shall comply with all applicable data protection laws including GDPR, CCPA, and any other relevant privacy regulations. Personal data shall only be processed for the purposes specified in the Agreement and in accordance with Buyer's documented instructions. Data subjects shall have the right to access, rectify, and delete their personal data upon request."),
+      ]},
+      { num: '3', heading: 'Incident Response', status: 'redlined', runs: [
+        t('Supplier shall maintain a comprehensive incident response plan and notify Buyer within '),
+        { text: '24 hours', kind: 'del' },
+        { text: '12 hours', kind: 'ins' },
+        t(' of discovering any security breach or unauthorized access to Buyer data. Supplier shall cooperate fully with any investigation and implement appropriate remediation measures at Supplier\u2019s expense.'),
+      ]},
+      { num: '4', heading: 'Compliance & Audit Rights', status: 'pending', runs: [
+        t('Buyer shall have the right to audit Supplier\u2019s security practices and compliance with this Addendum upon reasonable notice. Supplier shall maintain detailed logs of all access to Buyer data and retain such logs for a minimum of two (2) years.'),
+      ]},
+    ],
+  },
+};
+
+function resolveDoc(name: string): DocData {
+  const key = (name || '').toLowerCase();
+  if (key.includes('data processing') || key.includes('dpa')) return DOC_LIBRARY.dpa;
+  if (key.includes('security') || key.includes('compliance') || key.includes('addendum')) return DOC_LIBRARY.addendum;
+  if (key.includes('msa') || key.includes('master service') || key.includes('vendor') || key.includes('contract') || key.includes('purchase') || key.includes('procurement')) return DOC_LIBRARY.msa;
+  // Fallback: render the MSA but relabel it to the requested name.
+  return { ...DOC_LIBRARY.msa, fileName: `${name}.docx` };
+}
+
+const STATUS_META: Record<DocStatus, { label: string; color: string; bg: string }> = {
+  approved: { label: 'Approved', color: 'var(--ink-green-80, #1F7A33)', bg: 'rgba(31, 122, 51, 0.12)' },
+  redlined: { label: 'Redlined', color: '#8A5A00', bg: '#FFF4E5' },
+  pending:  { label: 'Pending Review', color: 'var(--ink-text-color-secondary, #6B6580)', bg: 'var(--ink-neutral-fade-10, #EEE)' },
+};
+
+interface DocumentPreviewProps {
+  open: boolean;
+  onClose: () => void;
+  documentName: string;
+}
+
+function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) {
+  const [showAiPanel, setShowAiPanel] = useState(true);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  if (!open) return null;
+
+  const doc = resolveDoc(documentName);
+
+  const iconBtn: CSSProperties = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 32, height: 32, borderRadius: 6, border: 'none',
+    background: 'transparent', cursor: 'pointer', color: 'var(--ink-text-color, #130032)',
+  };
+  const toolbarBtn: CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 6, height: 30,
+    padding: '0 10px', borderRadius: 6, border: '1px solid var(--ink-neutral-fade-15, #DDD)',
+    background: 'white', cursor: 'pointer', fontSize: 13, color: 'var(--ink-text-color, #130032)',
+    fontFamily: 'var(--ink-font-family)', whiteSpace: 'nowrap',
+  };
+  const divider = <span style={{ width: 1, height: 22, background: 'var(--ink-neutral-fade-15, #DDD)' }} />;
+
+  const renderRun = (run: DocRun, i: number) => {
+    if (run.kind === 'del') {
+      return <span key={i} style={{ textDecoration: 'line-through', color: '#C0362C', background: 'rgba(192,54,44,0.08)' }}>{run.text}</span>;
+    }
+    if (run.kind === 'ins') {
+      return <span key={i} style={{ color: '#1F7A33', background: 'rgba(31,122,51,0.10)', textDecoration: 'underline' }}>{run.text}</span>;
+    }
+    if (run.kind === 'mark') {
+      return <span key={i} style={{ background: '#FFF1A8', borderRadius: 2 }}>{run.text}</span>;
+    }
+    return <span key={i}>{run.text}</span>;
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 1100, background: 'var(--ink-neutral-fade-5, #F5F4F7)',
+      display: 'flex', flexDirection: 'column', fontFamily: 'var(--ink-font-family)',
+    }}>
+      {/* ── Top bar ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: 56, padding: '0 16px', background: 'white',
+        borderBottom: '1px solid var(--ink-neutral-fade-10, #EEE)', flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <button onClick={onClose} style={iconBtn} aria-label="Back"><Icon name="arrow-left" size={20} /></button>
+          <Icon name="document" size={18} color="var(--ink-cobalt-80)" />
+          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-text-color, #130032)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.fileName}</span>
+          <button style={{ ...toolbarBtn, height: 26 }}>version 4.0 <Icon name="chevron-down" size={14} /></button>
+          <span style={{ padding: '3px 10px', borderRadius: 12, background: '#FFF4E5', color: '#8A5A00', fontSize: 12, fontWeight: 600 }}>In Review</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button style={iconBtn} aria-label="More options"><Icon name="overflow-horizontal" size={18} /></button>
+          <button style={iconBtn} aria-label="Comments"><Icon name="comment" size={18} /></button>
+          <button style={iconBtn} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => !v)}>
+            <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
+          </button>
+          <Button kind="primary" size="small">Send for Signature</Button>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 8, height: 48, padding: '0 16px',
+        background: 'white', borderBottom: '1px solid var(--ink-neutral-fade-10, #EEE)',
+        flexShrink: 0, overflowX: 'auto',
+      }}>
+        <button style={toolbarBtn}><Icon name="pencil" size={14} /> Editing <Icon name="chevron-down" size={14} /></button>
+        {divider}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--ink-text-color-secondary, #6B6580)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 34, height: 28, border: '1px solid var(--ink-neutral-fade-15, #DDD)', borderRadius: 6, color: 'var(--ink-text-color, #130032)' }}>1</span>
+          <span>/ {doc.pages}</span>
+        </div>
+        {divider}
+        <button style={toolbarBtn}>Body Text <Icon name="chevron-down" size={14} /></button>
+        <button style={toolbarBtn}>Arial <Icon name="chevron-down" size={14} /></button>
+        <button style={toolbarBtn}>12 <Icon name="chevron-down" size={14} /></button>
+        {divider}
+        <button style={iconBtn} aria-label="Bold"><Icon name="bold" size={16} /></button>
+        <button style={iconBtn} aria-label="Italic"><Icon name="italics" size={16} /></button>
+        <button style={iconBtn} aria-label="Underline"><Icon name="underline" size={16} /></button>
+        <button style={iconBtn} aria-label="Text color"><Icon name="text-color" size={16} /></button>
+        <button style={iconBtn} aria-label="Link"><Icon name="link" size={16} /></button>
+        {divider}
+        <button style={iconBtn} aria-label="Align"><Icon name="text-align-start" size={16} /></button>
+        <button style={iconBtn} aria-label="Bulleted list"><Icon name="bulleted-list" size={16} /></button>
+        <button style={iconBtn} aria-label="Numbered list"><Icon name="numbered-list" size={16} /></button>
+      </div>
+
+      {/* ── Body: canvas + AI panel ── */}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
+          <div style={{
+            maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 4,
+            boxShadow: '0 1px 8px rgba(19,0,50,0.10)', padding: '64px 72px',
+          }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center', color: '#130032', margin: '0 0 8px 0' }}>{doc.title}</h1>
+            <p style={{ textAlign: 'center', color: 'var(--ink-text-color-secondary, #6B6580)', margin: '0 0 2px 0', fontSize: 14 }}>{doc.parties}</p>
+            <p style={{ textAlign: 'center', color: 'var(--ink-text-color-secondary, #6B6580)', margin: '0 0 40px 0', fontSize: 13 }}>Effective Date: {doc.effectiveDate}</p>
+
+            {doc.clauses.map((c) => {
+              const meta = STATUS_META[c.status];
+              return (
+                <div key={c.num} style={{ marginBottom: 26 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 8px 0' }}>
+                    <h2 style={{ fontSize: 16, fontWeight: 600, color: '#130032', margin: 0 }}>{c.num}. {c.heading}</h2>
+                    <span style={{ padding: '2px 8px', borderRadius: 10, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 600 }}>{meta.label}</span>
+                  </div>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-text-color, #130032)', margin: 0 }}>
+                    {c.runs.map(renderRun)}
+                  </p>
+                </div>
+              );
+            })}
+
+            {/* Signature block */}
+            <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--ink-neutral-fade-10, #EEE)', display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+              {doc.parties.split(' & ').map((party) => (
+                <div key={party} style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#130032', marginBottom: 28 }}>{party}</div>
+                  <div style={{ borderBottom: '1px solid var(--ink-text-color-secondary, #6B6580)', marginBottom: 6 }} />
+                  <div style={{ fontSize: 12, color: 'var(--ink-text-color-secondary, #6B6580)' }}>Authorized Signature</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* AI-Assisted panel */}
+        {showAiPanel && (
+          <div style={{ width: 360, flexShrink: 0, borderLeft: '1px solid var(--ink-neutral-fade-10, #EEE)', background: 'white', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 16px', borderBottom: '1px solid var(--ink-neutral-fade-10, #EEE)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>AI-Assisted</span>
+              </div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <button style={iconBtn} aria-label="Expand"><Icon name="arrows-out" size={16} /></button>
+                <button style={iconBtn} aria-label="Close AI panel" onClick={() => setShowAiPanel(false)}><Icon name="close" size={18} /></button>
+              </div>
+            </div>
+            <div style={{ padding: 20, flex: 1, overflowY: 'auto' }}>
+              <div style={{ fontSize: 20, fontWeight: 600, color: '#130032', marginBottom: 4 }}>Hello, Larry</div>
+              <div style={{ fontSize: 15, color: 'var(--ink-text-color-secondary, #6B6580)', marginBottom: 20 }}>What would you like to know?</div>
+              <div style={{ border: '1px solid var(--ink-neutral-fade-10, #EEE)', borderRadius: 12, padding: 16, marginBottom: 24 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#130032', marginBottom: 8 }}>Agreement summary</div>
+                <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink-text-color-secondary, #6B6580)', maxHeight: summaryExpanded ? 'none' : 66, overflow: 'hidden' }}>{doc.summary}</div>
+                <button onClick={() => setSummaryExpanded(v => !v)} style={{ ...iconBtn, width: '100%', height: 24, marginTop: 4 }} aria-label="Toggle summary">
+                  <Icon name={summaryExpanded ? 'chevron-up' : 'chevron-down'} size={16} />
+                </button>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-text-color-secondary, #6B6580)', marginBottom: 12 }}>My shortcuts</div>
+              {['Suggest changes against Playbook', 'Insert Clause', 'Automatically route approvals', 'Compare Documents'].map((s) => (
+                <button key={s} style={{
+                  display: 'block', width: '100%', textAlign: 'left', marginBottom: 8,
+                  padding: '12px 14px', borderRadius: 999, border: '1px solid var(--ink-neutral-fade-15, #DDD)',
+                  background: 'white', cursor: 'pointer', fontSize: 13, color: '#130032', fontFamily: 'var(--ink-font-family)',
+                }}>{s}</button>
+              ))}
+            </div>
+            <div style={{ padding: 16, borderTop: '1px solid var(--ink-neutral-fade-10, #EEE)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 14px', borderRadius: 999, border: '1px solid var(--ink-neutral-fade-15, #DDD)' }}>
+                <Icon name="plus" size={16} color="var(--ink-text-color-secondary, #6B6580)" />
+                <span style={{ fontSize: 13, color: 'var(--ink-text-color-secondary, #6B6580)' }}>Ask anything about this document...</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface WorkspaceViewProps {
   agreement: Agreement;
   onClose: () => void;
@@ -3015,6 +3344,7 @@ interface WorkspaceViewProps {
   ndaSentForSignature?: boolean;
   ndaRecipientName?: string;
   uploadedDocAgreement?: { documents: string[], recipientName: string } | null;
+  onPreviewDocument?: (documentName: string) => void;
 }
 
 /* ═══════════════════════════════════════
@@ -3963,7 +4293,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -4488,7 +4818,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                       if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
-                                        window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                        onPreviewDocument?.(doc.name);
                                       }
                                     }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                       <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
@@ -4598,7 +4928,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                       if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
-                                        window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                        onPreviewDocument?.(doc.name);
                                       }
                                     }}
                                   >
@@ -4649,7 +4979,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                     if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                       onEditNDA();
                                     } else {
-                                      window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent(doc.name)}`, '_blank');
+                                      onPreviewDocument?.(doc.name);
                                     }
                                   }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
@@ -5497,6 +5827,7 @@ export default function App() {
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
+  const [previewDocName, setPreviewDocName] = useState<string | null>(null);
   
   /* ���� Sync hash ↔ state ── */
   useEffect(() => {
@@ -5962,9 +6293,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         ndaSentForSignature={ndaSentForSignature}
         ndaRecipientName={ndaRecipientName}
         uploadedDocAgreement={uploadedDocAgreement}
+        onPreviewDocument={(name) => setPreviewDocName(name)}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => setPreviewDocName(name)} />
+
+    <DocumentPreview
+      open={previewDocName !== null}
+      documentName={previewDocName ?? ''}
+      onClose={() => setPreviewDocName(null)}
+    />
 
     <DocumentUpload
       open={showDocumentUpload}
