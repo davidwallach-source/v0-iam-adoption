@@ -60,8 +60,11 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
   const handleSelectFile = () => {
     setShowFilePicker(false);
     onClose();
-    // Open the Document Preview screen (same as the View CTA in an Agreement Space)
-    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('New Vendor Contract')}`, '_blank');
+    // Hand off to the document preview prototype (same mechanism as the View CTA
+    // in an Agreement Space). That prototype renders documents by name; the
+    // "Master Service Agreement (MSA)" is its B2B procurement contract
+    // (Acme as Buyer, Globex as Supplier), which fits this vendor-contract flow.
+    window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('Master Service Agreement (MSA)')}`, '_blank');
   };
 
   const agreements = [
@@ -1517,7 +1520,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* ═══════════════════���═══════════════════
+/* ═══════════���═══════���═══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
