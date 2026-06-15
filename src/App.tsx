@@ -429,7 +429,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
               >
                 <Icon name="document" size={20} color="currentColor" />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 500 }}>New Vendor Contract</span>
+                  <span style={{ fontWeight: 500 }}>New Vendor MSA</span>
                   <span style={{ fontSize: 12, opacity: 0.7 }}>PDF Document · 248 KB</span>
                 </div>
               </button>
