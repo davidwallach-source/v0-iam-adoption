@@ -1519,7 +1519,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* ��══════════���═══════���═══════════════════
+/* ���══════════���═══════���═══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -3016,7 +3016,10 @@ const TEAM_PROGRESS = [
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
 type DocStatus = 'approved' | 'redlined' | 'pending';
-interface DocClause { num: string; heading: string; status: DocStatus; runs: DocRun[]; }
+interface DocClause { num: string; heading: string; status: DocStatus; runs: DocRun[] }
+type PlaybookStatus = 'passed' | 'needs_review';
+interface PlaybookRule { name: string; section: string; status: PlaybookStatus; description: string; details: string }
+interface KeyTerm { label: string; value: string }
 interface DocData {
   fileName: string;
   title: string;
@@ -3025,6 +3028,8 @@ interface DocData {
   pages: number;
   summary: string;
   clauses: DocClause[];
+  keyTerms?: KeyTerm[];
+  playbook?: PlaybookRule[];
 }
 
 const t = (text: string): DocRun => ({ text });
@@ -3085,6 +3090,30 @@ const DOC_LIBRARY: Record<string, DocData> = {
       { num: '10', heading: 'Governing Law and Dispute Resolution', status: 'approved', runs: [
         t('This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws provisions. Any dispute arising under this Agreement shall first be submitted to good-faith mediation. If mediation fails within sixty (60) days, either party may submit the dispute to binding arbitration in Wilmington, Delaware under the rules of the American Arbitration Association.'),
       ]},
+    ],
+    keyTerms: [
+      { label: 'Agreement Type', value: 'Master Services Agreement' },
+      { label: 'Effective Date', value: 'January 15, 2026' },
+      { label: 'Buyer', value: 'Acme Corporation' },
+      { label: 'Supplier', value: 'Globex Industries' },
+      { label: 'Initial Term', value: '36 months' },
+      { label: 'Total Value', value: '$2,400,000 USD' },
+      { label: 'Monthly Payment', value: '$66,667' },
+      { label: 'Payment Terms', value: 'Net 30' },
+      { label: 'Governing Law', value: 'State of Delaware' },
+      { label: 'Renewal', value: 'Auto-renew (12 mo.)' },
+    ],
+    playbook: [
+      { name: 'Liability Cap Compliance', section: '7. Limitation of Liability', status: 'needs_review', description: 'Liability cap must not exceed total contract value', details: 'Current cap references 12-month fees. Company standard requires cap at total contract value ($2.4M) for deals over $1M.' },
+      { name: 'Payment Terms', section: '4. Compensation and Payment', status: 'passed', description: 'Net payment terms within 30-45 day range', details: 'Payment terms set at Net 30, which falls within acceptable range.' },
+      { name: 'Auto-Renewal Notice Period', section: '3. Term and Termination', status: 'passed', description: 'Minimum 90-day notice for non-renewal', details: 'Non-renewal notice period is 90 days, meeting minimum threshold.' },
+      { name: 'IP Assignment Clause', section: '5. Intellectual Property', status: 'passed', description: 'Work product must be assigned to Buyer with proper carve-outs', details: 'IP assignment includes work-for-hire designation and full assignment of rights.' },
+      { name: 'Data Breach Notification', section: '9. Data Protection', status: 'passed', description: 'Notification window must not exceed 72 hours', details: 'Notification window set at 72 hours, meeting compliance requirement.' },
+      { name: 'Indemnification Scope', section: '8. Indemnification', status: 'needs_review', description: 'Must include IP infringement and data breach indemnification', details: 'Indemnification covers IP infringement but lacks explicit data breach indemnification clause.' },
+      { name: 'Governing Law', section: '10. Governing Law', status: 'passed', description: 'Must specify Delaware or New York law', details: 'Governing law set to Delaware, consistent with company policy.' },
+      { name: 'Fee Escalation Cap', section: '4. Compensation and Payment', status: 'needs_review', description: 'Annual fee increases must not exceed 5%', details: 'Current language permits 5% increase. Company standard limits to CPI or 3%, whichever is lower.' },
+      { name: 'Confidentiality Survival', section: '6. Confidentiality', status: 'passed', description: 'Survival period minimum 3 years post-termination', details: 'Survival period is 5 years, exceeding the 3-year minimum.' },
+      { name: 'Subcontracting Restrictions', section: '2. Scope of Services', status: 'passed', description: 'Subcontracting requires prior written consent', details: 'Clause requires prior written consent for any subcontracting.' },
     ],
   },
   dpa: {
@@ -3157,6 +3186,31 @@ const STATUS_META: Record<DocStatus, { label: string; color: string; bg: string 
   pending:  { label: 'Pending Review', color: 'var(--ink-text-color-secondary, #6B6580)', bg: 'var(--ink-neutral-fade-10, #EEE)' },
 };
 
+interface ChatMessage { role: 'user' | 'ai'; text: string }
+
+const AI_SHORTCUTS = ['Suggest changes against Playbook', 'Insert Clause', 'Automatically route approvals', 'Compare Documents'];
+
+function aiRespond(prompt: string, doc: DocData): string {
+  const p = prompt.toLowerCase();
+  if (p.includes('playbook') || p.includes('suggest changes')) {
+    const flagged = (doc.playbook ?? []).filter(r => r.status === 'needs_review');
+    return `I reviewed this agreement against your Playbook. ${(doc.playbook ?? []).length - flagged.length} of ${(doc.playbook ?? []).length} rules passed. ${flagged.length} need review: ${flagged.map(r => r.name).join(', ')}. Would you like me to draft redlines for these?`;
+  }
+  if (p.includes('insert') || p.includes('clause')) {
+    return "I found 8 clauses in your library that are relevant to this MSA. The most commonly needed are the Standard Limitation of Liability and Fallback Indemnification clauses. Would you like me to insert one?";
+  }
+  if (p.includes('approval') || p.includes('route')) {
+    return 'Setting up approval workflow. Which section needs approval assignment?';
+  }
+  if (p.includes('compare')) {
+    return 'Comparing against version 3.0: 9 changes detected across Scope, Compensation, and Limitation of Liability. The liability cap increased from 1x to 2x fees, and payment terms moved from Net 30 to Net 45. Want a side-by-side view?';
+  }
+  if (p.includes('summary') || p.includes('summarize')) {
+    return doc.summary;
+  }
+  return "I've reviewed the New Vendor MSA v4.0. This is a $2.4M, 36-month Master Services Agreement between Acme (Buyer) and Globex (Supplier). There are 9 active redlines across 4 sections, with Compensation and Liability being the most contested. Would you like me to run a specific analysis or take an action?";
+}
+
 interface DocumentPreviewProps {
   open: boolean;
   onClose: () => void;
@@ -3166,58 +3220,102 @@ interface DocumentPreviewProps {
 function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(true);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | null>('clauses');
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [expandedRule, setExpandedRule] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [zoom, setZoom] = useState(100);
+  const [editing, setEditing] = useState(true);
+
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const doc = useMemo(() => resolveDoc(documentName), [documentName]);
+
+  useEffect(() => {
+    if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   if (!open) return null;
 
-  const doc = resolveDoc(documentName);
+  const send = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
+    setInput('');
+    window.setTimeout(() => {
+      setMessages(prev => [...prev, { role: 'ai', text: aiRespond(trimmed, doc) }]);
+    }, 450);
+  };
+
+  const scrollToSection = (num: string) => {
+    setActiveSection(num);
+    const el = sectionRefs.current[num];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const exec = (cmd: string, value?: string) => {
+    canvasRef.current?.focus();
+    try { document.execCommand(cmd, false, value); } catch { /* noop */ }
+  };
 
   const iconBtn: CSSProperties = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     width: 32, height: 32, borderRadius: 6, border: 'none',
-    background: 'transparent', cursor: 'pointer', color: 'var(--ink-text-color, #130032)',
+    background: 'transparent', cursor: 'pointer', color: '#130032',
   };
+  const railBtn = (active: boolean): CSSProperties => ({
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 8, border: 'none', cursor: 'pointer',
+    background: active ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent',
+    color: active ? 'var(--ink-cobalt-80, #4C00FF)' : '#5B5670',
+  });
   const toolbarBtn: CSSProperties = {
     display: 'flex', alignItems: 'center', gap: 6, height: 30,
-    padding: '0 10px', borderRadius: 6, border: '1px solid var(--ink-neutral-fade-15, #DDD)',
-    background: 'white', cursor: 'pointer', fontSize: 13, color: 'var(--ink-text-color, #130032)',
+    padding: '0 10px', borderRadius: 6, border: '1px solid #DDD9E3',
+    background: 'white', cursor: 'pointer', fontSize: 13, color: '#130032',
     fontFamily: 'var(--ink-font-family)', whiteSpace: 'nowrap',
   };
-  const divider = <span style={{ width: 1, height: 22, background: 'var(--ink-neutral-fade-15, #DDD)' }} />;
+  const divider = <span style={{ width: 1, height: 22, background: '#DDD9E3' }} />;
 
   const renderRun = (run: DocRun, i: number) => {
-    if (run.kind === 'del') {
-      return <span key={i} style={{ textDecoration: 'line-through', color: '#C0362C', background: 'rgba(192,54,44,0.08)' }}>{run.text}</span>;
-    }
-    if (run.kind === 'ins') {
-      return <span key={i} style={{ color: '#1F7A33', background: 'rgba(31,122,51,0.10)', textDecoration: 'underline' }}>{run.text}</span>;
-    }
-    if (run.kind === 'mark') {
-      return <span key={i} style={{ background: '#FFF1A8', borderRadius: 2 }}>{run.text}</span>;
-    }
+    if (run.kind === 'del') return <span key={i} style={{ textDecoration: 'line-through', color: '#C0362C', background: 'rgba(192,54,44,0.08)' }}>{run.text}</span>;
+    if (run.kind === 'ins') return <span key={i} style={{ color: '#1F7A33', background: 'rgba(31,122,51,0.10)', textDecoration: 'underline' }}>{run.text}</span>;
+    if (run.kind === 'mark') return <span key={i} style={{ background: '#FFF1A8', borderRadius: 2 }}>{run.text}</span>;
     return <span key={i}>{run.text}</span>;
   };
 
+  const statusDot = (s: DocStatus) => {
+    const c = s === 'approved' ? '#1F7A33' : s === 'redlined' ? '#C0362C' : '#B0883A';
+    return <span style={{ width: 8, height: 8, borderRadius: '50%', background: c, flexShrink: 0 }} />;
+  };
+
+  const hasChat = messages.length > 0;
+
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 1100, background: 'var(--ink-neutral-fade-5, #F5F4F7)',
+      position: 'fixed', inset: 0, zIndex: 1100, background: '#F4F3F6',
       display: 'flex', flexDirection: 'column', fontFamily: 'var(--ink-font-family)',
     }}>
       {/* ── Top bar ── */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         height: 56, padding: '0 16px', background: 'white',
-        borderBottom: '1px solid var(--ink-neutral-fade-10, #EEE)', flexShrink: 0,
+        borderBottom: '1px solid #E8E6ED', flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
           <button onClick={onClose} style={iconBtn} aria-label="Back"><Icon name="arrow-left" size={20} /></button>
           <Icon name="document" size={18} color="var(--ink-cobalt-80)" />
-          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-text-color, #130032)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.fileName}</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#130032', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.fileName}</span>
           <button style={{ ...toolbarBtn, height: 26 }}>version 4.0 <Icon name="chevron-down" size={14} /></button>
           <span style={{ padding: '3px 10px', borderRadius: 12, background: '#FFF4E5', color: '#8A5A00', fontSize: 12, fontWeight: 600 }}>In Review</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <button style={iconBtn} aria-label="More options"><Icon name="overflow-horizontal" size={18} /></button>
           <button style={iconBtn} aria-label="Comments"><Icon name="comment" size={18} /></button>
-          <button style={iconBtn} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => !v)}>
+          <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => !v)}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
           <Button kind="primary" size="small">Send for Signature</Button>
@@ -3227,13 +3325,14 @@ function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) 
       {/* ── Toolbar ── */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, height: 48, padding: '0 16px',
-        background: 'white', borderBottom: '1px solid var(--ink-neutral-fade-10, #EEE)',
-        flexShrink: 0, overflowX: 'auto',
+        background: 'white', borderBottom: '1px solid #E8E6ED', flexShrink: 0, overflowX: 'auto',
       }}>
-        <button style={toolbarBtn}><Icon name="pencil" size={14} /> Editing <Icon name="chevron-down" size={14} /></button>
+        <button style={{ ...toolbarBtn, background: editing ? 'var(--ink-cobalt-10, #ECE6FF)' : 'white', color: editing ? 'var(--ink-cobalt-80, #4C00FF)' : '#130032' }} onClick={() => setEditing(v => !v)}>
+          <Icon name="pencil" size={14} /> {editing ? 'Editing' : 'Viewing'} <Icon name="chevron-down" size={14} />
+        </button>
         {divider}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--ink-text-color-secondary, #6B6580)' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 34, height: 28, border: '1px solid var(--ink-neutral-fade-15, #DDD)', borderRadius: 6, color: 'var(--ink-text-color, #130032)' }}>1</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: '#5B5670' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 34, height: 28, border: '1px solid #DDD9E3', borderRadius: 6, color: '#130032' }}>1</span>
           <span>/ {doc.pages}</span>
         </div>
         {divider}
@@ -3241,50 +3340,146 @@ function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) 
         <button style={toolbarBtn}>Arial <Icon name="chevron-down" size={14} /></button>
         <button style={toolbarBtn}>12 <Icon name="chevron-down" size={14} /></button>
         {divider}
-        <button style={iconBtn} aria-label="Bold"><Icon name="bold" size={16} /></button>
-        <button style={iconBtn} aria-label="Italic"><Icon name="italics" size={16} /></button>
-        <button style={iconBtn} aria-label="Underline"><Icon name="underline" size={16} /></button>
-        <button style={iconBtn} aria-label="Text color"><Icon name="text-color" size={16} /></button>
-        <button style={iconBtn} aria-label="Link"><Icon name="link" size={16} /></button>
+        <button style={iconBtn} aria-label="Bold" onMouseDown={(e) => { e.preventDefault(); exec('bold'); }}><Icon name="bold" size={16} /></button>
+        <button style={iconBtn} aria-label="Italic" onMouseDown={(e) => { e.preventDefault(); exec('italic'); }}><Icon name="italics" size={16} /></button>
+        <button style={iconBtn} aria-label="Underline" onMouseDown={(e) => { e.preventDefault(); exec('underline'); }}><Icon name="underline" size={16} /></button>
+        <button style={iconBtn} aria-label="Highlight" onMouseDown={(e) => { e.preventDefault(); exec('hiliteColor', '#FFF1A8'); }}><Icon name="text-color" size={16} /></button>
+        <button style={iconBtn} aria-label="Link" onMouseDown={(e) => { e.preventDefault(); const u = window.prompt('Link URL'); if (u) exec('createLink', u); }}><Icon name="link" size={16} /></button>
         {divider}
-        <button style={iconBtn} aria-label="Align"><Icon name="text-align-start" size={16} /></button>
-        <button style={iconBtn} aria-label="Bulleted list"><Icon name="bulleted-list" size={16} /></button>
-        <button style={iconBtn} aria-label="Numbered list"><Icon name="numbered-list" size={16} /></button>
+        <button style={iconBtn} aria-label="Align left" onMouseDown={(e) => { e.preventDefault(); exec('justifyLeft'); }}><Icon name="text-align-start" size={16} /></button>
+        <button style={iconBtn} aria-label="Bulleted list" onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList'); }}><Icon name="bulleted-list" size={16} /></button>
+        <button style={iconBtn} aria-label="Numbered list" onMouseDown={(e) => { e.preventDefault(); exec('insertOrderedList'); }}><Icon name="numbered-list" size={16} /></button>
       </div>
 
-      {/* ── Body: canvas + AI panel ── */}
+      {/* ── Body: left rail + flyout + canvas + AI panel ── */}
       <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
-          <div style={{
-            maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 4,
-            boxShadow: '0 1px 8px rgba(19,0,50,0.10)', padding: '64px 72px',
-          }}>
+
+        {/* Left icon rail */}
+        <div style={{
+          width: 56, flexShrink: 0, background: 'white', borderRight: '1px solid #E8E6ED',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0',
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+            <button style={railBtn(leftPanel === 'clauses')} aria-label="Clauses" title="Clauses" onClick={() => setLeftPanel(p => p === 'clauses' ? null : 'clauses')}>
+              <Icon name="bulleted-list" size={20} color="currentColor" />
+            </button>
+            <button style={railBtn(leftPanel === 'playbook')} aria-label="Playbooks" title="Playbooks" onClick={() => setLeftPanel(p => p === 'playbook' ? null : 'playbook')}>
+              <Icon name="shield" size={20} color="currentColor" />
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <button style={iconBtn} aria-label="Zoom out" onClick={() => setZoom(z => Math.max(50, z - 10))}><Icon name="zoom-out" size={18} /></button>
+            <span style={{ fontSize: 11, color: '#5B5670' }}>{zoom}%</span>
+            <button style={iconBtn} aria-label="Zoom in" onClick={() => setZoom(z => Math.min(200, z + 10))}><Icon name="zoom-in" size={18} /></button>
+          </div>
+        </div>
+
+        {/* Flyout panel */}
+        {leftPanel && (
+          <div style={{ width: 280, flexShrink: 0, background: 'white', borderRight: '1px solid #E8E6ED', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 52, padding: '0 16px', borderBottom: '1px solid #E8E6ED' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>{leftPanel === 'clauses' ? 'Clauses' : 'Playbook'}</span>
+              <button style={iconBtn} aria-label="Close panel" onClick={() => setLeftPanel(null)}><Icon name="close" size={18} /></button>
+            </div>
+
+            {leftPanel === 'clauses' && (
+              <div style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
+                {doc.clauses.map((c) => (
+                  <button key={c.num} onClick={() => scrollToSection(c.num)} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left',
+                    padding: '10px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    background: activeSection === c.num ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent',
+                    fontFamily: 'var(--ink-font-family)', marginBottom: 2,
+                  }}>
+                    {statusDot(c.status)}
+                    <span style={{ fontSize: 13, color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.num}. {c.heading}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {leftPanel === 'playbook' && (
+              <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#5B5670', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 10 }}>Key Terms</div>
+                <div style={{ border: '1px solid #E8E6ED', borderRadius: 10, padding: '4px 12px', marginBottom: 20 }}>
+                  {(doc.keyTerms ?? []).map((k, i, arr) => (
+                    <div key={k.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid #F0EEF4' : 'none' }}>
+                      <span style={{ fontSize: 12, color: '#5B5670' }}>{k.label}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: '#130032', textAlign: 'right' }}>{k.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#5B5670', textTransform: 'uppercase', letterSpacing: 0.4 }}>Playbook Rules</span>
+                  <span style={{ fontSize: 11, color: '#5B5670' }}>{(doc.playbook ?? []).filter(r => r.status === 'passed').length}/{(doc.playbook ?? []).length} passed</span>
+                </div>
+                {(doc.playbook ?? []).map((r) => {
+                  const passed = r.status === 'passed';
+                  const exp = expandedRule === r.name;
+                  return (
+                    <div key={r.name} style={{ border: '1px solid #E8E6ED', borderRadius: 10, marginBottom: 8, overflow: 'hidden' }}>
+                      <button onClick={() => setExpandedRule(exp ? null : r.name)} style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 8, width: '100%', textAlign: 'left',
+                        padding: '10px 12px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--ink-font-family)',
+                      }}>
+                        <span style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, marginTop: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: passed ? 'rgba(31,122,51,0.12)' : '#FFF4E5' }}>
+                          <Icon name={passed ? 'check' : 'overflow-horizontal'} size={12} color={passed ? '#1F7A33' : '#8A5A00'} />
+                        </span>
+                        <span style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#130032' }}>{r.name}</span>
+                          <span style={{ display: 'block', fontSize: 11, color: '#5B5670' }}>{r.section}</span>
+                        </span>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 8, whiteSpace: 'nowrap', color: passed ? '#1F7A33' : '#8A5A00', background: passed ? 'rgba(31,122,51,0.12)' : '#FFF4E5' }}>
+                          {passed ? 'Passed' : 'Review'}
+                        </span>
+                      </button>
+                      {exp && (
+                        <div style={{ padding: '0 12px 12px 38px', fontSize: 12, lineHeight: 1.5, color: '#5B5670' }}>{r.details}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Document canvas */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px', background: '#F4F3F6' }}>
+          <div
+            ref={canvasRef}
+            contentEditable={editing}
+            suppressContentEditableWarning
+            spellCheck={false}
+            style={{
+              maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 4,
+              boxShadow: '0 1px 8px rgba(19,0,50,0.10)', padding: '64px 72px', outline: 'none',
+              width: `${(zoom / 100) * 800}px`, transformOrigin: 'top center',
+            }}
+          >
             <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center', color: '#130032', margin: '0 0 8px 0' }}>{doc.title}</h1>
-            <p style={{ textAlign: 'center', color: 'var(--ink-text-color-secondary, #6B6580)', margin: '0 0 2px 0', fontSize: 14 }}>{doc.parties}</p>
-            <p style={{ textAlign: 'center', color: 'var(--ink-text-color-secondary, #6B6580)', margin: '0 0 40px 0', fontSize: 13 }}>Effective Date: {doc.effectiveDate}</p>
+            <p style={{ textAlign: 'center', color: '#5B5670', margin: '0 0 2px 0', fontSize: 14 }}>{doc.parties}</p>
+            <p style={{ textAlign: 'center', color: '#5B5670', margin: '0 0 40px 0', fontSize: 13 }}>Effective Date: {doc.effectiveDate}</p>
 
             {doc.clauses.map((c) => {
               const meta = STATUS_META[c.status];
               return (
-                <div key={c.num} style={{ marginBottom: 26 }}>
+                <div key={c.num} ref={(el) => { sectionRefs.current[c.num] = el; }} style={{ marginBottom: 26, scrollMarginTop: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 8px 0' }}>
                     <h2 style={{ fontSize: 16, fontWeight: 600, color: '#130032', margin: 0 }}>{c.num}. {c.heading}</h2>
-                    <span style={{ padding: '2px 8px', borderRadius: 10, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 600 }}>{meta.label}</span>
+                    <span contentEditable={false} style={{ padding: '2px 8px', borderRadius: 10, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 600 }}>{meta.label}</span>
                   </div>
-                  <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-text-color, #130032)', margin: 0 }}>
-                    {c.runs.map(renderRun)}
-                  </p>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>{c.runs.map(renderRun)}</p>
                 </div>
               );
             })}
 
-            {/* Signature block */}
-            <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--ink-neutral-fade-10, #EEE)', display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+            <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid #E8E6ED', display: 'flex', gap: 48, flexWrap: 'wrap' }}>
               {doc.parties.split(' & ').map((party) => (
                 <div key={party} style={{ flex: 1, minWidth: 220 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: '#130032', marginBottom: 28 }}>{party}</div>
-                  <div style={{ borderBottom: '1px solid var(--ink-text-color-secondary, #6B6580)', marginBottom: 6 }} />
-                  <div style={{ fontSize: 12, color: 'var(--ink-text-color-secondary, #6B6580)' }}>Authorized Signature</div>
+                  <div style={{ borderBottom: '1px solid #5B5670', marginBottom: 6 }} />
+                  <div style={{ fontSize: 12, color: '#5B5670' }}>Authorized Signature</div>
                 </div>
               ))}
             </div>
@@ -3293,40 +3488,78 @@ function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) 
 
         {/* AI-Assisted panel */}
         {showAiPanel && (
-          <div style={{ width: 360, flexShrink: 0, borderLeft: '1px solid var(--ink-neutral-fade-10, #EEE)', background: 'white', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 16px', borderBottom: '1px solid var(--ink-neutral-fade-10, #EEE)' }}>
+          <div style={{ width: 360, flexShrink: 0, borderLeft: '1px solid #E8E6ED', background: 'white', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 16px', borderBottom: '1px solid #E8E6ED' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>AI-Assisted</span>
               </div>
               <div style={{ display: 'flex', gap: 4 }}>
-                <button style={iconBtn} aria-label="Expand"><Icon name="arrows-out" size={16} /></button>
+                {hasChat && <button style={iconBtn} aria-label="New chat" onClick={() => setMessages([])}><Icon name="plus" size={16} /></button>}
                 <button style={iconBtn} aria-label="Close AI panel" onClick={() => setShowAiPanel(false)}><Icon name="close" size={18} /></button>
               </div>
             </div>
+
             <div style={{ padding: 20, flex: 1, overflowY: 'auto' }}>
-              <div style={{ fontSize: 20, fontWeight: 600, color: '#130032', marginBottom: 4 }}>Hello, Larry</div>
-              <div style={{ fontSize: 15, color: 'var(--ink-text-color-secondary, #6B6580)', marginBottom: 20 }}>What would you like to know?</div>
-              <div style={{ border: '1px solid var(--ink-neutral-fade-10, #EEE)', borderRadius: 12, padding: 16, marginBottom: 24 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#130032', marginBottom: 8 }}>Agreement summary</div>
-                <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink-text-color-secondary, #6B6580)', maxHeight: summaryExpanded ? 'none' : 66, overflow: 'hidden' }}>{doc.summary}</div>
-                <button onClick={() => setSummaryExpanded(v => !v)} style={{ ...iconBtn, width: '100%', height: 24, marginTop: 4 }} aria-label="Toggle summary">
-                  <Icon name={summaryExpanded ? 'chevron-up' : 'chevron-down'} size={16} />
-                </button>
-              </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-text-color-secondary, #6B6580)', marginBottom: 12 }}>My shortcuts</div>
-              {['Suggest changes against Playbook', 'Insert Clause', 'Automatically route approvals', 'Compare Documents'].map((s) => (
-                <button key={s} style={{
-                  display: 'block', width: '100%', textAlign: 'left', marginBottom: 8,
-                  padding: '12px 14px', borderRadius: 999, border: '1px solid var(--ink-neutral-fade-15, #DDD)',
-                  background: 'white', cursor: 'pointer', fontSize: 13, color: '#130032', fontFamily: 'var(--ink-font-family)',
-                }}>{s}</button>
-              ))}
+              {!hasChat ? (
+                <>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: '#130032', marginBottom: 4 }}>Hello, Larry</div>
+                  <div style={{ fontSize: 15, color: '#5B5670', marginBottom: 20 }}>What would you like to know?</div>
+                  <div style={{ border: '1px solid #E8E6ED', borderRadius: 12, padding: 16, marginBottom: 24 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#130032', marginBottom: 8 }}>Agreement summary</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.6, color: '#5B5670', maxHeight: summaryExpanded ? 'none' : 66, overflow: 'hidden' }}>{doc.summary}</div>
+                    <button onClick={() => setSummaryExpanded(v => !v)} style={{ ...iconBtn, width: '100%', height: 24, marginTop: 4 }} aria-label="Toggle summary">
+                      <Icon name={summaryExpanded ? 'chevron-up' : 'chevron-down'} size={16} />
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#5B5670', marginBottom: 12 }}>My shortcuts</div>
+                  {AI_SHORTCUTS.map((s) => (
+                    <button key={s} onClick={() => send(s)} style={{
+                      display: 'block', width: '100%', textAlign: 'left', marginBottom: 8,
+                      padding: '12px 14px', borderRadius: 999, border: '1px solid #DDD9E3',
+                      background: 'white', cursor: 'pointer', fontSize: 13, color: '#130032', fontFamily: 'var(--ink-font-family)',
+                    }}>{s}</button>
+                  ))}
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {messages.map((m, i) => (
+                    <div key={i} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                      <div style={{
+                        padding: '10px 14px', borderRadius: 14, fontSize: 13, lineHeight: 1.55,
+                        background: m.role === 'user' ? 'var(--ink-cobalt-80, #4C00FF)' : '#F4F3F6',
+                        color: m.role === 'user' ? 'white' : '#130032',
+                        borderTopRightRadius: m.role === 'user' ? 4 : 14,
+                        borderTopLeftRadius: m.role === 'user' ? 14 : 4,
+                      }}>{m.text}</div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+              )}
             </div>
-            <div style={{ padding: 16, borderTop: '1px solid var(--ink-neutral-fade-10, #EEE)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 14px', borderRadius: 999, border: '1px solid var(--ink-neutral-fade-15, #DDD)' }}>
-                <Icon name="plus" size={16} color="var(--ink-text-color-secondary, #6B6580)" />
-                <span style={{ fontSize: 13, color: 'var(--ink-text-color-secondary, #6B6580)' }}>Ask anything about this document...</span>
+
+            <div style={{ padding: 16, borderTop: '1px solid #E8E6ED' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 8px 8px 14px', borderRadius: 999, border: '1px solid #DDD9E3' }}>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); send(input); } }}
+                  placeholder="Ask anything about this document..."
+                  style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, color: '#130032', background: 'transparent', fontFamily: 'var(--ink-font-family)' }}
+                />
+                <button
+                  onClick={() => send(input)}
+                  aria-label="Send"
+                  disabled={!input.trim()}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32,
+                    borderRadius: '50%', border: 'none', cursor: input.trim() ? 'pointer' : 'default',
+                    background: input.trim() ? 'var(--ink-cobalt-80, #4C00FF)' : '#E8E6ED',
+                  }}
+                >
+                  <Icon name="send" size={16} color="white" />
+                </button>
               </div>
             </div>
           </div>
@@ -5636,7 +5869,7 @@ function AgreementDetailView({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
-        {/* Detail panel — LEFT side, toggled by sidebar icons, no tab bar */}
+        {/* Detail panel �� LEFT side, toggled by sidebar icons, no tab bar */}
         {activeDetailTab && (
           <div style={{
             borderRight: '1px solid var(--ink-border-subtle)',
