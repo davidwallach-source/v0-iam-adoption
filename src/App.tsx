@@ -55,9 +55,10 @@ interface StartNewModalProps {
 
 function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchase, onStartRequest, onSignatureRequest }: StartNewModalProps) {
   const [search, setSearch] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showFilePicker, setShowFilePicker] = useState(false);
 
-  const handleUploadFile = () => {
+  const handleSelectFile = () => {
+    setShowFilePicker(false);
     onClose();
     // Open the Document Preview screen (same as the View CTA in an Agreement Space)
     window.open(`https://v0-doc-preview-iamadoption-ingest.vercel.app/?document=${encodeURIComponent('New Vendor Contract')}`, '_blank');
@@ -191,7 +192,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                     /* Upload split button — matches the one on Prepare */
                     <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                       <button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setShowFilePicker(true)}
                         style={{
                           background: 'var(--ink-cta-bg-color-secondary-default)',
                           border: '1px solid var(--ink-cta-border-color-secondary-default)',
@@ -227,17 +228,6 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                       >
                         <Icon name="chevron-down" size={14} color="var(--ink-cta-font-color-secondary)" />
                       </button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        style={{ display: 'none' }}
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            handleUploadFile();
-                          }
-                          e.target.value = '';
-                        }}
-                      />
                     </div>
                   ) : (
                     <Button 
@@ -355,6 +345,112 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
         </div>
 
       </div>
+
+      {/* Fake (prototype) file picker — not the real OS dialog */}
+      {showFilePicker && (
+        <div
+          onClick={() => setShowFilePicker(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(19, 0, 50, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 560,
+              maxWidth: '90vw',
+              background: 'white',
+              borderRadius: 12,
+              boxShadow: '0 24px 60px rgba(19, 0, 50, 0.28)',
+              overflow: 'hidden',
+              fontFamily: 'var(--ink-font-family)',
+            }}
+          >
+            {/* Title bar */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 16px',
+              borderBottom: '1px solid var(--ink-neutral-fade-10)',
+              background: 'var(--ink-neutral-fade-3)',
+            }}>
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF5F57' }} />
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FEBC2E' }} />
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#28C840' }} />
+              <span style={{ marginLeft: 8, fontSize: 13, fontWeight: 600, color: '#130032' }}>
+                Choose a file to upload
+              </span>
+            </div>
+
+            {/* File list */}
+            <div style={{ padding: 12, maxHeight: 320, overflowY: 'auto' }}>
+              <div style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--ink-text-color-secondary, #6B6580)',
+                padding: '4px 8px 8px',
+              }}>
+                Documents
+              </div>
+              <button
+                onDoubleClick={handleSelectFile}
+                onClick={(e) => {
+                  // single click selects (highlight), confirm via Open
+                  const el = e.currentTarget;
+                  el.style.background = 'var(--ink-cobalt-80, #4C00FF)';
+                  el.style.color = 'white';
+                  el.setAttribute('data-selected', 'true');
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: 'none',
+                  borderRadius: 8,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontFamily: 'var(--ink-font-family)',
+                  fontSize: 14,
+                  color: '#130032',
+                }}
+              >
+                <Icon name="document" size={20} color="currentColor" />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontWeight: 500 }}>New Vendor Contract</span>
+                  <span style={{ fontSize: 12, opacity: 0.7 }}>PDF Document · 248 KB</span>
+                </div>
+              </button>
+            </div>
+
+            {/* Footer actions */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 8,
+              padding: '12px 16px',
+              borderTop: '1px solid var(--ink-neutral-fade-10)',
+              background: 'var(--ink-neutral-fade-3)',
+            }}>
+              <Button kind="secondary" size="small" onClick={() => setShowFilePicker(false)}>
+                Cancel
+              </Button>
+              <Button kind="primary" size="small" onClick={handleSelectFile}>
+                Open
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </Modal>
   );
@@ -1421,7 +1517,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* ═══════════════════════════════════════
+/* ═══════════════════���═══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
