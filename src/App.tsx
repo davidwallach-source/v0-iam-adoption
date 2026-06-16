@@ -4621,7 +4621,13 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
-  const currentActivity = workspaceData.activity;
+  // A saved-blank draft has only just been created, so its activity feed should
+  // reflect that single real event rather than the default rich sample feed.
+  const currentActivity = (isUploadedDocAgreement && uploadedDocAgreement?.isDraft)
+    ? [
+        { id: 'draft-create', icon: 'document' as IconName, user: 'You', action: `Created ${uploadedDocAgreement.documents[0] || 'draft document'}`, time: 'Just now' },
+      ]
+    : workspaceData.activity;
   const currentTasks = useMemo(() => {
     // For NDA agreements sent for signature, create Sign NDA task
     if (isNDADraft && ndaSentForSignature) {
