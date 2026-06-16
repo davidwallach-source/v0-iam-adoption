@@ -1519,7 +1519,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* ����══════════���═══════���═══════════════════
+/* �����══════════���═══════���═══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -3578,7 +3578,7 @@ interface WorkspaceViewProps {
   savedNDAData?: NDAFormData | null;
   ndaSentForSignature?: boolean;
   ndaRecipientName?: string;
-  uploadedDocAgreement?: { documents: string[], recipientName: string } | null;
+  uploadedDocAgreement?: { documents: string[], recipientName: string, isDraft?: boolean } | null;
   onPreviewDocument?: (documentName: string) => void;
 }
 
@@ -4594,6 +4594,15 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
     
     // For uploaded document agreements, create documents with sent status
     if (isUploadedDocAgreement && uploadedDocAgreement) {
+      // A saved-blank draft has not been sent for signature - show it as a Draft.
+      if (uploadedDocAgreement.isDraft) {
+        return uploadedDocAgreement.documents.map((docName, idx) => ({
+          id: `uploaded-${idx}`,
+          name: docName,
+          status: 'Draft' as const,
+          dateModified: new Date().toLocaleDateString('en-US'),
+        }));
+      }
       return uploadedDocAgreement.documents.map((docName, idx) => ({
         id: `uploaded-${idx}`,
         name: docName,
@@ -4633,6 +4642,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       return [signNdaTask, ...[...sentTasks].reverse()];
     }
     
+    // A saved-blank draft has no signature task yet - just show any added tasks.
+    if (isUploadedDocAgreement && uploadedDocAgreement?.isDraft) {
+      return [...sentTasks].reverse();
+    }
     // For uploaded document agreements (e.g., Lease Agreement from Signature Request flow), show only Sign task
     if (isUploadedDocAgreement && uploadedDocAgreement) {
       const docName = uploadedDocAgreement.documents[0] || 'Lease Agreement';
@@ -6058,7 +6071,7 @@ export default function App() {
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
   const [showDocumentUpload, setShowDocumentUpload] = useState(false);
-  const [uploadedDocAgreement, setUploadedDocAgreement] = useState<{ documents: string[], recipientName: string } | null>(null);
+  const [uploadedDocAgreement, setUploadedDocAgreement] = useState<{ documents: string[], recipientName: string, isDraft?: boolean } | null>(null);
 const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
@@ -6544,16 +6557,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         if (previewOrigin === 'new') {
           // New document: create a new Agreement Space containing just this document.
           const docName = previewDocName ?? 'Untitled Document';
-          setUploadedDocAgreement({ documents: [docName], recipientName: '' });
+          setUploadedDocAgreement({ documents: [docName], recipientName: '', isDraft: true });
           const newAgreement: Agreement = {
             id: 'uploaded-doc',
             name: docName,
             party: '—',
             partyLogo: docName.substring(0, 2).toUpperCase(),
-            status: 'In Progress',
+            status: 'Draft',
             statusIcon: 'clock',
-            statusKind: 'info',
-            statusSub: 'Draft saved',
+            statusKind: 'neutral',
+            statusSub: 'Draft',
             dealValue: '—',
             agreementType: 'Master Services Agreement',
             termLength: '—',
