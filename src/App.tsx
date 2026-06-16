@@ -3318,6 +3318,7 @@ function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) 
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => !v)}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
+          <Button kind="secondary" size="small">Save</Button>
           <Button kind="primary" size="small">Send for Signature</Button>
         </div>
       </div>
