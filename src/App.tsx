@@ -1519,7 +1519,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* ���══════════���═══════���═══════════════════
+/* ����══════════���═══════���═══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -3214,13 +3214,14 @@ function aiRespond(prompt: string, doc: DocData): string {
 interface DocumentPreviewProps {
   open: boolean;
   onClose: () => void;
+  onSave?: () => void;
   documentName: string;
 }
 
-function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) {
+function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(true);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
-  const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | null>('clauses');
+  const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [expandedRule, setExpandedRule] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -3318,7 +3319,7 @@ function DocumentPreview({ open, onClose, documentName }: DocumentPreviewProps) 
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => !v)}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-          <Button kind="secondary" size="small">Save</Button>
+          <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
           <Button kind="primary" size="small">Send for Signature</Button>
         </div>
       </div>
@@ -6062,6 +6063,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showAgreementRequestModal, setShowAgreementRequestModal] = useState(false);
   const [showRootPrepare, setShowRootPrepare] = useState(false);
   const [previewDocName, setPreviewDocName] = useState<string | null>(null);
+  // Tracks where the preview was opened from: 'agreement' = existing Agreement Space
+  // (Save returns there), 'new' = a brand-new document (Save creates a new space).
+  const [previewOrigin, setPreviewOrigin] = useState<'agreement' | 'new'>('agreement');
   
   /* ���� Sync hash ↔ state ── */
   useEffect(() => {
@@ -6527,15 +6531,48 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         ndaSentForSignature={ndaSentForSignature}
         ndaRecipientName={ndaRecipientName}
         uploadedDocAgreement={uploadedDocAgreement}
-        onPreviewDocument={(name) => setPreviewDocName(name)}
+        onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => setPreviewDocName(name)} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
 
     <DocumentPreview
       open={previewDocName !== null}
       documentName={previewDocName ?? ''}
       onClose={() => setPreviewDocName(null)}
+      onSave={() => {
+        if (previewOrigin === 'new') {
+          // New document: create a new Agreement Space containing just this document.
+          const docName = previewDocName ?? 'Untitled Document';
+          setUploadedDocAgreement({ documents: [docName], recipientName: '' });
+          const newAgreement: Agreement = {
+            id: 'uploaded-doc',
+            name: docName,
+            party: '—',
+            partyLogo: docName.substring(0, 2).toUpperCase(),
+            status: 'In Progress',
+            statusIcon: 'clock',
+            statusKind: 'info',
+            statusSub: 'Draft saved',
+            dealValue: '—',
+            agreementType: 'Master Services Agreement',
+            termLength: '—',
+            closeDate: '—',
+            date: new Date().toLocaleDateString('en-GB'),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            action: 'View',
+            documentsCount: 1,
+            tasksCount: 0,
+            tasksPending: 0,
+          };
+          addNewAgreement(newAgreement);
+          setSelectedAgreement(newAgreement);
+          setShowDealWorkspace(true);
+        }
+        // For 'agreement' origin the space is already mounted behind the preview,
+        // so closing returns the user there.
+        setPreviewDocName(null);
+      }}
     />
 
     <DocumentUpload
