@@ -1893,36 +1893,56 @@ interface FolderRow extends FolderNode {
 
 const FOLDERS_TREE: FolderNode[] = [
   {
-    id: 'admin', name: '_Admin', type: 'folder', lastChange: '5/12/2026',
+    id: 'active-sourcing', name: 'Active Sourcing', type: 'folder', lastChange: '5/12/2026',
     children: [
-      { id: 'admin-onboarding', name: 'Onboarding Templates', type: 'folder', lastChange: '5/2/2026', children: [
-        { id: 'admin-onboarding-1', name: 'New Hire Packet.pdf', type: 'document', lastChange: '4/28/2026', status: 'Completed', recipient: 'To: HR Team' },
-      ] },
-      { id: 'admin-policy', name: 'Policy Acknowledgement.pdf', type: 'document', lastChange: '5/10/2026', status: 'Completed', recipient: 'To: All Staff' },
+      {
+        id: 'space-globex', name: 'Globex Industries — MSA', type: 'folder', lastChange: '5/12/2026',
+        children: [
+          { id: 'globex-msa', name: 'New Vendor MSA', type: 'document', lastChange: '5/12/2026', status: 'Draft', recipient: 'Supplier: Globex Industries' },
+          { id: 'globex-dpa', name: 'Data Processing Addendum', type: 'document', lastChange: '5/10/2026', status: 'Draft', recipient: 'Supplier: Globex Industries' },
+          { id: 'globex-sca', name: 'Security & Compliance Addendum', type: 'document', lastChange: '5/9/2026', status: 'Completed', recipient: 'Supplier: Globex Industries' },
+        ],
+      },
+      {
+        id: 'space-initech', name: 'Initech — SaaS Subscription', type: 'folder', lastChange: '5/8/2026',
+        children: [
+          { id: 'initech-osa', name: 'Order & Subscription Agreement', type: 'document', lastChange: '5/8/2026', status: 'Completed', recipient: 'Supplier: Initech LLC' },
+          { id: 'initech-sla', name: 'Service Level Agreement', type: 'document', lastChange: '5/6/2026', status: 'Completed', recipient: 'Supplier: Initech LLC' },
+        ],
+      },
     ],
   },
   {
-    id: 'approved', name: 'Approved', type: 'folder', lastChange: '5/10/2026',
+    id: 'renewals', name: 'Renewals & Amendments', type: 'folder', lastChange: '5/10/2026',
     children: [
-      { id: 'demo-roles', name: 'Demo Roles', type: 'folder', lastChange: '5/8/2026', children: [
-        { id: 'demo-roles-1', name: 'Role Matrix.xlsx', type: 'document', lastChange: '5/6/2026', status: 'Completed', recipient: 'To: Operations' },
-      ] },
-      { id: 'approved-1', name: 'Here is your signed document: Sample_Service_Agreement.pdf', type: 'document', lastChange: '24/3/2026', status: 'Voided', statusSub: 'Purging soon', recipient: 'To: Akshat Mishra, [Placeholder]' },
-      { id: 'approved-2', name: 'Complete with Docusign: rhi.pdf', type: 'document', lastChange: '24/3/2026', status: 'Voided', statusSub: 'Purging soon', recipient: 'To: Akshat Mishra' },
+      {
+        id: 'space-soylent', name: 'Soylent Corp — Supply Agreement', type: 'folder', lastChange: '5/10/2026',
+        children: [
+          { id: 'soylent-amend', name: 'Amendment No. 2 — Pricing', type: 'document', lastChange: '5/10/2026', status: 'Draft', recipient: 'Supplier: Soylent Corp' },
+          { id: 'soylent-msa', name: 'Master Supply Agreement', type: 'document', lastChange: '3/2/2026', status: 'Completed', recipient: 'Supplier: Soylent Corp' },
+        ],
+      },
+      { id: 'renewal-umbrella', name: 'Umbrella Logistics — Renewal Notice', type: 'document', lastChange: '4/28/2026', status: 'Completed', recipient: 'Supplier: Umbrella Logistics' },
     ],
   },
   {
-    id: 'doc-builder', name: 'DocumentBuilder', type: 'folder', lastChange: '5/11/2026',
+    id: 'executed', name: 'Executed Agreements', type: 'folder', lastChange: '5/4/2026',
     children: [
-      { id: 'db-1', name: 'Contract Template v2.docx', type: 'document', lastChange: '5/9/2026', status: 'Draft', recipient: 'Owner: You' },
-      { id: 'db-2', name: 'MSA Boilerplate.docx', type: 'document', lastChange: '5/7/2026', status: 'Draft', recipient: 'Owner: You' },
+      {
+        id: 'space-stark', name: 'Stark Manufacturing — MSA', type: 'folder', lastChange: '5/4/2026',
+        children: [
+          { id: 'stark-msa', name: 'Master Services Agreement', type: 'document', lastChange: '5/4/2026', status: 'Completed', recipient: 'Supplier: Stark Manufacturing' },
+          { id: 'stark-sow', name: 'Statement of Work #1', type: 'document', lastChange: '5/4/2026', status: 'Completed', recipient: 'Supplier: Stark Manufacturing' },
+        ],
+      },
+      { id: 'executed-wonka', name: 'Wonka Ingredients — Purchase Agreement', type: 'document', lastChange: '4/15/2026', status: 'Completed', recipient: 'Supplier: Wonka Ingredients' },
     ],
   },
   {
-    id: 'archived', name: 'Archived 2025', type: 'folder', lastChange: '1/14/2026',
+    id: 'archived', name: 'Archived — FY25', type: 'folder', lastChange: '1/14/2026',
     children: [
-      { id: 'arch-1', name: 'FY25 Vendor Agreements.pdf', type: 'document', lastChange: '12/20/2025', status: 'Completed', recipient: 'To: Procurement' },
-      { id: 'arch-2', name: 'Q4 Renewals.pdf', type: 'document', lastChange: '12/2/2025', status: 'Completed', recipient: 'To: Finance' },
+      { id: 'arch-hooli', name: 'Hooli Cloud Services — MSA', type: 'document', lastChange: '12/20/2025', status: 'Completed', recipient: 'Supplier: Hooli, Inc.' },
+      { id: 'arch-acme', name: 'Acme Logistics — Voided NDA', type: 'document', lastChange: '12/2/2025', status: 'Voided', statusSub: 'Superseded', recipient: 'Supplier: Acme Logistics' },
     ],
   },
 ];
@@ -2130,7 +2150,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�������═�������������═══�����������══════════════════════════════
+/* ══�������═���������������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -2921,7 +2941,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ════════���������������════════════════════════════ */
+   ════════�����������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
