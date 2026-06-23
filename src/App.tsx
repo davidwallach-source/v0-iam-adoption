@@ -2130,7 +2130,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�������═�����������═══�����������══════════════════════════════
+/* ══�������═�������������═══�����������══════════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -2921,7 +2921,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ════════�������������════════════════════════════ */
+   ════════���������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -6404,7 +6404,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const foldersTitle = folderPath.length === 0 ? 'Folders' : folderPath[folderPath.length - 1].name;
   const folderBreadcrumbItems = useMemo(
-    () => [{ label: 'Folders' }, ...folderPath.map((p) => ({ label: p.name }))],
+    () => [{ label: 'Folders', href: '#' }, ...folderPath.map((p) => ({ label: p.name, href: '#' }))],
     [folderPath]
   );
 
