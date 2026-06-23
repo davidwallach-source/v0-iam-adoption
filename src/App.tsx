@@ -8,6 +8,7 @@ import {
   Button,
   Banner,
   Badge,
+  Breadcrumb,
   ComboButton,
   AIIcon,
   AIBadge,
@@ -1515,7 +1516,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
    ═══════════════════════════════════════ */
 
 type TabId = 'home' | 'agreements' | 'templates' | 'insights' | 'admin';
-type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | 'deleted' | 'parties' | 'requests';
+type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | 'deleted' | 'parties' | 'requests' | 'folders';
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
@@ -1869,6 +1870,73 @@ const agreementColumns = [
     ),
   },
 ];
+
+/* ═══════════════════════════════════════
+   Folders Data — hierarchical folder/document tree
+   ═══════════════════════════════════════ */
+
+interface FolderNode {
+  id: string;
+  name: string;
+  type: 'folder' | 'document';
+  lastChange: string;
+  status?: 'Voided' | 'Completed' | 'Draft';
+  statusSub?: string;
+  recipient?: string;
+  children?: FolderNode[];
+}
+
+interface FolderRow extends FolderNode {
+  depth: number;
+  hasChildren: boolean;
+}
+
+const FOLDERS_TREE: FolderNode[] = [
+  {
+    id: 'admin', name: '_Admin', type: 'folder', lastChange: '5/12/2026',
+    children: [
+      { id: 'admin-onboarding', name: 'Onboarding Templates', type: 'folder', lastChange: '5/2/2026', children: [
+        { id: 'admin-onboarding-1', name: 'New Hire Packet.pdf', type: 'document', lastChange: '4/28/2026', status: 'Completed', recipient: 'To: HR Team' },
+      ] },
+      { id: 'admin-policy', name: 'Policy Acknowledgement.pdf', type: 'document', lastChange: '5/10/2026', status: 'Completed', recipient: 'To: All Staff' },
+    ],
+  },
+  {
+    id: 'approved', name: 'Approved', type: 'folder', lastChange: '5/10/2026',
+    children: [
+      { id: 'demo-roles', name: 'Demo Roles', type: 'folder', lastChange: '5/8/2026', children: [
+        { id: 'demo-roles-1', name: 'Role Matrix.xlsx', type: 'document', lastChange: '5/6/2026', status: 'Completed', recipient: 'To: Operations' },
+      ] },
+      { id: 'approved-1', name: 'Here is your signed document: Sample_Service_Agreement.pdf', type: 'document', lastChange: '24/3/2026', status: 'Voided', statusSub: 'Purging soon', recipient: 'To: Akshat Mishra, [Placeholder]' },
+      { id: 'approved-2', name: 'Complete with Docusign: rhi.pdf', type: 'document', lastChange: '24/3/2026', status: 'Voided', statusSub: 'Purging soon', recipient: 'To: Akshat Mishra' },
+    ],
+  },
+  {
+    id: 'doc-builder', name: 'DocumentBuilder', type: 'folder', lastChange: '5/11/2026',
+    children: [
+      { id: 'db-1', name: 'Contract Template v2.docx', type: 'document', lastChange: '5/9/2026', status: 'Draft', recipient: 'Owner: You' },
+      { id: 'db-2', name: 'MSA Boilerplate.docx', type: 'document', lastChange: '5/7/2026', status: 'Draft', recipient: 'Owner: You' },
+    ],
+  },
+  {
+    id: 'archived', name: 'Archived 2025', type: 'folder', lastChange: '1/14/2026',
+    children: [
+      { id: 'arch-1', name: 'FY25 Vendor Agreements.pdf', type: 'document', lastChange: '12/20/2025', status: 'Completed', recipient: 'To: Procurement' },
+      { id: 'arch-2', name: 'Q4 Renewals.pdf', type: 'document', lastChange: '12/2/2025', status: 'Completed', recipient: 'To: Finance' },
+    ],
+  },
+];
+
+function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    if (n.children) {
+      const found = findFolderNode(n.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 
 /* ═══════════════════════════════════════
    Navigator (Completed) Data — matches Navigator view
@@ -6058,6 +6126,10 @@ function getTabFromHash(): TabId {
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(getTabFromHash);
   const [sidebarView, setSidebarView] = useState<SidebarView>('all-agreements');
+  // Folders view: breadcrumb path of folders the user has navigated into, and the
+  // set of folders currently expanded inline within the table.
+  const [folderPath, setFolderPath] = useState<{ id: string; name: string }[]>([]);
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [templatesSidebarView, setTemplatesSidebarView] = useState<TemplatesSidebarView>('my-templates');
   const [insightsSidebarView, setInsightsSidebarView] = useState<InsightsSidebarView>('overview');
   const [search, setSearch] = useState('');
@@ -6137,7 +6209,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         ],
       },
       { id: 'folders-divider', hasDivider: true, items: [
-        { id: 'folders-item', label: 'Folders', icon: 'folder' as const, hasMenu: true },
+        { id: 'folders', label: 'Folders', icon: 'folder' as const, onClick: () => { setSidebarView('folders'); setFolderPath([]); setSearch(''); } },
       ]},
       {
         id: 'features',
@@ -6269,11 +6341,136 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const VIEW_LABELS: Record<SidebarView, string> = {
     'all-agreements': 'All Agreements', drafts: 'Drafts', 'in-progress': 'In Progress',
     completed: 'Completed', deleted: 'Expired / Voided', parties: 'Parties', requests: 'Requests',
+    folders: 'Folders',
   };
 
   const isPartiesView = sidebarView === 'parties';
   const isNavigatorView = sidebarView === 'completed';
   const isRequestsView = sidebarView === 'requests';
+  const isFoldersView = sidebarView === 'folders';
+
+  /* ── Folders view: navigation + inline expansion ── */
+  const toggleFolderExpand = useCallback((id: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const enterFolder = useCallback((row: FolderNode) => {
+    setFolderPath((prev) => [...prev, { id: row.id, name: row.name }]);
+    setSearch('');
+  }, []);
+
+  const navigateToCrumb = useCallback((index: number) => {
+    // index 0 = "Folders" root; index k maps to folderPath[0..k-1]
+    setFolderPath((prev) => prev.slice(0, index));
+    setSearch('');
+  }, []);
+
+  // Direct children of the folder the user is currently inside.
+  const currentFolderChildren = useMemo(() => {
+    if (folderPath.length === 0) return FOLDERS_TREE;
+    const node = findFolderNode(FOLDERS_TREE, folderPath[folderPath.length - 1].id);
+    return node?.children ?? [];
+  }, [folderPath]);
+
+  // Rows to render: flatten the current level, expanding any opened subfolders.
+  // When searching, show a flat list of all matching descendants instead.
+  const folderRows = useMemo<FolderRow[]>(() => {
+    const acc: FolderRow[] = [];
+    if (search) {
+      const q = search.toLowerCase();
+      const walkAll = (nodes: FolderNode[]) => {
+        for (const n of nodes) {
+          if (n.name.toLowerCase().includes(q)) acc.push({ ...n, depth: 0, hasChildren: false });
+          if (n.children) walkAll(n.children);
+        }
+      };
+      walkAll(currentFolderChildren);
+      return acc;
+    }
+    const walk = (nodes: FolderNode[], depth: number) => {
+      for (const n of nodes) {
+        const hasChildren = n.type === 'folder' && (n.children?.length ?? 0) > 0;
+        acc.push({ ...n, depth, hasChildren });
+        if (hasChildren && expandedFolders.has(n.id)) walk(n.children!, depth + 1);
+      }
+    };
+    walk(currentFolderChildren, 0);
+    return acc;
+  }, [currentFolderChildren, expandedFolders, search]);
+
+  const foldersTitle = folderPath.length === 0 ? 'Folders' : folderPath[folderPath.length - 1].name;
+  const folderBreadcrumbItems = useMemo(
+    () => [{ label: 'Folders' }, ...folderPath.map((p) => ({ label: p.name }))],
+    [folderPath]
+  );
+
+  const folderColumns = useMemo(() => [
+    {
+      key: 'name', header: 'Name', sortable: true, width: '52%',
+      cell: (row: FolderRow) => (
+        <Inline gap="small" align="center" style={{ paddingLeft: row.depth * 24 }}>
+          {row.type === 'folder' && row.hasChildren ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFolderExpand(row.id); }}
+              aria-label={expandedFolders.has(row.id) ? 'Collapse folder' : 'Expand folder'}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, border: 'none', background: 'transparent', cursor: 'pointer', flexShrink: 0, padding: 0, color: 'var(--ink-text-color, #130032)' }}
+            >
+              <Icon name={expandedFolders.has(row.id) ? 'chevron-down' : 'chevron-right'} size={16} />
+            </button>
+          ) : (
+            <span style={{ width: 24, flexShrink: 0 }} />
+          )}
+          <Icon name={row.type === 'folder' ? 'folder' : 'envelope'} size={18} color={row.type === 'folder' ? 'var(--ink-cobalt-60, #7B61FF)' : 'var(--ink-text-color-secondary, #5B5670)'} />
+          <Stack gap="none" style={{ gap: 2, minWidth: 0 }}>
+            {row.type === 'folder' ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); enterFolder(row); }}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+              >
+                <Text size="sm" weight="medium">{row.name}</Text>
+              </button>
+            ) : (
+              <Text size="sm" weight="medium">{row.name}</Text>
+            )}
+            {row.recipient && <Text size="xs" color="secondary">{row.recipient}</Text>}
+          </Stack>
+        </Inline>
+      ),
+    },
+    {
+      key: 'status', header: 'Status', width: '20%',
+      cell: (row: FolderRow) => row.status ? (
+        <Stack gap="none" style={{ gap: 2 }}>
+          <Inline gap="small" align="center">
+            <Icon
+              name={row.status === 'Voided' ? 'status-void' : row.status === 'Completed' ? 'status-check' : 'clock'}
+              size={16}
+              color={row.status === 'Voided' ? 'var(--ink-text-color-secondary, #5B5670)' : row.status === 'Completed' ? 'var(--ink-green-80, #1B7A3D)' : 'var(--ink-cobalt-80)'}
+            />
+            <Text size="sm" color={row.status === 'Voided' ? 'secondary' : undefined}>{row.status}</Text>
+          </Inline>
+          {row.statusSub && <Text size="xs" color="secondary">{row.statusSub}</Text>}
+        </Stack>
+      ) : null,
+    },
+    {
+      key: 'lastChange', header: 'Last Change', sortable: true, width: '18%',
+      cell: (row: FolderRow) => <Text size="sm" color="secondary">{row.lastChange}</Text>,
+    },
+    {
+      key: 'action', header: '', alignment: 'end', width: 'auto',
+      cell: (row: FolderRow) => (
+        <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
+          {row.type === 'document' && <Button kind="secondary" size="small">Copy</Button>}
+          <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
+        </Inline>
+      ),
+    },
+  ], [expandedFolders, toggleFolderExpand, enterFolder]);
 
   /* ─��� Navigator filtered data ── */
   const filteredNavigator = useMemo(() => {
@@ -6499,6 +6696,44 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     </AgreementTableView>
   );
 
+  /* ── Folders content ── */
+  const foldersContent = (
+    <AgreementTableView
+      pageHeader={
+        <div>
+          <PageHeader title={foldersTitle} />
+          {folderPath.length > 0 && (
+            <div style={{ marginTop: 4 }}>
+              <Breadcrumb
+                items={folderBreadcrumbItems}
+                onItemClick={(_item, index) => navigateToCrumb(index)}
+              />
+            </div>
+          )}
+        </div>
+      }
+      filterBar={
+        <FilterBar
+          search={{ value: search, onChange: setSearch, placeholder: 'Search Folders' }}
+          showSearchIndicator={false}
+          filters={
+            <Button kind="secondary" size="small" startElement={<Icon name="filter" size={16} />}>All Filters</Button>
+          }
+        />
+      }
+    >
+      <DataTable
+        columns={folderColumns}
+        data={folderRows}
+        getRowKey={(row: FolderRow) => row.id}
+        selectable
+        stickyHeader
+        rowHeight="tall"
+        emptyMessage={search ? 'No folders or documents match your search' : 'This folder is empty'}
+      />
+    </AgreementTableView>
+  );
+
   /* ── Resolve content + sidebar ── */
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
@@ -6510,7 +6745,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const contentMap: Record<TabId, JSX.Element> = {
     home: <HomePage />,
-    agreements: agreementsContent,
+    agreements: isFoldersView ? foldersContent : agreementsContent,
     templates: templatesContent,
     insights: insightsContent,
     admin: <AdminPage />,
