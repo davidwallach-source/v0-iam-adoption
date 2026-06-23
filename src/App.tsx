@@ -1864,7 +1864,7 @@ const agreementColumns = [
     width: 'auto',
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
-        <Button kind="secondary" size="small">{row.status === 'Completed' ? 'View' : 'Edit'}</Button>
+        <Button kind="secondary" size="small">View</Button>
         <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
       </Inline>
     ),
