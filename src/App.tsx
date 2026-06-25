@@ -6223,7 +6223,8 @@ export default function App() {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   // Agreements list filter selections (multi-select per facet).
   const [filterParty, setFilterParty] = useState<Set<string>>(new Set());
-  const [filterType, setFilterType] = useState<Set<string>>(new Set());
+  // This list defaults to Agreement Spaces, so pre-select it in the Type menu.
+  const [filterType, setFilterType] = useState<Set<string>>(new Set(['Agreement Spaces']));
   const [filterStatus, setFilterStatus] = useState<Set<string>>(new Set());
   const [filterOwner, setFilterOwner] = useState<Set<string>>(new Set());
   const [templatesSidebarView, setTemplatesSidebarView] = useState<TemplatesSidebarView>('my-templates');
