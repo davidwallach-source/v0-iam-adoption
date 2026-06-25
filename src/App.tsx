@@ -1983,7 +1983,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
     <div style={{ minWidth: 220, maxWidth: 280, padding: 4 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 8px' }}>
         <Text size="xs" color="secondary" weight="semibold" style={{ textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</Text>
-        {count > 0 && (
+        {!radio && count > 0 && (
           <button
             onClick={onClear}
             style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, color: 'var(--ink-cobalt-80, #4C00FF)', fontSize: 12, fontFamily: 'var(--ink-font-family)' }}
@@ -2023,7 +2023,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   return (
     <Popover content={content} position="bottom" align="start" showArrow={false} open={open} onOpenChange={setOpen}>
       <Button kind="secondary" size="small" menuTrigger>
-        {count > 0 ? `${label} (${count})` : label}
+        {!radio && count > 0 ? `${label} (${count})` : label}
       </Button>
     </Popover>
   );
