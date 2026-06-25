@@ -39,6 +39,7 @@ import {
   Modal,
   Popover,
   Checkbox,
+  Radio,
   dataTableStyles,
 } from '@/design-system';
 
@@ -1970,9 +1971,11 @@ interface FilterMenuProps {
   selected: Set<string>;
   onToggle: (value: string) => void;
   onClear: () => void;
+  /** When true, options are single-select and rendered as radios. */
+  radio?: boolean;
 }
 
-function FilterMenu({ label, options, selected, onToggle, onClear }: FilterMenuProps) {
+function FilterMenu({ label, options, selected, onToggle, onClear, radio = false }: FilterMenuProps) {
   const [open, setOpen] = useState(false);
   const count = selected.size;
 
@@ -1997,11 +2000,20 @@ function FilterMenu({ label, options, selected, onToggle, onClear }: FilterMenuP
             key={opt}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, cursor: 'pointer' }}
           >
-            <Checkbox
-              label={opt}
-              checked={selected.has(opt)}
-              onChange={() => onToggle(opt)}
-            />
+            {radio ? (
+              <Radio
+                name={`filter-${label}`}
+                label={opt}
+                checked={selected.has(opt)}
+                onChange={() => onToggle(opt)}
+              />
+            ) : (
+              <Checkbox
+                label={opt}
+                checked={selected.has(opt)}
+                onChange={() => onToggle(opt)}
+              />
+            )}
           </label>
         ))}
       </div>
@@ -6415,7 +6427,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   // Facet options derived from the agreements in the current view.
   const partyOptions = useMemo(() => Array.from(new Set(viewAgreements.map(a => a.party).filter(Boolean))).sort(), [viewAgreements]);
-  const typeOptions = useMemo(() => Array.from(new Set(viewAgreements.map(a => a.agreementType).filter((v): v is string => Boolean(v)))).sort(), [viewAgreements]);
+  const typeOptions = useMemo(() => ['Agreement Spaces', 'Documents'], []);
   const statusOptions = useMemo(() => Array.from(new Set(viewAgreements.map(a => a.status).filter(Boolean))).sort(), [viewAgreements]);
   // Owner filter lists the current user plus the procurement specialist's collaborators.
   const ownerOptions = useMemo(() => [
@@ -6441,7 +6453,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     return viewAgreements.filter((a) => {
       if (q && !(a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q))) return false;
       if (filterParty.size > 0 && !filterParty.has(a.party)) return false;
-      if (filterType.size > 0 && !(a.agreementType && filterType.has(a.agreementType))) return false;
+      if (filterType.size > 0) {
+        // Multi-document agreements are "Agreement Spaces"; single docs are "Documents".
+        const kind = (a.documentsCount ?? 1) > 1 ? 'Agreement Spaces' : 'Documents';
+        if (!filterType.has(kind)) return false;
+      }
       if (filterStatus.size > 0 && !filterStatus.has(a.status)) return false;
       if (filterOwner.size > 0 && !filterOwner.has(ownerOf(a))) return false;
       return true;
@@ -6783,7 +6799,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
               <FilterMenu label="Party" options={partyOptions} selected={filterParty} onToggle={(v) => toggleInSet(setFilterParty, v)} onClear={() => setFilterParty(new Set())} />
-              <FilterMenu label="Type" options={typeOptions} selected={filterType} onToggle={(v) => toggleInSet(setFilterType, v)} onClear={() => setFilterType(new Set())} />
+              <FilterMenu label="Type" radio options={typeOptions} selected={filterType} onToggle={(v) => setFilterType(prev => prev.has(v) ? new Set() : new Set([v]))} onClear={() => setFilterType(new Set())} />
               <FilterMenu label="Status" options={statusOptions} selected={filterStatus} onToggle={(v) => toggleInSet(setFilterStatus, v)} onClear={() => setFilterStatus(new Set())} />
               <FilterMenu label="Owner" options={ownerOptions} selected={filterOwner} onToggle={(v) => toggleInSet(setFilterOwner, v)} onClear={() => setFilterOwner(new Set())} />
               <Button kind="secondary" size="small" aria-label="All Filters" style={{ minWidth: 'auto', padding: '0 8px' }}>
