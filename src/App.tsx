@@ -37,6 +37,8 @@ import {
   Alert,
   AlertBadge,
   Modal,
+  Popover,
+  Checkbox,
   dataTableStyles,
 } from '@/design-system';
 
@@ -1959,6 +1961,63 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
 }
 
 /* ═══════════════════════════════════════
+   FilterMenu — multi-select dropdown for the agreements filter bar
+   ═══════════════════════════════════════ */
+
+interface FilterMenuProps {
+  label: string;
+  options: string[];
+  selected: Set<string>;
+  onToggle: (value: string) => void;
+  onClear: () => void;
+}
+
+function FilterMenu({ label, options, selected, onToggle, onClear }: FilterMenuProps) {
+  const [open, setOpen] = useState(false);
+  const count = selected.size;
+
+  const content = (
+    <div style={{ minWidth: 220, maxWidth: 280, padding: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 8px' }}>
+        <Text size="xs" color="secondary" weight="semibold" style={{ textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</Text>
+        {count > 0 && (
+          <button
+            onClick={onClear}
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, color: 'var(--ink-cobalt-80, #4C00FF)', fontSize: 12, fontFamily: 'var(--ink-font-family)' }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      <div style={{ maxHeight: 280, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        {options.length === 0 ? (
+          <div style={{ padding: '8px 10px' }}><Text size="sm" color="secondary">No options</Text></div>
+        ) : options.map((opt) => (
+          <label
+            key={opt}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, cursor: 'pointer' }}
+          >
+            <Checkbox
+              label={opt}
+              checked={selected.has(opt)}
+              onChange={() => onToggle(opt)}
+            />
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <Popover content={content} position="bottom" align="start" showArrow={false} open={open} onOpenChange={setOpen}>
+      <Button kind="secondary" size="small" menuTrigger>
+        {count > 0 ? `${label} (${count})` : label}
+      </Button>
+    </Popover>
+  );
+}
+
+/* ═══════════════════════════════════════
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -2249,16 +2308,16 @@ interface TemplateItem {
 }
 
 const TEMPLATES_DATA: TemplateItem[] = [
-  { id: '1', name: 'quick send', description: 'Default template for quick envelope sending', owner: 'Akshat Mishra', lastModified: '03/13/2026', shared: false, uses: 24, favorited: true },
-  { id: '2', name: 'shared template info', description: 'Shared informational template', owner: 'Akshat Mishra', lastModified: '08/12/2025', shared: true, uses: 12, favorited: true },
+  { id: '1', name: 'quick send', description: 'Default template for quick envelope sending', owner: 'Lisa Jones', lastModified: '03/13/2026', shared: false, uses: 24, favorited: true },
+  { id: '2', name: 'shared template info', description: 'Shared informational template', owner: 'Lisa Jones', lastModified: '08/12/2025', shared: true, uses: 12, favorited: true },
   { id: '3', name: 'Non-Disclosure Agreement', description: 'Standard NDA for external partners', owner: 'Legal Team', lastModified: '02/28/2026', shared: true, uses: 156, favorited: false },
   { id: '4', name: 'Service Agreement', description: 'Master service agreement template', owner: 'Legal Team', lastModified: '01/15/2026', shared: true, uses: 89, favorited: false },
   { id: '5', name: 'Offer Letter', description: 'Standard offer letter for new hires', owner: 'HR Department', lastModified: '03/05/2026', shared: true, uses: 203, favorited: false },
-  { id: '6', name: 'Consulting Agreement', description: 'Independent contractor consulting agreement', owner: 'Akshat Mishra', lastModified: '02/10/2026', shared: false, uses: 7, favorited: false },
+  { id: '6', name: 'Consulting Agreement', description: 'Independent contractor consulting agreement', owner: 'Lisa Jones', lastModified: '02/10/2026', shared: false, uses: 7, favorited: false },
   { id: '7', name: 'Sales Contract', description: 'Standard sales contract with payment terms', owner: 'Sales Ops', lastModified: '03/20/2026', shared: true, uses: 342, favorited: false },
   { id: '8', name: 'Vendor Onboarding', description: 'New vendor setup and compliance form', owner: 'Procurement', lastModified: '12/08/2025', shared: true, uses: 45, favorited: false },
   { id: '9', name: 'Employment Agreement', description: 'Full-time employment agreement', owner: 'HR Department', lastModified: '03/01/2026', shared: true, uses: 178, favorited: false },
-  { id: '10', name: 'Change Order', description: 'Amendment to existing SOW or contract', owner: 'Akshat Mishra', lastModified: '03/22/2026', shared: false, uses: 3, favorited: false },
+  { id: '10', name: 'Change Order', description: 'Amendment to existing SOW or contract', owner: 'Lisa Jones', lastModified: '03/22/2026', shared: false, uses: 3, favorited: false },
 ];
 
 const templateColumns: any[] = [
@@ -2316,8 +2375,8 @@ const REPORTS_DATA: ReportItem[] = [
   { id: '3', name: 'All agreements', type: 'report', owner: 'System', lastViewed: '02/28/2026', shared: true },
   { id: '4', name: 'Agreements with renewal notice date', type: 'report', owner: 'System', lastViewed: '02/26/2026', shared: true },
   { id: '5', name: 'Obligations by type', type: 'report', owner: 'System', lastViewed: '02/26/2026', shared: true },
-  { id: '6', name: 'Envelope Velocity Report', type: 'dashboard', owner: 'Akshat Mishra', lastViewed: '03/25/2026', shared: false },
-  { id: '7', name: 'Agreement Trends', type: 'dashboard', owner: 'Akshat Mishra', lastViewed: '03/20/2026', shared: false },
+  { id: '6', name: 'Envelope Velocity Report', type: 'dashboard', owner: 'Lisa Jones', lastViewed: '03/25/2026', shared: false },
+  { id: '7', name: 'Agreement Trends', type: 'dashboard', owner: 'Lisa Jones', lastViewed: '03/20/2026', shared: false },
   { id: '8', name: 'Renewals Dashboard', type: 'dashboard', owner: 'Legal Team', lastViewed: '03/15/2026', shared: true },
   { id: '9', name: 'Monthly Signing Activity', type: 'report', owner: 'System', lastViewed: '03/10/2026', shared: true },
   { id: '10', name: 'Compliance Overview', type: 'dashboard', owner: 'Legal Team', lastViewed: '03/01/2026', shared: true },
@@ -3593,7 +3652,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
             <div style={{ padding: 20, flex: 1, overflowY: 'auto' }}>
               {!hasChat ? (
                 <>
-                  <div style={{ fontSize: 20, fontWeight: 600, color: '#130032', marginBottom: 4 }}>Hello, Larry</div>
+                  <div style={{ fontSize: 20, fontWeight: 600, color: '#130032', marginBottom: 4 }}>Hello, Lisa</div>
                   <div style={{ fontSize: 15, color: '#5B5670', marginBottom: 20 }}>What would you like to know?</div>
                   <div style={{ border: '1px solid #E8E6ED', borderRadius: 12, padding: 16, marginBottom: 24 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: '#130032', marginBottom: 8 }}>Agreement summary</div>
@@ -6150,6 +6209,11 @@ export default function App() {
   // set of folders currently expanded inline within the table.
   const [folderPath, setFolderPath] = useState<{ id: string; name: string }[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  // Agreements list filter selections (multi-select per facet).
+  const [filterParty, setFilterParty] = useState<Set<string>>(new Set());
+  const [filterType, setFilterType] = useState<Set<string>>(new Set());
+  const [filterStatus, setFilterStatus] = useState<Set<string>>(new Set());
+  const [filterOwner, setFilterOwner] = useState<Set<string>>(new Set());
   const [templatesSidebarView, setTemplatesSidebarView] = useState<TemplatesSidebarView>('my-templates');
   const [insightsSidebarView, setInsightsSidebarView] = useState<InsightsSidebarView>('overview');
   const [search, setSearch] = useState('');
@@ -6209,7 +6273,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     ],
     showSettings: true,
     settingsIcon: 'sliders-horizontal' as const,
-    user: { name: 'Kathie P' },
+    user: { name: 'Lisa Jones' },
   };
 
   /* ── LocalNav — Agreements tab ── */
@@ -6346,11 +6410,43 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     });
   }, [sidebarView, agreementsList]);
 
+  // In this demo all listed agreements are owned by the current user.
+  const ownerOf = useCallback((_a: Agreement) => 'Lisa Jones (You)', []);
+
+  // Facet options derived from the agreements in the current view.
+  const partyOptions = useMemo(() => Array.from(new Set(viewAgreements.map(a => a.party).filter(Boolean))).sort(), [viewAgreements]);
+  const typeOptions = useMemo(() => Array.from(new Set(viewAgreements.map(a => a.agreementType).filter((v): v is string => Boolean(v)))).sort(), [viewAgreements]);
+  const statusOptions = useMemo(() => Array.from(new Set(viewAgreements.map(a => a.status).filter(Boolean))).sort(), [viewAgreements]);
+  // Owner filter lists the current user plus the procurement specialist's collaborators.
+  const ownerOptions = useMemo(() => [
+    'Lisa Jones (You)',
+    'David Kim',
+    'Sarah Martinez',
+    'Robert Yang',
+    'Laura Chen',
+    'Kevin Park',
+    'Priya Nair',
+  ], []);
+
+  const toggleInSet = useCallback((setFn: React.Dispatch<React.SetStateAction<Set<string>>>, value: string) => {
+    setFn(prev => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value); else next.add(value);
+      return next;
+    });
+  }, []);
+
   const filteredAgreements = useMemo(() => {
-    if (!search) return viewAgreements;
     const q = search.toLowerCase();
-    return viewAgreements.filter((a) => a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q));
-  }, [search, viewAgreements]);
+    return viewAgreements.filter((a) => {
+      if (q && !(a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q))) return false;
+      if (filterParty.size > 0 && !filterParty.has(a.party)) return false;
+      if (filterType.size > 0 && !(a.agreementType && filterType.has(a.agreementType))) return false;
+      if (filterStatus.size > 0 && !filterStatus.has(a.status)) return false;
+      if (filterOwner.size > 0 && !filterOwner.has(ownerOf(a))) return false;
+      return true;
+    });
+  }, [search, viewAgreements, filterParty, filterType, filterStatus, filterOwner, ownerOf]);
 
   const filteredParties = useMemo(() => {
     if (!search) return PARTIES_DATA;
@@ -6510,9 +6606,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const viewTemplates = useMemo(() => {
     switch (templatesSidebarView) {
       case 'my-templates':
-        return TEMPLATES_DATA.filter(t => t.owner === 'Akshat Mishra');
+        return TEMPLATES_DATA.filter(t => t.owner === 'Lisa Jones');
       case 'shared-with-me':
-        return TEMPLATES_DATA.filter(t => t.shared && t.owner !== 'Akshat Mishra');
+        return TEMPLATES_DATA.filter(t => t.shared && t.owner !== 'Lisa Jones');
       case 'favorites':
         return TEMPLATES_DATA.filter(t => t.favorited);
       default:
@@ -6686,10 +6782,10 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             </Inline>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
-              <Button kind="secondary" size="small" menuTrigger>Party</Button>
-              <Button kind="secondary" size="small" menuTrigger>Type</Button>
-              <Button kind="secondary" size="small" menuTrigger>Status</Button>
-              <Button kind="secondary" size="small" menuTrigger>Owner</Button>
+              <FilterMenu label="Party" options={partyOptions} selected={filterParty} onToggle={(v) => toggleInSet(setFilterParty, v)} onClear={() => setFilterParty(new Set())} />
+              <FilterMenu label="Type" options={typeOptions} selected={filterType} onToggle={(v) => toggleInSet(setFilterType, v)} onClear={() => setFilterType(new Set())} />
+              <FilterMenu label="Status" options={statusOptions} selected={filterStatus} onToggle={(v) => toggleInSet(setFilterStatus, v)} onClear={() => setFilterStatus(new Set())} />
+              <FilterMenu label="Owner" options={ownerOptions} selected={filterOwner} onToggle={(v) => toggleInSet(setFilterOwner, v)} onClear={() => setFilterOwner(new Set())} />
               <Button kind="secondary" size="small" aria-label="All Filters" style={{ minWidth: 'auto', padding: '0 8px' }}>
                 <Icon name="filter" size={16} />
               </Button>
