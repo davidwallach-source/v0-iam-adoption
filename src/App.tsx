@@ -1528,7 +1528,7 @@ type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
    a specific transaction between parties.
-   ════���══════════════════════════════════ */
+   ════���═══════════════════���══════════════ */
 
 interface Agreement {
   id: string;
@@ -1899,30 +1899,21 @@ const DOCUMENTS_DATA: ProcurementDocument[] = [
   { id: 'd9', name: 'Umbrella Logistics - NDA.pdf', parties: ['Umbrella Logistics', 'Acme Corporation'], type: 'NDA', effective: 'Feb 8, 2024', expires: 'Feb 8, 2026' },
 ];
 
-function PartyChip({ label }: { label: string }) {
-  return (
-    <span style={{
-      display: 'inline-block',
-      background: 'var(--ink-cobalt-10, #F1EDFF)',
-      color: 'var(--ink-text-color, #130032)',
-      fontSize: 13,
-      lineHeight: '18px',
-      padding: '2px 6px',
-      borderRadius: 4,
-      borderBottom: '1px dashed var(--ink-cobalt-60, #7B61FF)',
-      whiteSpace: 'nowrap',
-    }}>{label}</span>
-  );
-}
-
-const documentColumns = [
+const documentColumns: any[] = [
   {
     key: 'name',
     header: 'Name',
     sortable: true,
     width: '32%',
     cell: (row: ProcurementDocument) => (
-      <span data-debug="doc-name">{row.name}</span>
+      <div className={dataTableStyles.cellContent} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <span className={dataTableStyles.aiSparkle}>
+          <AIIcon name="ai-spark-filled" size={14} />
+        </span>
+        <a href="#" className={dataTableStyles.cellPrimary} style={{ textDecoration: 'none', color: 'inherit' }}>
+          {row.name}
+        </a>
+      </div>
     ),
   },
   {
@@ -1931,7 +1922,13 @@ const documentColumns = [
     sortable: true,
     width: '22%',
     cell: (row: ProcurementDocument) => (
-      <span data-debug="doc-parties">{row.parties.join(', ')}</span>
+      <div className={dataTableStyles.cellContent}>
+        {row.parties.map((party, i) => (
+          <span key={i} className={dataTableStyles.partyChip}>
+            <a href="#" className={dataTableStyles.partyLink}>{party}</a>
+          </span>
+        ))}
+      </div>
     ),
   },
   {
@@ -1954,9 +1951,7 @@ const documentColumns = [
     sortable: true,
     width: '18%',
     cell: (row: ProcurementDocument) => (
-      <span style={{ borderBottom: '1px dashed var(--ink-cobalt-60, #7B61FF)', paddingBottom: 1 }}>
-        <Text size="sm">{row.expires}</Text>
-      </span>
+      <a href="#" className={dataTableStyles.partyLink}>{row.expires}</a>
     ),
   },
 ];
@@ -1994,7 +1989,7 @@ const FOLDERS_TREE: FolderNode[] = [
         ],
       },
       {
-        id: 'space-initech', name: 'Initech — SaaS Subscription', type: 'folder', lastChange: '5/8/2026',
+        id: 'space-initech', name: 'Initech ��� SaaS Subscription', type: 'folder', lastChange: '5/8/2026',
         children: [
           { id: 'initech-osa', name: 'Order & Subscription Agreement', type: 'document', lastChange: '5/8/2026', status: 'Completed', recipient: 'Supplier: Initech LLC' },
           { id: 'initech-sla', name: 'Service Level Agreement', type: 'document', lastChange: '5/6/2026', status: 'Completed', recipient: 'Supplier: Initech LLC' },
@@ -2320,7 +2315,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�������═���������������═══�����������══════════════════════════════
+/* ══�������═���������������═══�����������═════��════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
