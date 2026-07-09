@@ -1875,6 +1875,93 @@ const agreementColumns = [
 ];
 
 /* ═══════════════════════════════════════
+   Documents Data — individual documents (Type = Documents view)
+   ═══════════════════════════════════════ */
+
+interface ProcurementDocument {
+  id: string;
+  name: string;
+  parties: string[];
+  type: string;       // MSA, SLA, SOW, etc.
+  effective: string;
+  expires: string;
+}
+
+const DOCUMENTS_DATA: ProcurementDocument[] = [
+  { id: 'd1', name: 'MSA - Globex Industries.docx', parties: ['Globex Industries', 'Acme Corporation'], type: 'MSA', effective: 'Apr 26, 2022', expires: 'Apr 26, 2025' },
+  { id: 'd2', name: 'SLA - Cloud Hosting Services.pdf', parties: ['Initech LLC', 'Acme Corporation'], type: 'SLA', effective: 'May 1, 2024', expires: 'May 1, 2027' },
+  { id: 'd3', name: 'Stark-ScopeOfWork.pdf', parties: ['Stark Manufacturing'], type: 'SOW', effective: 'Apr 1, 2024', expires: 'May 1, 2025' },
+  { id: 'd4', name: 'Statement of Work - April 2025.pdf', parties: ['Soylent Corp', 'Acme Corporation'], type: 'SOW', effective: 'Apr 4, 2025', expires: 'May 4, 2026' },
+  { id: 'd5', name: 'Data Processing Addendum.pdf', parties: ['Globex Industries', 'Acme Corporation'], type: 'DPA', effective: 'Apr 26, 2022', expires: 'Apr 26, 2025' },
+  { id: 'd6', name: 'Master Supply Agreement.pdf', parties: ['Soylent Corp'], type: 'Supply', effective: 'Mar 2, 2024', expires: 'Mar 2, 2027' },
+  { id: 'd7', name: 'Purchase Agreement - Wonka.pdf', parties: ['Wonka Ingredients', 'Acme Corporation'], type: 'PO', effective: 'Apr 15, 2024', expires: 'Apr 15, 2025' },
+  { id: 'd8', name: 'Hooli Cloud Services - MSA.pdf', parties: ['Hooli, Inc.', 'Acme Corporation'], type: 'MSA', effective: 'Jan 10, 2023', expires: 'Jan 10, 2026' },
+  { id: 'd9', name: 'Umbrella Logistics - NDA.pdf', parties: ['Umbrella Logistics', 'Acme Corporation'], type: 'NDA', effective: 'Feb 8, 2024', expires: 'Feb 8, 2026' },
+];
+
+function PartyChip({ label }: { label: string }) {
+  return (
+    <span style={{
+      display: 'inline-block',
+      background: 'var(--ink-cobalt-10, #F1EDFF)',
+      color: 'var(--ink-text-color, #130032)',
+      fontSize: 13,
+      lineHeight: '18px',
+      padding: '2px 6px',
+      borderRadius: 4,
+      borderBottom: '1px dashed var(--ink-cobalt-60, #7B61FF)',
+      whiteSpace: 'nowrap',
+    }}>{label}</span>
+  );
+}
+
+const documentColumns = [
+  {
+    key: 'name',
+    header: 'Name',
+    sortable: true,
+    width: '32%',
+    cell: (row: ProcurementDocument) => (
+      <span data-debug="doc-name">{row.name}</span>
+    ),
+  },
+  {
+    key: 'parties',
+    header: 'Party Name',
+    sortable: true,
+    width: '22%',
+    cell: (row: ProcurementDocument) => (
+      <span data-debug="doc-parties">{row.parties.join(', ')}</span>
+    ),
+  },
+  {
+    key: 'type',
+    header: 'Type',
+    sortable: true,
+    width: '12%',
+    cell: (row: ProcurementDocument) => <Text size="sm">{row.type}</Text>,
+  },
+  {
+    key: 'effective',
+    header: 'Effective',
+    sortable: true,
+    width: '16%',
+    cell: (row: ProcurementDocument) => <Text size="sm">{row.effective}</Text>,
+  },
+  {
+    key: 'expires',
+    header: 'Expires',
+    sortable: true,
+    width: '18%',
+    cell: (row: ProcurementDocument) => (
+      <span style={{ borderBottom: '1px dashed var(--ink-cobalt-60, #7B61FF)', paddingBottom: 1 }}>
+        <Text size="sm">{row.expires}</Text>
+      </span>
+    ),
+  },
+];
+
+/* ═══════════════════════════════════════
    Folders Data — hierarchical folder/document tree
    ═══════════════════════════════════════ */
 
@@ -1973,11 +2060,18 @@ interface FilterMenuProps {
   onClear: () => void;
   /** When true, options are single-select and rendered as radios. */
   radio?: boolean;
+  /** When true, shows a search box to filter the options list. */
+  searchable?: boolean;
 }
 
-function FilterMenu({ label, options, selected, onToggle, onClear, radio = false }: FilterMenuProps) {
+function FilterMenu({ label, options, selected, onToggle, onClear, radio = false, searchable = false }: FilterMenuProps) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const count = selected.size;
+
+  const visibleOptions = searchable && query
+    ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase()))
+    : options;
 
   const content = (
     <div style={{ minWidth: 220, maxWidth: 280, padding: 4 }}>
@@ -1992,10 +2086,15 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
           </button>
         )}
       </div>
+      {searchable && (
+        <div style={{ padding: '0 8px 8px' }}>
+          <SearchInput size="small" value={query} onChange={setQuery} placeholder={`Search ${label}`} />
+        </div>
+      )}
       <div style={{ maxHeight: 280, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-        {options.length === 0 ? (
-          <div style={{ padding: '8px 10px' }}><Text size="sm" color="secondary">No options</Text></div>
-        ) : options.map((opt) => (
+        {visibleOptions.length === 0 ? (
+          <div style={{ padding: '8px 10px' }}><Text size="sm" color="secondary">{searchable && query ? 'No matches' : 'No options'}</Text></div>
+        ) : visibleOptions.map((opt) => (
           <label
             key={opt}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, cursor: 'pointer' }}
@@ -6465,6 +6564,18 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     });
   }, [search, viewAgreements, filterParty, filterType, filterStatus, filterOwner, ownerOf]);
 
+  // When "Documents" is chosen in the Type filter, the list shows individual
+  // documents with document-specific columns instead of agreements.
+  const isDocumentsView = filterType.has('Documents');
+  const filteredDocuments = useMemo(() => {
+    const q = search.toLowerCase();
+    return DOCUMENTS_DATA.filter((d) => {
+      if (q && !(d.name.toLowerCase().includes(q) || d.parties.some((p) => p.toLowerCase().includes(q)))) return false;
+      if (filterParty.size > 0 && !d.parties.some((p) => filterParty.has(p))) return false;
+      return true;
+    });
+  }, [search, filterParty]);
+
   const filteredParties = useMemo(() => {
     if (!search) return PARTIES_DATA;
     const q = search.toLowerCase();
@@ -6799,7 +6910,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             </Inline>
           ) : (
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
-              <FilterMenu label="Party" options={partyOptions} selected={filterParty} onToggle={(v) => toggleInSet(setFilterParty, v)} onClear={() => setFilterParty(new Set())} />
+              <FilterMenu label="Party" searchable options={partyOptions} selected={filterParty} onToggle={(v) => toggleInSet(setFilterParty, v)} onClear={() => setFilterParty(new Set())} />
               <FilterMenu label="Type" radio options={typeOptions} selected={filterType} onToggle={(v) => setFilterType(prev => prev.has(v) ? new Set() : new Set([v]))} onClear={() => setFilterType(new Set())} />
               <FilterMenu label="Status" options={statusOptions} selected={filterStatus} onToggle={(v) => toggleInSet(setFilterStatus, v)} onClear={() => setFilterStatus(new Set())} />
               <FilterMenu label="Owner" options={ownerOptions} selected={filterOwner} onToggle={(v) => toggleInSet(setFilterOwner, v)} onClear={() => setFilterOwner(new Set())} />
@@ -6813,6 +6924,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     >
       {isPartiesView ? (
         <DataTable columns={partyColumns} data={filteredParties} getRowKey={(row) => row.id} stickyHeader showColumnControl emptyMessage="No parties match your search" pagination={{ page: 1, pageSize: 25, totalItems: 1334, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
+      ) : isDocumentsView ? (
+        <DataTable columns={documentColumns} data={filteredDocuments} getRowKey={(row: ProcurementDocument) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage="No documents match your search" pagination={{ page: 1, pageSize: 25, totalItems: filteredDocuments.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : isRequestsView ? (
         <DataTable columns={requestColumns} data={filteredRequests} getRowKey={(row) => row.id} stickyHeader showColumnControl rowHeight="tall" emptyMessage="No requests found" pagination={{ page: 1, pageSize: 10, totalItems: filteredRequests.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : (
