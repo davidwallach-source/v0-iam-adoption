@@ -3303,6 +3303,32 @@ const DOC_LIBRARY: Record<string, DocData> = {
       { name: 'Subcontracting Restrictions', section: '2. Scope of Services', status: 'passed', description: 'Subcontracting requires prior written consent', details: 'Clause requires prior written consent for any subcontracting.' },
     ],
   },
+  nda: {
+    fileName: 'Non-Disclosure Agreement.docx',
+    title: 'NON-DISCLOSURE AGREEMENT',
+    parties: 'Acme Corporation & Receiving Party',
+    effectiveDate: 'January 15, 2026',
+    pages: 3,
+    summary: 'This Non-Disclosure Agreement governs the confidential exchange of information between the Disclosing Party and the Receiving Party for the purpose of evaluating a potential business relationship, including confidentiality obligations and the term of the agreement.',
+    clauses: [
+      { num: '1', heading: 'Definition of Confidential Information', status: 'approved', runs: [
+        t('For purposes of this Agreement, "Confidential Information" shall include all information or data that has or could have commercial value or other utility in the business in which Disclosing Party is engaged.'),
+      ]},
+      { num: '2', heading: 'Obligations of Receiving Party', status: 'approved', runs: [
+        t('Receiving Party agrees to: (a) hold the Confidential Information in strict confidence; (b) not to use the Confidential Information for any purpose other than evaluating a potential business relationship; (c) not to disclose Confidential Information to any third parties.'),
+      ]},
+      { num: '3', heading: 'Term', status: 'approved', runs: [
+        t('This Agreement shall remain in effect for the duration specified above from the Effective Date, unless terminated earlier by either party with 30 days written notice.'),
+      ]},
+    ],
+    keyTerms: [
+      { label: 'Agreement Type', value: 'Non-Disclosure Agreement' },
+      { label: 'Effective Date', value: 'January 15, 2026' },
+      { label: 'Disclosing Party', value: 'Acme Corporation' },
+      { label: 'Duration', value: '16 months' },
+      { label: 'Governing Law', value: 'State of Delaware' },
+    ],
+  },
   dpa: {
     fileName: 'Data Processing Agreement.docx',
     title: 'DATA PROCESSING AGREEMENT',
@@ -3360,6 +3386,7 @@ const DOC_LIBRARY: Record<string, DocData> = {
 
 function resolveDoc(name: string): DocData {
   const key = (name || '').toLowerCase();
+  if (key.includes('nda') || key.includes('non-disclosure') || key.includes('non disclosure') || key.includes('nondisclosure')) return DOC_LIBRARY.nda;
   if (key.includes('data processing') || key.includes('dpa')) return DOC_LIBRARY.dpa;
   if (key.includes('security') || key.includes('compliance') || key.includes('addendum')) return DOC_LIBRARY.addendum;
   if (key.includes('msa') || key.includes('master service') || key.includes('vendor') || key.includes('contract') || key.includes('purchase') || key.includes('procurement')) return DOC_LIBRARY.msa;
