@@ -3098,7 +3098,7 @@ const VALID_TABS: TabId[] = ['home', 'agreements', 'templates', 'insights', 'adm
 /* ═══════════════════════════════════════
    Agreement Detail View (Navigator Viewer)
    Full-screen dialog with PDF viewer + detail sidebar
-   ═════════════════════��═════════════════ */
+   ���════════════════════��═════════════════ */
 
 const AGREEMENT_DETAIL = {
   fileName: 'Batterii MLA_00992.pdf',
@@ -3238,6 +3238,7 @@ interface DocData {
   keyTerms?: KeyTerm[];
   playbook?: PlaybookRule[];
   hideClauseStatus?: boolean;
+  hideEditToolbar?: boolean;
 }
 
 const t = (text: string): DocRun => ({ text });
@@ -3328,6 +3329,7 @@ const DOC_LIBRARY: Record<string, DocData> = {
     fileName: 'Non-Disclosure Agreement.docx',
     title: 'NON-DISCLOSURE AGREEMENT',
     hideClauseStatus: true,
+    hideEditToolbar: true,
     parties: 'Acme Corporation & Receiving Party',
     effectiveDate: 'January 15, 2026',
     pages: 3,
@@ -3561,6 +3563,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
       </div>
 
       {/* ── Toolbar ── */}
+      {!doc.hideEditToolbar && (
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, height: 48, padding: '0 16px',
         background: 'white', borderBottom: '1px solid #E8E6ED', flexShrink: 0, overflowX: 'auto',
@@ -3588,6 +3591,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
         <button style={iconBtn} aria-label="Bulleted list" onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList'); }}><Icon name="bulleted-list" size={16} /></button>
         <button style={iconBtn} aria-label="Numbered list" onMouseDown={(e) => { e.preventDefault(); exec('insertOrderedList'); }}><Icon name="numbered-list" size={16} /></button>
       </div>
+      )}
 
       {/* ── Body: left rail + flyout + canvas + AI panel ── */}
       <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
