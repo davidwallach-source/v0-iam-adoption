@@ -3457,7 +3457,7 @@ interface DocumentPreviewProps {
 }
 
 function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPreviewProps) {
-  const [showAiPanel, setShowAiPanel] = useState(true);
+  const [showAiPanel, setShowAiPanel] = useState(false);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
