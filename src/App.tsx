@@ -778,11 +778,9 @@ function AgreementRequestModal({ open, onClose, onSubmit }: AgreementRequestModa
    ═══════════════════════════════════════ */
 
 interface NDAFormData {
-  disclosingParty: string;
   receivingParty: string;
   effectiveDate: string;
   duration: string;
-  authorizedSigner: string;
 }
 
 interface InstantNDAModalProps {
@@ -794,31 +792,25 @@ interface InstantNDAModalProps {
 }
 
 function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialData }: InstantNDAModalProps) {
-  const [disclosingParty, setDisclosingParty] = useState(initialData?.disclosingParty || '');
   const [receivingParty, setReceivingParty] = useState(initialData?.receivingParty || '');
   const [effectiveDate, setEffectiveDate] = useState(initialData?.effectiveDate || '');
   const [duration, setDuration] = useState(initialData?.duration || '12');
-  const [authorizedSigner, setAuthorizedSigner] = useState(initialData?.authorizedSigner || '');
   const [highlightData, setHighlightData] = useState(true);
   
   // Reset form when initialData changes (opening with new data)
   useEffect(() => {
     if (open) {
-      setDisclosingParty(initialData?.disclosingParty || '');
       setReceivingParty(initialData?.receivingParty || '');
       setEffectiveDate(initialData?.effectiveDate || '');
       setDuration(initialData?.duration || '12');
-      setAuthorizedSigner(initialData?.authorizedSigner || '');
     }
   }, [open, initialData]);
   
   const handleSave = () => {
     onSave({
-      disclosingParty,
       receivingParty,
       effectiveDate,
       duration,
-      authorizedSigner,
     });
   };
 
@@ -898,18 +890,6 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
           {/* Sender Field Data section */}
           <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, display: 'block' }}>Sender Field Data</Text>
 
-          {/* Disclosing Party */}
-          <div style={{ marginBottom: 20 }}>
-            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Disclosing Party</Text>
-            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>The party sharing confidential information.</Text>
-            <Input
-              value={disclosingParty}
-              onChange={(e) => setDisclosingParty(e.target.value)}
-              placeholder=""
-              style={{ width: '100%' }}
-            />
-          </div>
-
           {/* Receiving Party */}
           <div style={{ marginBottom: 20 }}>
             <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Receiving Party</Text>
@@ -941,18 +921,6 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
               type="number"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
-              placeholder=""
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          {/* Authorized Signer */}
-          <div style={{ marginBottom: 28 }}>
-            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Authorized Signer</Text>
-            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>The person authorized to sign on behalf of the Receiving Party.</Text>
-            <Input
-              value={authorizedSigner}
-              onChange={(e) => setAuthorizedSigner(e.target.value)}
               placeholder=""
               style={{ width: '100%' }}
             />
@@ -1023,12 +991,9 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
               marginBottom: 32,
               color: '#130032',
             }}>
-              <span>Disclosing Party: {renderFieldValue(disclosingParty, 'Disclosing Party')}</span>
-              <span style={{ margin: '0 16px' }}>Receiving Party: {renderFieldValue(receivingParty, 'Receiving Party')}</span>
+              <span>Receiving Party: {renderFieldValue(receivingParty, 'Receiving Party')}</span>
               <span style={{ margin: '0 16px' }}>Effective Date: {renderFieldValue(effectiveDate, 'Effective Date')}</span>
               <span style={{ margin: '0 16px' }}>Duration (months): {renderFieldValue(duration, 'Duration', true)}</span>
-              <br />
-              <span>Authorized Signer: {renderFieldValue(authorizedSigner, 'Authorized Signer')}</span>
             </div>
 
             {/* Section 1 */}
@@ -1064,11 +1029,9 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
               size="medium" 
               onClick={() => {
                 const formData = {
-                  disclosingParty,
                   receivingParty,
                   effectiveDate,
                   duration,
-                  authorizedSigner,
                 };
                 if (onSendForSignature) {
                   onSendForSignature(formData);
@@ -1528,7 +1491,7 @@ type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
    a specific transaction between parties.
-   ════���═══════════════════���══════════════ */
+   ════���═══════════════════�����══════════════ */
 
 interface Agreement {
   id: string;
@@ -2315,7 +2278,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�������═���������������═══�����������═════��════════════════════════
+/* ══�������═���������������═���═�����������═════��════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3106,7 +3069,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ════════������������������════════════════════════════ */
+   ════════�������������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
