@@ -2263,7 +2263,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�������═���������������═���═�����������═════��════════════════════════
+/* ══���������═���������������═���═�����������═════��════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3231,6 +3231,7 @@ interface DocData {
   clauses: DocClause[];
   keyTerms?: KeyTerm[];
   playbook?: PlaybookRule[];
+  hideClauseStatus?: boolean;
 }
 
 const t = (text: string): DocRun => ({ text });
@@ -3320,6 +3321,7 @@ const DOC_LIBRARY: Record<string, DocData> = {
   nda: {
     fileName: 'Non-Disclosure Agreement.docx',
     title: 'NON-DISCLOSURE AGREEMENT',
+    hideClauseStatus: true,
     parties: 'Acme Corporation & Receiving Party',
     effectiveDate: 'January 15, 2026',
     pages: 3,
@@ -3697,7 +3699,9 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
                 <div key={c.num} ref={(el) => { sectionRefs.current[c.num] = el; }} style={{ marginBottom: 26, scrollMarginTop: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 8px 0' }}>
                     <h2 style={{ fontSize: 16, fontWeight: 600, color: '#130032', margin: 0 }}>{c.num}. {c.heading}</h2>
-                    <span contentEditable={false} style={{ padding: '2px 8px', borderRadius: 10, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 600 }}>{meta.label}</span>
+                    {!doc.hideClauseStatus && (
+                      <span contentEditable={false} style={{ padding: '2px 8px', borderRadius: 10, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 600 }}>{meta.label}</span>
+                    )}
                   </div>
                   <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>{c.runs.map(renderRun)}</p>
                 </div>
