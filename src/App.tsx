@@ -795,7 +795,7 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
   const [receivingParty, setReceivingParty] = useState(initialData?.receivingParty || '');
   const [effectiveDate, setEffectiveDate] = useState(initialData?.effectiveDate || '');
   const [duration, setDuration] = useState(initialData?.duration || '12');
-  const [highlightData, setHighlightData] = useState(true);
+  const highlightData = true;
   
   // Reset form when initialData changes (opening with new data)
   useEffect(() => {
@@ -926,35 +926,6 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
             />
           </div>
 
-          {/* Highlight Data toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-            <button
-              onClick={() => setHighlightData(!highlightData)}
-              style={{
-                width: 44,
-                height: 24,
-                borderRadius: 12,
-                border: 'none',
-                background: highlightData ? 'var(--ink-purple-100)' : 'var(--ink-neutral-30)',
-                cursor: 'pointer',
-                position: 'relative',
-                transition: 'background 0.2s',
-              }}
-            >
-              <div style={{
-                width: 18,
-                height: 18,
-                borderRadius: '50%',
-                background: 'white',
-                position: 'absolute',
-                top: 3,
-                left: highlightData ? 23 : 3,
-                transition: 'left 0.2s',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-              }} />
-            </button>
-            <Text size="sm">Highlight Data</Text>
-          </div>
         </div>
 
         {/* Right panel - Document preview */}
