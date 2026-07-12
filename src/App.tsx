@@ -951,9 +951,15 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
               textAlign: 'center',
               fontSize: 22,
               fontWeight: 600,
-              marginBottom: 32,
+              marginBottom: 8,
               color: '#130032',
             }}>Non-Disclosure Agreement</h1>
+
+            {/* Title metadata */}
+            <div style={{ textAlign: 'center', fontSize: 14, lineHeight: 1.6, color: '#6B6B7B', marginBottom: 32 }}>
+              <div>Acme Corporation & Receiving Party</div>
+              <div>Effective Date: January 15, 2026</div>
+            </div>
 
             {/* Field values header */}
             <div style={{
@@ -2263,7 +2269,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══���������═���������������═���═�����������═════��════════════════════════
+/* ══�����������═���������������═���═�����������═════��════════════════════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
