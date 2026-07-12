@@ -990,6 +990,20 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
                 This Agreement shall remain in effect for the duration specified above from the Effective Date, unless terminated earlier by either party with 30 days written notice.
               </p>
             </div>
+
+            {/* Signature lines */}
+            <div style={{ borderTop: '1px solid #E5E1EC', marginTop: 40, paddingTop: 40, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 40 }}>Acme Corporation</div>
+                <div style={{ borderBottom: '1px solid #130032', marginBottom: 8 }} />
+                <div style={{ fontSize: 14, color: '#6B6B7B' }}>Authorized Signature</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 40 }}>Receiving Party</div>
+                <div style={{ borderBottom: '1px solid #130032', marginBottom: 8 }} />
+                <div style={{ fontSize: 14, color: '#6B6B7B' }}>Authorized Signature</div>
+              </div>
+            </div>
           </div>
 
           {/* Footer buttons */}
@@ -2454,7 +2468,7 @@ const reportColumns: any[] = [
 
 /* ═��═════════════════════════════════════
    Home Page
-   ═══════════════════════���═════��═════════ */
+   ═══════════════════════���═══���═��═════════ */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
