@@ -3578,6 +3578,44 @@ const COLLAB_COMMENTS: CollabComment[] = [
     body: withMentions('Confirmed governing law as State of Delaware. Thanks @legal for the quick turnaround.') },
 ];
 
+// The signed-in user who authors new comments.
+const CURRENT_USER = { name: 'Leona Legal', initials: 'LL' };
+
+interface MentionPerson { name: string; email: string; }
+const MENTION_PEOPLE: MentionPerson[] = [
+  { name: 'Francis Finance', email: 'francis.finance@email.com' },
+  { name: 'Frank Finance', email: 'frank.finance@email.com' },
+  { name: 'Freya Finance', email: 'freya.finance@email.com' },
+  { name: 'Frida Finance', email: 'frida.finance@email.com' },
+  { name: 'Leona Legal', email: 'leona.legal@email.com' },
+  { name: 'Liam Legal', email: 'liam.legal@email.com' },
+  { name: 'Priya Product', email: 'priya.product@email.com' },
+  { name: 'Sam Security', email: 'sam.security@email.com' },
+];
+
+// Renders a posted comment body, bolding any @FullName mentions.
+function renderMentionBody(text: string, names: string[]): React.ReactNode {
+  if (!names.length) return text;
+  const escaped = names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp('(@(?:' + escaped.join('|') + '))', 'g');
+  return text.split(re).map((part, i) =>
+    names.some((n) => part === '@' + n)
+      ? <strong key={i} style={{ fontWeight: 700, color: '#130032' }}>{part}</strong>
+      : <span key={i}>{part}</span>
+  );
+}
+
+const commentComposerStyles = `
+@keyframes inkSpin { to { transform: rotate(360deg); } }
+.ink-comment-input:empty:before {
+  content: attr(data-placeholder);
+  color: #8A85A0;
+  pointer-events: none;
+}
+.ink-comment-input:focus { outline: none; }
+.ink-comment-box:focus-within { border-color: var(--ink-cobalt-80, #4C00FF); }
+`;
+
 function aiRespond(prompt: string, doc: DocData): string {
   const p = prompt.toLowerCase();
   if (p.includes('playbook') || p.includes('suggest changes')) {
@@ -3619,11 +3657,16 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const [zoom, setZoom] = useState(100);
   const [editing, setEditing] = useState(true);
   const [selMenu, setSelMenu] = useState<{ x: number; y: number } | null>(null);
+  const [composer, setComposer] = useState<{ y: number } | null>(null);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [posting, setPosting] = useState(false);
+  const [pinnedComments, setPinnedComments] = useState<{ id: string; y: number; text: string; mentions: string[]; time: string }[]>([]);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const composerRef = useRef<HTMLDivElement | null>(null);
 
   const doc = useMemo(() => resolveDoc(documentName), [documentName]);
 
@@ -3677,6 +3720,96 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
     setSelMenu(null);
     window.getSelection()?.removeAllRanges();
   };
+
+  // Open the comment composer anchored to the current selection, and
+  // highlight the selected text as the comment anchor.
+  const openComposer = () => {
+    const sel = window.getSelection();
+    const container = scrollRef.current;
+    let y = 60;
+    if (sel && container && sel.rangeCount && !sel.isCollapsed) {
+      const rect = sel.getRangeAt(0).getBoundingClientRect();
+      const cRect = container.getBoundingClientRect();
+      y = rect.top - cRect.top + container.scrollTop;
+      try {
+        document.execCommand('backColor', false, '#FCE9A6');
+        document.execCommand('underline');
+      } catch { /* noop */ }
+    }
+    setSelMenu(null);
+    window.getSelection()?.removeAllRanges();
+    setPosting(false);
+    setMentionQuery(null);
+    setComposer({ y });
+    window.setTimeout(() => composerRef.current?.focus(), 0);
+  };
+
+  // Detect a trailing "@query" at the caret to drive the mention dropdown.
+  const handleComposerInput = () => {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) { setMentionQuery(null); return; }
+    const range = sel.getRangeAt(0);
+    const text = (range.startContainer.textContent || '').slice(0, range.startOffset);
+    const m = text.match(/@(\w*)$/);
+    setMentionQuery(m ? m[1] : null);
+  };
+
+  // Replace the "@query" being typed with a bold, non-editable mention chip.
+  const pickMention = (person: MentionPerson) => {
+    const el = composerRef.current;
+    if (!el) return;
+    el.focus();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const back = (mentionQuery ?? '').length + 1; // "@" + query
+    for (let i = 0; i < back; i++) sel.modify('extend', 'backward', 'character');
+    document.execCommand(
+      'insertHTML',
+      false,
+      `<strong contenteditable="false" data-mention="${person.name}" style="font-weight:700;color:#130032;">@${person.name}</strong>&nbsp;`
+    );
+    setMentionQuery(null);
+  };
+
+  // Insert an "@" and open the mention picker from the footer button.
+  const triggerMention = () => {
+    const el = composerRef.current;
+    if (!el) return;
+    el.focus();
+    document.execCommand('insertText', false, '@');
+    setMentionQuery('');
+  };
+
+  const cancelComposer = () => {
+    setComposer(null);
+    setMentionQuery(null);
+    setPosting(false);
+  };
+
+  const postComment = () => {
+    const el = composerRef.current;
+    const active = composer;
+    if (!el || !active) return;
+    const text = (el.innerText || '').replace(/\u00A0/g, ' ').trim();
+    if (!text) return;
+    const mentions = Array.from(el.querySelectorAll('[data-mention]'))
+      .map((n) => (n as HTMLElement).dataset.mention || '')
+      .filter(Boolean);
+    setPosting(true);
+    window.setTimeout(() => {
+      const time = new Date().toLocaleString('en-US', {
+        month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+      });
+      setPinnedComments((prev) => [...prev, { id: 'pc-' + Date.now(), y: active.y, text, mentions, time }]);
+      setPosting(false);
+      setComposer(null);
+      setMentionQuery(null);
+    }, 1100);
+  };
+
+  const filteredPeople = mentionQuery === null
+    ? []
+    : MENTION_PEOPLE.filter((p) => p.name.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 5);
 
   const openComments = COLLAB_COMMENTS.filter((c) => !c.resolved);
   const resolvedComments = COLLAB_COMMENTS.filter((c) => c.resolved);
@@ -3934,12 +4067,12 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
               }}
             >
               {[
-                { label: 'Add comment', path: 'M18 8V16.01H5.38L2 19H0V2H12V4H2V16.33L4.62 14.01H16V8.01H18V8ZM14 6H4V8H14V6ZM11 10H4V12H11V10ZM20 2H18V0H16V2H14V4H16V6H18V4H20V2Z' },
-                { label: 'Add approval', path: 'M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z' },
+                { label: 'Add comment', path: 'M18 8V16.01H5.38L2 19H0V2H12V4H2V16.33L4.62 14.01H16V8.01H18V8ZM14 6H4V8H14V6ZM11 10H4V12H11V10ZM20 2H18V0H16V2H14V4H16V6H18V4H20V2Z', onClick: openComposer },
+                { label: 'Add approval', path: 'M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z', onClick: closeSelMenu },
               ].map((item) => (
                 <button
                   key={item.label}
-                  onClick={closeSelMenu}
+                  onClick={item.onClick}
                   onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   style={{
@@ -3955,6 +4088,133 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
                   {item.label}
                 </button>
               ))}
+            </div>
+          )}
+
+          <style>{commentComposerStyles}</style>
+
+          {/* Posted comment cards */}
+          {pinnedComments.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                position: 'absolute', right: 24, top: c.y, zIndex: 29, width: 340,
+                background: 'white', borderRadius: 12, padding: 16,
+                border: '1px solid #EAE7F0', boxShadow: '0 8px 24px rgba(19,0,50,0.12)',
+                fontFamily: 'var(--ink-font-family)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <div style={{
+                  flexShrink: 0, width: 32, height: 32, borderRadius: '50%',
+                  background: '#CFE9E5', color: '#0F6B5F',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 600,
+                }}>{CURRENT_USER.initials}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{CURRENT_USER.name}</div>
+                  <div style={{ fontSize: 13, color: '#8A85A0' }}>{c.time}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 2 }}>
+                  <button style={iconBtn} aria-label="Resolve comment" onClick={() => setPinnedComments((prev) => prev.filter((x) => x.id !== c.id))}><Icon name="check" size={16} /></button>
+                  <button style={iconBtn} aria-label="More options"><Icon name="overflow-vertical" size={16} /></button>
+                </div>
+              </div>
+              <div style={{ fontSize: 14, lineHeight: 1.5, color: '#130032', marginTop: 12 }}>
+                {renderMentionBody(c.text, c.mentions)}
+              </div>
+            </div>
+          ))}
+
+          {/* Comment composer */}
+          {composer && (
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                position: 'absolute', right: 24, top: composer.y, zIndex: 32, width: 340,
+                background: 'white', borderRadius: 16, padding: 16,
+                border: '1px solid #EAE7F0', boxShadow: '0 16px 40px rgba(19,0,50,0.20)',
+                fontFamily: 'var(--ink-font-family)',
+              }}
+            >
+              <div
+                className="ink-comment-box"
+                style={{ border: '1px solid #DDD9E3', borderRadius: 10, padding: 12, transition: 'border-color 0.15s' }}
+              >
+                <div
+                  ref={composerRef}
+                  className="ink-comment-input"
+                  contentEditable={!posting}
+                  suppressContentEditableWarning
+                  data-placeholder="Comment or type @ to mention someone"
+                  onInput={handleComposerInput}
+                  style={{
+                    minHeight: 48, fontSize: 14, lineHeight: 1.5,
+                    color: posting ? '#8A85A0' : '#130032', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  }}
+                />
+              </div>
+
+              {/* Mention dropdown */}
+              {mentionQuery !== null && filteredPeople.length > 0 && (
+                <div style={{
+                  marginTop: 8, background: 'white', borderRadius: 12, padding: '10px 4px',
+                  border: '1px solid #EAE7F0', boxShadow: '0 12px 28px rgba(19,0,50,0.16)',
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#8A85A0', padding: '2px 14px 8px' }}>Select who to notify</div>
+                  {filteredPeople.map((p) => (
+                    <button
+                      key={p.email}
+                      onMouseDown={(e) => { e.preventDefault(); pickMention(p); }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left', border: 'none',
+                        background: 'transparent', cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
+                        fontFamily: 'var(--ink-font-family)',
+                      }}
+                    >
+                      <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{p.name}</div>
+                      <div style={{ fontSize: 13, color: '#8A85A0' }}>{p.email}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Footer */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                <button style={iconBtn} aria-label="Mention someone" onMouseDown={(e) => { e.preventDefault(); triggerMention(); }}>
+                  <Icon name="at" size={18} />
+                </button>
+                <div style={{ flex: 1 }} />
+                <button
+                  onClick={cancelComposer}
+                  style={{
+                    height: 36, padding: '0 16px', borderRadius: 8, border: 'none',
+                    background: '#F1EFF4', color: '#130032', cursor: 'pointer',
+                    fontFamily: 'var(--ink-font-family)', fontSize: 14, fontWeight: 600,
+                  }}
+                >Cancel</button>
+                <button
+                  onClick={postComment}
+                  disabled={posting}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    height: 36, padding: '0 18px', borderRadius: 8, border: 'none',
+                    background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white',
+                    cursor: posting ? 'default' : 'pointer', opacity: posting ? 0.9 : 1,
+                    fontFamily: 'var(--ink-font-family)', fontSize: 14, fontWeight: 600,
+                  }}
+                >
+                  {posting && (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: 'inkSpin 0.7s linear infinite' }}>
+                      <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
+                      <path d="M8 2 A6 6 0 0 1 14 8" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  )}
+                  Post
+                </button>
+              </div>
             </div>
           )}
         </div>
