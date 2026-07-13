@@ -10,6 +10,9 @@ export interface IconPath {
 }
 
 export const iconPaths: Record<string, IconPath> = {
+  'workflow': {
+    path: 'M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z',
+  },
   'align-bottom': {
     path: 'M21 21H3v-2h18zM9 5H7v10h2zm2-2v14H5V3zm6 5h-2v7h2zm2-2v11h-6V6z',
   },
