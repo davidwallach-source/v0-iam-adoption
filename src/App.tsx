@@ -5528,9 +5528,10 @@ interface AddMenuProps {
   onAddWireTransfer?: () => void;
   onUploadRequest?: () => void;
   onNewVendorOnboarding?: () => void;
+  onDocument?: () => void;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument }: AddMenuProps) {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -5583,7 +5584,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               </svg>
             }
             label="Document"
-            onClick={() => { setOpen(false); setTasksOpen(false); }}
+            onClick={() => { setOpen(false); setTasksOpen(false); onDocument?.(); }}
           />
 
           {/* Signature Request */}
@@ -5754,6 +5755,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [showPrepare, setShowPrepare] = useState(false);
   const [showUploadRequest, setShowUploadRequest] = useState(false);
+  const [showDocumentUpload, setShowDocumentUpload] = useState(false);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
@@ -6037,6 +6039,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
             <AddMenu 
               onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }} 
+              onDocument={() => setShowDocumentUpload(true)}
               onUploadRequest={() => setShowUploadRequest(true)}
               onAddWireTransfer={() => {
                 const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
@@ -6694,6 +6697,17 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         onClose={() => setShowPrepare(false)}
         preselectedDocs={preparePreselectedDocs}
         onSend={handleSendForSignature}
+      />
+
+      {/* Document Upload flow (Add menu → Document) */}
+      <DocumentUpload
+        open={showDocumentUpload}
+        onClose={() => setShowDocumentUpload(false)}
+        onContinue={(docs) => {
+          setShowDocumentUpload(false);
+          setPreparePreselectedDocs(docs);
+          setShowPrepare(true);
+        }}
       />
 
       {/* Upload Request full-screen overlay */}
