@@ -3581,6 +3581,24 @@ const COLLAB_COMMENTS: CollabComment[] = [
 // The signed-in user who authors new comments.
 const CURRENT_USER = { name: 'Leona Legal', initials: 'LL' };
 
+// Derive initials + a stable avatar color from a person's name.
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
+}
+const AVATAR_COLORS = [
+  { bg: '#CFE9E5', fg: '#0F6B5F' },
+  { bg: '#ECE6FF', fg: '#4C00FF' },
+  { bg: '#FCE3EC', fg: '#B4234A' },
+  { bg: '#FFF0D6', fg: '#8A5A00' },
+  { bg: '#DCEBFB', fg: '#1F5FA8' },
+];
+function avatarColor(seed: string): { bg: string; fg: string } {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
 interface MentionPerson { name: string; email: string; }
 const MENTION_PEOPLE: MentionPerson[] = [
   { name: 'Francis Finance', email: 'francis.finance@email.com' },
@@ -3649,7 +3667,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const [showComments, setShowComments] = useState(false);
   const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
   const [summaryExpanded, setSummaryExpanded] = useState(false);
-  const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | null>(null);
+  const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | 'approvals' | 'addApproval' | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [expandedRule, setExpandedRule] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -3662,6 +3680,10 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const [posting, setPosting] = useState(false);
   const [pinnedComments, setPinnedComments] = useState<{ id: string; y: number; text: string; mentions: string[]; time: string; anchor: string }[]>([]);
   const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const [approvalDraft, setApprovalDraft] = useState<{ anchor: string; description: string; requireAll: boolean; approvers: MentionPerson[] } | null>(null);
+  const [approverQuery, setApproverQuery] = useState('');
+  const [creatingApproval, setCreatingApproval] = useState(false);
+  const [approvals, setApprovals] = useState<{ id: string; anchor: string; description: string; approvers: MentionPerson[]; status: string }[]>([]);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -3746,6 +3768,54 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
     setComposer({ y, anchor });
     window.setTimeout(() => composerRef.current?.focus(), 0);
   };
+
+  // Open the Add Approval panel, capturing + highlighting the selected text.
+  const openApproval = () => {
+    const sel = window.getSelection();
+    let anchor = '';
+    if (sel && sel.rangeCount && !sel.isCollapsed) {
+      anchor = sel.toString().trim();
+      try {
+        document.execCommand('backColor', false, '#FCE9A6');
+        document.execCommand('underline');
+      } catch { /* noop */ }
+    }
+    setSelMenu(null);
+    window.getSelection()?.removeAllRanges();
+    setApprovalDraft({ anchor, description: '', requireAll: false, approvers: [] });
+    setApproverQuery('');
+    setCreatingApproval(false);
+    setLeftPanel('addApproval');
+  };
+
+  const addApprover = (p: MentionPerson) => {
+    setApprovalDraft((d) => (!d || d.approvers.some((a) => a.email === p.email)) ? d : { ...d, approvers: [...d.approvers, p] });
+    setApproverQuery('');
+  };
+  const removeApprover = (email: string) =>
+    setApprovalDraft((d) => d ? { ...d, approvers: d.approvers.filter((a) => a.email !== email) } : d);
+  const resetApproval = () =>
+    setApprovalDraft((d) => d ? { ...d, description: '', approvers: [], requireAll: false } : d);
+
+  const createApproval = () => {
+    const d = approvalDraft;
+    if (!d || !d.description.trim() || d.approvers.length === 0) return;
+    setCreatingApproval(true);
+    window.setTimeout(() => {
+      setApprovals((prev) => [...prev, { id: 'ap-' + Date.now(), anchor: d.anchor, description: d.description.trim(), approvers: d.approvers, status: 'Pending' }]);
+      setCreatingApproval(false);
+      setApprovalDraft(null);
+      setApproverQuery('');
+      setLeftPanel('approvals');
+    }, 1100);
+  };
+
+  const approverMatches = approverQuery.trim()
+    ? MENTION_PEOPLE.filter((p) =>
+        (p.name.toLowerCase().includes(approverQuery.toLowerCase()) || p.email.toLowerCase().includes(approverQuery.toLowerCase()))
+        && !approvalDraft?.approvers.some((a) => a.email === p.email)
+      ).slice(0, 5)
+    : [];
 
   // Detect a trailing "@query" at the caret to drive the mention dropdown.
   const handleComposerInput = () => {
@@ -3938,7 +4008,12 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
           display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0',
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            <button style={railBtn(false)} aria-label="Approvals" title="Approvals">
+            <button
+              style={railBtn(leftPanel === 'approvals' || leftPanel === 'addApproval')}
+              aria-label="Approvals"
+              title="Approvals"
+              onClick={() => setLeftPanel((p) => (p === 'approvals' || p === 'addApproval') ? null : 'approvals')}
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z" fill="currentColor" />
               </svg>
@@ -3958,7 +4033,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
         </div>
 
         {/* Flyout panel */}
-        {leftPanel && (
+        {(leftPanel === 'clauses' || leftPanel === 'playbook') && (
           <div style={{ width: 280, flexShrink: 0, background: 'white', borderRight: '1px solid #E8E6ED', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 52, padding: '0 16px', borderBottom: '1px solid #E8E6ED' }}>
               <span style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>{leftPanel === 'clauses' ? 'Clauses' : 'Playbook'}</span>
@@ -4027,6 +4102,172 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
           </div>
         )}
 
+        {/* Add Approval panel */}
+        {leftPanel === 'addApproval' && approvalDraft && (
+          <div style={{ width: 420, flexShrink: 0, background: 'white', borderRight: '1px solid #E8E6ED', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 20px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
+              <span style={{ fontSize: 18, fontWeight: 600, color: '#130032' }}>Add Approval</span>
+              <button style={iconBtn} aria-label="Close approval panel" onClick={() => { setLeftPanel(null); setApprovalDraft(null); }}><Icon name="close" size={18} /></button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+              {approvalDraft.anchor && (
+                <div style={{ background: '#FCF4D6', borderRadius: 8, padding: '10px 14px', marginBottom: 20, fontSize: 14, lineHeight: 1.5, color: '#130032' }}>
+                  <strong style={{ fontWeight: 700 }}>Selected: </strong>{'\u201C'}{approvalDraft.anchor}{'\u201D'}
+                </div>
+              )}
+
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>
+                Description <span style={{ color: '#C0362C' }}>*</span>
+              </label>
+              <textarea
+                value={approvalDraft.description}
+                onChange={(e) => setApprovalDraft((d) => d ? { ...d, description: e.target.value } : d)}
+                placeholder="Add a description"
+                style={{ width: '100%', minHeight: 88, resize: 'vertical', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '12px 14px', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--ink-font-family)', color: '#130032', marginBottom: 24, boxSizing: 'border-box' }}
+              />
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>Require all to approve</div>
+                  <div style={{ fontSize: 13, color: '#8A85A0', lineHeight: 1.4, marginTop: 2, maxWidth: 300 }}>You cannot require all to approve if a group has been added as an approver</div>
+                </div>
+                <button
+                  role="switch"
+                  aria-checked={approvalDraft.requireAll}
+                  aria-label="Require all to approve"
+                  onClick={() => setApprovalDraft((d) => d ? { ...d, requireAll: !d.requireAll } : d)}
+                  style={{
+                    flexShrink: 0, width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', padding: 2,
+                    background: approvalDraft.requireAll ? 'var(--ink-cobalt-80, #4C00FF)' : '#C7C3D0',
+                    display: 'flex', justifyContent: approvalDraft.requireAll ? 'flex-end' : 'flex-start', transition: 'background 0.15s',
+                  }}
+                >
+                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'white' }} />
+                </button>
+              </div>
+
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>
+                Add approvers <span style={{ color: '#C0362C' }}>*</span>
+              </label>
+              <div style={{ position: 'relative', marginBottom: 8 }}>
+                <input
+                  value={approverQuery}
+                  onChange={(e) => setApproverQuery(e.target.value)}
+                  placeholder="Type name or email"
+                  style={{ width: '100%', height: 48, borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '0 14px', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: '#130032', boxSizing: 'border-box' }}
+                />
+                {approverMatches.length > 0 && (
+                  <div style={{ position: 'absolute', top: 52, left: 0, right: 0, zIndex: 5, background: 'white', borderRadius: 12, border: '1px solid #EAE7F0', boxShadow: '0 12px 28px rgba(19,0,50,0.16)', padding: '6px 4px' }}>
+                    {approverMatches.map((p) => (
+                      <button
+                        key={p.email}
+                        onClick={() => addApprover(p)}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        style={{ display: 'block', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', cursor: 'pointer', padding: '8px 14px', borderRadius: 8, fontFamily: 'var(--ink-font-family)' }}
+                      >
+                        <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{p.name}</div>
+                        <div style={{ fontSize: 13, color: '#8A85A0' }}>{p.email}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {approvalDraft.approvers.map((p) => {
+                const col = avatarColor(p.name);
+                return (
+                  <div key={p.email} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+                    <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', background: col.bg, color: col.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600 }}>{initialsOf(p.name)}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{p.name}</div>
+                      <div style={{ fontSize: 13, color: '#8A85A0' }}>{p.email}</div>
+                    </div>
+                    <button style={iconBtn} aria-label={`Remove ${p.name}`} onClick={() => removeApprover(p.email)}><Icon name="close" size={16} /></button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, padding: 16, borderTop: '1px solid #E8E6ED', flexShrink: 0 }}>
+              <button
+                onClick={resetApproval}
+                style={{ height: 44, padding: '0 24px', borderRadius: 8, border: 'none', background: '#F1EFF4', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+              >Reset</button>
+              <button
+                onClick={createApproval}
+                disabled={creatingApproval || !approvalDraft.description.trim() || approvalDraft.approvers.length === 0}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 24px', borderRadius: 8, border: 'none',
+                  background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white',
+                  cursor: (creatingApproval || !approvalDraft.description.trim() || approvalDraft.approvers.length === 0) ? 'default' : 'pointer',
+                  opacity: (!creatingApproval && (!approvalDraft.description.trim() || approvalDraft.approvers.length === 0)) ? 0.5 : 1,
+                  fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)',
+                }}
+              >
+                {creatingApproval && (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: 'inkSpin 0.7s linear infinite' }}>
+                    <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
+                    <path d="M8 2 A6 6 0 0 1 14 8" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                )}
+                Create Approval
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Approvals list panel */}
+        {leftPanel === 'approvals' && (
+          <div style={{ width: 420, flexShrink: 0, background: 'white', borderRight: '1px solid #E8E6ED', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 20px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
+              <span style={{ fontSize: 18, fontWeight: 600, color: '#130032' }}>Approvals</span>
+              <button style={iconBtn} aria-label="Close approvals panel" onClick={() => setLeftPanel(null)}><Icon name="close" size={18} /></button>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, padding: '16px 20px 8px', flexShrink: 0 }}>
+              {['All types', 'All assignees'].map((f) => (
+                <button key={f} style={{
+                  display: 'flex', alignItems: 'center', gap: 6, height: 40, padding: '0 14px',
+                  borderRadius: 8, border: '1px solid #DDD9E3', background: 'white', cursor: 'pointer',
+                  fontFamily: 'var(--ink-font-family)', fontSize: 14, fontWeight: 500, color: '#130032',
+                }}>
+                  {f}<Icon name="chevron-down" size={14} />
+                </button>
+              ))}
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', padding: '4px 20px 20px' }}>
+              {approvals.length === 0 ? (
+                <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 14, color: '#8A85A0' }}>No approvals yet</div>
+              ) : approvals.map((a) => {
+                const stack = [CURRENT_USER.name, ...a.approvers.map((p) => p.name)];
+                return (
+                  <div key={a.id} style={{ padding: '16px 0', borderBottom: '1px solid #EFEDF3' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+                      <div style={{ display: 'flex' }}>
+                        {stack.map((name, i) => {
+                          const col = avatarColor(name);
+                          return (
+                            <div key={name + i} style={{
+                              width: 28, height: 28, borderRadius: '50%', background: col.bg, color: col.fg,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 11, fontWeight: 600, border: '2px solid white', marginLeft: i === 0 ? 0 : -8,
+                            }}>{initialsOf(name)}</div>
+                          );
+                        })}
+                      </div>
+                      <span style={{ padding: '4px 12px', borderRadius: 8, background: '#F1EFF4', color: '#5B5670', fontSize: 13, fontWeight: 500 }}>{a.status}</span>
+                    </div>
+                    <div style={{ fontSize: 15, lineHeight: 1.5, color: '#130032' }}>{a.description}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Document canvas */}
         <div
           ref={scrollRef}
@@ -4089,7 +4330,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
             >
               {[
                 { label: 'Add comment', path: 'M18 8V16.01H5.38L2 19H0V2H12V4H2V16.33L4.62 14.01H16V8.01H18V8ZM14 6H4V8H14V6ZM11 10H4V12H11V10ZM20 2H18V0H16V2H14V4H16V6H18V4H20V2Z', onClick: openComposer },
-                { label: 'Add approval', path: 'M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z', onClick: closeSelMenu },
+                { label: 'Add approval', path: 'M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z', onClick: openApproval },
               ].map((item) => (
                 <button
                   key={item.label}
