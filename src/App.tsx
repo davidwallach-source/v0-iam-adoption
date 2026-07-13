@@ -3579,10 +3579,12 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const [input, setInput] = useState('');
   const [zoom, setZoom] = useState(100);
   const [editing, setEditing] = useState(true);
+  const [selMenu, setSelMenu] = useState<{ x: number; y: number } | null>(null);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const doc = useMemo(() => resolveDoc(documentName), [documentName]);
 
@@ -3611,6 +3613,30 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const exec = (cmd: string, value?: string) => {
     canvasRef.current?.focus();
     try { document.execCommand(cmd, false, value); } catch { /* noop */ }
+  };
+
+  const handleCanvasMouseUp = () => {
+    // Defer so the browser finalizes the selection before we read it.
+    window.setTimeout(() => {
+      const sel = window.getSelection();
+      const container = scrollRef.current;
+      if (!sel || sel.isCollapsed || !sel.toString().trim() || !container) {
+        setSelMenu(null);
+        return;
+      }
+      const rect = sel.getRangeAt(0).getBoundingClientRect();
+      if (!rect.width && !rect.height) { setSelMenu(null); return; }
+      const cRect = container.getBoundingClientRect();
+      setSelMenu({
+        x: rect.right - cRect.left + container.scrollLeft,
+        y: rect.bottom - cRect.top + container.scrollTop + 8,
+      });
+    }, 0);
+  };
+
+  const closeSelMenu = () => {
+    setSelMenu(null);
+    window.getSelection()?.removeAllRanges();
   };
 
   const iconBtn: CSSProperties = {
@@ -3800,7 +3826,12 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
         )}
 
         {/* Document canvas */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px', background: '#F4F3F6' }}>
+        <div
+          ref={scrollRef}
+          onMouseUp={handleCanvasMouseUp}
+          onScroll={() => selMenu && setSelMenu(null)}
+          style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '32px 24px', background: '#F4F3F6' }}
+        >
           <div
             ref={canvasRef}
             contentEditable={editing}
@@ -3841,6 +3872,42 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
               ))}
             </div>
           </div>
+
+          {/* Text-selection context menu */}
+          {selMenu && (
+            <div
+              onMouseDown={(e) => e.preventDefault()}
+              style={{
+                position: 'absolute', left: selMenu.x, top: selMenu.y, zIndex: 30,
+                minWidth: 240, background: 'white', borderRadius: 12, padding: 8,
+                border: '1px solid #EAE7F0', boxShadow: '0 12px 32px rgba(19,0,50,0.18)',
+                fontFamily: 'var(--ink-font-family)',
+              }}
+            >
+              {[
+                { label: 'Add comment', path: 'M18 8V16.01H5.38L2 19H0V2H12V4H2V16.33L4.62 14.01H16V8.01H18V8ZM14 6H4V8H14V6ZM11 10H4V12H11V10ZM20 2H18V0H16V2H14V4H16V6H18V4H20V2Z' },
+                { label: 'Add approval', path: 'M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z' },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={closeSelMenu}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                    padding: '10px 14px', border: 'none', borderRadius: 8, background: 'transparent',
+                    cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--ink-font-family)',
+                    fontSize: 16, color: '#130032',
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                    <path d={item.path} fill="#130032" fillOpacity="0.9" />
+                  </svg>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* AI-Assisted panel */}
