@@ -5404,7 +5404,15 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
 }
 
 // Full-screen overlay for the "Upload request" task in an Agreement Space.
-function UploadRequestScreen({ open, onClose }: { open: boolean; onClose: () => void }) {
+interface UploadRequestData {
+  title: string;
+  description: string;
+  dueDate: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+function UploadRequestScreen({ open, onClose, onSend }: { open: boolean; onClose: () => void; onSend?: (data: UploadRequestData) => void }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -5413,6 +5421,14 @@ function UploadRequestScreen({ open, onClose }: { open: boolean; onClose: () => 
   const [email, setEmail] = useState('');
 
   if (!open) return null;
+
+  const canSend = title.trim() && firstName.trim() && lastName.trim() && email.trim();
+  const handleSend = () => {
+    if (!canSend) return;
+    onSend?.({ title: title.trim(), description: description.trim(), dueDate, firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() });
+    setTitle(''); setDescription(''); setDueDate(''); setFirstName(''); setLastName(''); setEmail('');
+    onClose();
+  };
 
   const labelStyle: React.CSSProperties = {
     display: 'block', fontSize: 15, color: '#130032', marginBottom: 8,
@@ -5498,8 +5514,9 @@ function UploadRequestScreen({ open, onClose }: { open: boolean; onClose: () => 
           style={{ height: 44, padding: '0 24px', borderRadius: 4, border: '1px solid #8B8699', background: 'white', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
         >Cancel</button>
         <button
-          onClick={onClose}
-          style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+          onClick={handleSend}
+          disabled={!canSend}
+          style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.5, fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
         >Send</button>
       </div>
     </div>
@@ -5740,6 +5757,13 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = (msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  };
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
 
@@ -6532,7 +6556,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                     </div>
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Anticipated Close</Text>
-                      <Text size="sm">{agreement.closeDate || '—'}</Text>
+                      <Text size="sm">{agreement.closeDate || '��'}</Text>
                     </div>
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Status</Text>
@@ -6651,7 +6675,45 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       <UploadRequestScreen
         open={showUploadRequest}
         onClose={() => setShowUploadRequest(false)}
+        onSend={(data) => {
+          const assignee = `${data.firstName} ${data.lastName}`.trim();
+          const assigneeInitials = ((data.firstName[0] || '') + (data.lastName[0] || '')).toUpperCase();
+          let formattedDueDate = '--';
+          if (data.dueDate) {
+            const d = new Date(data.dueDate + 'T00:00:00');
+            formattedDueDate = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
+          }
+          setSentTasks(prev => [...prev, {
+            id: `upload-request-${Date.now()}`,
+            title: data.title,
+            type: 'Upload' as const,
+            team: '',
+            assignee,
+            assigneeInitials,
+            status: 'Not started',
+            dueDate: formattedDueDate,
+            isDueSoon: false,
+          }]);
+          showToast('Upload request sent out');
+        }}
       />
+
+      {/* Toast (bottom-left) */}
+      {toast && (
+        <div style={{ position: 'fixed', bottom: 32, left: 32, zIndex: 1300, display: 'flex', alignItems: 'center', gap: 16, minWidth: 360, maxWidth: 520, padding: '18px 20px', borderRadius: 12, background: '#2A1A45', boxShadow: '0 12px 32px rgba(19,0,50,0.28)', fontFamily: 'var(--ink-font-family)' }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }} aria-hidden="true">
+            <path d="M5 12.5l4.5 4.5L19 7.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span style={{ flex: 1, fontSize: 16, color: 'white' }}>{toast}</span>
+          <button
+            onClick={() => setToast(null)}
+            aria-label="Dismiss notification"
+            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, border: 'none', background: 'transparent', cursor: 'pointer', color: 'white', borderRadius: 4 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+          </button>
+        </div>
+      )}
 
       {/* Party History Panel */}
       <Drawer
