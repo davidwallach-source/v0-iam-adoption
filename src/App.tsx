@@ -5490,6 +5490,18 @@ function UploadRequestScreen({ open, onClose }: { open: boolean; onClose: () => 
           </div>
         </div>
       </div>
+
+      {/* Sticky footer */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, height: 76, padding: '0 32px', borderTop: '1px solid var(--ink-border-subtle, #E4E2E9)', flexShrink: 0, background: 'white' }}>
+        <button
+          onClick={onClose}
+          style={{ height: 44, padding: '0 24px', borderRadius: 4, border: '1px solid #8B8699', background: 'white', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+        >Cancel</button>
+        <button
+          onClick={onClose}
+          style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+        >Send</button>
+      </div>
     </div>
   );
 }
@@ -7531,7 +7543,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const isRequestsView = sidebarView === 'requests';
   const isFoldersView = sidebarView === 'folders';
 
-  /* ── Folders view: navigation + inline expansion ── */
+  /* ─�� Folders view: navigation + inline expansion ── */
   const toggleFolderExpand = useCallback((id: string) => {
     setExpandedFolders((prev) => {
       const next = new Set(prev);
