@@ -5781,6 +5781,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [showPrepare, setShowPrepare] = useState(false);
   const [showUploadRequest, setShowUploadRequest] = useState(false);
   const [showFilePicker, setShowFilePicker] = useState(false);
+  const [pendingPreviewDoc, setPendingPreviewDoc] = useState<string | null>(null);
+  const [addedDocuments, setAddedDocuments] = useState<string[]>([]);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
@@ -5833,8 +5835,17 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
 
   // Update NDA document status if sent for signature
   const modifiedDocuments = useMemo(() => {
+    // Documents added to this space via the Add menu → Document flow (saved from Doc Preview).
+    const addedDocs = addedDocuments.map((docName, idx) => ({
+      id: `added-${idx}`,
+      name: docName,
+      status: 'Draft' as const,
+      dateModified: new Date().toLocaleDateString('en-US'),
+    }));
+
+    let baseDocs;
     if (isNDADraft && ndaSentForSignature) {
-      return workspaceData.documents.map(doc => ({
+      baseDocs = workspaceData.documents.map(doc => ({
         ...doc,
         status: 'Pending Signature' as const,
         signatureProgress: { 
@@ -5843,34 +5854,35 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
           waitingFor: ndaRecipientName || savedNDAData?.receivingParty || 'Recipient' 
         },
       }));
-    }
-    
-    // For uploaded document agreements, create documents with sent status
-    if (isUploadedDocAgreement && uploadedDocAgreement) {
+    } else if (isUploadedDocAgreement && uploadedDocAgreement) {
+      // For uploaded document agreements, create documents with sent status
       // A saved-blank draft has not been sent for signature - show it as a Draft.
       if (uploadedDocAgreement.isDraft) {
-        return uploadedDocAgreement.documents.map((docName, idx) => ({
+        baseDocs = uploadedDocAgreement.documents.map((docName, idx) => ({
           id: `uploaded-${idx}`,
           name: docName,
           status: 'Draft' as const,
           dateModified: new Date().toLocaleDateString('en-US'),
         }));
+      } else {
+        baseDocs = uploadedDocAgreement.documents.map((docName, idx) => ({
+          id: `uploaded-${idx}`,
+          name: docName,
+          status: 'Pending Signature' as const,
+          lastModified: new Date().toLocaleDateString('en-US'),
+          signatureProgress: {
+            signed: 0,
+            total: 1,
+            waitingFor: uploadedDocAgreement.recipientName || 'Recipient'
+          },
+        }));
       }
-      return uploadedDocAgreement.documents.map((docName, idx) => ({
-        id: `uploaded-${idx}`,
-        name: docName,
-        status: 'Pending Signature' as const,
-        lastModified: new Date().toLocaleDateString('en-US'),
-        signatureProgress: {
-          signed: 0,
-          total: 1,
-          waitingFor: uploadedDocAgreement.recipientName || 'Recipient'
-        },
-      }));
+    } else {
+      baseDocs = workspaceData.documents;
     }
-    
-    return workspaceData.documents;
-  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement]);
+
+    return [...baseDocs, ...addedDocs];
+  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments]);
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
@@ -6730,7 +6742,22 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         onCancel={() => setShowFilePicker(false)}
         onOpen={(fileName) => {
           setShowFilePicker(false);
-          onPreviewDocument?.(fileName);
+          setPendingPreviewDoc(fileName);
+        }}
+      />
+
+      {/* Doc Preview for the Add → Document flow. Saving adds the doc to this
+          space's Documents table and confirms with a toast. */}
+      <DocumentPreview
+        open={pendingPreviewDoc !== null}
+        documentName={pendingPreviewDoc ?? ''}
+        onClose={() => setPendingPreviewDoc(null)}
+        onSave={() => {
+          if (pendingPreviewDoc) {
+            setAddedDocuments(prev => [...prev, pendingPreviewDoc]);
+            showToast('Your document was added');
+          }
+          setPendingPreviewDoc(null);
         }}
       />
 
