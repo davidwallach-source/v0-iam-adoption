@@ -3541,6 +3541,43 @@ interface ChatMessage { role: 'user' | 'ai'; text: string }
 
 const AI_SHORTCUTS = ['Suggest changes against Playbook', 'Insert Clause', 'Automatically route approvals', 'Compare Documents'];
 
+interface CollabComment {
+  id: string;
+  initials: string;
+  name: string;
+  time: string;
+  body: React.ReactNode;
+  clause: string;
+  redline?: boolean;
+  resolved?: boolean;
+}
+
+// @mention helper — renders mentions in cobalt.
+function withMentions(text: string): React.ReactNode {
+  return text.split(/(@\w+)/g).map((part, i) =>
+    part.startsWith('@')
+      ? <span key={i} style={{ color: 'var(--ink-cobalt-80, #4C00FF)', fontWeight: 500 }}>{part}</span>
+      : <span key={i}>{part}</span>
+  );
+}
+
+const COLLAB_COMMENTS: CollabComment[] = [
+  { id: 'c1', initials: 'SC', name: 'Sarah Chen', time: '2h ago', clause: 'Limitation of Liability',
+    body: withMentions('The liability cap in section 7 needs to be increased to match total contract value per our standard playbook. @legal please review the proposed language.') },
+  { id: 'c2', initials: 'JO', name: 'James Okafor', time: '5h ago', clause: 'Compensation and Payment',
+    body: withMentions('Updated payment terms from Net 45 to Net 30 per finance team requirements. @finance can you confirm this aligns with our cash flow targets?') },
+  { id: 'c3', initials: 'EN', name: 'Emily Nakamura', time: '1d ago', clause: 'Term and Termination',
+    body: withMentions('Globex requests extending the initial term to 48 months. We can accept 36 months if renewal pricing is more favorable.') },
+  { id: 'c4', initials: 'DP', name: 'David Park', time: '1d ago', clause: 'Scope of Services',
+    body: withMentions('Scope language looks good. @product please confirm the service descriptions in Exhibit A are accurate.') },
+  { id: 'c5', initials: 'AR', name: 'Alex Rivera', time: '3d ago', clause: 'Data Protection',
+    body: withMentions('@security Need sign-off on the technical and organizational measures referenced in section 9 before we can approve.') },
+  { id: 'c6', initials: 'EN', name: 'Emily Nakamura', time: '3d ago', clause: 'Indemnification', redline: true,
+    body: withMentions('Proposed redline narrows the indemnity to third-party IP claims only. @legal does this match our fallback position?') },
+  { id: 'c7', initials: 'SC', name: 'Sarah Chen', time: '4d ago', clause: 'Governing Law', resolved: true,
+    body: withMentions('Confirmed governing law as State of Delaware. Thanks @legal for the quick turnaround.') },
+];
+
 function aiRespond(prompt: string, doc: DocData): string {
   const p = prompt.toLowerCase();
   if (p.includes('playbook') || p.includes('suggest changes')) {
@@ -3571,6 +3608,8 @@ interface DocumentPreviewProps {
 
 function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [leftPanel, setLeftPanel] = useState<'clauses' | 'playbook' | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -3639,6 +3678,10 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
     window.getSelection()?.removeAllRanges();
   };
 
+  const openComments = COLLAB_COMMENTS.filter((c) => !c.resolved);
+  const resolvedComments = COLLAB_COMMENTS.filter((c) => c.resolved);
+  const visibleComments = commentsTab === 'open' ? openComments : resolvedComments;
+
   const iconBtn: CSSProperties = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     width: 32, height: 32, borderRadius: 6, border: 'none',
@@ -3692,8 +3735,14 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <button style={iconBtn} aria-label="More options"><Icon name="overflow-horizontal" size={18} /></button>
-          <button style={iconBtn} aria-label="Comments"><Icon name="comment" size={18} /></button>
-          <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => !v)}>
+          <button
+            style={{ ...iconBtn, background: showComments ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }}
+            aria-label="Comments"
+            onClick={() => setShowComments(v => { const next = !v; if (next) setShowAiPanel(false); return next; })}
+          >
+            <Icon name="comment" size={18} color={showComments ? 'var(--ink-cobalt-80)' : undefined} />
+          </button>
+          <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
           <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
@@ -3985,6 +4034,98 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
                   <Icon name="send" size={16} color="white" />
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Collaborate panel */}
+        {showComments && (
+          <div style={{ width: 400, flexShrink: 0, borderLeft: '1px solid #E8E6ED', background: 'white', display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 20px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
+              <span style={{ fontSize: 18, fontWeight: 600, color: '#130032' }}>Collaborate</span>
+              <button style={iconBtn} aria-label="Close comments" onClick={() => setShowComments(false)}><Icon name="close" size={18} /></button>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 8, padding: '12px 16px', flexShrink: 0 }}>
+              {([['open', 'Open', openComments.length], ['resolved', 'Resolved', resolvedComments.length]] as const).map(([key, label, count]) => {
+                const active = commentsTab === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setCommentsTab(key)}
+                    style={{
+                      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      height: 40, borderRadius: 10, cursor: 'pointer',
+                      border: active ? '1px solid #DDD9E3' : '1px solid transparent',
+                      background: active ? 'white' : 'transparent',
+                      boxShadow: active ? '0 1px 3px rgba(19,0,50,0.08)' : 'none',
+                      fontFamily: 'var(--ink-font-family)', fontSize: 14, fontWeight: 600,
+                      color: active ? '#130032' : '#5B5670',
+                    }}
+                  >
+                    {label}
+                    <span style={{ fontSize: 13, fontWeight: 600, color: active ? '#5B5670' : '#8A85A0' }}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Filters */}
+            <div style={{ display: 'flex', gap: 8, padding: '0 16px 12px', flexShrink: 0 }}>
+              {['Type: All', 'Assignee: All'].map((f) => (
+                <button key={f} style={{
+                  display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 12px',
+                  borderRadius: 8, border: '1px solid #DDD9E3', background: 'white', cursor: 'pointer',
+                  fontFamily: 'var(--ink-font-family)', fontSize: 13, fontWeight: 500, color: '#130032',
+                }}>
+                  {f}<Icon name="chevron-down" size={14} />
+                </button>
+              ))}
+            </div>
+
+            {/* Comment list */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '4px 16px 20px' }}>
+              {visibleComments.length === 0 ? (
+                <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 14, color: '#8A85A0' }}>
+                  No {commentsTab} comments
+                </div>
+              ) : visibleComments.map((c) => {
+                const selected = c.id === visibleComments[0].id;
+                return (
+                  <div key={c.id} style={{
+                    position: 'relative', padding: '16px 12px', borderRadius: 12, marginBottom: 4,
+                    background: selected ? '#F5F3FB' : 'transparent',
+                  }}>
+                    {selected && (
+                      <div style={{ position: 'absolute', top: 12, right: 8, display: 'flex', gap: 2, background: 'white', borderRadius: 8, border: '1px solid #EAE7F0', boxShadow: '0 2px 6px rgba(19,0,50,0.08)' }}>
+                        <button style={iconBtn} aria-label="Resolve comment"><Icon name="check" size={16} /></button>
+                        <button style={iconBtn} aria-label="More options"><Icon name="overflow-horizontal" size={16} /></button>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{
+                        flexShrink: 0, width: 32, height: 32, borderRadius: '50%',
+                        background: 'var(--ink-cobalt-10, #ECE6FF)', color: 'var(--ink-cobalt-80, #4C00FF)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 12, fontWeight: 600,
+                      }}>{c.initials}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{c.name}</span>
+                          {c.redline && (
+                            <span style={{ padding: '1px 8px', borderRadius: 10, background: '#FCE8EC', color: '#B4234A', fontSize: 12, fontWeight: 600 }}>Redline</span>
+                          )}
+                          <span style={{ fontSize: 13, color: '#8A85A0' }}>{c.time}</span>
+                        </div>
+                        <div style={{ fontSize: 14, lineHeight: 1.5, color: '#3D3852', marginBottom: 10 }}>{c.body}</div>
+                        <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 8, background: 'var(--ink-neutral-fade-6, #F1EFF4)', fontSize: 13, color: '#5B5670' }}>{c.clause}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
