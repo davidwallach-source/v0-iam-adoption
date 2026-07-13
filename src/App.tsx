@@ -3938,6 +3938,11 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
           display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0',
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+            <button style={railBtn(false)} aria-label="Approvals" title="Approvals">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M16 11H13V8.98C14.21 8.07 15 6.63 15 5C15 2.24 12.76 0 10 0C7.24 0 5 2.24 5 5C5 6.63 5.79 8.06 7 8.98V11H4C2.9 11 2 11.9 2 13V16C2 17.1 2.9 18 4 18V20H16V18C17.1 18 18 17.1 18 16V13C18 11.9 17.1 11 16 11ZM8.21 7.51C7.44 6.93 6.88 5.94 6.88 5C6.88 3.35 8.35 1.88 10 1.88C11.65 1.88 13.12 3.35 13.12 5C13.12 5.93 12.56 6.93 11.79 7.51L11 8.11V11H9V8.11L8.21 7.51ZM16 16H4V13H16V16Z" fill="currentColor" />
+              </svg>
+            </button>
             <button style={railBtn(leftPanel === 'clauses')} aria-label="Clauses" title="Clauses" onClick={() => setLeftPanel(p => p === 'clauses' ? null : 'clauses')}>
               <Icon name="bulleted-list" size={20} color="currentColor" />
             </button>
