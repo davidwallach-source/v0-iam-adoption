@@ -4027,7 +4027,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
           ref={scrollRef}
           onMouseUp={handleCanvasMouseUp}
           onMouseDown={() => { if (openCardId) setOpenCardId(null); }}
-          onScroll={() => { if (selMenu) setSelMenu(null); if (openCardId) setOpenCardId(null); }}
+          onScroll={() => { if (selMenu) setSelMenu(null); }}
           style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '32px 24px', background: '#F4F3F6' }}
         >
           <div
