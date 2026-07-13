@@ -3657,10 +3657,10 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const [zoom, setZoom] = useState(100);
   const [editing, setEditing] = useState(true);
   const [selMenu, setSelMenu] = useState<{ x: number; y: number } | null>(null);
-  const [composer, setComposer] = useState<{ y: number } | null>(null);
+  const [composer, setComposer] = useState<{ y: number; anchor: string } | null>(null);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
-  const [pinnedComments, setPinnedComments] = useState<{ id: string; y: number; text: string; mentions: string[]; time: string }[]>([]);
+  const [pinnedComments, setPinnedComments] = useState<{ id: string; y: number; text: string; mentions: string[]; time: string; anchor: string }[]>([]);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -3727,7 +3727,9 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
     const sel = window.getSelection();
     const container = scrollRef.current;
     let y = 60;
+    let anchor = '';
     if (sel && container && sel.rangeCount && !sel.isCollapsed) {
+      anchor = sel.toString().trim();
       const rect = sel.getRangeAt(0).getBoundingClientRect();
       const cRect = container.getBoundingClientRect();
       y = rect.top - cRect.top + container.scrollTop;
@@ -3740,7 +3742,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
     window.getSelection()?.removeAllRanges();
     setPosting(false);
     setMentionQuery(null);
-    setComposer({ y });
+    setComposer({ y, anchor });
     window.setTimeout(() => composerRef.current?.focus(), 0);
   };
 
@@ -3800,7 +3802,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
       const time = new Date().toLocaleString('en-US', {
         month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
       });
-      setPinnedComments((prev) => [...prev, { id: 'pc-' + Date.now(), y: active.y, text, mentions, time }]);
+      setPinnedComments((prev) => [...prev, { id: 'pc-' + Date.now(), y: active.y, text, mentions, time, anchor: active.anchor }]);
       setPosting(false);
       setComposer(null);
       setMentionQuery(null);
@@ -3811,7 +3813,17 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
     ? []
     : MENTION_PEOPLE.filter((p) => p.name.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 5);
 
-  const openComments = COLLAB_COMMENTS.filter((c) => !c.resolved);
+  // Convert user-posted comments into the panel's comment shape (newest first).
+  const postedComments: CollabComment[] = [...pinnedComments].reverse().map((c) => ({
+    id: c.id,
+    initials: CURRENT_USER.initials,
+    name: CURRENT_USER.name,
+    time: c.time,
+    body: renderMentionBody(c.text, c.mentions),
+    clause: c.anchor ? (c.anchor.length > 42 ? c.anchor.slice(0, 42) + '…' : c.anchor) : 'Comment',
+  }));
+
+  const openComments = [...postedComments, ...COLLAB_COMMENTS.filter((c) => !c.resolved)];
   const resolvedComments = COLLAB_COMMENTS.filter((c) => c.resolved);
   const visibleComments = commentsTab === 'open' ? openComments : resolvedComments;
 
