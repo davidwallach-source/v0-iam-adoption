@@ -5403,6 +5403,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
   );
 }
 
+// Full-screen overlay for the "Upload request" task in an Agreement Space.
 function UploadRequestScreen({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
