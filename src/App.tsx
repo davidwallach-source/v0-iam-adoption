@@ -44,6 +44,243 @@ import {
 } from '@/design-system';
 
 /* ═══════════════════════════════════════
+   FilePickerDialog Component
+   macOS-style "Open" file picker, shared by
+   the Start New modal and the Agreement Space
+   Add menu (Document).
+   ═══════════════════════════════════════ */
+
+interface FilePickerDialogProps {
+  open: boolean;
+  onCancel: () => void;
+  onOpen: (fileName: string) => void;
+}
+
+function FilePickerDialog({ open, onCancel, onOpen }: FilePickerDialogProps) {
+  // Finder-style file list. "New Vendor MSA" stays pinned at the top.
+  const pickerFiles = [
+    { name: 'New Vendor MSA', kind: 'PDF Document', size: '248 KB', modified: 'Today, 9:41 AM' },
+    { name: 'Master Services Template', kind: 'Word Document', size: '182 KB', modified: 'Yesterday, 4:12 PM' },
+    { name: 'Vendor Onboarding Packet', kind: 'PDF Document', size: '1.4 MB', modified: 'May 8, 2026' },
+    { name: '2026 Budget Proposal', kind: 'Word Document', size: '96 KB', modified: 'May 2, 2026' },
+    { name: 'Statement of Work Q3', kind: 'PDF Document', size: '311 KB', modified: 'Apr 28, 2026' },
+  ];
+  const [selectedFile, setSelectedFile] = useState(pickerFiles[0].name);
+
+  if (!open) return null;
+
+  const handleOpen = () => onOpen(selectedFile);
+
+  return (
+    <div
+      onClick={onCancel}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(19, 0, 50, 0.4)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1400,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 720,
+          maxWidth: '92vw',
+          height: 460,
+          maxHeight: '82vh',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#ECECEC',
+          borderRadius: 10,
+          border: '1px solid rgba(0,0,0,0.18)',
+          boxShadow: '0 30px 70px rgba(0, 0, 0, 0.35)',
+          overflow: 'hidden',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
+        }}
+      >
+        {/* Title bar with traffic lights + centered title */}
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          height: 40,
+          padding: '0 14px',
+          background: 'linear-gradient(#F6F6F6, #E4E4E4)',
+          borderBottom: '1px solid rgba(0,0,0,0.12)',
+        }}>
+          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF5F57', border: '0.5px solid rgba(0,0,0,0.12)' }} />
+          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FEBC2E', border: '0.5px solid rgba(0,0,0,0.12)' }} />
+          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#28C840', border: '0.5px solid rgba(0,0,0,0.12)' }} />
+          <span style={{
+            position: 'absolute', left: 0, right: 0, textAlign: 'center',
+            fontSize: 13, fontWeight: 600, color: '#3D3D3D', pointerEvents: 'none',
+          }}>
+            Open
+          </span>
+        </div>
+
+        {/* Location toolbar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          height: 44,
+          padding: '0 14px',
+          background: 'linear-gradient(#FBFBFB, #F0F0F0)',
+          borderBottom: '1px solid rgba(0,0,0,0.1)',
+        }}>
+          <div style={{ display: 'flex', gap: 2, color: '#9B9B9B' }}>
+            <Icon name="chevron-left" size={16} color="currentColor" />
+            <span style={{ color: '#3D3D3D' }}><Icon name="chevron-right" size={16} color="currentColor" /></span>
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '4px 10px', background: 'white',
+            border: '1px solid rgba(0,0,0,0.14)', borderRadius: 6,
+            fontSize: 13, color: '#3D3D3D', fontWeight: 500,
+          }}>
+            <Icon name="folder" size={15} color="#5AACF5" />
+            Documents
+            <Icon name="chevron-down" size={13} color="#9B9B9B" />
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            width: 150, padding: '4px 8px', background: 'white',
+            border: '1px solid rgba(0,0,0,0.14)', borderRadius: 6,
+            fontSize: 13, color: '#9B9B9B',
+          }}>
+            <Icon name="search" size={14} color="#9B9B9B" />
+            Search
+          </div>
+        </div>
+
+        {/* Body: sidebar + file list */}
+        <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+          {/* Favorites sidebar */}
+          <div style={{
+            width: 176,
+            flexShrink: 0,
+            padding: '10px 8px',
+            background: 'rgba(230,230,232,0.9)',
+            borderRight: '1px solid rgba(0,0,0,0.1)',
+            overflowY: 'auto',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#8A8A8A', padding: '2px 8px 6px' }}>
+              Favorites
+            </div>
+            {[
+              { label: 'AirDrop', icon: 'download' },
+              { label: 'Recents', icon: 'clock' },
+              { label: 'Applications', icon: 'grid' },
+              { label: 'Desktop', icon: 'desktop' },
+              { label: 'Documents', icon: 'folder', active: true },
+              { label: 'Downloads', icon: 'download' },
+            ].map((item) => (
+              <div key={item.label} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '5px 8px', borderRadius: 6, marginBottom: 1,
+                fontSize: 13, fontWeight: item.active ? 600 : 400,
+                color: item.active ? '#1D1D1F' : '#3D3D3D',
+                background: item.active ? 'rgba(0,0,0,0.08)' : 'transparent',
+              }}>
+                <Icon name={item.icon === 'grid' || item.icon === 'desktop' ? 'folder' : item.icon} size={15} color="#5AACF5" />
+                {item.label}
+              </div>
+            ))}
+          </div>
+
+          {/* File list */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', minWidth: 0 }}>
+            {/* Column headers */}
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              height: 26, padding: '0 12px', flexShrink: 0,
+              background: 'linear-gradient(#FCFCFC, #F1F1F1)',
+              borderBottom: '1px solid rgba(0,0,0,0.12)',
+              fontSize: 11, fontWeight: 600, color: '#6E6E6E',
+            }}>
+              <span style={{ flex: 1 }}>Name</span>
+              <span style={{ width: 150, borderLeft: '1px solid rgba(0,0,0,0.1)', paddingLeft: 10 }}>Date Modified</span>
+              <span style={{ width: 70, borderLeft: '1px solid rgba(0,0,0,0.1)', paddingLeft: 10, textAlign: 'right' }}>Size</span>
+              <span style={{ width: 110, borderLeft: '1px solid rgba(0,0,0,0.1)', paddingLeft: 10 }}>Kind</span>
+            </div>
+
+            {/* Rows */}
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {pickerFiles.map((file, i) => {
+                const isSelected = selectedFile === file.name;
+                return (
+                  <div
+                    key={file.name}
+                    onClick={() => setSelectedFile(file.name)}
+                    onDoubleClick={handleOpen}
+                    style={{
+                      display: 'flex', alignItems: 'center',
+                      height: 30, padding: '0 12px', cursor: 'default',
+                      fontSize: 13,
+                      color: isSelected ? 'white' : '#1D1D1F',
+                      background: isSelected ? '#3268E6' : (i % 2 === 1 ? '#F4F7FE' : 'white'),
+                    }}
+                  >
+                    <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                      <Icon name="document" size={16} color={isSelected ? 'white' : '#5AACF5'} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                    </span>
+                    <span style={{ width: 150, paddingLeft: 10, color: isSelected ? 'rgba(255,255,255,0.85)' : '#8A8A8A' }}>{file.modified}</span>
+                    <span style={{ width: 70, paddingLeft: 10, textAlign: 'right', color: isSelected ? 'rgba(255,255,255,0.85)' : '#8A8A8A' }}>{file.size}</span>
+                    <span style={{ width: 110, paddingLeft: 10, color: isSelected ? 'rgba(255,255,255,0.85)' : '#8A8A8A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.kind}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer actions */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: 10,
+          height: 52,
+          padding: '0 16px',
+          background: 'linear-gradient(#F4F4F4, #E7E7E7)',
+          borderTop: '1px solid rgba(0,0,0,0.12)',
+        }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: '5px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500,
+              border: '1px solid rgba(0,0,0,0.18)', background: 'linear-gradient(#FFFFFF, #F2F2F2)',
+              color: '#1D1D1F', cursor: 'pointer',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleOpen}
+            style={{
+              padding: '5px 20px', borderRadius: 6, fontSize: 13, fontWeight: 600,
+              border: '1px solid #2657CE', background: 'linear-gradient(#4C86F0, #2F6BE0)',
+              color: 'white', cursor: 'pointer',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+            }}
+          >
+            Open
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════
    StartNewModal Component
    ═══════════════════════════════════════ */
 
@@ -62,22 +299,12 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
   const [search, setSearch] = useState('');
   const [showFilePicker, setShowFilePicker] = useState(false);
 
-  // Finder-style file list. "New Vendor MSA" stays pinned at the top.
-  const pickerFiles = [
-    { name: 'New Vendor MSA', kind: 'PDF Document', size: '248 KB', modified: 'Today, 9:41 AM' },
-    { name: 'Master Services Template', kind: 'Word Document', size: '182 KB', modified: 'Yesterday, 4:12 PM' },
-    { name: 'Vendor Onboarding Packet', kind: 'PDF Document', size: '1.4 MB', modified: 'May 8, 2026' },
-    { name: '2026 Budget Proposal', kind: 'Word Document', size: '96 KB', modified: 'May 2, 2026' },
-    { name: 'Statement of Work Q3', kind: 'PDF Document', size: '311 KB', modified: 'Apr 28, 2026' },
-  ];
-  const [selectedFile, setSelectedFile] = useState(pickerFiles[0].name);
-
-  const handleSelectFile = () => {
+  const handleSelectFile = (fileName: string) => {
     setShowFilePicker(false);
     onClose();
     // Open the in-app document preview with the selected document loaded
     // (same preview screen the View CTA opens in an Agreement Space).
-    onPreviewDocument?.(selectedFile);
+    onPreviewDocument?.(fileName);
   };
 
   const agreements = [
@@ -363,213 +590,11 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
       </div>
 
       {/* Fake (prototype) file picker — not the real OS dialog */}
-      {showFilePicker && (
-        <div
-          onClick={() => setShowFilePicker(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(19, 0, 50, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: 720,
-              maxWidth: '92vw',
-              height: 460,
-              maxHeight: '82vh',
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#ECECEC',
-              borderRadius: 10,
-              border: '1px solid rgba(0,0,0,0.18)',
-              boxShadow: '0 30px 70px rgba(0, 0, 0, 0.35)',
-              overflow: 'hidden',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif',
-            }}
-          >
-            {/* Title bar with traffic lights + centered title */}
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              height: 40,
-              padding: '0 14px',
-              background: 'linear-gradient(#F6F6F6, #E4E4E4)',
-              borderBottom: '1px solid rgba(0,0,0,0.12)',
-            }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF5F57', border: '0.5px solid rgba(0,0,0,0.12)' }} />
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FEBC2E', border: '0.5px solid rgba(0,0,0,0.12)' }} />
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#28C840', border: '0.5px solid rgba(0,0,0,0.12)' }} />
-              <span style={{
-                position: 'absolute', left: 0, right: 0, textAlign: 'center',
-                fontSize: 13, fontWeight: 600, color: '#3D3D3D', pointerEvents: 'none',
-              }}>
-                Open
-              </span>
-            </div>
-
-            {/* Location toolbar */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              height: 44,
-              padding: '0 14px',
-              background: 'linear-gradient(#FBFBFB, #F0F0F0)',
-              borderBottom: '1px solid rgba(0,0,0,0.1)',
-            }}>
-              <div style={{ display: 'flex', gap: 2, color: '#9B9B9B' }}>
-                <Icon name="chevron-left" size={16} color="currentColor" />
-                <span style={{ color: '#3D3D3D' }}><Icon name="chevron-right" size={16} color="currentColor" /></span>
-              </div>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '4px 10px', background: 'white',
-                border: '1px solid rgba(0,0,0,0.14)', borderRadius: 6,
-                fontSize: 13, color: '#3D3D3D', fontWeight: 500,
-              }}>
-                <Icon name="folder" size={15} color="#5AACF5" />
-                Documents
-                <Icon name="chevron-down" size={13} color="#9B9B9B" />
-              </div>
-              <div style={{ flex: 1 }} />
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                width: 150, padding: '4px 8px', background: 'white',
-                border: '1px solid rgba(0,0,0,0.14)', borderRadius: 6,
-                fontSize: 13, color: '#9B9B9B',
-              }}>
-                <Icon name="search" size={14} color="#9B9B9B" />
-                Search
-              </div>
-            </div>
-
-            {/* Body: sidebar + file list */}
-            <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
-              {/* Favorites sidebar */}
-              <div style={{
-                width: 176,
-                flexShrink: 0,
-                padding: '10px 8px',
-                background: 'rgba(230,230,232,0.9)',
-                borderRight: '1px solid rgba(0,0,0,0.1)',
-                overflowY: 'auto',
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#8A8A8A', padding: '2px 8px 6px' }}>
-                  Favorites
-                </div>
-                {[
-                  { label: 'AirDrop', icon: 'download' },
-                  { label: 'Recents', icon: 'clock' },
-                  { label: 'Applications', icon: 'grid' },
-                  { label: 'Desktop', icon: 'desktop' },
-                  { label: 'Documents', icon: 'folder', active: true },
-                  { label: 'Downloads', icon: 'download' },
-                ].map((item) => (
-                  <div key={item.label} style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '5px 8px', borderRadius: 6, marginBottom: 1,
-                    fontSize: 13, fontWeight: item.active ? 600 : 400,
-                    color: item.active ? '#1D1D1F' : '#3D3D3D',
-                    background: item.active ? 'rgba(0,0,0,0.08)' : 'transparent',
-                  }}>
-                    <Icon name={item.icon === 'grid' || item.icon === 'desktop' ? 'folder' : item.icon} size={15} color="#5AACF5" />
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-
-              {/* File list */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', minWidth: 0 }}>
-                {/* Column headers */}
-                <div style={{
-                  display: 'flex', alignItems: 'center',
-                  height: 26, padding: '0 12px', flexShrink: 0,
-                  background: 'linear-gradient(#FCFCFC, #F1F1F1)',
-                  borderBottom: '1px solid rgba(0,0,0,0.12)',
-                  fontSize: 11, fontWeight: 600, color: '#6E6E6E',
-                }}>
-                  <span style={{ flex: 1 }}>Name</span>
-                  <span style={{ width: 150, borderLeft: '1px solid rgba(0,0,0,0.1)', paddingLeft: 10 }}>Date Modified</span>
-                  <span style={{ width: 70, borderLeft: '1px solid rgba(0,0,0,0.1)', paddingLeft: 10, textAlign: 'right' }}>Size</span>
-                  <span style={{ width: 110, borderLeft: '1px solid rgba(0,0,0,0.1)', paddingLeft: 10 }}>Kind</span>
-                </div>
-
-                {/* Rows */}
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                  {pickerFiles.map((file, i) => {
-                    const isSelected = selectedFile === file.name;
-                    return (
-                      <div
-                        key={file.name}
-                        onClick={() => setSelectedFile(file.name)}
-                        onDoubleClick={handleSelectFile}
-                        style={{
-                          display: 'flex', alignItems: 'center',
-                          height: 30, padding: '0 12px', cursor: 'default',
-                          fontSize: 13,
-                          color: isSelected ? 'white' : '#1D1D1F',
-                          background: isSelected ? '#3268E6' : (i % 2 === 1 ? '#F4F7FE' : 'white'),
-                        }}
-                      >
-                        <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                          <Icon name="document" size={16} color={isSelected ? 'white' : '#5AACF5'} />
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                        </span>
-                        <span style={{ width: 150, paddingLeft: 10, color: isSelected ? 'rgba(255,255,255,0.85)' : '#8A8A8A' }}>{file.modified}</span>
-                        <span style={{ width: 70, paddingLeft: 10, textAlign: 'right', color: isSelected ? 'rgba(255,255,255,0.85)' : '#8A8A8A' }}>{file.size}</span>
-                        <span style={{ width: 110, paddingLeft: 10, color: isSelected ? 'rgba(255,255,255,0.85)' : '#8A8A8A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.kind}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer actions */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: 10,
-              height: 52,
-              padding: '0 16px',
-              background: 'linear-gradient(#F4F4F4, #E7E7E7)',
-              borderTop: '1px solid rgba(0,0,0,0.12)',
-            }}>
-              <button
-                onClick={() => setShowFilePicker(false)}
-                style={{
-                  padding: '5px 16px', borderRadius: 6, fontSize: 13, fontWeight: 500,
-                  border: '1px solid rgba(0,0,0,0.18)', background: 'linear-gradient(#FFFFFF, #F2F2F2)',
-                  color: '#1D1D1F', cursor: 'pointer',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSelectFile}
-                style={{
-                  padding: '5px 20px', borderRadius: 6, fontSize: 13, fontWeight: 600,
-                  border: '1px solid #2657CE', background: 'linear-gradient(#4C86F0, #2F6BE0)',
-                  color: 'white', cursor: 'pointer',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
-                }}
-              >
-                Open
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilePickerDialog
+        open={showFilePicker}
+        onCancel={() => setShowFilePicker(false)}
+        onOpen={handleSelectFile}
+      />
 
     </Modal>
   );
@@ -5528,9 +5553,10 @@ interface AddMenuProps {
   onAddWireTransfer?: () => void;
   onUploadRequest?: () => void;
   onNewVendorOnboarding?: () => void;
+  onDocument?: () => void;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument }: AddMenuProps) {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -5583,7 +5609,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               </svg>
             }
             label="Document"
-            onClick={() => { setOpen(false); setTasksOpen(false); }}
+            onClick={() => { setOpen(false); setTasksOpen(false); onDocument?.(); }}
           />
 
           {/* Signature Request */}
@@ -5754,6 +5780,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [showPrepare, setShowPrepare] = useState(false);
   const [showUploadRequest, setShowUploadRequest] = useState(false);
+  const [showFilePicker, setShowFilePicker] = useState(false);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
@@ -6035,9 +6062,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
-            <AddMenu 
-              onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }} 
-              onUploadRequest={() => setShowUploadRequest(true)}
+              <AddMenu
+                onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
+                onDocument={() => setShowFilePicker(true)}
+                onUploadRequest={() => setShowUploadRequest(true)}
               onAddWireTransfer={() => {
                 const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
                 const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -6694,6 +6722,16 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         onClose={() => setShowPrepare(false)}
         preselectedDocs={preparePreselectedDocs}
         onSend={handleSendForSignature}
+      />
+
+      {/* Add menu → Document: open the macOS file picker, then the Doc Preview */}
+      <FilePickerDialog
+        open={showFilePicker}
+        onCancel={() => setShowFilePicker(false)}
+        onOpen={(fileName) => {
+          setShowFilePicker(false);
+          onPreviewDocument?.(fileName);
+        }}
       />
 
       {/* Upload Request full-screen overlay */}
