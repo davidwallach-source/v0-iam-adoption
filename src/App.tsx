@@ -6670,7 +6670,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Button kind="secondary" size="small">
-                          {task.id.startsWith('upload-request-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
+                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
                         </Button>
                       </td>
                     </tr>
