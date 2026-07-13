@@ -6071,6 +6071,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                   dueDate: formattedDueDate,
                   isDueSoon: false,
                 }]);
+                setSentActivity(prev => [
+                  { id: `activity-onboarding-${Date.now()}`, icon: 'document' as IconName, user: 'You', action: 'Added New Vendor Onboarding workflow', time: 'Just now' },
+                  ...prev,
+                ]);
                 showToast('New workflow task added');
               }}
             />
