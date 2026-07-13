@@ -5403,12 +5403,103 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
   );
 }
 
+function UploadRequestScreen({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+
+  if (!open) return null;
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block', fontSize: 15, color: '#130032', marginBottom: 8,
+    fontFamily: 'var(--ink-font-family)',
+  };
+  const req = <span style={{ color: '#CC1B5B', marginLeft: 2 }}>*</span>;
+  const inputStyle: React.CSSProperties = {
+    width: '100%', height: 44, borderRadius: 4, border: '1px solid #8B8699',
+    padding: '0 12px', fontSize: 15, color: '#130032',
+    fontFamily: 'var(--ink-font-family)', boxSizing: 'border-box', background: 'white',
+  };
+  const sectionHeading: React.CSSProperties = {
+    fontSize: 22, fontWeight: 400, color: '#130032', margin: '0 0 24px',
+    fontFamily: 'var(--ink-font-family)',
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1200, background: 'white', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, height: 80, padding: '0 32px', borderBottom: '1px solid var(--ink-border-subtle, #E4E2E9)', flexShrink: 0 }}>
+        <button
+          onClick={onClose}
+          aria-label="Close upload request"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, border: 'none', background: 'transparent', cursor: 'pointer', color: '#130032', borderRadius: 4 }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+        </button>
+        <span style={{ fontSize: 18, fontWeight: 700, color: '#130032', fontFamily: 'var(--ink-font-family)' }}>Upload request</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ maxWidth: 780, padding: '48px 32px 64px', marginLeft: 268 }}>
+          {/* Details */}
+          <h2 style={sectionHeading}>Details</h2>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Title{req}</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} style={inputStyle} />
+          </div>
+
+          <div style={{ marginBottom: 8 }}>
+            <label style={labelStyle}>Description</label>
+            <textarea
+              value={description}
+              maxLength={1000}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{ ...inputStyle, height: 96, padding: '10px 12px', resize: 'vertical', lineHeight: 1.5 }}
+            />
+          </div>
+          <div style={{ fontSize: 13, color: '#6B6777', marginBottom: 24, fontFamily: 'var(--ink-font-family)' }}>
+            Characters remaining: {1000 - description.length}
+          </div>
+
+          <div style={{ marginBottom: 48 }}>
+            <label style={labelStyle}>Due date</label>
+            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={{ ...inputStyle, width: 224 }} />
+          </div>
+
+          {/* Assignee */}
+          <h2 style={sectionHeading}>Assignee</h2>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <label style={labelStyle}>First name{req}</label>
+              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <label style={labelStyle}>Last name{req}</label>
+              <input value={lastName} onChange={(e) => setLastName(e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <label style={labelStyle}>Email address{req}</label>
+              <input value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface AddMenuProps {
   onSignatureRequest?: () => void;
   onAddWireTransfer?: () => void;
+  onUploadRequest?: () => void;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest }: AddMenuProps) {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -5538,7 +5629,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer }: AddMenuProps) {
                     </svg>
                   }
                   label="Upload request"
-                  onClick={() => { setOpen(false); setTasksOpen(false); }}
+                  onClick={() => { setOpen(false); setTasksOpen(false); onUploadRequest?.(); }}
                 />
                 <MenuRow
                   icon={
@@ -5632,6 +5723,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [showPrepare, setShowPrepare] = useState(false);
+  const [showUploadRequest, setShowUploadRequest] = useState(false);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
@@ -5904,6 +5996,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
             <AddMenu 
               onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }} 
+              onUploadRequest={() => setShowUploadRequest(true)}
               onAddWireTransfer={() => {
                 const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
                 const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -6539,6 +6632,12 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
         onClose={() => setShowPrepare(false)}
         preselectedDocs={preparePreselectedDocs}
         onSend={handleSendForSignature}
+      />
+
+      {/* Upload Request full-screen overlay */}
+      <UploadRequestScreen
+        open={showUploadRequest}
+        onClose={() => setShowUploadRequest(false)}
       />
 
       {/* Party History Panel */}
