@@ -3661,6 +3661,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
   const [pinnedComments, setPinnedComments] = useState<{ id: string; y: number; text: string; mentions: string[]; time: string; anchor: string }[]>([]);
+  const [openCardId, setOpenCardId] = useState<string | null>(null);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -3802,7 +3803,9 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
       const time = new Date().toLocaleString('en-US', {
         month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
       });
-      setPinnedComments((prev) => [...prev, { id: 'pc-' + Date.now(), y: active.y, text, mentions, time, anchor: active.anchor }]);
+      const newId = 'pc-' + Date.now();
+      setPinnedComments((prev) => [...prev, { id: newId, y: active.y, text, mentions, time, anchor: active.anchor }]);
+      setOpenCardId(newId);
       setPosting(false);
       setComposer(null);
       setMentionQuery(null);
@@ -4023,7 +4026,8 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
         <div
           ref={scrollRef}
           onMouseUp={handleCanvasMouseUp}
-          onScroll={() => selMenu && setSelMenu(null)}
+          onMouseDown={() => { if (openCardId) setOpenCardId(null); }}
+          onScroll={() => { if (selMenu) setSelMenu(null); if (openCardId) setOpenCardId(null); }}
           style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '32px 24px', background: '#F4F3F6' }}
         >
           <div
@@ -4105,10 +4109,11 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
 
           <style>{commentComposerStyles}</style>
 
-          {/* Posted comment cards */}
-          {pinnedComments.map((c) => (
+          {/* Posted comment card (only the open one shows on the canvas; all remain in the Comments panel) */}
+          {pinnedComments.filter((c) => c.id === openCardId).map((c) => (
             <div
               key={c.id}
+              onMouseDown={(e) => e.stopPropagation()}
               style={{
                 position: 'absolute', right: 24, top: c.y, zIndex: 29, width: 340,
                 background: 'white', borderRadius: 12, padding: 16,
@@ -4365,11 +4370,21 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
                 </div>
               ) : visibleComments.map((c) => {
                 const selected = c.id === visibleComments[0].id;
+                const isPosted = pinnedComments.some((p) => p.id === c.id);
                 return (
-                  <div key={c.id} style={{
-                    position: 'relative', padding: '16px 12px', borderRadius: 12, marginBottom: 4,
-                    background: selected ? '#F5F3FB' : 'transparent',
-                  }}>
+                  <div
+                    key={c.id}
+                    onClick={isPosted ? () => {
+                      const pinned = pinnedComments.find((p) => p.id === c.id);
+                      setOpenCardId(c.id);
+                      if (pinned) scrollRef.current?.scrollTo({ top: Math.max(0, pinned.y - 40), behavior: 'smooth' });
+                    } : undefined}
+                    style={{
+                      position: 'relative', padding: '16px 12px', borderRadius: 12, marginBottom: 4,
+                      background: selected ? '#F5F3FB' : 'transparent',
+                      cursor: isPosted ? 'pointer' : 'default',
+                    }}
+                  >
                     {selected && (
                       <div style={{ position: 'absolute', top: 12, right: 8, display: 'flex', gap: 2, background: 'white', borderRadius: 8, border: '1px solid #EAE7F0', boxShadow: '0 2px 6px rgba(19,0,50,0.08)' }}>
                         <button style={iconBtn} aria-label="Resolve comment"><Icon name="check" size={16} /></button>
