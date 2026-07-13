@@ -5527,9 +5527,10 @@ interface AddMenuProps {
   onSignatureRequest?: () => void;
   onAddWireTransfer?: () => void;
   onUploadRequest?: () => void;
+  onNewVendorOnboarding?: () => void;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding }: AddMenuProps) {
   const [open, setOpen] = useState(false);
   const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -5686,10 +5687,9 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest }: Add
                       <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                     </svg>
                   }
-                  label="Custom Task"
-                  crown
-                  onClick={() => { setOpen(false); setTasksOpen(false); }}
-                />
+            label="New Vendor Onboarding"
+            onClick={() => { setOpen(false); setTasksOpen(false); onNewVendorOnboarding?.(); }}
+          />
               </div>
             )}
           </div>
@@ -6055,6 +6055,23 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                   dueDate: formattedDueDate,
                   isDueSoon: false,
                 }]);
+              }}
+              onNewVendorOnboarding={() => {
+                const dueDate = new Date();
+                dueDate.setDate(dueDate.getDate() + 7);
+                const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
+                setSentTasks(prev => [...prev, {
+                  id: `vendor-onboarding-${Date.now()}`,
+                  title: 'New Vendor Onboarding',
+                  type: 'Other' as const,
+                  team: '',
+                  assignee: CURRENT_USER.name,
+                  assigneeInitials: CURRENT_USER.initials,
+                  status: 'Not started',
+                  dueDate: formattedDueDate,
+                  isDueSoon: false,
+                }]);
+                showToast('New workflow task added');
               }}
             />
           </Inline>
