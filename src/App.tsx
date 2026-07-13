@@ -6470,14 +6470,17 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                                     kind="secondary"
                                     size="small"
                                     onClick={() => {
-                                      if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                      if (doc.id.startsWith('added-')) {
+                                        // Documents added via the Add → Document flow open in the local Doc Preview.
+                                        setPendingPreviewDoc(doc.name);
+                                      } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
                                         onEditNDA();
                                       } else {
                                         onPreviewDocument?.(doc.name);
                                       }
                                     }}
                                   >
-                                    {isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}
+                                    {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
                                   </Button>
                                   <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
                                 </Inline>
