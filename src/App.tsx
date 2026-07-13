@@ -4043,7 +4043,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
           <div style={{ width: 400, flexShrink: 0, borderLeft: '1px solid #E8E6ED', background: 'white', display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 20px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
-              <span style={{ fontSize: 18, fontWeight: 600, color: '#130032' }}>Collaborate</span>
+              <span style={{ fontSize: 18, fontWeight: 600, color: '#130032' }}>Comments</span>
               <button style={iconBtn} aria-label="Close comments" onClick={() => setShowComments(false)}><Icon name="close" size={18} /></button>
             </div>
 
