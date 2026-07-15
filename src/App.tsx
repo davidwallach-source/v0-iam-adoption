@@ -1176,7 +1176,7 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
   );
 }
 
-/* ═══════════════════════════════════════
+/* ═══════��═══════════════════════════════
    PurchaseRequestModal Component
    ═══════════════════════════════════════ */
 
@@ -4939,12 +4939,12 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
   
   const [documents, setDocuments] = useState<string[]>(preselectedDocs);
   const [recipients, setRecipients] = useState<Recipient[]>([
-    { id: '1', name: 'Marco Corcoran', email: 'marco.corcoran@dsxtr.com', role: 'signer' }
+    { id: '1', name: '', email: '', role: 'signer' }
   ]);
   const [signingOrder, setSigningOrder] = useState(false);
   const [customMessage, setCustomMessage] = useState(false);
-  const [emailSubject, setEmailSubject] = useState('Offer Letter');
-  const [emailMessage, setEmailMessage] = useState('Hello,\n\nPlease sign the included docs. Thank you and I look forward to you joining the team!\n\n- Alex');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
   const [reminderDays, setReminderDays] = useState('2');
 
   // Update documents when preselectedDocs changes
