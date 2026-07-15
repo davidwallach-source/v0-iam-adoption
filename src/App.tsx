@@ -3726,23 +3726,26 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
       aria-modal="true"
       aria-label="Send for approval"
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(19,0,50,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'white', display: 'flex', alignItems: 'stretch', justifyContent: 'center' }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: 520, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: 'white', borderRadius: 16, boxShadow: '0 24px 64px rgba(19,0,50,0.28)', overflow: 'hidden', fontFamily: 'var(--ink-font-family)' }}
+        style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'white', overflow: 'hidden', fontFamily: 'var(--ink-font-family)' }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '20px 24px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#130032' }}>Send for approval</div>
-            <div style={{ fontSize: 13, color: '#8A85A0', marginTop: 4, lineHeight: 1.4 }}>Choose who needs to approve this document before it moves forward.</div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 24px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
+          <div style={{ width: '100%', maxWidth: 640, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#130032' }}>Send for approval</div>
+              <div style={{ fontSize: 13, color: '#8A85A0', marginTop: 4, lineHeight: 1.4 }}>Choose who needs to approve this document before it moves forward.</div>
+            </div>
+            <button onClick={onClose} style={iconBtn} aria-label="Close"><Icon name="close" size={18} /></button>
           </div>
-          <button onClick={onClose} style={iconBtn} aria-label="Close"><Icon name="close" size={18} /></button>
         </div>
 
         {/* Body */}
-        <div style={{ padding: 24, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: '32px 24px' }}>
+          <div style={{ width: '100%', maxWidth: 640 }}>
           {/* Document chip */}
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>Document</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', marginBottom: 24 }}>
@@ -3818,10 +3821,12 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
               <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'white' }} />
             </button>
           </div>
+          </div>
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, padding: 16, borderTop: '1px solid #E8E6ED', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 24px', borderTop: '1px solid #E8E6ED', flexShrink: 0 }}>
+          <div style={{ width: '100%', maxWidth: 640, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
           <button
             onClick={onClose}
             style={{ height: 44, padding: '0 24px', borderRadius: 8, border: 'none', background: '#F1EFF4', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
@@ -3845,6 +3850,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
             )}
             Send for approval
           </button>
+          </div>
         </div>
       </div>
     </div>
