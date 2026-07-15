@@ -64,6 +64,7 @@ function FilePickerDialog({ open, onCancel, onOpen }: FilePickerDialogProps) {
     { name: 'Vendor Onboarding Packet', kind: 'PDF Document', size: '1.4 MB', modified: 'May 8, 2026' },
     { name: '2026 Budget Proposal', kind: 'Word Document', size: '96 KB', modified: 'May 2, 2026' },
     { name: 'Statement of Work Q3', kind: 'PDF Document', size: '311 KB', modified: 'Apr 28, 2026' },
+    { name: 'Non-Disclosure Agreement', kind: 'PDF Document', size: '204 KB', modified: 'Apr 24, 2026' },
   ];
   const [selectedFile, setSelectedFile] = useState(pickerFiles[0].name);
 
