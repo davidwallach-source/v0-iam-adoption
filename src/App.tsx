@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════����������������═══════════════════════════════ */
+   ═══════�����������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -7891,13 +7891,14 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       default:
         list = agreementsList;
     }
-    // Sort: In Progress first, then Completed
-    return [...list].sort((a, b) => {
-      if (a.status === b.status) return 0;
-      if (a.status === 'In Progress') return -1;
-      if (b.status === 'In Progress') return 1;
-      return 0;
-    });
+    // Sort by most recent first, using the item's date (D/M/YYYY) + time (HH:MM).
+    const toTimestamp = (a: Agreement) => {
+      const [d, m, y] = (a.date || '').split('/').map(Number);
+      if (!y || !m || !d) return 0;
+      const [hh, mm] = (a.time || '00:00').split(':').map(Number);
+      return new Date(y, m - 1, d, hh || 0, mm || 0).getTime();
+    };
+    return [...list].sort((a, b) => toTimestamp(b) - toTimestamp(a));
   }, [sidebarView, agreementsList]);
 
   // In this demo all listed agreements are owned by the current user.
