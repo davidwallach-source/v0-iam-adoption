@@ -1969,7 +1969,7 @@ const agreementColumns = [
 
 /* ═══════════════════════════════════════
    Documents Data — individual documents (Type = Documents view)
-   ═════════════════════════��═════════════ */
+   ═════════════════════════���═════════════ */
 
 interface ProcurementDocument {
   id: string;
@@ -3873,6 +3873,9 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
   const [approverQuery, setApproverQuery] = useState('');
   const [creatingApproval, setCreatingApproval] = useState(false);
   const [approvals, setApprovals] = useState<{ id: string; anchor: string; description: string; approvers: MentionPerson[]; status: string }[]>([]);
+  // Width of the scrollable document canvas, tracked so we can reserve a
+  // right-hand comment rail and dock comment cards 16px past the page edge.
+  const [containerWidth, setContainerWidth] = useState(0);
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -3885,6 +3888,19 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
   useEffect(() => {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Keep the measured canvas width in sync so the comment rail math is correct
+  // across viewport/panel resizes.
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const measure = () => setContainerWidth(el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
 
   if (!open) return null;
 
@@ -4133,6 +4149,25 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
   };
 
   const hasChat = messages.length > 0;
+
+  // ── Comment-rail layout ──
+  // When a comment card or composer is open we shift the page left and dock the
+  // card 16px past the page's right edge (Google-Docs style). Because a full
+  // 800px page + 16px gap + 340px card can exceed the canvas width, the page is
+  // narrowed just enough to guarantee the card fits without clipping.
+  const RAIL_W = 340;
+  const RAIL_GAP = 16;
+  const CANVAS_PAD = 24;
+  const commentOpen = !!(composer || openCardId);
+  const naturalDocW = (zoom / 100) * 800;
+  const maxDocW = containerWidth > 0 ? containerWidth - CANVAS_PAD * 2 - RAIL_GAP - RAIL_W : naturalDocW;
+  const docW = commentOpen && containerWidth > 0
+    ? Math.max(360, Math.min(naturalDocW, maxDocW))
+    : naturalDocW;
+  const docLeftOffset = commentOpen
+    ? CANVAS_PAD
+    : (containerWidth > 0 ? Math.max(CANVAS_PAD, (containerWidth - docW) / 2) : CANVAS_PAD);
+  const railLeft = docLeftOffset + docW + RAIL_GAP;
 
   return (
     <div style={{
@@ -4491,9 +4526,13 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
             suppressContentEditableWarning
             spellCheck={false}
             style={{
-              maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 4,
+              maxWidth: 800,
+              marginTop: 0, marginBottom: 0,
+              marginLeft: commentOpen ? 0 : 'auto', marginRight: 'auto',
+              background: 'white', borderRadius: 4,
               boxShadow: '0 1px 8px rgba(19,0,50,0.10)', padding: '64px 72px', outline: 'none',
-              width: `${(zoom / 100) * 800}px`, transformOrigin: 'top center',
+              width: `${docW}px`, transformOrigin: 'top center',
+              transition: 'width 0.18s ease, margin-left 0.18s ease',
             }}
           >
             <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center', color: '#130032', margin: '0 0 8px 0' }}>{doc.title}</h1>
@@ -4570,7 +4609,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
               key={c.id}
               onMouseDown={(e) => e.stopPropagation()}
               style={{
-                position: 'absolute', right: 24, top: c.y, zIndex: 29, width: 340,
+                position: 'absolute', left: railLeft, top: c.y, zIndex: 29, width: RAIL_W,
                 background: 'white', borderRadius: 12, padding: 16,
                 border: '1px solid #EAE7F0', boxShadow: '0 8px 24px rgba(19,0,50,0.12)',
                 fontFamily: 'var(--ink-font-family)',
