@@ -3650,10 +3650,207 @@ interface DocumentPreviewProps {
   open: boolean;
   onClose: () => void;
   onSave?: () => void;
+  onSendForApproval?: (documentName: string) => void;
   documentName: string;
 }
 
-function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPreviewProps) {
+interface SendForApprovalModalProps {
+  open: boolean;
+  documentName: string;
+  onClose: () => void;
+  onComplete: (task: DealTask) => void;
+}
+
+function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendForApprovalModalProps) {
+  const [approvers, setApprovers] = useState<MentionPerson[]>([]);
+  const [query, setQuery] = useState('');
+  const [message, setMessage] = useState('');
+  const [requireAll, setRequireAll] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setApprovers([]);
+      setQuery('');
+      setMessage('');
+      setRequireAll(false);
+      setSending(false);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const iconBtn: CSSProperties = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 32, height: 32, borderRadius: 6, border: 'none',
+    background: 'transparent', cursor: 'pointer', color: '#130032',
+  };
+
+  const matches = query.trim()
+    ? MENTION_PEOPLE.filter((p) =>
+        !approvers.some((a) => a.email === p.email) &&
+        (p.name.toLowerCase().includes(query.toLowerCase()) || p.email.toLowerCase().includes(query.toLowerCase()))
+      ).slice(0, 5)
+    : [];
+
+  const addApprover = (p: MentionPerson) => {
+    setApprovers((prev) => prev.some((a) => a.email === p.email) ? prev : [...prev, p]);
+    setQuery('');
+  };
+  const removeApprover = (email: string) => setApprovers((prev) => prev.filter((a) => a.email !== email));
+
+  const handleSend = () => {
+    if (approvers.length === 0 || sending) return;
+    setSending(true);
+    const first = approvers[0];
+    const task: DealTask = {
+      id: 'approval-' + Date.now(),
+      title: `Approve ${documentName}`,
+      type: 'Approval',
+      team: '',
+      assignee: first ? first.name : 'Approvers',
+      assigneeInitials: first ? initialsOf(first.name) : 'AP',
+      status: 'In progress',
+      dueDate: '--',
+    };
+    // brief spinner for realism, then complete
+    setTimeout(() => {
+      onComplete(task);
+    }, 450);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Send for approval"
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(19,0,50,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{ width: '100%', maxWidth: 520, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: 'white', borderRadius: 16, boxShadow: '0 24px 64px rgba(19,0,50,0.28)', overflow: 'hidden', fontFamily: 'var(--ink-font-family)' }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, padding: '20px 24px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#130032' }}>Send for approval</div>
+            <div style={{ fontSize: 13, color: '#8A85A0', marginTop: 4, lineHeight: 1.4 }}>Choose who needs to approve this document before it moves forward.</div>
+          </div>
+          <button onClick={onClose} style={iconBtn} aria-label="Close"><Icon name="close" size={18} /></button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: 24, overflowY: 'auto' }}>
+          {/* Document chip */}
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>Document</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', marginBottom: 24 }}>
+            <Icon name="document" size={18} color="var(--ink-cobalt-80)" />
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{documentName}</span>
+          </div>
+
+          {/* Approvers */}
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>
+            Add approvers <span style={{ color: '#C0362C' }}>*</span>
+          </label>
+          <div style={{ position: 'relative', marginBottom: 8 }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Type name or email"
+              style={{ width: '100%', height: 48, borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '0 14px', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: '#130032', boxSizing: 'border-box' }}
+            />
+            {matches.length > 0 && (
+              <div style={{ position: 'absolute', top: 52, left: 0, right: 0, zIndex: 5, background: 'white', borderRadius: 12, border: '1px solid #EAE7F0', boxShadow: '0 12px 28px rgba(19,0,50,0.16)', padding: '6px 4px' }}>
+                {matches.map((p) => (
+                  <button
+                    key={p.email}
+                    onClick={() => addApprover(p)}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', border: 'none', background: 'transparent', cursor: 'pointer', padding: '8px 14px', borderRadius: 8, fontFamily: 'var(--ink-font-family)' }}
+                  >
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{p.name}</div>
+                    <div style={{ fontSize: 13, color: '#8A85A0' }}>{p.email}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {approvers.map((p) => {
+            const col = avatarColor(p.name);
+            return (
+              <div key={p.email} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+                <div style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', background: col.bg, color: col.fg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600 }}>{initialsOf(p.name)}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{p.name}</div>
+                  <div style={{ fontSize: 13, color: '#8A85A0' }}>{p.email}</div>
+                </div>
+                <button style={iconBtn} aria-label={`Remove ${p.name}`} onClick={() => removeApprover(p.email)}><Icon name="close" size={16} /></button>
+              </div>
+            );
+          })}
+
+          {/* Message */}
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', margin: '16px 0 8px' }}>Message (optional)</label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Add a note for your approvers"
+            style={{ width: '100%', minHeight: 80, resize: 'vertical', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '12px 14px', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--ink-font-family)', color: '#130032', marginBottom: 24, boxSizing: 'border-box' }}
+          />
+
+          {/* Require all toggle */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>Require all to approve</div>
+              <div style={{ fontSize: 13, color: '#8A85A0', lineHeight: 1.4, marginTop: 2, maxWidth: 320 }}>When on, every approver must approve before the document is cleared.</div>
+            </div>
+            <button
+              role="switch"
+              aria-checked={requireAll}
+              aria-label="Require all to approve"
+              onClick={() => setRequireAll((v) => !v)}
+              style={{ flexShrink: 0, width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', padding: 2, background: requireAll ? 'var(--ink-cobalt-80, #4C00FF)' : '#C7C3D0', display: 'flex', justifyContent: requireAll ? 'flex-end' : 'flex-start', transition: 'background 0.15s' }}
+            >
+              <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'white' }} />
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, padding: 16, borderTop: '1px solid #E8E6ED', flexShrink: 0 }}>
+          <button
+            onClick={onClose}
+            style={{ height: 44, padding: '0 24px', borderRadius: 8, border: 'none', background: '#F1EFF4', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+          >Cancel</button>
+          <button
+            onClick={handleSend}
+            disabled={approvers.length === 0 || sending}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 24px', borderRadius: 8, border: 'none',
+              background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white',
+              cursor: (approvers.length === 0 || sending) ? 'default' : 'pointer',
+              opacity: (approvers.length === 0 && !sending) ? 0.5 : 1,
+              fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)',
+            }}
+          >
+            {sending && (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: 'inkSpin 0.7s linear infinite' }}>
+                <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
+                <path d="M8 2 A6 6 0 0 1 14 8" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            )}
+            Send for approval
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DocumentPreview({ open, onClose, onSave, onSendForApproval, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
@@ -3936,7 +4133,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
         borderBottom: '1px solid #E8E6ED', flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <button onClick={onClose} style={iconBtn} aria-label="Back"><Icon name="arrow-left" size={20} /></button>
+          <button onClick={() => (onSave ?? onClose)()} style={iconBtn} aria-label="Back"><Icon name="arrow-left" size={20} /></button>
           <Icon name="document" size={18} color="var(--ink-cobalt-80)" />
           <span style={{ fontSize: 15, fontWeight: 600, color: '#130032', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.fileName}</span>
           <button style={{ ...toolbarBtn, height: 26 }}>version 4.0 <Icon name="chevron-down" size={14} /></button>
@@ -3954,7 +4151,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-          <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
+          <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(doc.fileName) : (onSave ?? onClose)())}>Send for Approval</Button>
           <Button kind="primary" size="small">Send for Signature</Button>
         </div>
       </div>
@@ -4685,6 +4882,7 @@ interface WorkspaceViewProps {
   ndaRecipientName?: string;
   uploadedDocAgreement?: { documents: string[], recipientName: string, isDraft?: boolean } | null;
   onPreviewDocument?: (documentName: string) => void;
+  injectedTasks?: DealTask[];
 }
 
 /* ═══════════════════════════════════════
@@ -5755,7 +5953,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -5770,6 +5968,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
+  const [approvalModalDoc, setApprovalModalDoc] = useState<string | null>(null);
   const [sentActivity, setSentActivity] = useState<{ id: string; icon: IconName; user: string; action: string; time: string }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -5881,6 +6080,8 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       : workspaceData.activity),
   ];
   const currentTasks = useMemo(() => {
+    const injected = injectedTasks ?? [];
+    const base = (() => {
     // For NDA agreements sent for signature, create Sign NDA task
     if (isNDADraft && ndaSentForSignature) {
       const ndaRecipientInitials = ndaRecipientName 
@@ -5926,7 +6127,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       return [signTask, ...[...sentTasks].reverse()];
     }
     return [...[...sentTasks].reverse(), ...workspaceData.tasks];
-  }, [workspaceData.tasks, sentTasks, isNDADraft, ndaSentForSignature, isUploadedDocAgreement, uploadedDocAgreement]);
+    })();
+    return [...injected, ...base];
+  }, [workspaceData.tasks, sentTasks, isNDADraft, ndaSentForSignature, isUploadedDocAgreement, uploadedDocAgreement, injectedTasks]);
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
@@ -6746,6 +6949,18 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
           }
           setPendingPreviewDoc(null);
         }}
+        onSendForApproval={(name) => { setPendingPreviewDoc(null); setApprovalModalDoc(name); }}
+      />
+
+      <SendForApprovalModal
+        open={approvalModalDoc !== null}
+        documentName={approvalModalDoc ?? ''}
+        onClose={() => setApprovalModalDoc(null)}
+        onComplete={(task) => {
+          setSentTasks(prev => [...prev, task]);
+          setApprovalModalDoc(null);
+          showToast('Sent for approval');
+        }}
       />
 
       {/* Upload Request full-screen overlay */}
@@ -7446,6 +7661,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // Tracks where the preview was opened from: 'agreement' = existing Agreement Space
   // (Save returns there), 'new' = a brand-new document (Save creates a new space).
   const [previewOrigin, setPreviewOrigin] = useState<'agreement' | 'new'>('agreement');
+  // Approval flow triggered from a document preview's "Send for Approval" action.
+  const [pendingApprovalDoc, setPendingApprovalDoc] = useState<string | null>(null);
+  const [workspaceApprovalTasks, setWorkspaceApprovalTasks] = useState<DealTask[]>([]);
   
   /* ���� Sync hash ↔ state ── */
   useEffect(() => {
@@ -8116,6 +8334,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         onClose={() => {
           setShowDealWorkspace(false);
           setSelectedAgreement(null);
+          setWorkspaceApprovalTasks([]);
         }}
         onEditNDA={() => {
           setShowNDAModal(true);
@@ -8125,6 +8344,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         ndaRecipientName={ndaRecipientName}
         uploadedDocAgreement={uploadedDocAgreement}
         onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
+        injectedTasks={workspaceApprovalTasks}
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
@@ -8165,6 +8385,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         // For 'agreement' origin the space is already mounted behind the preview,
         // so closing returns the user there.
         setPreviewDocName(null);
+      }}
+      onSendForApproval={(name) => { setPreviewDocName(null); setPendingApprovalDoc(name); }}
+    />
+
+    <SendForApprovalModal
+      open={pendingApprovalDoc !== null}
+      documentName={pendingApprovalDoc ?? ''}
+      onClose={() => setPendingApprovalDoc(null)}
+      onComplete={(task) => {
+        setWorkspaceApprovalTasks(prev => [...prev, task]);
+        setPendingApprovalDoc(null);
       }}
     />
 
