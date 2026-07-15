@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════���������������═══════════════════════════════ */
+   ═══════����������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -8592,8 +8592,34 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       open={showAgreementRequestModal}
       onClose={() => setShowAgreementRequestModal(false)}
       onSubmit={(data) => {
-        console.log('Agreement Request submitted:', data);
+        const requestName = data.category && data.category !== '-- None --'
+          ? `${data.requestType} - ${data.category}`
+          : (data.requestType || 'Agreement Request');
+        const requestAgreement: Agreement = {
+          id: `request-${Date.now()}`,
+          entityKind: 'space',
+          name: requestName,
+          party: '—',
+          partyLogo: (data.category || data.requestType || 'RQ').substring(0, 2).toUpperCase(),
+          status: 'In Progress',
+          statusIcon: 'clock',
+          statusKind: 'info',
+          statusSub: 'In Progress',
+          dealValue: '—',
+          agreementType: data.requestType || 'Request',
+          termLength: '—',
+          closeDate: '—',
+          date: new Date().toLocaleDateString('en-GB'),
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          action: 'Edit',
+          documentsCount: 1,
+          tasksCount: 1,
+          tasksPending: 1,
+        };
         setShowAgreementRequestModal(false);
+        setSelectedAgreement(requestAgreement);
+        setShowDealWorkspace(true);
+        addNewAgreement(requestAgreement);
       }}
     />
     <PrepareScreen
