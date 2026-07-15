@@ -1989,7 +1989,6 @@ const DOCUMENTS_DATA: ProcurementDocument[] = [
   { id: 'd7', name: 'Purchase Agreement - Wonka.pdf', parties: ['Wonka Ingredients', 'Acme Corporation'], type: 'PO', effective: 'Apr 15, 2024', expires: 'Apr 15, 2025' },
   { id: 'd8', name: 'Hooli Cloud Services - MSA.pdf', parties: ['Hooli, Inc.', 'Acme Corporation'], type: 'MSA', effective: 'Jan 10, 2023', expires: 'Jan 10, 2026' },
   { id: 'd9', name: 'Umbrella Logistics - NDA.pdf', parties: ['Umbrella Logistics', 'Acme Corporation'], type: 'NDA', effective: 'Feb 8, 2024', expires: 'Feb 8, 2026' },
-  { id: 'd10', name: 'Non-Disclosure Agreement.docx', parties: ['Acme Corporation'], type: 'NDA', effective: 'Jul 15, 2026', expires: 'Jul 15, 2028' },
 ];
 
 const documentColumns: any[] = [
@@ -4819,7 +4818,7 @@ function DocumentUpload({ open, onClose, onContinue }: DocumentUploadProps) {
                   color: 'white',
                   fontFamily: 'var(--ink-font-family)',
                 }}
-                onClick={() => setDocuments([...documents, 'New Vendor Contract'])}
+                onClick={() => setDocuments([...documents, 'Non-Disclosure Agreement'])}
                 >
                   Upload
                 </button>
