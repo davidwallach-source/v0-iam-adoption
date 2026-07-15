@@ -1642,6 +1642,10 @@ interface Agreement {
   documentsCount?: number;
   tasksCount?: number;
   tasksPending?: number;
+  // Explicit classification for the Type filter. When set, it overrides the
+  // documentsCount heuristic. Workspaces created via "Start New" are always
+  // Agreement Spaces so they appear under the default "Agreement Spaces" view.
+  entityKind?: 'space' | 'document';
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
@@ -7928,8 +7932,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       if (q && !(a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q))) return false;
       if (filterParty.size > 0 && !filterParty.has(a.party)) return false;
       if (filterType.size > 0) {
-        // Multi-document agreements are "Agreement Spaces"; single docs are "Documents".
-        const kind = (a.documentsCount ?? 1) > 1 ? 'Agreement Spaces' : 'Documents';
+        // Prefer the explicit entityKind flag; fall back to the documentsCount
+        // heuristic (multi-document agreements are "Agreement Spaces").
+        const kind = a.entityKind
+          ? (a.entityKind === 'space' ? 'Agreement Spaces' : 'Documents')
+          : ((a.documentsCount ?? 1) > 1 ? 'Agreement Spaces' : 'Documents');
         if (!filterType.has(kind)) return false;
       }
       if (filterStatus.size > 0 && !filterStatus.has(a.status)) return false;
@@ -8423,6 +8430,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setUploadedDocAgreement({ documents: [docName], recipientName: '', isDraft: true });
           const newAgreement: Agreement = {
             id: 'uploaded-doc',
+            entityKind: 'space',
             name: docName,
             party: '—',
             partyLogo: docName.substring(0, 2).toUpperCase(),
@@ -8479,6 +8487,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setShowPurchaseModal(false);
         const purchaseAgreement: Agreement = {
           id: `purchase-${Date.now()}`,
+          entityKind: 'space',
           name: data.title || 'Purchase Agreement (Draft)',
           party: data.vendor || 'Vendor',
           partyLogo: data.vendor ? data.vendor.substring(0, 2).toUpperCase() : 'PA',
@@ -8517,6 +8526,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         // Create a draft NDA agreement object
         const ndaAgreement: Agreement = {
           id: ndaId,
+          entityKind: 'space',
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -8552,6 +8562,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         
         const ndaAgreement: Agreement = {
           id: ndaId,
+          entityKind: 'space',
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -8604,6 +8615,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setNdaSentForSignature(true);
           const sentNdaAgreement: Agreement = {
             id: 'nda-draft',
+            entityKind: 'space',
             name: savedNDAData?.receivingParty ? `NDA - ${savedNDAData.receivingParty}` : 'Non-Disclosure Agreement',
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
@@ -8635,6 +8647,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           // Create a new agreement for the uploaded document
           const uploadedAgreement: Agreement = {
             id: 'uploaded-doc',
+            entityKind: 'space',
             name: docName,
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
