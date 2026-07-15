@@ -5920,9 +5920,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
     if (isUploadedDocAgreement && uploadedDocAgreement?.isDraft) {
       return [...sentTasks].reverse();
     }
-    // For uploaded document agreements (e.g., Lease Agreement from Signature Request flow), show only Sign task
+    // For uploaded document agreements (e.g., NDA from Signature Request flow), show only Sign task
     if (isUploadedDocAgreement && uploadedDocAgreement) {
-      const docName = uploadedDocAgreement.documents[0] || 'Lease Agreement';
+      const docName = uploadedDocAgreement.documents[0] || 'Non-Disclosure Agreement';
       const taskName = docName.toLowerCase().includes('lease') ? 'Sign Lease' : `Sign ${docName}`;
       const recipientInitials = uploadedDocAgreement.recipientName 
         ? uploadedDocAgreement.recipientName.split(' ').map(n => n[0]).join('').toUpperCase()
@@ -8348,7 +8348,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setShowDealWorkspace(true);
         } else {
           // Uploaded document flow - create a new agreement space
-          const docName = documents && documents.length > 0 ? documents[0] : 'Lease Agreement';
+          const docName = documents && documents.length > 0 ? documents[0] : 'Non-Disclosure Agreement';
           
           // Store the uploaded document info
           setUploadedDocAgreement({ documents: documents || [], recipientName });
