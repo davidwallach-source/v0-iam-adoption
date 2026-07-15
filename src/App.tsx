@@ -3385,6 +3385,7 @@ const t = (text: string): DocRun => ({ text });
 const DOC_LIBRARY: Record<string, DocData> = {
   msa: {
     fileName: 'New Vendor MSA.docx',
+    hideClauseStatus: true,
     title: 'MASTER SERVICES AGREEMENT',
     parties: 'Acme Corporation & Globex Industries',
     effectiveDate: 'January 15, 2026',
@@ -3394,28 +3395,14 @@ const DOC_LIBRARY: Record<string, DocData> = {
       { num: '1', heading: 'Definitions', status: 'approved', runs: [
         t('This Master Services Agreement ("Agreement") is entered into as of January 15, 2026 ("Effective Date") by and between Acme Corporation, a Delaware corporation ("Buyer"), and Globex Industries, a California corporation ("Supplier"). "Services" shall mean the cloud infrastructure, software development, and technical consulting services described in Exhibit A. "Confidential Information" means any information disclosed by either party that is marked as confidential or would reasonably be considered confidential.'),
       ]},
-      { num: '2', heading: 'Scope of Services', status: 'redlined', runs: [
-        t('Supplier shall provide the '),
-        { text: 'Services as described in Exhibit A', kind: 'mark' },
-        t(', attached hereto and incorporated by reference. The Services shall include: (a) Cloud infrastructure provisioning and management; (b) Custom software development per specifications in Exhibit B; (c) Technical consulting and advisory services; (d) 24/7 monitoring and incident response. Supplier shall assign '),
-        { text: 'dedicated resources', kind: 'del' },
-        { text: 'dedicated full-time resources with minimum 3 years experience', kind: 'ins' },
-        t(' to perform the Services and '),
-        { text: 'shall not subcontract any portion', kind: 'del' },
-        { text: 'shall not subcontract any material portion exceeding 20%', kind: 'ins' },
-        t(' without prior written consent of Buyer.'),
+      { num: '2', heading: 'Scope of Services', status: 'approved', runs: [
+        t('Supplier shall provide the Services as described in Exhibit A, attached hereto and incorporated by reference. The Services shall include: (a) Cloud infrastructure provisioning and management; (b) Custom software development per specifications in Exhibit B; (c) Technical consulting and advisory services; (d) 24/7 monitoring and incident response. Supplier shall assign dedicated full-time resources with minimum 3 years experience to perform the Services and shall not subcontract any material portion exceeding 20% without prior written consent of Buyer.'),
       ]},
       { num: '3', heading: 'Term and Termination', status: 'pending', runs: [
         t('This Agreement shall commence on the Effective Date and continue for an initial term of three (3) years, automatically renewing for successive one-year terms unless either party provides ninety (90) days written notice of non-renewal. Either party may terminate this Agreement for material breach upon thirty (30) days written notice if such breach remains uncured. Upon termination, Supplier shall promptly return or destroy all Buyer materials and provide reasonable transition assistance.'),
       ]},
-      { num: '4', heading: 'Compensation and Payment', status: 'redlined', runs: [
-        t('Buyer shall pay Supplier the fees set forth in Exhibit C. Total committed spend for the initial term shall not exceed '),
-        { text: '$1,200,000', kind: 'del' },
-        { text: '$960,000', kind: 'ins' },
-        t(' USD. Undisputed invoices are payable '),
-        { text: 'net thirty (30) days', kind: 'del' },
-        { text: 'net forty-five (45) days', kind: 'ins' },
-        t(' from receipt. Late payments accrue interest at one and one-half percent (1.5%) per month or the maximum rate permitted by law. Pricing shall remain firm for the initial term.'),
+      { num: '4', heading: 'Compensation and Payment', status: 'approved', runs: [
+        t('Buyer shall pay Supplier the fees set forth in Exhibit C. Total committed spend for the initial term shall not exceed $960,000 USD. Undisputed invoices are payable net forty-five (45) days from receipt. Late payments accrue interest at one and one-half percent (1.5%) per month or the maximum rate permitted by law. Pricing shall remain firm for the initial term.'),
       ]},
       { num: '5', heading: 'Intellectual Property', status: 'approved', runs: [
         t('Each party retains all right, title, and interest in its pre-existing intellectual property. Deliverables created specifically for Buyer under a Statement of Work shall be deemed "work made for hire" and assigned to Buyer upon full payment. Supplier retains ownership of its underlying tools, libraries, and know-how, and grants Buyer a perpetual, non-exclusive license to use such materials as embedded in the Deliverables.'),
@@ -3423,11 +3410,8 @@ const DOC_LIBRARY: Record<string, DocData> = {
       { num: '6', heading: 'Confidentiality', status: 'approved', runs: [
         t("Each party agrees to hold the other party's Confidential Information in strict confidence and not to disclose it to any third party without prior written consent. The receiving party shall protect Confidential Information using the same degree of care it uses to protect its own confidential information, but no less than reasonable care. This obligation shall survive termination of this Agreement for a period of five (5) years."),
       ]},
-      { num: '7', heading: 'Limitation of Liability', status: 'redlined', runs: [
-        t('EXCEPT FOR BREACHES OF CONFIDENTIALITY OR INTELLECTUAL PROPERTY OBLIGATIONS, NEITHER PARTY SHALL BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES. THE TOTAL AGGREGATE LIABILITY OF EITHER PARTY SHALL NOT EXCEED '),
-        { text: 'THE TOTAL FEES PAID', kind: 'del' },
-        { text: 'TWO TIMES (2X) THE TOTAL FEES PAID', kind: 'ins' },
-        t(' OR PAYABLE UNDER THIS AGREEMENT DURING THE TWELVE (12) MONTH PERIOD PRECEDING THE CLAIM. This limitation shall apply regardless of the form of action or theory of liability.'),
+      { num: '7', heading: 'Limitation of Liability', status: 'approved', runs: [
+        t('EXCEPT FOR BREACHES OF CONFIDENTIALITY OR INTELLECTUAL PROPERTY OBLIGATIONS, NEITHER PARTY SHALL BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES. THE TOTAL AGGREGATE LIABILITY OF EITHER PARTY SHALL NOT EXCEED TWO TIMES (2X) THE TOTAL FEES PAID OR PAYABLE UNDER THIS AGREEMENT DURING THE TWELVE (12) MONTH PERIOD PRECEDING THE CLAIM. This limitation shall apply regardless of the form of action or theory of liability.'),
       ]},
       { num: '8', heading: 'Indemnification', status: 'pending', runs: [
         t("Supplier shall indemnify, defend, and hold harmless Buyer from any third-party claims arising from: (a) Supplier's negligence or willful misconduct; (b) infringement of intellectual property rights; (c) breach of confidentiality obligations; or (d) violation of applicable laws. Buyer shall indemnify Supplier from claims arising from Buyer's use of the Services in violation of this Agreement. The indemnified party shall provide prompt notice and reasonable cooperation."),
@@ -3494,6 +3478,7 @@ const DOC_LIBRARY: Record<string, DocData> = {
   },
   dpa: {
     fileName: 'Data Processing Agreement.docx',
+    hideClauseStatus: true,
     title: 'DATA PROCESSING AGREEMENT',
     parties: 'Acme Corporation & Globex Industries',
     effectiveDate: 'January 15, 2026',
@@ -3506,11 +3491,8 @@ const DOC_LIBRARY: Record<string, DocData> = {
       { num: '2', heading: 'Security Measures', status: 'approved', runs: [
         t('Data Processor shall implement appropriate technical and organizational measures to ensure a level of security appropriate to the risk, including: encryption of Personal Data, regular security assessments, access controls, and employee training on data protection.'),
       ]},
-      { num: '3', heading: 'Sub-processors', status: 'redlined', runs: [
-        t('Data Processor shall not engage any sub-processor without prior '),
-        { text: 'written authorization', kind: 'del' },
-        { text: 'specific written authorization', kind: 'ins' },
-        t(' from Data Controller. Data Processor shall maintain a list of approved sub-processors and notify Data Controller of any intended changes.'),
+      { num: '3', heading: 'Sub-processors', status: 'approved', runs: [
+        t('Data Processor shall not engage any sub-processor without prior specific written authorization from Data Controller. Data Processor shall maintain a list of approved sub-processors and notify Data Controller of any intended changes.'),
       ]},
       { num: '4', heading: 'Data Subject Rights', status: 'approved', runs: [
         t('Data Processor shall assist Data Controller in responding to requests from Data Subjects exercising their rights under applicable data protection law, including rights of access, rectification, erasure, and data portability.'),
@@ -3522,6 +3504,7 @@ const DOC_LIBRARY: Record<string, DocData> = {
   },
   addendum: {
     fileName: 'Security & Compliance Addendum.docx',
+    hideClauseStatus: true,
     title: 'SECURITY & COMPLIANCE ADDENDUM',
     parties: 'Acme Corporation & Globex Industries',
     effectiveDate: 'January 15, 2026',
@@ -3534,11 +3517,8 @@ const DOC_LIBRARY: Record<string, DocData> = {
       { num: '2', heading: 'Data Privacy', status: 'approved', runs: [
         t("Supplier shall comply with all applicable data protection laws including GDPR, CCPA, and any other relevant privacy regulations. Personal data shall only be processed for the purposes specified in the Agreement and in accordance with Buyer's documented instructions. Data subjects shall have the right to access, rectify, and delete their personal data upon request."),
       ]},
-      { num: '3', heading: 'Incident Response', status: 'redlined', runs: [
-        t('Supplier shall maintain a comprehensive incident response plan and notify Buyer within '),
-        { text: '24 hours', kind: 'del' },
-        { text: '12 hours', kind: 'ins' },
-        t(' of discovering any security breach or unauthorized access to Buyer data. Supplier shall cooperate fully with any investigation and implement appropriate remediation measures at Supplier\u2019s expense.'),
+      { num: '3', heading: 'Incident Response', status: 'approved', runs: [
+        t('Supplier shall maintain a comprehensive incident response plan and notify Buyer within 12 hours of discovering any security breach or unauthorized access to Buyer data. Supplier shall cooperate fully with any investigation and implement appropriate remediation measures at Supplier\u2019s expense.'),
       ]},
       { num: '4', heading: 'Compliance & Audit Rights', status: 'pending', runs: [
         t('Buyer shall have the right to audit Supplier\u2019s security practices and compliance with this Addendum upon reasonable notice. Supplier shall maintain detailed logs of all access to Buyer data and retain such logs for a minimum of two (2) years.'),
@@ -3587,22 +3567,7 @@ function withMentions(text: string): React.ReactNode {
   );
 }
 
-const COLLAB_COMMENTS: CollabComment[] = [
-  { id: 'c1', initials: 'SC', name: 'Sarah Chen', time: '2h ago', clause: 'Limitation of Liability',
-    body: withMentions('The liability cap in section 7 needs to be increased to match total contract value per our standard playbook. @legal please review the proposed language.') },
-  { id: 'c2', initials: 'JO', name: 'James Okafor', time: '5h ago', clause: 'Compensation and Payment',
-    body: withMentions('Updated payment terms from Net 45 to Net 30 per finance team requirements. @finance can you confirm this aligns with our cash flow targets?') },
-  { id: 'c3', initials: 'EN', name: 'Emily Nakamura', time: '1d ago', clause: 'Term and Termination',
-    body: withMentions('Globex requests extending the initial term to 48 months. We can accept 36 months if renewal pricing is more favorable.') },
-  { id: 'c4', initials: 'DP', name: 'David Park', time: '1d ago', clause: 'Scope of Services',
-    body: withMentions('Scope language looks good. @product please confirm the service descriptions in Exhibit A are accurate.') },
-  { id: 'c5', initials: 'AR', name: 'Alex Rivera', time: '3d ago', clause: 'Data Protection',
-    body: withMentions('@security Need sign-off on the technical and organizational measures referenced in section 9 before we can approve.') },
-  { id: 'c6', initials: 'EN', name: 'Emily Nakamura', time: '3d ago', clause: 'Indemnification', redline: true,
-    body: withMentions('Proposed redline narrows the indemnity to third-party IP claims only. @legal does this match our fallback position?') },
-  { id: 'c7', initials: 'SC', name: 'Sarah Chen', time: '4d ago', clause: 'Governing Law', resolved: true,
-    body: withMentions('Confirmed governing law as State of Delaware. Thanks @legal for the quick turnaround.') },
-];
+  const COLLAB_COMMENTS: CollabComment[] = [];
 
 // The signed-in user who authors new comments.
 const CURRENT_USER = { name: 'Leona Legal', initials: 'LL' };
@@ -4075,7 +4040,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
                     background: activeSection === c.num ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent',
                     fontFamily: 'var(--ink-font-family)', marginBottom: 2,
                   }}>
-                    {statusDot(c.status)}
+                    {!doc.hideClauseStatus && statusDot(c.status)}
                     <span style={{ fontSize: 13, color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.num}. {c.heading}</span>
                   </button>
                 ))}
@@ -4266,7 +4231,15 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '4px 20px 20px' }}>
               {approvals.length === 0 ? (
-                <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 14, color: '#8A85A0' }}>No approvals yet</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '48px 24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: '50%', background: '#F1EFF4', marginBottom: 16 }}>
+                    <Icon name="shield" size={22} color="#8A85A0" />
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#130032', marginBottom: 6 }}>No approvals yet</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.5, color: '#8A85A0', maxWidth: 260 }}>
+                    Route this document for review to start tracking approvals here.
+                  </div>
+                </div>
               ) : approvals.map((a) => {
                 const stack = [CURRENT_USER.name, ...a.approvers.map((p) => p.name)];
                 return (
@@ -4637,8 +4610,18 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
             {/* Comment list */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '4px 16px 20px' }}>
               {visibleComments.length === 0 ? (
-                <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 14, color: '#8A85A0' }}>
-                  No {commentsTab} comments
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '48px 24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: '50%', background: '#F1EFF4', marginBottom: 16 }}>
+                    <Icon name="comment" size={22} color="#8A85A0" />
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#130032', marginBottom: 6 }}>
+                    {commentsTab === 'resolved' ? 'No resolved comments' : 'No comments yet'}
+                  </div>
+                  <div style={{ fontSize: 13, lineHeight: 1.5, color: '#8A85A0', maxWidth: 260 }}>
+                    {commentsTab === 'resolved'
+                      ? 'Comments you resolve will be collected here for reference.'
+                      : 'Start the conversation by adding a comment or proposing a redline on any clause.'}
+                  </div>
                 </div>
               ) : visibleComments.map((c) => {
                 const selected = c.id === visibleComments[0].id;
