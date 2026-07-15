@@ -1969,7 +1969,7 @@ const agreementColumns = [
 
 /* ═══════════════════════════════════════
    Documents Data — individual documents (Type = Documents view)
-   ═══════════════════════════════════════ */
+   ═════════════════════════��═════════════ */
 
 interface ProcurementDocument {
   id: string;
@@ -3234,7 +3234,7 @@ function Footer() {
 
 const VALID_TABS: TabId[] = ['home', 'agreements', 'templates', 'insights', 'admin'];
 
-/* ═══════════════════════════════════════
+/* ════════════════════════════��══════════
    Agreement Detail View (Navigator Viewer)
    Full-screen dialog with PDF viewer + detail sidebar
    ���════════════════════��═════════════════ */
@@ -4620,7 +4620,7 @@ function DocumentPreview({ open, onClose, onSave, documentName }: DocumentPrevie
                   <div style={{ fontSize: 13, lineHeight: 1.5, color: '#8A85A0', maxWidth: 260 }}>
                     {commentsTab === 'resolved'
                       ? 'Comments you resolve will be collected here for reference.'
-                      : 'Start the conversation by adding a comment or proposing a redline on any clause.'}
+                      : 'Start the conversation by adding a comment or approval to any clause.'}
                   </div>
                 </div>
               ) : visibleComments.map((c) => {
