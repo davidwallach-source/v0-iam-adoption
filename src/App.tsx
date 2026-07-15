@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════������������������═══════════════════════════════ */
+   ═══════�������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -3894,6 +3894,12 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
   const composerRef = useRef<HTMLDivElement | null>(null);
 
   const doc = useMemo(() => resolveDoc(documentName), [documentName]);
+  // The header filename and the in-document heading must reflect the SAME
+  // document the user opened. Derive both from the incoming documentName so
+  // they always match (previously the header showed the library's canned
+  // fileName while the body showed a generic library title).
+  const baseDocName = (documentName || '').replace(/\.docx$/i, '').trim() || 'Untitled Document';
+  const headerFileName = `${baseDocName}.docx`;
 
   useEffect(() => {
     if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -4196,7 +4202,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
           <button onClick={() => (onSave ?? onClose)()} style={iconBtn} aria-label="Back"><Icon name="arrow-left" size={20} /></button>
           <Icon name="document" size={18} color="var(--ink-cobalt-80)" />
-          <span style={{ fontSize: 15, fontWeight: 600, color: '#130032', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.fileName}</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#130032', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{headerFileName}</span>
           <button style={{ ...toolbarBtn, height: 26 }}>version 4.0 <Icon name="chevron-down" size={14} /></button>
           <span style={{ padding: '3px 10px', borderRadius: 12, background: '#FFF4E5', color: '#8A5A00', fontSize: 12, fontWeight: 600 }}>In Review</span>
         </div>
@@ -4212,7 +4218,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-          <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(doc.fileName) : (onSave ?? onClose)())}>Send for Approval</Button>
+          <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}>Send for Approval</Button>
           <Button kind="primary" size="small">Send for Signature</Button>
         </div>
       </div>
@@ -4549,7 +4555,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
               transition: 'width 0.18s ease, margin-left 0.18s ease',
             }}
           >
-            <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center', color: '#130032', margin: '0 0 8px 0' }}>{doc.title}</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center', color: '#130032', margin: '0 0 8px 0', textTransform: 'uppercase' }}>{baseDocName}</h1>
             <p style={{ textAlign: 'center', color: '#5B5670', margin: '0 0 2px 0', fontSize: 14 }}>{doc.parties}</p>
             <p style={{ textAlign: 'center', color: '#5B5670', margin: '0 0 40px 0', fontSize: 13 }}>Effective Date: {doc.effectiveDate}</p>
 
