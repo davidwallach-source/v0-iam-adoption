@@ -4164,9 +4164,12 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
   const docW = commentOpen && containerWidth > 0
     ? Math.max(360, Math.min(naturalDocW, maxDocW))
     : naturalDocW;
-  const docLeftOffset = commentOpen
-    ? CANVAS_PAD
-    : (containerWidth > 0 ? Math.max(CANVAS_PAD, (containerWidth - docW) / 2) : CANVAS_PAD);
+  // When a comment is open, treat the page + gap + comment rail as one group and
+  // center that whole group in the canvas. Otherwise just center the page.
+  const groupW = docW + RAIL_GAP + RAIL_W;
+  const docLeftOffset = containerWidth > 0
+    ? Math.max(CANVAS_PAD, (containerWidth - (commentOpen ? groupW : docW)) / 2)
+    : CANVAS_PAD;
   const railLeft = docLeftOffset + docW + RAIL_GAP;
 
   return (
@@ -4528,7 +4531,8 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
             style={{
               maxWidth: 800,
               marginTop: 0, marginBottom: 0,
-              marginLeft: commentOpen ? 0 : 'auto', marginRight: 'auto',
+              marginLeft: commentOpen && containerWidth > 0 ? Math.max(0, docLeftOffset - CANVAS_PAD) : 'auto',
+              marginRight: 'auto',
               background: 'white', borderRadius: 4,
               boxShadow: '0 1px 8px rgba(19,0,50,0.10)', padding: '64px 72px', outline: 'none',
               width: `${docW}px`, transformOrigin: 'top center',
