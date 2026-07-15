@@ -5111,7 +5111,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
                       color: 'white',
                       fontFamily: 'var(--ink-font-family)',
                     }}
-                    onClick={() => setDocuments([...documents, 'Non-Disclosure Agreement'])}
+                    onClick={() => setDocuments([...documents, 'Lease Agreement'])}
                     >
                       Upload
                     </button>
@@ -5209,7 +5209,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
                         color: 'white',
                         fontFamily: 'var(--ink-font-family)',
                       }}
-                      onClick={() => setDocuments([...documents, 'Non-Disclosure Agreement'])}
+                      onClick={() => setDocuments([...documents, 'Lease Agreement'])}
                       >Upload</button>
                       <button style={{
                         background: 'var(--ink-cobalt-80)',
