@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�����������������═══════════════════════════════ */
+   ═══════������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -7949,14 +7949,43 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // When "Documents" is chosen in the Type filter, the list shows individual
   // documents with document-specific columns instead of agreements.
   const isDocumentsView = filterType.has('Documents');
+
+  // Flatten every document that lives inside an agreement space into an
+  // individual document row, so they appear alongside the standalone document
+  // repository when filtering by Type: Documents.
+  const spaceDocuments = useMemo<ProcurementDocument[]>(() => {
+    const rows: ProcurementDocument[] = [];
+    viewAgreements.forEach((a) => {
+      const isSpace = a.entityKind ? a.entityKind === 'space' : (a.documentsCount ?? 1) > 1;
+      if (!isSpace) return;
+      const parties = a.party && a.party !== '—' ? [a.party] : [];
+      const type = a.agreementType || 'Document';
+      const workspace = AGREEMENT_WORKSPACE_DATA[a.id];
+      if (workspace) {
+        [...workspace.documents, ...workspace.supplementalDocs].forEach((doc) => {
+          rows.push({ id: `${a.id}-${doc.id}`, name: doc.name, parties, type, effective: doc.dateModified || '—', expires: a.closeDate || '—' });
+        });
+      } else if (a.id === 'uploaded-doc' && uploadedDocAgreement) {
+        // Newly created single-document space: list each of its uploaded docs.
+        uploadedDocAgreement.documents.forEach((name, i) => {
+          rows.push({ id: `${a.id}-${i}`, name, parties, type, effective: a.date, expires: a.closeDate || '—' });
+        });
+      } else {
+        // Created space without seeded workspace data — represent its document.
+        rows.push({ id: `${a.id}-doc`, name: a.name, parties, type, effective: a.date, expires: a.closeDate || '—' });
+      }
+    });
+    return rows;
+  }, [viewAgreements, uploadedDocAgreement]);
+
   const filteredDocuments = useMemo(() => {
     const q = search.toLowerCase();
-    return DOCUMENTS_DATA.filter((d) => {
+    return [...spaceDocuments, ...DOCUMENTS_DATA].filter((d) => {
       if (q && !(d.name.toLowerCase().includes(q) || d.parties.some((p) => p.toLowerCase().includes(q)))) return false;
       if (filterParty.size > 0 && !d.parties.some((p) => filterParty.has(p))) return false;
       return true;
     });
-  }, [search, filterParty]);
+  }, [search, filterParty, spaceDocuments]);
 
   const filteredParties = useMemo(() => {
     if (!search) return PARTIES_DATA;
