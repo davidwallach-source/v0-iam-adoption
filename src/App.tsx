@@ -4642,7 +4642,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
             <div
               onMouseDown={(e) => e.stopPropagation()}
               style={{
-                position: 'absolute', right: 24, top: composer.y, zIndex: 32, width: 340,
+                position: 'absolute', left: railLeft, top: composer.y, zIndex: 32, width: RAIL_W,
                 background: 'white', borderRadius: 16, padding: 16,
                 border: '1px solid #EAE7F0', boxShadow: '0 16px 40px rgba(19,0,50,0.20)',
                 fontFamily: 'var(--ink-font-family)',
@@ -7858,7 +7858,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     ],
   };
 
-  /* ── View-filtered data (Sales Agreement Workspaces) ── */
+  /* ���─ View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
     let list: Agreement[];
     switch (sidebarView) {
