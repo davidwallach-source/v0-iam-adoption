@@ -3651,6 +3651,7 @@ interface DocumentPreviewProps {
   onClose: () => void;
   onSave?: () => void;
   onSendForApproval?: (documentName: string) => void;
+  onApprovalCreated?: (task: DealTask) => void;
   documentName: string;
 }
 
@@ -3850,7 +3851,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
   );
 }
 
-function DocumentPreview({ open, onClose, onSave, onSendForApproval, documentName }: DocumentPreviewProps) {
+function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalCreated, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
@@ -3990,7 +3991,19 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, documentNam
     if (!d || !d.description.trim() || d.approvers.length === 0) return;
     setCreatingApproval(true);
     window.setTimeout(() => {
-      setApprovals((prev) => [...prev, { id: 'ap-' + Date.now(), anchor: d.anchor, description: d.description.trim(), approvers: d.approvers, status: 'Pending' }]);
+      const id = 'ap-' + Date.now();
+      setApprovals((prev) => [...prev, { id, anchor: d.anchor, description: d.description.trim(), approvers: d.approvers, status: 'Pending' }]);
+      const first = d.approvers[0];
+      onApprovalCreated?.({
+        id: 'task-' + id,
+        title: `Approve ${doc.fileName}`,
+        type: 'Approval',
+        team: '',
+        assignee: first ? first.name : 'Approvers',
+        assigneeInitials: first ? initialsOf(first.name) : 'AP',
+        status: 'In progress',
+        dueDate: '--',
+      });
       setCreatingApproval(false);
       setApprovalDraft(null);
       setApproverQuery('');
@@ -6950,6 +6963,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
           setPendingPreviewDoc(null);
         }}
         onSendForApproval={(name) => { setPendingPreviewDoc(null); setApprovalModalDoc(name); }}
+        onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); showToast('Approval added to tasks'); }}
       />
 
       <SendForApprovalModal
@@ -8387,6 +8401,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setPreviewDocName(null);
       }}
       onSendForApproval={(name) => { setPreviewDocName(null); setPendingApprovalDoc(name); }}
+      onApprovalCreated={(task) => { setWorkspaceApprovalTasks(prev => [...prev, task]); }}
     />
 
     <SendForApprovalModal
