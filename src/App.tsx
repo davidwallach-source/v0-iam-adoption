@@ -4120,11 +4120,56 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
   };
   const divider = <span style={{ width: 1, height: 22, background: '#DDD9E3' }} />;
 
+  // Text snippets that have a comment or approval anchored to them. Derived from
+  // persistent state so the document highlight re-renders on every return visit
+  // (the imperative execCommand highlight is lost when the preview re-mounts).
+  const anchoredSelections = Array.from(new Set(
+    [...pinnedComments, ...approvals]
+      .map((x) => (x.anchor || '').trim())
+      .filter((s) => s.length > 2)
+  ));
+
+  // Wrap any anchored substrings within a run's text in a persistent highlight.
+  const highlightAnchors = (text: string, keyBase: string | number): React.ReactNode => {
+    if (anchoredSelections.length === 0) return text;
+    const ranges: [number, number][] = [];
+    for (const anchor of anchoredSelections) {
+      let from = 0;
+      let idx = text.indexOf(anchor, from);
+      while (idx !== -1) {
+        ranges.push([idx, idx + anchor.length]);
+        from = idx + anchor.length;
+        idx = text.indexOf(anchor, from);
+      }
+    }
+    if (ranges.length === 0) return text;
+    ranges.sort((a, b) => a[0] - b[0]);
+    const merged: [number, number][] = [];
+    for (const r of ranges) {
+      const last = merged[merged.length - 1];
+      if (last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1]);
+      else merged.push([r[0], r[1]]);
+    }
+    const nodes: React.ReactNode[] = [];
+    let cursor = 0;
+    merged.forEach(([s, e], i) => {
+      if (s > cursor) nodes.push(text.slice(cursor, s));
+      nodes.push(
+        <span key={`${keyBase}-hl-${i}`} style={{ background: '#FCE9A6', borderRadius: 2, boxShadow: 'inset 0 -1.5px 0 #E0B84B' }}>
+          {text.slice(s, e)}
+        </span>
+      );
+      cursor = e;
+    });
+    if (cursor < text.length) nodes.push(text.slice(cursor));
+    return nodes;
+  };
+
   const renderRun = (run: DocRun, i: number) => {
     if (run.kind === 'del') return <span key={i} style={{ textDecoration: 'line-through', color: '#C0362C', background: 'rgba(192,54,44,0.08)' }}>{run.text}</span>;
     if (run.kind === 'ins') return <span key={i} style={{ color: '#1F7A33', background: 'rgba(31,122,51,0.10)', textDecoration: 'underline' }}>{run.text}</span>;
     if (run.kind === 'mark') return <span key={i} style={{ background: '#FFF1A8', borderRadius: 2 }}>{run.text}</span>;
-    return <span key={i}>{run.text}</span>;
+    return <span key={i}>{highlightAnchors(run.text, i)}</span>;
   };
 
   const statusDot = (s: DocStatus) => {
