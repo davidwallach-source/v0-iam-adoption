@@ -7086,7 +7086,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                         <Inline gap="small" align="center">
                           {task.type === 'Sign' ? (
                             <img src="/icon-sign.svg" alt="Sign" style={{ width: 16, height: 16, opacity: 1, filter: 'brightness(0.17) sepia(0.5) hue-rotate(275deg) saturate(1.5)' }} />
-                          ) : task.type === 'Upload' && task.title === 'Wire Transfer' ? (
+                          ) : (task.type === 'Upload' && task.title === 'Wire Transfer') || task.title.startsWith('New Vendor Onboarding') ? (
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                             </svg>
