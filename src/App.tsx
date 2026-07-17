@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�����������������������═══════════════════════════════ */
+   ═══════������������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -4956,6 +4956,10 @@ interface WorkspaceViewProps {
   uploadedDocAgreement?: { documents: string[], recipientName: string, isDraft?: boolean } | null;
   onPreviewDocument?: (documentName: string) => void;
   injectedTasks?: DealTask[];
+  // Documents sent for signature from outside this component (e.g. the global
+  // document-preview header CTA). Their status is shown as Pending Signature
+  // without replacing the workspace or removing the document.
+  injectedSignatureDocs?: { name: string; recipient: string }[];
 }
 
 /* ═══════════════════════════════════════
@@ -6026,7 +6030,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks, injectedSignatureDocs }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -6054,23 +6058,32 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
 
   // Handler for when documents are sent for signature
+  // Documents sent for signature from within this workspace (batch action or
+  // the local doc preview). We keep each document in place and only change its
+  // status to Pending Signature — the workspace name, other documents, and
+  // needs-attention sections are left untouched.
+  const [signedDocs, setSignedDocs] = useState<{ name: string; recipient: string }[]>([]);
+  const allSignedDocs = useMemo(
+    () => [...(injectedSignatureDocs ?? []), ...signedDocs],
+    [injectedSignatureDocs, signedDocs],
+  );
+
   const handleSendForSignature = (documentNames: string[], recipients: { name: string }[]) => {
-    const envelopeId = `env-${Date.now()}`;
     const recipientNames = recipients.map(r => r.name);
-    setSentEnvelopes(prev => [...prev, {
-      envelopeId,
-      documents: documentNames,
-      recipients: recipientNames,
-      sentAt: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
-    }]);
-    // Create a new Sign task for each recipient
+    const recipient = recipientNames[0] || 'Recipient';
+    // Mark each sent document as Pending Signature (status change only).
+    setSignedDocs(prev => [
+      ...prev,
+      ...documentNames.filter(name => !prev.some(d => d.name === name)).map(name => ({ name, recipient })),
+    ]);
+    // Add a Sign task for the sent documents.
     const newTask: DealTask = {
       id: `task-sign-${Date.now()}`,
       title: `Sign ${documentNames.join(', ')}`,
       type: 'Sign',
       team: 'External',
-      assignee: recipientNames[0] || 'Recipient',
-      assigneeInitials: (recipientNames[0] || 'R').split(' ').map(n => n[0]).join('').toUpperCase(),
+      assignee: recipient,
+      assigneeInitials: recipient.split(' ').map(n => n[0]).join('').toUpperCase(),
       status: 'Not started',
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
       isDueSoon: false,
@@ -6137,8 +6150,20 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       baseDocs = workspaceData.documents;
     }
 
-    return [...baseDocs, ...addedDocs];
-  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments]);
+    const combined = [...baseDocs, ...addedDocs] as DealDocument[];
+    // Apply Pending Signature status to any document sent for signature,
+    // keeping the document in its place in the list.
+    if (allSignedDocs.length === 0) return combined;
+    return combined.map(doc => {
+      const sent = allSignedDocs.find(s => s.name === doc.name);
+      if (!sent) return doc;
+      return {
+        ...doc,
+        status: 'Pending Signature' as const,
+        signatureProgress: { signed: 0, total: 1, waitingFor: sent.recipient },
+      };
+    }) as DealDocument[];
+  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments, allSignedDocs]);
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
@@ -7750,6 +7775,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // Approval flow triggered from a document preview's "Send for Approval" action.
   const [pendingApprovalDoc, setPendingApprovalDoc] = useState<string | null>(null);
   const [workspaceApprovalTasks, setWorkspaceApprovalTasks] = useState<DealTask[]>([]);
+  // Signature sent from the global doc-preview header while a workspace is open.
+  // pendingSignatureDoc marks that the Prepare flow should update the mounted
+  // workspace (status + task) instead of creating a brand-new agreement space.
+  const [pendingSignatureDoc, setPendingSignatureDoc] = useState<string | null>(null);
+  const [workspaceSignatureDocs, setWorkspaceSignatureDocs] = useState<{ name: string; recipient: string }[]>([]);
   
   /* ���� Sync hash ↔ state ── */
   useEffect(() => {
@@ -8454,6 +8484,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setShowDealWorkspace(false);
           setSelectedAgreement(null);
           setWorkspaceApprovalTasks([]);
+          setWorkspaceSignatureDocs([]);
         }}
         onEditNDA={() => {
           setShowNDAModal(true);
@@ -8464,6 +8495,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         uploadedDocAgreement={uploadedDocAgreement}
         onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
         injectedTasks={workspaceApprovalTasks}
+        injectedSignatureDocs={workspaceSignatureDocs}
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
@@ -8507,7 +8539,15 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setPreviewDocName(null);
       }}
       onSendForApproval={(name) => { setPreviewDocName(null); setPendingApprovalDoc(name); }}
-      onSendForSignature={(name) => { setPreviewDocName(null); setRootPreparePreselectedDocs([name]); setShowRootPrepare(true); }}
+      onSendForSignature={(name) => {
+        setPreviewDocName(null);
+        // When the document was opened from within an agreement workspace, keep
+        // that workspace intact and just send the doc; otherwise fall back to the
+        // new-agreement Signature Request flow.
+        if (previewOrigin === 'agreement') setPendingSignatureDoc(name);
+        setRootPreparePreselectedDocs([name]);
+        setShowRootPrepare(true);
+      }}
       onApprovalCreated={(task) => { setWorkspaceApprovalTasks(prev => [...prev, task]); }}
     />
 
@@ -8677,11 +8717,36 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       onClose={() => {
         setShowRootPrepare(false);
         setRootPreparePreselectedDocs([]);
+        setPendingSignatureDoc(null);
       }}
       preselectedDocs={rootPreparePreselectedDocs}
       onSend={(documents, recipients) => {
         const recipientName = recipients && recipients.length > 0 ? recipients[0].name : '';
-        
+
+        // Signature sent from the global doc-preview header while an agreement
+        // workspace is open: keep the workspace (name, documents, needs
+        // attention) intact — only change the sent document's status and add a
+        // Sign task. Do NOT create a new agreement space.
+        if (pendingSignatureDoc) {
+          const recipient = recipientName || 'Recipient';
+          setWorkspaceSignatureDocs(prev => [...prev, { name: pendingSignatureDoc, recipient }]);
+          setWorkspaceApprovalTasks(prev => [...prev, {
+            id: `task-sign-${Date.now()}`,
+            title: `Sign ${pendingSignatureDoc}`,
+            type: 'Sign',
+            team: 'External',
+            assignee: recipient,
+            assigneeInitials: recipient.split(' ').map(n => n[0]).join('').toUpperCase(),
+            status: 'Not started',
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+            isDueSoon: false,
+          }]);
+          setPendingSignatureDoc(null);
+          setShowRootPrepare(false);
+          setRootPreparePreselectedDocs([]);
+          return;
+        }
+
         // Check if this is an NDA flow (preselected docs contain NDA)
         const isNDAFlow = rootPreparePreselectedDocs.some(doc => doc.toLowerCase().includes('nda') || doc.toLowerCase().includes('non-disclosure'));
         
