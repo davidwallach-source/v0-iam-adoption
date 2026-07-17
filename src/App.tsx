@@ -6508,16 +6508,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
           </button>
           <Inline gap="medium" align="center">
             <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
-            <Inline gap="small" align="center">
-              <span style={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                background: agreement.statusKind === 'success' ? 'var(--ink-green-80)' : agreement.statusKind === 'warning' ? 'var(--ink-orange-80)' : '#D946EF',
-                flexShrink: 0,
-              }} />
-              <Text size="sm" style={{ color: agreement.statusKind === 'success' ? 'var(--ink-green-80)' : agreement.statusKind === 'warning' ? 'var(--ink-orange-80)' : '#D946EF' }}>{agreement.status}</Text>
-            </Inline>
+            <StatusLight
+              kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+              text={agreement.status}
+            />
           </Inline>
           <div style={{ flex: 1 }} />
           <Inline gap="small" align="center">
@@ -7070,14 +7064,10 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                     </div>
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Status</Text>
-                      <Inline gap="xsmall" align="center">
-                        <span style={{
-                          width: 8, height: 8, borderRadius: '50%',
-                          background: agreement.statusKind === 'success' ? 'var(--ink-green-80)' : agreement.statusKind === 'warning' ? 'var(--ink-orange-80)' : '#D946EF',
-                          flexShrink: 0,
-                        }} />
-                        <Text size="sm">{agreement.status}</Text>
-                      </Inline>
+                      <StatusLight
+                        kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+                        text={agreement.status}
+                      />
                     </div>
                   </Stack>
                 </div>

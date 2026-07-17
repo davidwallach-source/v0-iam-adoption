@@ -102,3 +102,18 @@
 .statusLight.alert.filled {
   background-color: var(--ink-status-bg-color-alert); /* #fee8ea */
 }
+
+/* =================================
+   Emphasis variant (accent / cobalt)
+   ================================= */
+.statusLight.emphasis .dot {
+  background-color: var(--ink-cobalt-100);
+}
+
+.statusLight.emphasis .text {
+  color: var(--ink-font-color-accent-emphasis); /* cobalt-110 */
+}
+
+.statusLight.emphasis.filled {
+  background-color: var(--ink-cobalt-10); /* #f3f2fe */
+}

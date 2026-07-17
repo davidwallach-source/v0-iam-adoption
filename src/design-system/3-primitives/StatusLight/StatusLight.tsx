@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './StatusLight.module.css';
 
-export type StatusLightKind = 'neutral' | 'success' | 'warning' | 'alert';
+export type StatusLightKind = 'neutral' | 'success' | 'warning' | 'alert' | 'emphasis';
 
 export interface StatusLightProps {
   /** The status type/variant - color of the StatusLight */
