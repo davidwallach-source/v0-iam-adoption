@@ -4964,6 +4964,11 @@ interface WorkspaceViewProps {
   // document-preview header CTA). Their status is shown as Pending Signature
   // without replacing the workspace or removing the document.
   injectedSignatureDocs?: { name: string; recipient: string }[];
+  // Deep-link entry points: auto-open an overlay when the workspace mounts from
+  // a scenario URL, prefilled with the provided data.
+  initialOverlay?: 'upload-request' | 'vendor-onboarding' | null;
+  uploadRequestPrefill?: Partial<UploadRequestData> | null;
+  vendorOnboardingPrefill?: Partial<VendorOnboardingData> | null;
 }
 
 /* ═══════════════════════════════════════
@@ -5700,13 +5705,26 @@ interface UploadRequestData {
   lastName: string;
   email: string;
 }
-function UploadRequestScreen({ open, onClose, onSend }: { open: boolean; onClose: () => void; onSend?: (data: UploadRequestData) => void }) {
+function UploadRequestScreen({ open, onClose, onSend, initialData }: { open: boolean; onClose: () => void; onSend?: (data: UploadRequestData) => void; initialData?: Partial<UploadRequestData> | null }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+
+  // Prefill the form when the overlay opens from a deep link (e.g. the
+  // "request a COI from Marco" scenario URL).
+  useEffect(() => {
+    if (open && initialData) {
+      setTitle(initialData.title ?? '');
+      setDescription(initialData.description ?? '');
+      setDueDate(initialData.dueDate ?? '');
+      setFirstName(initialData.firstName ?? '');
+      setLastName(initialData.lastName ?? '');
+      setEmail(initialData.email ?? '');
+    }
+  }, [open, initialData]);
 
   if (!open) return null;
 
@@ -5819,12 +5837,23 @@ interface VendorOnboardingData {
   assigneeLast: string;
 }
 
-function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; onClose: () => void; onCreate?: (data: VendorOnboardingData) => void }) {
+function VendorOnboardingScreen({ open, onClose, onCreate, initialData }: { open: boolean; onClose: () => void; onCreate?: (data: VendorOnboardingData) => void; initialData?: Partial<VendorOnboardingData> | null }) {
   const [vendorName, setVendorName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [assigneeFirst, setAssigneeFirst] = useState('');
   const [assigneeLast, setAssigneeLast] = useState('');
+
+  // Prefill when opened from the vendor-onboarding deep link.
+  useEffect(() => {
+    if (open && initialData) {
+      setVendorName(initialData.vendorName ?? '');
+      setContactEmail(initialData.contactEmail ?? '');
+      setDueDate(initialData.dueDate ?? '');
+      setAssigneeFirst(initialData.assigneeFirst ?? '');
+      setAssigneeLast(initialData.assigneeLast ?? '');
+    }
+  }, [open, initialData]);
 
   if (!open) return null;
 
@@ -6149,7 +6178,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks, injectedSignatureDocs }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks, injectedSignatureDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -6160,6 +6189,15 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [showUploadRequest, setShowUploadRequest] = useState(false);
   const [showVendorOnboarding, setShowVendorOnboarding] = useState(false);
   const [showFilePicker, setShowFilePicker] = useState(false);
+
+  // Deep-link entry point: when the workspace mounts from a scenario URL, open
+  // the requested overlay (prefilled) once.
+  useEffect(() => {
+    if (initialOverlay === 'upload-request') setShowUploadRequest(true);
+    else if (initialOverlay === 'vendor-onboarding') setShowVendorOnboarding(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [pendingPreviewDoc, setPendingPreviewDoc] = useState<string | null>(null);
   const [addedDocuments, setAddedDocuments] = useState<string[]>([]);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
@@ -7195,6 +7233,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       <UploadRequestScreen
         open={showUploadRequest}
         onClose={() => setShowUploadRequest(false)}
+        initialData={uploadRequestPrefill}
         onSend={(data) => {
           const assignee = `${data.firstName} ${data.lastName}`.trim();
           const assigneeInitials = ((data.firstName[0] || '') + (data.lastName[0] || '')).toUpperCase();
@@ -7226,6 +7265,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       <VendorOnboardingScreen
         open={showVendorOnboarding}
         onClose={() => setShowVendorOnboarding(false)}
+        initialData={vendorOnboardingPrefill}
         onCreate={(data) => {
           const assignee = `${data.assigneeFirst} ${data.assigneeLast}`.trim();
           const assigneeInitials = `${data.assigneeFirst[0] ?? ''}${data.assigneeLast[0] ?? ''}`.toUpperCase();
@@ -7880,6 +7920,44 @@ function getTabFromHash(): TabId {
   return VALID_TABS.includes(hash as TabId) ? (hash as TabId) : 'home';
 }
 
+/* ── Predictable scenario deep links ──
+   Each ?flow= value opens a specific step's entry point, prefilled with the
+   Tally Inc vendor scenario data. Steps 2-4 share one Tally Inc workspace. */
+const SCENARIO_VENDOR = {
+  company: 'Tally Inc',
+  contactFirst: 'Marco',
+  contactLast: 'Corcoran',
+  contactName: 'Marco Corcoran',
+  contactEmail: 'marco.corcoran@dsxtr.com',
+};
+const SCENARIO_WORKSPACE_ID = 'vendor-tally-inc';
+const SCENARIO_MSA_DOC = 'Master Service Agreement (MSA)';
+
+function buildScenarioAgreement(): Agreement {
+  return {
+    id: SCENARIO_WORKSPACE_ID,
+    entityKind: 'space',
+    workspaceKind: 'uploaded',
+    name: `${SCENARIO_VENDOR.company} — Vendor Agreement`,
+    party: SCENARIO_VENDOR.company,
+    partyLogo: SCENARIO_VENDOR.company.substring(0, 2).toUpperCase(),
+    status: 'In Progress',
+    statusIcon: 'clock',
+    statusKind: 'info',
+    statusSub: 'In Progress',
+    dealValue: '—',
+    agreementType: 'Master Services Agreement',
+    termLength: '12 months',
+    closeDate: '—',
+    date: new Date().toLocaleDateString('en-GB'),
+    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    action: 'View',
+    documentsCount: 1,
+    tasksCount: 0,
+    tasksPending: 0,
+  };
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(getTabFromHash);
   const [sidebarView, setSidebarView] = useState<SidebarView>('all-agreements');
@@ -7933,7 +8011,56 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // workspace (status + task) instead of creating a brand-new agreement space.
   const [pendingSignatureDoc, setPendingSignatureDoc] = useState<string | null>(null);
   const [workspaceSignatureDocs, setWorkspaceSignatureDocs] = useState<{ name: string; recipient: string }[]>([]);
-  
+  // Deep-link scenario: which overlay (if any) the Tally Inc workspace should
+  // auto-open when it mounts, and the prefill data for those overlays.
+  const [wsInitialOverlay, setWsInitialOverlay] = useState<'upload-request' | 'vendor-onboarding' | null>(null);
+
+  /* ── Predictable scenario deep links (?flow=…) ── */
+  useEffect(() => {
+    const flow = new URLSearchParams(window.location.search).get('flow');
+    if (!flow) return;
+    // All scenario steps live under the Agreements tab.
+    setActiveTab('agreements');
+
+    // Step 1: Send an NDA to Tally Inc — open the NDA modal prefilled.
+    if (flow === 'send-nda') {
+      setNdaAgreementId(null);
+      setSavedNDAData({ receivingParty: SCENARIO_VENDOR.company, effectiveDate: '', duration: '12' });
+      setShowNDAModal(true);
+      return;
+    }
+
+    // Steps 2-4 operate inside one shared Tally Inc vendor workspace seeded with
+    // the MSA document.
+    const openScenarioWorkspace = () => {
+      setUploadedDocById(prev => ({
+        ...prev,
+        [SCENARIO_WORKSPACE_ID]: { documents: [SCENARIO_MSA_DOC], recipientName: SCENARIO_VENDOR.contactName },
+      }));
+      const ws = buildScenarioAgreement();
+      addNewAgreement(ws);
+      setSelectedAgreement(ws);
+      setShowDealWorkspace(true);
+    };
+
+    if (flow === 'review-msa') {
+      // Step 2: open the uploaded MSA in the document preview to highlight,
+      // tag Francis Finance, and send to Liam Legal for approval.
+      openScenarioWorkspace();
+      setPreviewOrigin('agreement');
+      setPreviewDocName(SCENARIO_MSA_DOC);
+    } else if (flow === 'request-coi') {
+      // Step 3: open the upload-request overlay prefilled for a COI from Marco.
+      setWsInitialOverlay('upload-request');
+      openScenarioWorkspace();
+    } else if (flow === 'vendor-onboarding') {
+      // Step 4: open the New Vendor Onboarding overlay prefilled for Tally Inc.
+      setWsInitialOverlay('vendor-onboarding');
+      openScenarioWorkspace();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /* ���� Sync hash ↔ state ── */
   useEffect(() => {
     const onHashChange = () => {
@@ -8638,6 +8765,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setSelectedAgreement(null);
           setWorkspaceApprovalTasks([]);
           setWorkspaceSignatureDocs([]);
+          setWsInitialOverlay(null);
         }}
         onEditNDA={() => {
           // Edit the NDA that owns this workspace (reuse its id + data).
@@ -8652,6 +8780,18 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
         injectedTasks={workspaceApprovalTasks}
         injectedSignatureDocs={workspaceSignatureDocs}
+        initialOverlay={selectedAgreement.id === SCENARIO_WORKSPACE_ID ? wsInitialOverlay : null}
+        uploadRequestPrefill={{
+          title: 'Certificate of Insurance',
+          description: `Please upload ${SCENARIO_VENDOR.company}'s current Certificate of Insurance (COI).`,
+          firstName: SCENARIO_VENDOR.contactFirst,
+          lastName: SCENARIO_VENDOR.contactLast,
+          email: SCENARIO_VENDOR.contactEmail,
+        }}
+        vendorOnboardingPrefill={{
+          vendorName: SCENARIO_VENDOR.company,
+          contactEmail: SCENARIO_VENDOR.contactEmail,
+        }}
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => { setNdaAgreementId(null); setSavedNDAData(null); setShowNDAModal(true); }} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
