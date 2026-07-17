@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════���������������������═══════════════════════════════ */
+   ═══════����������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -6152,7 +6152,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       : workspaceData.activity),
   ];
   const currentTasks = useMemo(() => {
-    const injected = injectedTasks ?? [];
+    // Reverse so the most recently added approval task appears at the top,
+    // matching the sentTasks ordering used in each branch below.
+    const injected = [...(injectedTasks ?? [])].reverse();
     const base = (() => {
     // For NDA agreements sent for signature, create Sign NDA task
     if (isNDADraft && ndaSentForSignature) {
