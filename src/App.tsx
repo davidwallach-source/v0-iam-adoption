@@ -6190,13 +6190,15 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [showVendorOnboarding, setShowVendorOnboarding] = useState(false);
   const [showFilePicker, setShowFilePicker] = useState(false);
 
-  // Deep-link entry point: when the workspace mounts from a scenario URL, open
-  // the requested overlay (prefilled) once.
+  // Deep-link entry point: open the requested overlay (prefilled) whenever the
+  // scenario URL sets initialOverlay. Keyed on initialOverlay (not just mount)
+  // so it fires reliably regardless of the order in which the workspace mounts
+  // and the prop settles — this avoids a race where the overlay silently
+  // never opens.
   useEffect(() => {
     if (initialOverlay === 'upload-request') setShowUploadRequest(true);
     else if (initialOverlay === 'vendor-onboarding') setShowVendorOnboarding(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialOverlay]);
 
   const [pendingPreviewDoc, setPendingPreviewDoc] = useState<string | null>(null);
   const [addedDocuments, setAddedDocuments] = useState<string[]>([]);
