@@ -7066,8 +7066,19 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
           }
           setPendingPreviewDoc(null);
         }}
-        onSendForApproval={(name) => { setPendingPreviewDoc(null); setApprovalModalDoc(name); }}
-        onSendForSignature={(name) => { setPendingPreviewDoc(null); setPreparePreselectedDocs([name]); setShowPrepare(true); }}
+        onSendForApproval={(name) => {
+          // Also add the document to this space's Documents table (in addition
+          // to the approval task) so it persists after the preview closes.
+          if (pendingPreviewDoc) setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
+          setPendingPreviewDoc(null);
+          setApprovalModalDoc(name);
+        }}
+        onSendForSignature={(name) => {
+          if (pendingPreviewDoc) setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
+          setPendingPreviewDoc(null);
+          setPreparePreselectedDocs([name]);
+          setShowPrepare(true);
+        }}
         onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); showToast('Approval added to tasks'); }}
       />
 
