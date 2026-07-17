@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════����������������������═══════════════════════════════ */
+   ═══════�����������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -3655,6 +3655,7 @@ interface DocumentPreviewProps {
   onClose: () => void;
   onSave?: () => void;
   onSendForApproval?: (documentName: string) => void;
+  onSendForSignature?: (documentName: string) => void;
   onApprovalCreated?: (task: DealTask) => void;
   documentName: string;
 }
@@ -3861,7 +3862,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
   );
 }
 
-function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalCreated, documentName }: DocumentPreviewProps) {
+function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
@@ -4219,7 +4220,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
           <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}>Send for Approval</Button>
-          <Button kind="primary" size="small">Send for Signature</Button>
+          <Button kind="primary" size="small" onClick={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}>Send for Signature</Button>
         </div>
       </div>
 
@@ -7033,6 +7034,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
           setPendingPreviewDoc(null);
         }}
         onSendForApproval={(name) => { setPendingPreviewDoc(null); setApprovalModalDoc(name); }}
+        onSendForSignature={(name) => { setPendingPreviewDoc(null); setPreparePreselectedDocs([name]); setShowPrepare(true); }}
         onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); showToast('Approval added to tasks'); }}
       />
 
@@ -8505,6 +8507,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setPreviewDocName(null);
       }}
       onSendForApproval={(name) => { setPreviewDocName(null); setPendingApprovalDoc(name); }}
+      onSendForSignature={(name) => { setPreviewDocName(null); setRootPreparePreselectedDocs([name]); setShowRootPrepare(true); }}
       onApprovalCreated={(task) => { setWorkspaceApprovalTasks(prev => [...prev, task]); }}
     />
 
