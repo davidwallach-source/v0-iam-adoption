@@ -6158,7 +6158,9 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
       baseDocs = workspaceData.documents;
     }
 
-    const combined = [...baseDocs, ...addedDocs] as DealDocument[];
+    // Show the most recently added documents first: addedDocuments is appended
+    // newest-last, so reverse it and place it ahead of the base documents.
+    const combined = [...[...addedDocs].reverse(), ...baseDocs] as DealDocument[];
     // Apply Pending Signature status to any document sent for signature,
     // keeping the document in its place in the list.
     if (allSignedDocs.length === 0) return combined;
