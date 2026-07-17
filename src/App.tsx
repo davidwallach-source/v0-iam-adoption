@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������═══════════════════════════════ */
+   ═══════��������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -6503,7 +6503,16 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                     <Button kind="secondary" size="small" onClick={() => setSelectedDocs(new Set())}>
                       Clear
                     </Button>
-                    <Button kind="secondary" size="small">
+                    <Button kind="secondary" size="small" onClick={() => {
+                      // Open the same Send for Approval overlay as the doc preview
+                      // header CTA, seeded with the selected document names.
+                      const selectedDocNames = currentDocuments
+                        .filter(doc => selectedDocs.has(doc.id))
+                        .map(doc => doc.name);
+                      if (selectedDocNames.length === 0) return;
+                      setApprovalModalDoc(selectedDocNames.join(', '));
+                      setSelectedDocs(new Set());
+                    }}>
                       Send for Approval
                     </Button>
                     <Button kind="primary" size="small" onClick={() => {
