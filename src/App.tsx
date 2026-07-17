@@ -5817,16 +5817,7 @@ interface VendorOnboardingData {
   dueDate: string;
   assigneeFirst: string;
   assigneeLast: string;
-  steps: string[];
 }
-
-const VENDOR_ONBOARDING_STEPS = [
-  'Send & collect signed NDA',
-  'Collect W-9 / tax documentation',
-  'Compliance & security review',
-  'Banking & payment setup',
-  'Countersign master agreement',
-];
 
 function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; onClose: () => void; onCreate?: (data: VendorOnboardingData) => void }) {
   const [vendorName, setVendorName] = useState('');
@@ -5834,14 +5825,10 @@ function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; on
   const [dueDate, setDueDate] = useState('');
   const [assigneeFirst, setAssigneeFirst] = useState('');
   const [assigneeLast, setAssigneeLast] = useState('');
-  const [steps, setSteps] = useState<string[]>(VENDOR_ONBOARDING_STEPS);
 
   if (!open) return null;
 
-  const toggleStep = (step: string) =>
-    setSteps(prev => prev.includes(step) ? prev.filter(s => s !== step) : [...prev, step]);
-
-  const canCreate = vendorName.trim() && assigneeFirst.trim() && assigneeLast.trim() && steps.length > 0;
+  const canCreate = vendorName.trim() && assigneeFirst.trim() && assigneeLast.trim();
   const handleCreate = () => {
     if (!canCreate) return;
     onCreate?.({
@@ -5850,9 +5837,8 @@ function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; on
       dueDate,
       assigneeFirst: assigneeFirst.trim(),
       assigneeLast: assigneeLast.trim(),
-      steps,
     });
-    setVendorName(''); setContactEmail(''); setDueDate(''); setAssigneeFirst(''); setAssigneeLast(''); setSteps(VENDOR_ONBOARDING_STEPS);
+    setVendorName(''); setContactEmail(''); setDueDate(''); setAssigneeFirst(''); setAssigneeLast('');
     onClose();
   };
 
@@ -5891,7 +5877,7 @@ function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; on
         <div style={{ maxWidth: 780, padding: '48px 32px 64px', marginLeft: 268 }}>
           {/* Vendor */}
           <h2 style={sectionHeading}>Vendor</h2>
-          <p style={sectionSub}>Set up the onboarding workflow for this vendor before the task is created.</p>
+          <p style={sectionSub}>Set up onboarding for this vendor before the task is created.</p>
 
           <div style={{ marginBottom: 24 }}>
             <label style={labelStyle}>Vendor name{req}</label>
@@ -5901,29 +5887,6 @@ function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; on
           <div style={{ marginBottom: 48 }}>
             <label style={labelStyle}>Contact email</label>
             <input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} style={{ ...inputStyle, width: 360 }} />
-          </div>
-
-          {/* Workflow */}
-          <h2 style={sectionHeading}>Workflow steps</h2>
-          <p style={sectionSub}>Select the steps to include in this onboarding workflow.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 48 }}>
-            {VENDOR_ONBOARDING_STEPS.map((step, i) => {
-              const checked = steps.includes(step);
-              return (
-                <label key={step} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'var(--ink-font-family)' }}>
-                  <span style={{
-                    width: 22, height: 22, borderRadius: 4, flexShrink: 0,
-                    border: checked ? 'none' : '1px solid #8B8699',
-                    background: checked ? 'var(--ink-cobalt-80, #4C00FF)' : 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {checked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                  </span>
-                  <input type="checkbox" checked={checked} onChange={() => toggleStep(step)} style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }} />
-                  <span style={{ fontSize: 15, color: '#130032' }}>{`${i + 1}. ${step}`}</span>
-                </label>
-              );
-            })}
           </div>
 
           <div style={{ marginBottom: 48 }}>
@@ -7283,7 +7246,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
             isDueSoon: false,
           }]);
           setSentActivity(prev => [
-            { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up a ${data.steps.length}-step onboarding workflow for ${data.vendorName}`, time: 'Just now' },
+            { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up onboarding for ${data.vendorName}`, time: 'Just now' },
             ...prev,
           ]);
           showToast('Vendor onboarding workflow created');
