@@ -1646,6 +1646,10 @@ interface Agreement {
   // documentsCount heuristic. Workspaces created via "Start New" are always
   // Agreement Spaces so they appear under the default "Agreement Spaces" view.
   entityKind?: 'space' | 'document';
+  // Identifies special workspaces (NDA / blank-document) whose content is
+  // resolved by kind rather than by a fixed id, so multiple can coexist in a
+  // single session without overwriting one another.
+  workspaceKind?: 'nda' | 'uploaded';
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
@@ -3186,7 +3190,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════������������������������═══════════════════════════════ */
+   ═══════�������������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -6093,14 +6097,18 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
     setSelectedDocs(new Set());
   };
 
-  // Determine if this is an NDA draft
-  const isNDADraft = agreement.id === 'nda-draft';
+  // Determine if this is an NDA draft (matched by kind so multiple NDAs, each
+  // with a unique id, all resolve their NDA-specific content).
+  const isNDADraft = agreement.workspaceKind === 'nda' || agreement.id === 'nda-draft';
 
-  // Get workspace data for the agreement
-  const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id] || AGREEMENT_WORKSPACE_DATA['1'];
+  // Get workspace data for the agreement. NDA workspaces fall back to the shared
+  // NDA template when they have a unique (non-seeded) id.
+  const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id]
+    || (isNDADraft ? AGREEMENT_WORKSPACE_DATA['nda-draft'] : undefined)
+    || AGREEMENT_WORKSPACE_DATA['1'];
   
-  // Check if this is an uploaded document agreement
-  const isUploadedDocAgreement = agreement.id === 'uploaded-doc';
+  // Check if this is an uploaded/blank document agreement.
+  const isUploadedDocAgreement = agreement.workspaceKind === 'uploaded' || agreement.id === 'uploaded-doc';
 
   // Update NDA document status if sent for signature
   const modifiedDocuments = useMemo(() => {
@@ -7760,6 +7768,11 @@ export default function App() {
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
+  // Per-agreement session content keyed by unique agreement id, so every NDA and
+  // blank-document workspace created via Start New keeps its own content instead
+  // of overwriting a shared fixed-id entry.
+  const [ndaDataById, setNdaDataById] = useState<Record<string, { data: NDAFormData | null; sentForSignature: boolean; recipientName: string }>>({});
+  const [uploadedDocById, setUploadedDocById] = useState<Record<string, { documents: string[]; recipientName: string; isDraft?: boolean }>>({});
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
@@ -8014,9 +8027,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         [...workspace.documents, ...workspace.supplementalDocs].forEach((doc) => {
           rows.push({ id: `${a.id}-${doc.id}`, name: doc.name, parties, type, effective: doc.dateModified || '—', expires: a.closeDate || '—' });
         });
-      } else if (a.id === 'uploaded-doc' && uploadedDocAgreement) {
+      } else if (a.workspaceKind === 'uploaded' && uploadedDocById[a.id]) {
         // Newly created single-document space: list each of its uploaded docs.
-        uploadedDocAgreement.documents.forEach((name, i) => {
+        uploadedDocById[a.id].documents.forEach((name, i) => {
           rows.push({ id: `${a.id}-${i}`, name, parties, type, effective: a.date, expires: a.closeDate || '—' });
         });
       } else {
@@ -8025,7 +8038,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       }
     });
     return rows;
-  }, [viewAgreements, uploadedDocAgreement]);
+  }, [viewAgreements, uploadedDocById]);
 
   const filteredDocuments = useMemo(() => {
     const q = search.toLowerCase();
@@ -8487,18 +8500,21 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setWorkspaceSignatureDocs([]);
         }}
         onEditNDA={() => {
+          // Edit the NDA that owns this workspace (reuse its id + data).
+          setNdaAgreementId(selectedAgreement.id);
+          setSavedNDAData(ndaDataById[selectedAgreement.id]?.data ?? null);
           setShowNDAModal(true);
         }}
-        savedNDAData={savedNDAData}
-        ndaSentForSignature={ndaSentForSignature}
-        ndaRecipientName={ndaRecipientName}
-        uploadedDocAgreement={uploadedDocAgreement}
+        savedNDAData={ndaDataById[selectedAgreement.id]?.data ?? null}
+        ndaSentForSignature={ndaDataById[selectedAgreement.id]?.sentForSignature ?? false}
+        ndaRecipientName={ndaDataById[selectedAgreement.id]?.recipientName ?? ''}
+        uploadedDocAgreement={uploadedDocById[selectedAgreement.id] ?? null}
         onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
         injectedTasks={workspaceApprovalTasks}
         injectedSignatureDocs={workspaceSignatureDocs}
       />
     )}
-    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => setShowNDAModal(true)} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
+    <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => { setNdaAgreementId(null); setSavedNDAData(null); setShowNDAModal(true); }} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
 
     <DocumentPreview
       open={previewDocName !== null}
@@ -8508,10 +8524,12 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         if (previewOrigin === 'new') {
           // New document: create a new Agreement Space containing just this document.
           const docName = previewDocName ?? 'Untitled Document';
-          setUploadedDocAgreement({ documents: [docName], recipientName: '', isDraft: true });
+          const newId = `uploaded-${Date.now()}`;
+          setUploadedDocById(prev => ({ ...prev, [newId]: { documents: [docName], recipientName: '', isDraft: true } }));
           const newAgreement: Agreement = {
-            id: 'uploaded-doc',
+            id: newId,
             entityKind: 'space',
+            workspaceKind: 'uploaded',
             name: docName,
             party: '—',
             partyLogo: docName.substring(0, 2).toUpperCase(),
@@ -8609,14 +8627,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         // Save the NDA data
         setSavedNDAData(data);
         
-        // Create or find the NDA agreement - use a fixed ID for the draft NDA
-        const ndaId = 'nda-draft';
+        // Reuse the id when editing an existing NDA; otherwise mint a new unique
+        // id so this NDA does not overwrite a previously created one.
+        const ndaId = ndaAgreementId ?? `nda-${Date.now()}`;
         setNdaAgreementId(ndaId);
+        setNdaDataById(prev => ({ ...prev, [ndaId]: { data, sentForSignature: prev[ndaId]?.sentForSignature ?? false, recipientName: prev[ndaId]?.recipientName ?? '' } }));
         
         // Create a draft NDA agreement object
         const ndaAgreement: Agreement = {
           id: ndaId,
           entityKind: 'space',
+          workspaceKind: 'nda',
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -8646,13 +8667,15 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         // Save the NDA data
         setSavedNDAData(data);
         
-        // Create the NDA agreement
-        const ndaId = 'nda-draft';
+        // Reuse the id when editing; otherwise mint a unique id for this NDA.
+        const ndaId = ndaAgreementId ?? `nda-${Date.now()}`;
         setNdaAgreementId(ndaId);
+        setNdaDataById(prev => ({ ...prev, [ndaId]: { data, sentForSignature: false, recipientName: prev[ndaId]?.recipientName ?? '' } }));
         
         const ndaAgreement: Agreement = {
           id: ndaId,
           entityKind: 'space',
+          workspaceKind: 'nda',
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -8751,12 +8774,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         const isNDAFlow = rootPreparePreselectedDocs.some(doc => doc.toLowerCase().includes('nda') || doc.toLowerCase().includes('non-disclosure'));
         
         if (isNDAFlow) {
-          // NDA flow - mark as sent and add to agreements list
+          // NDA flow - mark as sent and add to agreements list. Reuse the id
+          // minted in the NDA modal so we update that NDA rather than a shared one.
           setNdaRecipientName(recipientName);
           setNdaSentForSignature(true);
+          const ndaId = ndaAgreementId ?? `nda-${Date.now()}`;
+          setNdaDataById(prev => ({ ...prev, [ndaId]: { data: prev[ndaId]?.data ?? savedNDAData, sentForSignature: true, recipientName } }));
           const sentNdaAgreement: Agreement = {
-            id: 'nda-draft',
+            id: ndaId,
             entityKind: 'space',
+            workspaceKind: 'nda',
             name: savedNDAData?.receivingParty ? `NDA - ${savedNDAData.receivingParty}` : 'Non-Disclosure Agreement',
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
@@ -8782,13 +8809,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           // Uploaded document flow - create a new agreement space
           const docName = documents && documents.length > 0 ? documents[0] : 'Non-Disclosure Agreement';
           
-          // Store the uploaded document info
-          setUploadedDocAgreement({ documents: documents || [], recipientName });
+          // Store the uploaded document info under a unique id so each uploaded
+          // document workspace persists independently.
+          const newId = `uploaded-${Date.now()}`;
+          setUploadedDocById(prev => ({ ...prev, [newId]: { documents: documents || [], recipientName } }));
           
           // Create a new agreement for the uploaded document
           const uploadedAgreement: Agreement = {
-            id: 'uploaded-doc',
+            id: newId,
             entityKind: 'space',
+            workspaceKind: 'uploaded',
             name: docName,
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
