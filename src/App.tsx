@@ -3186,7 +3186,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════��������������������═══════════════════════════════ */
+   ═══════���������������������═══════════════════════════════ */
 
 function AdminPage() {
   return (
@@ -4028,7 +4028,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onApprovalC
       const first = d.approvers[0];
       onApprovalCreated?.({
         id: 'task-' + id,
-        title: `Approve ${doc.fileName}`,
+        title: `Approve content in ${baseDocName}`,
         type: 'Approval',
         team: '',
         assignee: first ? first.name : 'Approvers',
