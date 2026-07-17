@@ -5811,6 +5811,158 @@ function UploadRequestScreen({ open, onClose, onSend }: { open: boolean; onClose
   );
 }
 
+interface VendorOnboardingData {
+  vendorName: string;
+  contactEmail: string;
+  dueDate: string;
+  assigneeFirst: string;
+  assigneeLast: string;
+  steps: string[];
+}
+
+const VENDOR_ONBOARDING_STEPS = [
+  'Send & collect signed NDA',
+  'Collect W-9 / tax documentation',
+  'Compliance & security review',
+  'Banking & payment setup',
+  'Countersign master agreement',
+];
+
+function VendorOnboardingScreen({ open, onClose, onCreate }: { open: boolean; onClose: () => void; onCreate?: (data: VendorOnboardingData) => void }) {
+  const [vendorName, setVendorName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [assigneeFirst, setAssigneeFirst] = useState('');
+  const [assigneeLast, setAssigneeLast] = useState('');
+  const [steps, setSteps] = useState<string[]>(VENDOR_ONBOARDING_STEPS);
+
+  if (!open) return null;
+
+  const toggleStep = (step: string) =>
+    setSteps(prev => prev.includes(step) ? prev.filter(s => s !== step) : [...prev, step]);
+
+  const canCreate = vendorName.trim() && assigneeFirst.trim() && assigneeLast.trim() && steps.length > 0;
+  const handleCreate = () => {
+    if (!canCreate) return;
+    onCreate?.({
+      vendorName: vendorName.trim(),
+      contactEmail: contactEmail.trim(),
+      dueDate,
+      assigneeFirst: assigneeFirst.trim(),
+      assigneeLast: assigneeLast.trim(),
+      steps,
+    });
+    setVendorName(''); setContactEmail(''); setDueDate(''); setAssigneeFirst(''); setAssigneeLast(''); setSteps(VENDOR_ONBOARDING_STEPS);
+    onClose();
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block', fontSize: 15, color: '#130032', marginBottom: 8, fontFamily: 'var(--ink-font-family)',
+  };
+  const req = <span style={{ color: '#CC1B5B', marginLeft: 2 }}>*</span>;
+  const inputStyle: React.CSSProperties = {
+    width: '100%', height: 44, borderRadius: 4, border: '1px solid #8B8699',
+    padding: '0 12px', fontSize: 15, color: '#130032',
+    fontFamily: 'var(--ink-font-family)', boxSizing: 'border-box', background: 'white',
+  };
+  const sectionHeading: React.CSSProperties = {
+    fontSize: 22, fontWeight: 400, color: '#130032', margin: '0 0 8px', fontFamily: 'var(--ink-font-family)',
+  };
+  const sectionSub: React.CSSProperties = {
+    fontSize: 14, color: '#6B6777', margin: '0 0 24px', fontFamily: 'var(--ink-font-family)', lineHeight: 1.5,
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1200, background: 'white', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, height: 80, padding: '0 32px', borderBottom: '1px solid var(--ink-border-subtle, #E4E2E9)', flexShrink: 0 }}>
+        <button
+          onClick={onClose}
+          aria-label="Close vendor onboarding"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, border: 'none', background: 'transparent', cursor: 'pointer', color: '#130032', borderRadius: 4 }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+        </button>
+        <span style={{ fontSize: 18, fontWeight: 700, color: '#130032', fontFamily: 'var(--ink-font-family)' }}>New vendor onboarding</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ maxWidth: 780, padding: '48px 32px 64px', marginLeft: 268 }}>
+          {/* Vendor */}
+          <h2 style={sectionHeading}>Vendor</h2>
+          <p style={sectionSub}>Set up the onboarding workflow for this vendor before the task is created.</p>
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Vendor name{req}</label>
+            <input value={vendorName} onChange={(e) => setVendorName(e.target.value)} style={inputStyle} />
+          </div>
+
+          <div style={{ marginBottom: 48 }}>
+            <label style={labelStyle}>Contact email</label>
+            <input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} style={{ ...inputStyle, width: 360 }} />
+          </div>
+
+          {/* Workflow */}
+          <h2 style={sectionHeading}>Workflow steps</h2>
+          <p style={sectionSub}>Select the steps to include in this onboarding workflow.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 48 }}>
+            {VENDOR_ONBOARDING_STEPS.map((step, i) => {
+              const checked = steps.includes(step);
+              return (
+                <label key={step} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'var(--ink-font-family)' }}>
+                  <span style={{
+                    width: 22, height: 22, borderRadius: 4, flexShrink: 0,
+                    border: checked ? 'none' : '1px solid #8B8699',
+                    background: checked ? 'var(--ink-cobalt-80, #4C00FF)' : 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {checked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                  </span>
+                  <input type="checkbox" checked={checked} onChange={() => toggleStep(step)} style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }} />
+                  <span style={{ fontSize: 15, color: '#130032' }}>{`${i + 1}. ${step}`}</span>
+                </label>
+              );
+            })}
+          </div>
+
+          <div style={{ marginBottom: 48 }}>
+            <label style={labelStyle}>Due date</label>
+            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={{ ...inputStyle, width: 224 }} />
+          </div>
+
+          {/* Assignee */}
+          <h2 style={sectionHeading}>Assignee</h2>
+          <p style={sectionSub}>Who owns this onboarding workflow?</p>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <label style={labelStyle}>First name{req}</label>
+              <input value={assigneeFirst} onChange={(e) => setAssigneeFirst(e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <label style={labelStyle}>Last name{req}</label>
+              <input value={assigneeLast} onChange={(e) => setAssigneeLast(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky footer */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, height: 76, padding: '0 32px', borderTop: '1px solid var(--ink-border-subtle, #E4E2E9)', flexShrink: 0, background: 'white' }}>
+        <button
+          onClick={onClose}
+          style={{ height: 44, padding: '0 24px', borderRadius: 4, border: '1px solid #8B8699', background: 'white', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+        >Cancel</button>
+        <button
+          onClick={handleCreate}
+          disabled={!canCreate}
+          style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: canCreate ? 'pointer' : 'default', opacity: canCreate ? 1 : 0.5, fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+        >Create task</button>
+      </div>
+    </div>
+  );
+}
+
 interface AddMenuProps {
   onSignatureRequest?: () => void;
   onAddWireTransfer?: () => void;
@@ -6043,6 +6195,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [showPrepare, setShowPrepare] = useState(false);
   const [showUploadRequest, setShowUploadRequest] = useState(false);
+  const [showVendorOnboarding, setShowVendorOnboarding] = useState(false);
   const [showFilePicker, setShowFilePicker] = useState(false);
   const [pendingPreviewDoc, setPendingPreviewDoc] = useState<string | null>(null);
   const [addedDocuments, setAddedDocuments] = useState<string[]>([]);
@@ -6393,27 +6546,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
                   isDueSoon: false,
                 }]);
               }}
-              onNewVendorOnboarding={() => {
-                const dueDate = new Date();
-                dueDate.setDate(dueDate.getDate() + 7);
-                const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
-                setSentTasks(prev => [...prev, {
-                  id: `vendor-onboarding-${Date.now()}`,
-                  title: 'New Vendor Onboarding',
-                  type: 'Other' as const,
-                  team: '',
-                  assignee: 'Vicki Vendor',
-                  assigneeInitials: 'VV',
-                  status: 'Not started',
-                  dueDate: formattedDueDate,
-                  isDueSoon: false,
-                }]);
-                setSentActivity(prev => [
-                  { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: 'added a New Vendor Onboarding task', time: 'Just now' },
-                  ...prev,
-                ]);
-                showToast('New workflow task added');
-              }}
+              onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
             />
           </Inline>
         </div>
@@ -7123,6 +7256,37 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
             ...prev,
           ]);
           showToast('Upload request sent out');
+        }}
+      />
+
+      {/* New Vendor Onboarding workflow setup (task created only after setup) */}
+      <VendorOnboardingScreen
+        open={showVendorOnboarding}
+        onClose={() => setShowVendorOnboarding(false)}
+        onCreate={(data) => {
+          const assignee = `${data.assigneeFirst} ${data.assigneeLast}`.trim();
+          const assigneeInitials = `${data.assigneeFirst[0] ?? ''}${data.assigneeLast[0] ?? ''}`.toUpperCase();
+          const due = new Date();
+          due.setDate(due.getDate() + 7);
+          const formattedDueDate = data.dueDate
+            ? (() => { const d = new Date(data.dueDate + 'T00:00:00'); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`; })()
+            : `${due.getMonth() + 1}/${due.getDate()}/${due.getFullYear().toString().slice(-2)}`;
+          setSentTasks(prev => [...prev, {
+            id: `vendor-onboarding-${Date.now()}`,
+            title: `New Vendor Onboarding — ${data.vendorName}`,
+            type: 'Other' as const,
+            team: '',
+            assignee: assignee || 'Vicki Vendor',
+            assigneeInitials: assigneeInitials || 'VV',
+            status: 'Not started',
+            dueDate: formattedDueDate,
+            isDueSoon: false,
+          }]);
+          setSentActivity(prev => [
+            { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up a ${data.steps.length}-step onboarding workflow for ${data.vendorName}`, time: 'Just now' },
+            ...prev,
+          ]);
+          showToast('Vendor onboarding workflow created');
         }}
       />
 
