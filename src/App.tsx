@@ -38,6 +38,7 @@ import {
   AlertBadge,
   Modal,
   Popover,
+  Dropdown,
   Checkbox,
   Radio,
   dataTableStyles,
@@ -1960,7 +1961,59 @@ function DocumentNamesSubtext({ names }: { names: string[] }) {
   );
 }
 
-const agreementColumns = [
+// Controls for renaming an Agreement Space directly from its table row.
+interface AgreementRenameControls {
+  renamingId: string | null;
+  renameDraft: string;
+  onRenameDraftChange: (value: string) => void;
+  onStartRename: (row: Agreement) => void;
+  onCommitRename: () => void;
+  onCancelRename: () => void;
+}
+
+// Inline text field shown in the name cell while a row is being renamed.
+function RowRenameInput({ value, onChange, onCommit, onCancel }: {
+  value: string;
+  onChange: (v: string) => void;
+  onCommit: () => void;
+  onCancel: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { inputRef.current?.focus(); inputRef.current?.select(); }, []);
+  return (
+    <input
+      ref={inputRef}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onBlur={onCommit}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+        if (e.key === 'Enter') onCommit();
+        else if (e.key === 'Escape') onCancel();
+      }}
+      aria-label="Agreement Space name"
+      style={{
+        fontSize: 'var(--ink-font-size-sm)',
+        fontWeight: 500,
+        fontFamily: 'var(--ink-font-family)',
+        color: 'var(--ink-font-color-default)',
+        border: '2px solid var(--ink-cobalt-80)',
+        borderRadius: 6,
+        padding: '2px 8px',
+        outline: 'none',
+        background: 'var(--ink-bg-color-default)',
+        width: '100%',
+        maxWidth: 280,
+      }}
+    />
+  );
+}
+
+function createAgreementColumns(rename: AgreementRenameControls) {
+  return [
   {
     key: 'name',
     header: 'Agreement Space',
@@ -1968,7 +2021,16 @@ const agreementColumns = [
     width: '30%',
     cell: (row: Agreement) => (
       <Stack gap="none" style={{ gap: 2 }}>
-        <Text size="sm" weight="medium">{row.name}</Text>
+        {rename.renamingId === row.id ? (
+          <RowRenameInput
+            value={rename.renameDraft}
+            onChange={rename.onRenameDraftChange}
+            onCommit={rename.onCommitRename}
+            onCancel={rename.onCancelRename}
+          />
+        ) : (
+          <Text size="sm" weight="medium">{row.name}</Text>
+        )}
         {row.documentNames && row.documentNames.length > 0 ? (
           <DocumentNamesSubtext names={row.documentNames} />
         ) : (
@@ -2045,11 +2107,24 @@ const agreementColumns = [
     cell: (row: Agreement) => (
       <Inline gap="small" align="center" justify="end" style={{ marginLeft: 'auto' }}>
         <Button kind="secondary" size="small">View</Button>
-        <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
+        <Dropdown
+          position="bottom"
+          align="end"
+          items={[
+            {
+              label: 'Rename',
+              icon: <Icon name="pencil" size="small" />,
+              onClick: () => rename.onStartRename(row),
+            },
+          ]}
+        >
+          <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
+        </Dropdown>
       </Inline>
     ),
   },
-];
+  ];
+}
 
 /* ═══════════════════════════════════════
    Documents Data — individual documents (Type = Documents view)
@@ -3283,7 +3358,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ════════�������������������════════════════════════════ */
+   ════��═══�������������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -8096,6 +8171,41 @@ export default function App() {
     setAgreementsList(prev => prev.map(a => (a.id === id ? { ...a, name: trimmed } : a)));
     setSelectedAgreement(prev => (prev && prev.id === id ? { ...prev, name: trimmed } : prev));
   }, []);
+
+  // Inline rename from the All Agreements row overflow menu. The draft is
+  // mirrored into a ref so a commit always reads the latest value regardless of
+  // render timing.
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState('');
+  const renameDraftRef = useRef('');
+  const setRenameDraftValue = useCallback((value: string) => {
+    renameDraftRef.current = value;
+    setRenameDraft(value);
+  }, []);
+  const startRename = useCallback((row: Agreement) => {
+    renameDraftRef.current = row.name;
+    setRenameDraft(row.name);
+    setRenamingId(row.id);
+  }, []);
+  const commitRename = useCallback(() => {
+    setRenamingId(current => {
+      if (current) handleRenameAgreement(current, renameDraftRef.current);
+      return null;
+    });
+  }, [handleRenameAgreement]);
+  const cancelRename = useCallback(() => setRenamingId(null), []);
+
+  const agreementColumns = useMemo(
+    () => createAgreementColumns({
+      renamingId,
+      renameDraft,
+      onRenameDraftChange: setRenameDraftValue,
+      onStartRename: startRename,
+      onCommitRename: commitRename,
+      onCancelRename: cancelRename,
+    }),
+    [renamingId, renameDraft, setRenameDraftValue, startRename, commitRename, cancelRename],
+  );
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
