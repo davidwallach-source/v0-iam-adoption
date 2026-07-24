@@ -2619,7 +2619,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��════════��════════════════════════════
+/* ═��════════���════════════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -6108,7 +6108,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
       onClick={onClick}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {icon}
+        <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
         <span>{label}</span>
       </div>
       {chevron && (
