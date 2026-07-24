@@ -1891,6 +1891,58 @@ function relativeDate(dateStr: string): string {
   return `${diffMonths} months ago`;
 }
 
+// Shows the document names contained in an Agreement Space as compact subtext.
+// Only the first couple of names are shown (each individually truncated so a
+// single long name can't widen the column); any remainder collapses into a
+// "+ N more" affordance that reveals the full list on hover.
+function DocumentNamesSubtext({ names }: { names: string[] }) {
+  const maxVisible = 2;
+  const visible = names.slice(0, maxVisible);
+  const remaining = names.length - visible.length;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%', overflow: 'hidden' }}>
+      {visible.map((name, i) => (
+        <span
+          key={i}
+          style={{
+            fontSize: 'var(--ink-font-size-xs)',
+            color: 'var(--ink-font-color-secondary)',
+            fontFamily: 'var(--ink-font-family)',
+            maxWidth: 130,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flexShrink: 1,
+          }}
+          title={name}
+        >
+          {name}{i < visible.length - 1 || remaining > 0 ? ',' : ''}
+        </span>
+      ))}
+      {remaining > 0 && (
+        <Tooltip text={names.join(', ')} location="below" alignment="start">
+          <span
+            style={{
+              fontSize: 'var(--ink-font-size-xs)',
+              color: 'var(--ink-font-color-secondary)',
+              fontFamily: 'var(--ink-font-family)',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              cursor: 'default',
+              textDecoration: 'underline',
+              textDecorationStyle: 'dotted',
+              textUnderlineOffset: 2,
+            }}
+          >
+            + {remaining} more
+          </span>
+        </Tooltip>
+      )}
+    </div>
+  );
+}
+
 const agreementColumns = [
   {
     key: 'name',
@@ -1901,14 +1953,7 @@ const agreementColumns = [
       <Stack gap="none" style={{ gap: 2 }}>
         <Text size="sm" weight="medium">{row.name}</Text>
         {row.documentNames && row.documentNames.length > 0 ? (
-          <Text
-            size="xs"
-            color="secondary"
-            title={row.documentNames.join(', ')}
-            style={{ display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-          >
-            {row.documentNames.join(', ')}
-          </Text>
+          <DocumentNamesSubtext names={row.documentNames} />
         ) : (
           <Text size="xs" color="secondary">{row.agreementType} · {row.dealValue}</Text>
         )}
@@ -2158,7 +2203,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
   return null;
 }
 
-/* ════════════════════════════════════��══
+/* ══════════════════════════════════��═��══
    FilterMenu — multi-select dropdown for the agreements filter bar
    ═══════════════════════════════════════ */
 
