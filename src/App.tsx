@@ -1891,7 +1891,7 @@ function relativeDate(dateStr: string): string {
 const agreementColumns = [
   {
     key: 'name',
-    header: 'Agreement',
+    header: 'Agreement Space',
     sortable: true,
     width: '30%',
     cell: (row: Agreement) => (
