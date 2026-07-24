@@ -2071,7 +2071,7 @@ const documentColumns: any[] = [
   },
 ];
 
-/* ═══════════════════════════════════════
+/* ═════════════════════════════════���═════
    Folders Data — hierarchical folder/document tree
    ═══════════════════════════════════════ */
 
@@ -2158,7 +2158,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
   return null;
 }
 
-/* ═══════════════════════════════════════
+/* ════════════════════════════════════��══
    FilterMenu — multi-select dropdown for the agreements filter bar
    ═══════════════════════════════════════ */
 
@@ -2577,7 +2577,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════════════════════════════
+/* ═══════════════���═══════════════════════
    Insights Reports Data
    ═══════════════════════════════════════ */
 
@@ -9034,7 +9034,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
+          name: 'Untitled Agreement Space',
+          documentNames: ['Non-Disclosure Agreement'],
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
           status: 'In Progress',
@@ -9180,7 +9181,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: ndaId,
             entityKind: 'space',
             workspaceKind: 'nda',
-            name: savedNDAData?.receivingParty ? `NDA - ${savedNDAData.receivingParty}` : 'Non-Disclosure Agreement',
+            name: 'Untitled Agreement Space',
+            documentNames: ['Non-Disclosure Agreement'],
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
             status: 'In Progress',
@@ -9215,7 +9217,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: newId,
             entityKind: 'space',
             workspaceKind: 'uploaded',
-            name: docName,
+            name: 'Untitled Agreement Space',
+            documentNames: documents && documents.length > 0 ? documents : [docName],
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
             status: 'In Progress',
