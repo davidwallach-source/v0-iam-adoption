@@ -5992,7 +5992,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" onClick={() => { setOpen(o => !o); setTasksOpen(false); }}>Add</Button>
+      <Button kind="primary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setTasksOpen(false); }}>Add</Button>
 
       {open && (
         <div style={{
