@@ -1646,6 +1646,10 @@ interface Agreement {
   // Names of the documents contained in this Agreement Space. Shown as subtext
   // in the All Agreements table.
   documentNames?: string[];
+  // Names of external participants (e.g. an NDA receiving party or the
+  // recipients of a signature request). Listed in the Parties column with a
+  // "+ N" overflow affordance when there are more than fit.
+  externalParticipants?: string[];
   // Explicit classification for the Type filter. When set, it overrides the
   // documentsCount heuristic. Workspaces created via "Start New" are always
   // Agreement Spaces so they appear under the default "Agreement Spaces" view.
@@ -1961,6 +1965,57 @@ function DocumentNamesSubtext({ names }: { names: string[] }) {
   );
 }
 
+// Lists external participants in the Parties column. Shows the first name
+// (truncated so it can't widen the narrow column) followed by a "+ N" overflow
+// badge that reveals the full list on hover.
+function ParticipantNames({ names }: { names: string[] }) {
+  if (names.length === 0) {
+    return <Text size="sm" color="secondary">—</Text>;
+  }
+  const [first, ...rest] = names;
+  return (
+    <Inline gap="small" align="center" justify="start" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <span
+        style={{
+          fontSize: 'var(--ink-font-size-sm)',
+          color: 'var(--ink-font-color-default)',
+          fontFamily: 'var(--ink-font-family)',
+          maxWidth: 120,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          minWidth: 0,
+        }}
+        title={first}
+      >
+        {first}
+      </span>
+      {rest.length > 0 && (
+        <Tooltip text={names.join(', ')} location="below" alignment="start">
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              flexShrink: 0,
+              fontSize: 'var(--ink-font-size-xs)',
+              fontWeight: 500,
+              color: 'var(--ink-cobalt-80)',
+              fontFamily: 'var(--ink-font-family)',
+              background: 'var(--ink-cobalt-10)',
+              borderRadius: 10,
+              padding: '1px 8px',
+              cursor: 'default',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            + {rest.length}
+          </span>
+        </Tooltip>
+      )}
+    </Inline>
+  );
+}
+
 // Controls for renaming an Agreement Space directly from its table row.
 interface AgreementRenameControls {
   renamingId: string | null;
@@ -2065,13 +2120,10 @@ function createAgreementColumns(rename: AgreementRenameControls) {
   {
     key: 'parties',
     header: 'Parties',
-    alignment: 'center',
-    width: '12%',
+    alignment: 'start',
+    width: '15%',
     cell: (row: Agreement) => (
-      <Inline gap="small" align="center" justify="center">
-        <Text size="sm">1</Text>
-        <Text size="xs" color="secondary" style={{ color: 'var(--ink-cobalt-80)' }}>ext</Text>
-      </Inline>
+      <ParticipantNames names={row.externalParticipants ?? (row.party && row.party !== '—' ? [row.party] : [])} />
     ),
   },
   {
@@ -8157,7 +8209,22 @@ export default function App() {
     AGREEMENTS_DATA.map(a => {
       const ws = AGREEMENT_WORKSPACE_DATA[a.id];
       const docNames = ws?.documents?.map(d => d.name) ?? [];
-      return docNames.length ? { ...a, documentNames: docNames } : a;
+      // External participants: the counterparty plus anyone assigned a signing
+      // task, excluding the current user. This mirrors how new spaces capture
+      // their receiving party / signature recipients.
+      const signerNames = (ws?.tasks ?? [])
+        .filter(t => t.type === 'Sign')
+        .map(t => t.assignee)
+        .filter(name => name && name !== 'You' && name !== 'Me');
+      const participants = Array.from(new Set([
+        ...(a.party && a.party !== '—' ? [a.party] : []),
+        ...signerNames,
+      ]));
+      return {
+        ...a,
+        ...(docNames.length ? { documentNames: docNames } : {}),
+        ...(participants.length ? { externalParticipants: participants } : {}),
+      };
     })
   );
 
@@ -9210,6 +9277,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           documentNames: ['Non-Disclosure Agreement'],
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
+          externalParticipants: data.receivingParty ? [data.receivingParty] : [],
           status: 'In Progress',
           statusIcon: 'clock',
           statusKind: 'info',
@@ -9248,6 +9316,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
+          externalParticipants: data.receivingParty ? [data.receivingParty] : [],
           status: 'In Progress',
           statusIcon: 'clock',
           statusKind: 'info',
@@ -9314,6 +9383,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       preselectedDocs={rootPreparePreselectedDocs}
       onSend={(documents, recipients) => {
         const recipientName = recipients && recipients.length > 0 ? recipients[0].name : '';
+        const recipientNames = (recipients ?? []).map(r => r.name).filter(Boolean);
 
         // Signature sent from the global doc-preview header while an agreement
         // workspace is open: keep the workspace (name, documents, needs
@@ -9357,6 +9427,10 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             documentNames: ['Non-Disclosure Agreement'],
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
+            externalParticipants: Array.from(new Set([
+              ...(savedNDAData?.receivingParty ? [savedNDAData.receivingParty] : []),
+              ...recipientNames,
+            ])),
             status: 'In Progress',
             statusIcon: 'clock',
             statusKind: 'info',
@@ -9393,6 +9467,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             documentNames: documents && documents.length > 0 ? documents : [docName],
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
+            externalParticipants: recipientNames,
             status: 'In Progress',
             statusIcon: 'clock',
             statusKind: 'info',
