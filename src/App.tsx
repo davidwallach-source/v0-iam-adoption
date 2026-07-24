@@ -1901,31 +1901,48 @@ function DocumentNamesSubtext({ names }: { names: string[] }) {
   const remaining = names.length - visible.length;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%', overflow: 'hidden' }}>
-      {visible.map((name, i) => (
-        <span
-          key={i}
-          style={{
-            fontSize: 'var(--ink-font-size-xs)',
-            color: 'var(--ink-font-color-secondary)',
-            fontFamily: 'var(--ink-font-family)',
-            maxWidth: 130,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flexShrink: 1,
-          }}
-          title={name}
-        >
-          {name}{i < visible.length - 1 || remaining > 0 ? ',' : ''}
-        </span>
-      ))}
+    <div style={{ display: 'flex', alignItems: 'center', maxWidth: '100%', overflow: 'hidden' }}>
+      {visible.map((name, i) => {
+        const showComma = i < visible.length - 1 || remaining > 0;
+        return (
+          <span key={i} style={{ display: 'inline-flex', minWidth: 0, marginRight: showComma ? 4 : 0 }}>
+            <span
+              style={{
+                fontSize: 'var(--ink-font-size-xs)',
+                color: 'var(--ink-font-color-tertiary)',
+                fontFamily: 'var(--ink-font-family)',
+                maxWidth: 130,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flexShrink: 1,
+                minWidth: 0,
+              }}
+              title={name}
+            >
+              {name}
+            </span>
+            {showComma && (
+              <span
+                style={{
+                  fontSize: 'var(--ink-font-size-xs)',
+                  color: 'var(--ink-font-color-tertiary)',
+                  fontFamily: 'var(--ink-font-family)',
+                  flexShrink: 0,
+                }}
+              >
+                ,
+              </span>
+            )}
+          </span>
+        );
+      })}
       {remaining > 0 && (
         <Tooltip text={names.join(', ')} location="below" alignment="start">
           <span
             style={{
               fontSize: 'var(--ink-font-size-xs)',
-              color: 'var(--ink-font-color-secondary)',
+              color: 'var(--ink-font-color-tertiary)',
               fontFamily: 'var(--ink-font-family)',
               whiteSpace: 'nowrap',
               flexShrink: 0,
