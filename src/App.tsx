@@ -2619,7 +2619,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��═════════════════════════════════════
+/* ═��════════��════════════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -5965,25 +5965,13 @@ interface AddMenuProps {
 
 function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument }: AddMenuProps) {
   const [open, setOpen] = useState(false);
-  const [tasksOpen, setTasksOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const tasksCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const openTasks = () => {
-    if (tasksCloseTimer.current) clearTimeout(tasksCloseTimer.current);
-    setTasksOpen(true);
-  };
-
-  const closeTasks = () => {
-    tasksCloseTimer.current = setTimeout(() => setTasksOpen(false), 150);
-  };
 
   // Close on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
-        setTasksOpen(false);
       }
     }
     if (open) document.addEventListener('mousedown', handleClick);
@@ -5992,7 +5980,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setTasksOpen(false); }}>Add</Button>
+      <Button kind="primary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add</Button>
 
       {open && (
         <div style={{
@@ -6016,7 +6004,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               </svg>
             }
             label="Document"
-            onClick={() => { setOpen(false); setTasksOpen(false); onDocument?.(); }}
+            onClick={() => { setOpen(false); onDocument?.(); }}
           />
 
           {/* Signature Request */}
@@ -6027,7 +6015,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               </svg>
             }
             label="Signature Request"
-            onClick={() => { setOpen(false); setTasksOpen(false); onSignatureRequest?.(); }}
+            onClick={() => { setOpen(false); onSignatureRequest?.(); }}
           />
 
           {/* Form */}
@@ -6038,94 +6026,53 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               </svg>
             }
             label="Form"
-            onClick={() => { setOpen(false); setTasksOpen(false); }}
+            onClick={() => { setOpen(false); }}
           />
 
           {/* Divider */}
           <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
 
-          {/* Other Tasks — with nested submenu */}
-          <div
-            style={{ position: 'relative' }}
-            onMouseEnter={openTasks}
-            onMouseLeave={closeTasks}
-          >
-            <MenuRow
-              icon={
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="#130032" strokeWidth="1.3" fill="none"/>
-                  <path d="M5 8l2 2 4-4" stroke="#130032" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              }
-              label="Other Tasks"
-              chevron
-            />
-
-            {tasksOpen && (
-              <div
-                onMouseEnter={openTasks}
-                onMouseLeave={closeTasks}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 'calc(100% + 2px)',
-                  background: 'white',
-                  border: '1px solid var(--ink-border-subtle)',
-                  borderRadius: 8,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-                  zIndex: 201,
-                  minWidth: 220,
-                  padding: 4,
-                }}>
-                {/* Invisible bridge to prevent hover gap */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '100%',
-                  width: 10,
-                  height: '100%',
-                  background: 'transparent',
-                }} />
-                <MenuRow
-                  icon={
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
-                    </svg>
-                  }
-                  label="Upload request"
-                  onClick={() => { setOpen(false); setTasksOpen(false); onUploadRequest?.(); }}
-                />
-                <MenuRow
-                  icon={
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6V18H4V6H20ZM21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM13 15C13 13.35 11.65 12 10 12H8C6.35 12 5 13.35 5 15V16H7V15C7 14.45 7.45 14 8 14H10C10.55 14 11 14.45 11 15V16H13V15ZM11 9C11 7.9 10.1 7 9 7C7.9 7 7 7.9 7 9C7 10.1 7.9 11 9 11C10.1 11 11 10.1 11 9ZM19 8H14V10H19V8ZM19 12H14V14H19V12Z" fill="#130032" fillOpacity="0.9"/>
-                    </svg>
-                  }
-                  label="Identity verification"
-                  onClick={() => { setOpen(false); setTasksOpen(false); }}
-                />
-                <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
-                <MenuRow
-                  icon={
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-                    </svg>
-                  }
-                  label="Wire Transfer Request"
-                  onClick={() => { setOpen(false); setTasksOpen(false); onAddWireTransfer?.(); }}
-                />
-                <MenuRow
-                  icon={
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-                    </svg>
-                  }
-            label="New Vendor Onboarding"
-            onClick={() => { setOpen(false); setTasksOpen(false); onNewVendorOnboarding?.(); }}
+          {/* Flattened task items (formerly "Other Tasks" submenu) */}
+          <MenuRow
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
+              </svg>
+            }
+            label="Upload request"
+            onClick={() => { setOpen(false); onUploadRequest?.(); }}
           />
-              </div>
-            )}
-          </div>
+          <MenuRow
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6V18H4V6H20ZM21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM13 15C13 13.35 11.65 12 10 12H8C6.35 12 5 13.35 5 15V16H7V15C7 14.45 7.45 14 8 14H10C10.55 14 11 14.45 11 15V16H13V15ZM11 9C11 7.9 10.1 7 9 7C7.9 7 7 7.9 7 9C7 10.1 7.9 11 9 11C10.1 11 11 10.1 11 9ZM19 8H14V10H19V8ZM19 12H14V14H19V12Z" fill="#130032" fillOpacity="0.9"/>
+              </svg>
+            }
+            label="Identity verification"
+            onClick={() => { setOpen(false); }}
+          />
+
+          {/* Divider */}
+          <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+
+          <MenuRow
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+              </svg>
+            }
+            label="Wire Transfer Request"
+            onClick={() => { setOpen(false); onAddWireTransfer?.(); }}
+          />
+          <MenuRow
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+              </svg>
+            }
+            label="New Vendor Onboarding"
+            onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
+          />
         </div>
       )}
     </div>
