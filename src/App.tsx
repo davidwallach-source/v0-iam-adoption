@@ -5992,7 +5992,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           borderRadius: 8,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
           zIndex: 200,
-          minWidth: 180,
+          minWidth: 264,
           padding: 4,
         }}>
           {/* Document */}
