@@ -103,6 +103,7 @@ export const GlobalNav = ({
               <a
                 key={item.id}
                 href={item.href || '#'}
+                data-nav-id={item.id}
                 className={`${styles.navItem} ${item.active ? styles.navItemActive : ''}`}
                 onClick={(e) => {
                   if (item.onClick) {

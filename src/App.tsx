@@ -7912,6 +7912,8 @@ export default function App() {
   const [filterOwner, setFilterOwner] = useState<Set<string>>(new Set());
   const [templatesSidebarView, setTemplatesSidebarView] = useState<TemplatesSidebarView>('my-templates');
   const [insightsSidebarView, setInsightsSidebarView] = useState<InsightsSidebarView>('overview');
+  // Callout shown when clicking a nav tab that isn't available in the prototype.
+  const [unavailableCallout, setUnavailableCallout] = useState<{ left: number; top: number } | null>(null);
   const [search, setSearch] = useState('');
   const [showAgreementDetail, setShowAgreementDetail] = useState(false);
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
@@ -8017,6 +8019,33 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     if (tabId === 'insights') setInsightsSidebarView('overview');
   }, []);
 
+  // Tabs that are intentionally not navigable in the prototype. Clicking one
+  // surfaces a small callout anchored beneath the tab instead of navigating.
+  const handleUnavailableTabClick = useCallback((tabId: string) => {
+    const el = document.querySelector<HTMLElement>(`[data-nav-id="${tabId}"]`);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setUnavailableCallout({ left: rect.left + rect.width / 2, top: rect.bottom });
+    }
+  }, []);
+
+  // Dismiss the callout on any outside click or on Escape.
+  useEffect(() => {
+    if (!unavailableCallout) return;
+    const dismiss = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-unavailable-callout]') || target.closest('[data-nav-id]')) return;
+      setUnavailableCallout(null);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setUnavailableCallout(null); };
+    document.addEventListener('mousedown', dismiss);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', dismiss);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [unavailableCallout]);
+
   /* ── GlobalNav — matches production DocuSign comp ─��� */
   const globalNavConfig = {
     logo: <img src="/docusign-logo.svg" alt="DocuSign" />,
@@ -8025,9 +8054,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     navItems: [
       { id: 'home',       label: 'Home',        active: activeTab === 'home',       onClick: () => handleTabClick('home') },
       { id: 'agreements', label: 'Agreements',   active: activeTab === 'agreements', onClick: () => handleTabClick('agreements') },
-      { id: 'templates',  label: 'Templates',    active: activeTab === 'templates',  onClick: () => handleTabClick('templates') },
-      { id: 'insights',   label: 'Insights',     active: activeTab === 'insights',   onClick: () => handleTabClick('insights') },
-      { id: 'admin',      label: 'Admin',        active: activeTab === 'admin',      onClick: () => handleTabClick('admin') },
+      { id: 'templates',  label: 'Templates',    active: false, onClick: () => handleUnavailableTabClick('templates') },
+      { id: 'insights',   label: 'Insights',     active: false, onClick: () => handleUnavailableTabClick('insights') },
+      { id: 'admin',      label: 'Admin',        active: false, onClick: () => handleUnavailableTabClick('admin') },
     ],
     showSettings: true,
     settingsIcon: 'sliders-horizontal' as const,
@@ -8693,6 +8722,42 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       </FadeIn>
       <Footer />
     </DocuSignShell>
+    {unavailableCallout && (
+      <div
+        data-unavailable-callout
+        role="status"
+        style={{
+          position: 'fixed',
+          left: unavailableCallout.left,
+          top: unavailableCallout.top + 8,
+          transform: 'translateX(-50%)',
+          zIndex: 2000,
+          maxWidth: 240,
+          padding: '10px 14px',
+          borderRadius: 8,
+          background: 'var(--ink-font-color-default)',
+          color: 'var(--ink-white-100)',
+          fontFamily: 'var(--ink-font-family)',
+          fontSize: 'var(--ink-font-size-sm)',
+          lineHeight: 1.4,
+          boxShadow: '0 8px 24px rgba(19,0,50,0.24)',
+        }}
+      >
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: -5,
+            left: '50%',
+            transform: 'translateX(-50%) rotate(45deg)',
+            width: 10,
+            height: 10,
+            background: 'var(--ink-font-color-default)',
+          }}
+        />
+        This page isn&apos;t available in the prototype
+      </div>
+    )}
     {showAgreementDetail && (
       <AgreementDetailView onClose={() => setShowAgreementDetail(false)} />
     )}
