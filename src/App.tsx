@@ -1642,6 +1642,9 @@ interface Agreement {
   documentsCount?: number;
   tasksCount?: number;
   tasksPending?: number;
+  // Names of the documents contained in this Agreement Space. Shown as subtext
+  // in the All Agreements table.
+  documentNames?: string[];
   // Explicit classification for the Type filter. When set, it overrides the
   // documentsCount heuristic. Workspaces created via "Start New" are always
   // Agreement Spaces so they appear under the default "Agreement Spaces" view.
@@ -1897,7 +1900,18 @@ const agreementColumns = [
     cell: (row: Agreement) => (
       <Stack gap="none" style={{ gap: 2 }}>
         <Text size="sm" weight="medium">{row.name}</Text>
-        <Text size="xs" color="secondary">{row.agreementType} · {row.dealValue}</Text>
+        {row.documentNames && row.documentNames.length > 0 ? (
+          <Text
+            size="xs"
+            color="secondary"
+            title={row.documentNames.join(', ')}
+            style={{ display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          >
+            {row.documentNames.join(', ')}
+          </Text>
+        ) : (
+          <Text size="xs" color="secondary">{row.agreementType} · {row.dealValue}</Text>
+        )}
       </Stack>
     ),
   },
@@ -4953,6 +4967,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
 interface WorkspaceViewProps {
   agreement: Agreement;
   onClose: () => void;
+  onRename?: (name: string) => void;
   onEditNDA?: () => void;
   savedNDAData?: NDAFormData | null;
   ndaSentForSignature?: boolean;
@@ -6125,7 +6140,87 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
   );
 }
 
-function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks, injectedSignatureDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
+// Click-to-edit Agreement Space title shown in the workspace header. Clicking
+// the name turns it into an inline text field (Google Docs style); Enter or
+// blur commits, Escape cancels.
+function EditableSpaceName({ name, onRename }: { name: string; onRename?: (name: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setDraft(name); }, [name]);
+  useEffect(() => {
+    if (editing) { inputRef.current?.focus(); inputRef.current?.select(); }
+  }, [editing]);
+
+  const titleFontStyle: React.CSSProperties = {
+    fontSize: 20,
+    fontWeight: 600,
+    fontFamily: 'var(--ink-font-family)',
+    color: 'var(--ink-font-color-default)',
+    lineHeight: 1.3,
+  };
+
+  if (!onRename) return <Heading level={3} style={{ margin: 0 }}>{name}</Heading>;
+
+  const commit = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== name) onRename(trimmed);
+    else setDraft(name);
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+          if (e.key === 'Enter') commit();
+          else if (e.key === 'Escape') { setDraft(name); setEditing(false); }
+        }}
+        aria-label="Agreement Space name"
+        style={{
+          ...titleFontStyle,
+          border: '2px solid var(--ink-cobalt-80)',
+          borderRadius: 6,
+          padding: '2px 8px',
+          margin: 0,
+          outline: 'none',
+          background: 'var(--ink-bg-color-default)',
+          minWidth: 320,
+        }}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      title="Click to rename"
+      style={{
+        ...titleFontStyle,
+        background: 'none',
+        border: '1px solid transparent',
+        borderRadius: 6,
+        padding: '2px 8px',
+        margin: '0 -8px',
+        cursor: 'text',
+        textAlign: 'left',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'; e.currentTarget.style.background = 'var(--ink-bg-color-secondary)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.background = 'none'; }}
+    >
+      {name}
+    </button>
+  );
+}
+
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks, injectedSignatureDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -6454,7 +6549,7 @@ function WorkspaceView({ agreement, onClose, onEditNDA, savedNDAData, ndaSentFor
             <Icon name="arrow-left" size={20} />
           </button>
           <Inline gap="medium" align="center">
-            <Heading level={3} style={{ margin: 0 }}>{agreement.name}</Heading>
+            <EditableSpaceName name={agreement.name} onRename={onRename} />
             <StatusLight
               kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
               text={agreement.status}
@@ -7919,11 +8014,26 @@ export default function App() {
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
   const [showDealWorkspace, setShowDealWorkspace] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
-  const [agreementsList, setAgreementsList] = useState<Agreement[]>(AGREEMENTS_DATA);
+  const [agreementsList, setAgreementsList] = useState<Agreement[]>(() =>
+    // Attach the contained document names (shown as subtext in the All
+    // Agreements table) by deriving them from each space's workspace data.
+    AGREEMENTS_DATA.map(a => {
+      const ws = AGREEMENT_WORKSPACE_DATA[a.id];
+      const docNames = ws?.documents?.map(d => d.name) ?? [];
+      return docNames.length ? { ...a, documentNames: docNames } : a;
+    })
+  );
 
   const addNewAgreement = (agreement: Agreement) => {
     setAgreementsList(prev => [agreement, ...prev.filter(a => a.id !== agreement.id)]);
   };
+
+  // Rename an Agreement Space in place (from the workspace's editable title).
+  const handleRenameAgreement = useCallback((id: string, name: string) => {
+    const trimmed = name.trim() || 'Untitled Agreement Space';
+    setAgreementsList(prev => prev.map(a => (a.id === id ? { ...a, name: trimmed } : a)));
+    setSelectedAgreement(prev => (prev && prev.id === id ? { ...prev, name: trimmed } : prev));
+  }, []);
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
   const [ndaAgreementId, setNdaAgreementId] = useState<string | null>(null);
@@ -8764,6 +8874,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     {showDealWorkspace && selectedAgreement && (
       <WorkspaceView 
         agreement={selectedAgreement} 
+        onRename={(name) => handleRenameAgreement(selectedAgreement.id, name)}
         onClose={() => {
           setShowDealWorkspace(false);
           setSelectedAgreement(null);
@@ -8814,9 +8925,10 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: newId,
             entityKind: 'space',
             workspaceKind: 'uploaded',
-            name: docName,
+            name: 'Untitled Agreement Space',
+            documentNames: [docName],
             party: '—',
-            partyLogo: docName.substring(0, 2).toUpperCase(),
+            partyLogo: 'UA',
             status: 'Draft',
             statusIcon: 'clock',
             statusKind: 'neutral',
