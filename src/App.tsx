@@ -4413,7 +4413,8 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-          <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}>Send for Approval</Button>
+                <Button kind="tertiary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
+                <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}>Send for Approval</Button>
           <Button kind="primary" size="small" onClick={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}>Send for Signature</Button>
         </div>
       </div>
