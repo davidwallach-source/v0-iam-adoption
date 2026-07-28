@@ -1708,10 +1708,10 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '8', title: 'Sign Data Processing Agreement', type: 'Sign', team: 'External', assignee: 'Globex Industries', assigneeInitials: 'GI', status: 'Not started', dueDate: '5/12/26' },
     ],
     documents: [
-    { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 5, status: 'In Review', dateModified: '4/24/2026' },
+    { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 5, status: 'In Review', value: '$2.4M', dateModified: '4/24/2026' },
     { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 8, status: 'In Review', dateModified: '4/23/2026' },
     { id: '3', name: 'Security & Compliance Addendum', commentCount: 2, status: 'In Review', dateModified: '4/22/2026' },
-    { id: '4', name: 'Service Level Agreement (SLA)', status: 'In Review', dateModified: '4/20/2026' },
+    { id: '4', name: 'Service Level Agreement (SLA)', status: 'In Review', value: '$480K', dateModified: '4/20/2026' },
       { id: '5', name: 'Non-Disclosure Agreement', status: 'Executed', owner: 'Laura Chen', ownerInitials: 'LC', dateModified: '3/10/2026' },
     ],
     supplementalDocs: [
@@ -2333,7 +2333,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
   return null;
 }
 
-/* ══════════════════════════════════��═��══
+/* ══════════════════════════════════��═���══
    FilterMenu — multi-select dropdown for the agreements filter bar
    ═══════════════════════════════════════ */
 
@@ -2688,7 +2688,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═�������═══════════════════════════════════
+/* ═�������═══════════════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -3494,6 +3494,7 @@ interface DealDocument {
   status: 'In Review' | 'Executed' | 'Pending Signature' | 'Draft';
   owner?: string;
   ownerInitials?: string;
+  value?: string;
   dateModified: string;
   isParent?: boolean;
   parentId?: string;
@@ -3515,7 +3516,7 @@ const DEAL_TASKS: DealTask[] = [
 ];
 
 const DEAL_DOCUMENTS: DealDocument[] = [
-    { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 3, status: 'In Review', dateModified: '3/15/2026' },
+    { id: '1', name: 'Master Service Agreement (MSA)', commentCount: 3, status: 'In Review', value: '$2.4M', dateModified: '3/15/2026' },
     { id: '2', name: 'Data Processing Agreement (DPA)', commentCount: 2, status: 'In Review', dateModified: '3/20/2026' },
     { id: '3', name: 'Security Terms', status: 'In Review', dateModified: '3/22/2026' },
     { id: '4', name: 'AI Addendum', commentCount: 5, status: 'In Review', dateModified: '3/23/2026' },
@@ -6953,14 +6954,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                             />
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '45%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '38%' }}>
                             <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '18%' }}>Status</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '22%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>Status</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '12%' }}>Value</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>
                             <Inline gap="xsmall" align="center">Last modified <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Actions</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '14%' }}>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -7027,6 +7029,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       </div>
                                     )}
                                   </td>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                    <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>NA</Text>
+                                  </td>
                                   <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
                                     {envelope.documents[0]?.dateModified}
                                   </td>
@@ -7057,6 +7062,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     </td>
                                     <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                       {/* Status inherited from envelope */}
+                                    </td>
+                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                      {/* Value inherited from envelope */}
                                     </td>
                                     <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                       {/* Date inherited from envelope */}
@@ -7135,6 +7143,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 ) : (
                                   <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                                 )}
+                              </td>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{doc.value || 'NA'}</Text>
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
