@@ -4,6 +4,12 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; overflow: hidden; }
 
+/* Render "In Progress" / "In Review" status lights in black instead of the
+   default cobalt/purple emphasis color. Targets StatusLight's internal dot and
+   text structurally since those use hashed CSS-module class names. */
+[data-ink-component="StatusLight"].status-black > div > div { background-color: #000000 !important; }
+[data-ink-component="StatusLight"].status-black > span { color: #000000 !important; }
+
 html {
   -webkit-text-size-adjust: 100%;
   line-height: 1.5;

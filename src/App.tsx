@@ -2101,6 +2101,7 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     cell: (row: Agreement) => (
       <StatusLight
         noFill
+        className={/^in (progress|review)$/i.test(row.status) ? 'status-black' : undefined}
         kind={row.statusKind === 'success' ? 'success' : row.statusKind === 'warning' ? 'warning' : row.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
         text={row.status}
       />
@@ -3566,7 +3567,7 @@ const TEAM_PROGRESS = [
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
    and an AI-Assisted panel. Fully self-contained / controllable.
-   ═════════════════════════�������═════════════ */
+   ═════════════════════════���������═════════════ */
 
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
@@ -6774,6 +6775,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             })()}
             <StatusLight
               noFill
+              className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
               kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
               text={agreement.status}
             />
@@ -7135,7 +7137,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     </Text>
                                   </div>
                                 ) : (
-                                  <StatusLight noFill kind={getStatusLightKind(doc.status)} text={doc.status} />
+                                  <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                                 )}
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
@@ -7304,6 +7306,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Status</Text>
                       <StatusLight
+                        noFill
+                        className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
                         kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
                         text={agreement.status}
                       />
@@ -7381,7 +7385,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         )}
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <StatusLight noFill kind={getStatusLightKind(task.status)} text={task.status} />
+                              <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
