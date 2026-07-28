@@ -7599,7 +7599,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <Text size="xs" color="secondary">Previous positions and outcomes with this party</Text>
                     </div>
                     <Inline gap="small">
-                      <Button kind="tertiary" size="small">View all</Button>
+                      <Button kind="secondary" size="small">View all</Button>
                       <IconButton icon="chevron-left" variant="tertiary" size="small" aria-label="Previous" />
                       <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="Next" />
                     </Inline>
