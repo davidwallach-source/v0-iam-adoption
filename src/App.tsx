@@ -2333,7 +2333,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
   return null;
 }
 
-/* ══════════════════════════════════��═���══
+/* ══════════════════════════════��═══��═���══
    FilterMenu — multi-select dropdown for the agreements filter bar
    ═══════════════════════════════════════ */
 
@@ -2605,7 +2605,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�����������═���������������═���═�����������═════��════════════════════════
+/* ══�����������═���������������═���═�����������═════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -2688,7 +2688,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═�������═══════════════════���═══════════════
+/* ═�������═══════��═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -6171,7 +6171,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="secondary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>More</Button>
+      <Button kind="secondary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Other</Button>
 
       {open && (
         <div style={{
