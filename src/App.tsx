@@ -3566,7 +3566,7 @@ const TEAM_PROGRESS = [
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
    and an AI-Assisted panel. Fully self-contained / controllable.
-   ═════════════════════════���═════════════ */
+   ═════════════════════════�����═════════════ */
 
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
@@ -6878,7 +6878,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
                   {/* Single CTA to add a document to the Agreement Space */}
-                  <Button kind="primary" size="small" onClick={() => setShowFilePicker(true)}>
+                  <Button kind="secondary" size="small" onClick={() => setShowFilePicker(true)}>
                     Add Document
                   </Button>
                 </div>
