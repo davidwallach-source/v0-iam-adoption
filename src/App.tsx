@@ -6834,7 +6834,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <div style={{ marginBottom: 'var(--ink-spacing-400)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                     <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Needs Attention</Text>
-                    <Button kind="tertiary" size="small">View all</Button>
+                    <Link href="#" size="small">View all</Link>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(currentAttentionItems.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
                     {currentAttentionItems.slice(0, 3).map((item) => (
