@@ -3566,7 +3566,7 @@ const TEAM_PROGRESS = [
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
    and an AI-Assisted panel. Fully self-contained / controllable.
-   ═══════════════════════════════════════ */
+   ═════════════════════════���═════════════ */
 
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
@@ -6877,36 +6877,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                  {/* Primary / Supplemental toggle */}
-                  <div style={{
-                    display: 'flex',
-                    background: 'var(--ink-bg-color-secondary)',
-                    border: '1px solid var(--ink-border-subtle)',
-                    borderRadius: 6,
-                    padding: 2,
-                    gap: 2,
-                  }}>
-                    {(['negotiating', 'supplemental'] as const).map((sub) => (
-                      <button
-                        key={sub}
-                        onClick={() => setDocSubTab(sub)}
-                        style={{
-                          background: docSubTab === sub ? 'var(--ink-white-100)' : 'transparent',
-                          border: docSubTab === sub ? '1px solid var(--ink-border-subtle)' : '1px solid transparent',
-                          borderRadius: 4,
-                          padding: '4px 12px',
-                          fontSize: 'var(--ink-font-size-sm)',
-                          fontWeight: docSubTab === sub ? 600 : 400,
-                          color: docSubTab === sub ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
-                          cursor: 'pointer',
-                          fontFamily: 'var(--ink-font-family-default)',
-                          transition: 'all 0.15s',
-                        }}
-                      >
-                        {sub === 'negotiating' ? 'Primary' : 'Supplemental'}
-                      </button>
-                    ))}
-                  </div>
+                  {/* Single CTA to add a document to the Agreement Space */}
+                  <Button kind="primary" size="small" onClick={() => setShowFilePicker(true)}>
+                    Add Document
+                  </Button>
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
