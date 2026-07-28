@@ -8423,7 +8423,6 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         id: 'agreements',
         items: [
           { id: 'all-agreements', label: 'All Agreements', icon: 'envelope' as const, onClick: () => setSidebarView('all-agreements') },
-          { id: 'drafts', label: 'Drafts', nested: true, onClick: () => setSidebarView('drafts') },
           { id: 'in-progress', label: 'In Progress', nested: true, onClick: () => setSidebarView('in-progress') },
           { id: 'completed', label: 'Completed', nested: true, onClick: () => setSidebarView('completed') },
         ],
