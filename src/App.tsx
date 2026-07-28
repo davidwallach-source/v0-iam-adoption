@@ -2333,7 +2333,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
   return null;
 }
 
-/* ══════════════════════════════��═══��═���══
+/* ══════════════════════════════���═══��═���══
    FilterMenu — multi-select dropdown for the agreements filter bar
    ═══════════════════════════════════════ */
 
@@ -2688,7 +2688,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═�������═════��═��═══════════���═══════════════
+/* ═�������═════��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -6870,12 +6870,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                  {/* Single CTA to add a document to the Agreement Space */}
-                  <Button kind="secondary" size="small" onClick={() => setShowFilePicker(true)}>
-                    Add Document
-                  </Button>
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
