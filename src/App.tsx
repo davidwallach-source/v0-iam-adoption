@@ -3566,7 +3566,7 @@ const TEAM_PROGRESS = [
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
    and an AI-Assisted panel. Fully self-contained / controllable.
-   ═════════════════════════�����═════════════ */
+   ═════════════════════════�������═════════════ */
 
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
@@ -6695,15 +6695,23 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     fontFamily: 'var(--ink-font-family-default)',
   });
 
-  const getStatusBadgeStyle = (status: string): CSSProperties => {
-    if (status === 'In progress') return { background: 'var(--ink-cobalt-20)', color: 'var(--ink-cobalt-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    if (status === 'Not started') return { background: 'var(--ink-neutral-20)', color: 'var(--ink-neutral-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    if (status === 'Complete') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    if (status === 'In Review') return { background: 'var(--ink-cobalt-20)', color: 'var(--ink-cobalt-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    if (status === 'Executed') return { background: 'var(--ink-green-20)', color: 'var(--ink-green-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    if (status === 'Pending Signature') return { background: 'var(--ink-yellow-20)', color: 'var(--ink-yellow-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    if (status === 'Draft') return { background: 'var(--ink-fuchsia-20)', color: 'var(--ink-fuchsia-100)', padding: '2px 8px', borderRadius: 4, fontSize: 'var(--ink-font-size-xs)', fontWeight: 500 };
-    return {};
+  // Maps a document/task status string to a StatusLight kind so statuses render
+  // as a colored dot + text (no background pill).
+  const getStatusLightKind = (status: string): 'neutral' | 'success' | 'warning' | 'alert' | 'emphasis' => {
+    switch (status) {
+      case 'Complete':
+      case 'Executed':
+        return 'success';
+      case 'Pending Signature':
+        return 'warning';
+      case 'In progress':
+      case 'In Review':
+        return 'emphasis';
+      case 'Not started':
+      case 'Draft':
+      default:
+        return 'neutral';
+    }
   };
 
   const getRiskBadgeStyle = (level: 'High' | 'Medium'): CSSProperties => {
@@ -7127,7 +7135,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     </Text>
                                   </div>
                                 ) : (
-                                  <span style={getStatusBadgeStyle(doc.status)}>{doc.status}</span>
+                                  <StatusLight noFill kind={getStatusLightKind(doc.status)} text={doc.status} />
                                 )}
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
@@ -7373,7 +7381,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         )}
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <span style={getStatusBadgeStyle(task.status)}>{task.status}</span>
+                              <StatusLight noFill kind={getStatusLightKind(task.status)} text={task.status} />
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
@@ -8143,7 +8151,7 @@ function getTabFromHash(): TabId {
   return VALID_TABS.includes(hash as TabId) ? (hash as TabId) : 'home';
 }
 
-/* ── Predictable scenario deep links ──
+/* ── Predictable scenario deep links ─���
    Each ?flow= value opens a specific step's entry point, prefilled with the
    Tally Inc vendor scenario data. Steps 2-4 share one Tally Inc workspace. */
 const SCENARIO_VENDOR = {
