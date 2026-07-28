@@ -2688,7 +2688,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═�������═══════��═══════════���═══════════════
+/* ═�������═════��═��═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -6171,7 +6171,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="secondary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Other</Button>
+      <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Other</Button>
 
       {open && (
         <div style={{
@@ -6772,8 +6772,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
-            <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
-              <Button kind="primary" startElement={<Icon name="plus" size={16} />} onClick={() => setShowFilePicker(true)}>Add Document</Button>
+            <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
+              <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => setShowFilePicker(true)}>Add Document</Button>
               <AddMenu
                 onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
                 onUploadRequest={() => setShowUploadRequest(true)}
