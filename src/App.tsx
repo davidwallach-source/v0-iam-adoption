@@ -2108,13 +2108,16 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     ),
   },
   {
-    key: 'docs',
-    header: 'Docs',
-    alignment: 'center',
+    key: 'value',
+    header: 'Value',
+    alignment: 'start',
     width: '10%',
-    cell: (row: Agreement) => (
-      <Text size="sm">{row.documentsCount || 0}</Text>
-    ),
+    cell: (row: Agreement) => {
+      const hasValue = row.dealValue && row.dealValue !== '—';
+      return hasValue
+        ? <Text size="sm" weight="medium">{row.dealValue}</Text>
+        : <Text size="sm" color="secondary">NA</Text>;
+    },
   },
   {
     key: 'parties',
