@@ -2099,13 +2099,11 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     header: 'Status',
     width: '15%',
     cell: (row: Agreement) => (
-      <Inline gap="small" align="center">
-        <span style={{
-          width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-          background: row.status === 'Completed' ? 'var(--ink-green-80)' : 'var(--ink-cobalt-80)',
-        }} />
-        <Text size="sm" style={{ color: row.status === 'Completed' ? 'var(--ink-green-80)' : 'var(--ink-cobalt-80)' }}>{row.status}</Text>
-      </Inline>
+      <StatusLight
+        noFill
+        kind={row.statusKind === 'success' ? 'success' : row.statusKind === 'warning' ? 'warning' : row.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+        text={row.status}
+      />
     ),
   },
   {
@@ -6767,6 +6765,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               );
             })()}
             <StatusLight
+              noFill
               kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
               text={agreement.status}
             />
