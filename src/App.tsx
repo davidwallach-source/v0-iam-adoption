@@ -6750,13 +6750,20 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               const partyName = agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null);
               if (!partyName) return null;
               return (
-                <span
+                <button
+                  type="button"
+                  onClick={() => setShowPartyHistory(true)}
+                  aria-label={`View history for ${partyName}`}
+                  title={`View history for ${partyName}`}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--ink-cobalt-20)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--ink-cobalt-10)'; }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
                     padding: '4px 10px',
                     borderRadius: 8,
+                    border: 'none',
                     background: 'var(--ink-cobalt-10)',
                     color: 'var(--ink-cobalt-90)',
                     fontFamily: 'var(--ink-font-family)',
@@ -6764,13 +6771,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     fontWeight: 600,
                     whiteSpace: 'nowrap',
                     flexShrink: 0,
+                    cursor: 'pointer',
+                    transition: 'background 0.15s',
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
                     <path d="M8 12H6V10H8V12ZM8 14H6V16H8V14ZM8 6H6V8H8V6ZM8 18H4V4.49L10 2.69V7L12 6V0L2 3V18H1V20H8V18ZM15 7.9C14.39 7.9 13.9 8.39 13.9 9C13.9 9.61 14.39 10.1 15 10.1C15.61 10.1 16.1 9.61 16.1 9C16.1 8.39 15.61 7.9 15 7.9ZM15 6C16.66 6 18 7.34 18 9C18 10.66 16.66 12 15 12C13.34 12 12 10.66 12 9C12 7.34 13.34 6 15 6ZM20 17C20 14.79 18.21 13 16 13H14C11.79 13 10 14.79 10 17V20H12V16.88C12 15.78 12.77 15 13.88 15H16.13C17.23 15 18.01 15.77 18.01 16.88V20H20.01V17H20Z" fill="currentColor" />
                   </svg>
                   {partyName}
-                </span>
+                </button>
               );
             })()}
             <StatusLight
