@@ -2129,22 +2129,6 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     ),
   },
   {
-    key: 'tasks',
-    header: 'Tasks',
-    alignment: 'center',
-    width: '12%',
-    className: 'dt-col-hide-narrow',
-    cell: (row: Agreement) => (
-      <Inline gap="small" align="center" justify="center">
-        {row.tasksPending && row.tasksPending > 0 ? (
-          <Text size="sm" style={{ color: 'var(--ink-orange-60)', fontWeight: 500 }}>{row.tasksPending} active</Text>
-        ) : (
-          <Text size="sm" color="secondary">{row.tasksCount || 0} total</Text>
-        )}
-      </Inline>
-    ),
-  },
-  {
     key: 'date',
     header: 'Updated',
     sortable: true,
