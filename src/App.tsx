@@ -6888,7 +6888,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
                   {/* Single CTA to add a document to the Agreement Space */}
-                  <Button kind="secondary" size="small" onClick={() => setShowFilePicker(true)}>
+                  <Button kind="tertiary" size="small" onClick={() => setShowFilePicker(true)}>
                     Add Document
                   </Button>
                 </div>
