@@ -1970,15 +1970,15 @@ function DocumentNamesSubtext({ names }: { names: string[] }) {
 // badge that reveals the full list on hover.
 function ParticipantNames({ names }: { names: string[] }) {
   if (names.length === 0) {
-    return <Text size="sm" color="secondary">—</Text>;
+    return <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>—</Text>;
   }
   const [first, ...rest] = names;
   return (
     <Inline gap="small" align="center" justify="start" style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <span
         style={{
-          fontSize: 'var(--ink-font-size-sm)',
-          color: 'var(--ink-font-color-default)',
+          fontSize: 14,
+          color: '#3d3a4e',
           fontFamily: 'var(--ink-font-family)',
           maxWidth: 120,
           overflow: 'hidden',
@@ -2114,9 +2114,9 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     width: '10%',
     cell: (row: Agreement) => {
       const hasValue = row.dealValue && row.dealValue !== '—';
-      return hasValue
-        ? <Text size="sm" weight="medium">{row.dealValue}</Text>
-        : <Text size="sm" color="secondary">NA</Text>;
+      return (
+        <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{hasValue ? row.dealValue : 'NA'}</Text>
+      );
     },
   },
   {
@@ -2134,7 +2134,7 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     sortable: true,
     width: '15%',
     cell: (row: Agreement) => (
-      <Text size="sm">{relativeDate(row.date)}</Text>
+      <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{relativeDate(row.date)}</Text>
     ),
   },
   {
