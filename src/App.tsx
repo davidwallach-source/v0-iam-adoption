@@ -6171,7 +6171,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add</Button>
+      <Button kind="secondary" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>More</Button>
 
       {open && (
         <div style={{
@@ -6186,18 +6186,6 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           minWidth: 264,
           padding: 4,
         }}>
-          {/* Document */}
-          <MenuRow
-            icon={
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 1z" stroke="#130032" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
-                <path d="M9 1v5h5" stroke="#130032" strokeWidth="1.3" strokeLinejoin="round" fill="none"/>
-              </svg>
-            }
-            label="Document"
-            onClick={() => { setOpen(false); onDocument?.(); }}
-          />
-
           {/* Signature Request */}
           <MenuRow
             icon={
@@ -6785,9 +6773,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
             <IconButton icon="comment" variant="tertiary" size="medium" aria-label="Comments" />
+              <Button kind="primary" startElement={<Icon name="plus" size={16} />} onClick={() => setShowFilePicker(true)}>Add Document</Button>
               <AddMenu
                 onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
-                onDocument={() => setShowFilePicker(true)}
                 onUploadRequest={() => setShowUploadRequest(true)}
               onAddWireTransfer={() => {
                 const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
