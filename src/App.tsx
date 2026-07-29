@@ -2688,7 +2688,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═�������═════��═����═══════════���═══════════════
+/* ═��������═════��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -8732,22 +8732,49 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   /* ���─ View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
+    // In the Simple Use Case version the All Agreements list is reduced to a
+    // single Agreement Space — a Waiver. Everything else (click-through,
+    // filtering, sorting) works exactly the same against this smaller dataset.
+    const sourceList: Agreement[] = protoVersion === 'simple'
+      ? [{
+          id: 'w1',
+          name: 'Event Participation Waiver',
+          party: 'Summit Events LLC',
+          partyLogo: 'SE',
+          status: 'In Progress',
+          statusIcon: 'clock',
+          statusKind: 'info',
+          statusSub: 'Awaiting Signature',
+          dealValue: '—',
+          agreementType: 'Waiver',
+          entityKind: 'space',
+          termLength: '12 months',
+          closeDate: 'May 15, 2026',
+          date: '28/7/2026',
+          time: '09:00',
+          action: 'Edit',
+          documentsCount: 1,
+          tasksCount: 1,
+          tasksPending: 1,
+        }]
+      : agreementsList;
+
     let list: Agreement[];
     switch (sidebarView) {
       case 'drafts':
-        list = agreementsList.filter(a => a.status === 'Draft');
+        list = sourceList.filter(a => a.status === 'Draft');
         break;
       case 'in-progress':
-        list = agreementsList.filter(a => a.status === 'In Progress');
+        list = sourceList.filter(a => a.status === 'In Progress');
         break;
       case 'completed':
-        list = agreementsList.filter(a => a.status === 'Completed');
+        list = sourceList.filter(a => a.status === 'Completed');
         break;
       case 'deleted':
-        list = agreementsList.filter(a => ['Expired', 'Voided'].includes(a.status));
+        list = sourceList.filter(a => ['Expired', 'Voided'].includes(a.status));
         break;
       default:
-        list = agreementsList;
+        list = sourceList;
     }
     // Sort by most recent first, using the item's date (D/M/YYYY) + time (HH:MM).
     const toTimestamp = (a: Agreement) => {
@@ -8757,7 +8784,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       return new Date(y, m - 1, d, hh || 0, mm || 0).getTime();
     };
     return [...list].sort((a, b) => toTimestamp(b) - toTimestamp(a));
-  }, [sidebarView, agreementsList]);
+  }, [sidebarView, agreementsList, protoVersion]);
 
   // In this demo all listed agreements are owned by the current user.
   const ownerOf = useCallback((_a: Agreement) => 'Lisa Jones (You)', []);
