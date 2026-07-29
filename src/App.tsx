@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef, type CSSProperties } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, createContext, useContext, type CSSProperties } from 'react';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -8244,8 +8244,157 @@ function buildScenarioAgreement(): Agreement {
   };
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Prototype version switcher
+   ---------------------------------------------------------------------------
+   All versions render the SAME component tree from this single codebase, so
+   any change made to the prototype automatically applies to every version.
+   The active version is exposed via context purely as a flag, so that future
+   work can branch behaviour per-version (e.g. `if (version === 'simple')`)
+   without forking the code. For now every version behaves identically.
+   ────────────────────────────────────────────────────────────────────────── */
+export type PrototypeVersion = 'standard' | 'simple';
+
+export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
+  { id: 'standard', label: 'Standard', description: 'The full-featured experience' },
+  { id: 'simple', label: 'Simple Use Case', description: 'Streamlined for simple use cases' },
+];
+
+interface PrototypeVersionContextValue {
+  version: PrototypeVersion;
+  setVersion: (v: PrototypeVersion) => void;
+}
+
+const PrototypeVersionContext = createContext<PrototypeVersionContextValue>({
+  version: 'standard',
+  setVersion: () => {},
+});
+
+/** Read (and set) the active prototype version from anywhere in the tree. */
+export function usePrototypeVersion() {
+  return useContext(PrototypeVersionContext);
+}
+
+/**
+ * Dropdown anchored under the global-header avatar. Lets the user switch
+ * between prototype versions. Rendered at the App level so it can position
+ * itself over the shared GlobalNav without modifying that design-system component.
+ */
+function UserMenu({
+  open,
+  onClose,
+  userName,
+  version,
+  onSelectVersion,
+}: {
+  open: boolean;
+  onClose: () => void;
+  userName: string;
+  version: PrototypeVersion;
+  onSelectVersion: (v: PrototypeVersion) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handlePointer(e: MouseEvent) {
+      // Ignore clicks on the avatar button itself (it toggles the menu).
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-ink-component="GlobalNav"] [aria-label="User menu"]')) return;
+      if (ref.current && !ref.current.contains(target)) onClose();
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      aria-label="Account and prototype version"
+      style={{
+        position: 'fixed',
+        top: 56,
+        right: 16,
+        zIndex: 2500,
+        minWidth: 268,
+        background: 'var(--ink-white-100)',
+        border: '1px solid var(--ink-border-subtle)',
+        borderRadius: 10,
+        boxShadow: '0 12px 32px rgba(19,0,50,0.18)',
+        padding: 6,
+        fontFamily: 'var(--ink-font-family)',
+      }}
+    >
+      {/* Signed-in user */}
+      <div style={{ padding: '8px 12px 10px' }}>
+        <Text size="sm" weight="semibold" style={{ display: 'block' }}>{userName}</Text>
+        <Text size="xs" color="secondary">Signed in</Text>
+      </div>
+
+      <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '2px 6px 6px' }} />
+
+      {/* Prototype version switcher */}
+      <div style={{ padding: '4px 12px 6px' }}>
+        <Text size="xs" color="secondary" weight="medium" style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Prototype version
+        </Text>
+      </div>
+      {PROTOTYPE_VERSIONS.map(({ id, label, description }) => {
+        const isActive = id === version;
+        return (
+          <button
+            key={id}
+            role="menuitemradio"
+            aria-checked={isActive}
+            onClick={() => { onSelectVersion(id); onClose(); }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              width: '100%',
+              textAlign: 'left',
+              padding: '8px 12px',
+              border: 'none',
+              borderRadius: 8,
+              background: isActive ? 'var(--ink-cobalt-10)' : 'transparent',
+              cursor: 'pointer',
+              fontFamily: 'var(--ink-font-family)',
+            }}
+            onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--ink-neutral-10)'; }}
+            onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+          >
+            <span style={{ width: 16, flexShrink: 0, display: 'inline-flex', justifyContent: 'center' }}>
+              {isActive && <Icon name="check" size={16} color="var(--ink-cobalt-90)" />}
+            </span>
+            <span style={{ minWidth: 0 }}>
+              <Text size="sm" weight={isActive ? 'semibold' : 'regular'} style={{ display: 'block', color: isActive ? 'var(--ink-cobalt-90)' : 'var(--ink-font-color-default)' }}>
+                {label}
+              </Text>
+              <Text size="xs" color="secondary">{description}</Text>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(getTabFromHash);
+  // Active prototype version + avatar menu open state. Both versions render
+  // the same tree; `protoVersion` is a shared flag for future per-version tweaks.
+  const [protoVersion, setProtoVersion] = useState<PrototypeVersion>('standard');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<SidebarView>('all-agreements');
   // Folders view: breadcrumb path of folders the user has navigated into, and the
   // set of folders currently expanded inline within the table.
@@ -8473,6 +8622,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     showSettings: true,
     settingsIcon: 'sliders-horizontal' as const,
     user: { name: 'Lisa Jones' },
+    onUserMenuClick: () => setUserMenuOpen(o => !o),
   };
 
   /* ── LocalNav — Agreements tab ── */
@@ -9120,8 +9270,15 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const transitionKey = `${activeTab}-${sidebarView}-${templatesSidebarView}-${insightsSidebarView}`;
 
   return (
-    <>
+    <PrototypeVersionContext.Provider value={{ version: protoVersion, setVersion: setProtoVersion }}>
     <style>{tableRowStaggerStyles}</style>
+    <UserMenu
+      open={userMenuOpen}
+      onClose={() => setUserMenuOpen(false)}
+      userName={globalNavConfig.user.name}
+      version={protoVersion}
+      onSelectVersion={setProtoVersion}
+    />
     <DocuSignShell
       globalNav={globalNavConfig}
       localNav={sidebarMap[activeTab]}
@@ -9555,6 +9712,6 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setRootPreparePreselectedDocs([]);
       }}
     />
-    </>
+    </PrototypeVersionContext.Provider>
   );
 }
