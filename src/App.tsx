@@ -1730,7 +1730,32 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
       { id: '4', icon: 'status-check', user: 'Priya Sharma', action: 'Completed initial security review', time: '1 day ago' },
     ],
   },
-  
+
+  // ═══ SIMPLE: Student/Parent Handbook Sign-Off (id: w1) ═══
+  'w1': {
+    tasks: [
+      { id: '1', title: 'Review Student/Parent Handbook', type: 'Approval', team: 'Family', assignee: 'Jordan Rivera', assigneeInitials: 'JR', status: 'In progress', dueDate: '9/3/26', isDueSoon: true },
+      { id: '2', title: 'Parent/Guardian Signature', type: 'Sign', team: 'Family', assignee: 'Maria Rivera', assigneeInitials: 'MR', status: 'Not started', dueDate: '9/5/26' },
+      { id: '3', title: 'Student Signature', type: 'Sign', team: 'Family', assignee: 'Jordan Rivera', assigneeInitials: 'JR', status: 'Not started', dueDate: '9/5/26' },
+    ],
+    documents: [
+      { id: '1', name: 'Student/Parent Handbook Acknowledgment', commentCount: 0, status: 'Pending Signature', dateModified: '8/28/2026', signatureProgress: { signed: 0, total: 2, waitingFor: 'Maria Rivera' } },
+    ],
+    supplementalDocs: [
+      { id: '2', name: 'Student/Parent Handbook 2025–2026', owner: 'Riverside Unified School District', ownerInitials: 'RU', dateModified: '8/15/2026' },
+      { id: '3', name: 'Code of Conduct', owner: 'Riverside Unified School District', ownerInitials: 'RU', dateModified: '8/15/2026' },
+      { id: '4', name: 'Technology Acceptable Use Policy', owner: 'Riverside Unified School District', ownerInitials: 'RU', dateModified: '8/15/2026' },
+    ],
+    attentionItems: [
+      { id: '1', item: 'Signatures Outstanding', description: 'Parent/guardian and student signatures due before the first day of school', riskLevel: 'Medium', alertMessage: 'The handbook sign-off is due Sep 5. Would you like to send the Rivera family a reminder?' },
+    ],
+    activity: [
+      { id: '1', icon: 'send', user: 'Riverside Unified School District', action: 'Sent handbook acknowledgment for signature', time: '2 hours ago' },
+      { id: '2', icon: 'upload', user: 'Front Office', action: 'Attached Student/Parent Handbook 2025–2026', time: '1 day ago' },
+      { id: '3', icon: 'edit', user: 'Front Office', action: 'Created the acknowledgment sign-off', time: '1 day ago' },
+    ],
+  },
+
   // ═══ COMPLEX: Apex Manufacturing Supply Agreement (id: 2) ═══
   '2': {
     tasks: [
@@ -2688,7 +2713,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═��������═════��═����═══════════���═══════════════
+/* ═���������═════��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -8748,18 +8773,18 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     const sourceList: Agreement[] = protoVersion === 'simple'
       ? [{
           id: 'w1',
-          name: 'Event Participation Waiver',
-          party: 'Summit Events LLC',
-          partyLogo: 'SE',
+          name: 'Student/Parent Handbook Sign-Off',
+          party: 'Riverside Unified School District',
+          partyLogo: 'RU',
           status: 'In Progress',
           statusIcon: 'clock',
           statusKind: 'info',
           statusSub: 'Awaiting Signature',
           dealValue: '—',
-          agreementType: 'Waiver',
+          agreementType: 'Acknowledgment',
           entityKind: 'space',
-          termLength: '12 months',
-          closeDate: 'May 15, 2026',
+          termLength: '2025–2026 School Year',
+          closeDate: 'Sep 5, 2026',
           date: '28/7/2026',
           time: '09:00',
           action: 'Edit',
