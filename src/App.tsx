@@ -3400,11 +3400,21 @@ function AdminPage() {
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
+  // In the Simple Use Case version the footer sticks to the bottom of the
+  // viewport (rather than sitting directly beneath a short table).
+  const { version } = usePrototypeVersion();
+  const isSticky = version === 'simple';
   return (
     <footer style={{
       borderTop: '1px solid var(--ink-border-subtle)',
       padding: 'var(--ink-spacing-200) var(--ink-spacing-300)',
       marginTop: 'auto',
+      ...(isSticky ? {
+        position: 'sticky',
+        bottom: 0,
+        background: 'var(--ink-white-100)',
+        zIndex: 10,
+      } : {}),
     }}>
       <Inline justify="between" align="center">
         <Inline gap="small" align="center">
@@ -9233,7 +9243,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         } onRowClick={(row: Agreement) => {
           setSelectedAgreement(row);
           setShowDealWorkspace(true);
-        }} pagination={{ page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
+        }} pagination={protoVersion === 'simple' ? undefined : { page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       )}
     </AgreementTableView>
   );
@@ -9310,12 +9320,29 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       globalNav={globalNavConfig}
       localNav={sidebarMap[activeTab]}
     >
-      <FadeIn keyProp={transitionKey} key={transitionKey}>
-        <div className="page-transition" style={{ flex: 1 }}>
-          {contentMap[activeTab]}
+      {/* In the Simple Use Case version, fill the content column so the footer
+          sticks to the bottom of the viewport instead of the bottom of the table. */}
+      {protoVersion === 'simple' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <FadeIn keyProp={transitionKey} key={transitionKey}>
+              <div className="page-transition" style={{ flex: 1 }}>
+                {contentMap[activeTab]}
+              </div>
+            </FadeIn>
+          </div>
+          <Footer />
         </div>
-      </FadeIn>
-      <Footer />
+      ) : (
+        <>
+          <FadeIn keyProp={transitionKey} key={transitionKey}>
+            <div className="page-transition" style={{ flex: 1 }}>
+              {contentMap[activeTab]}
+            </div>
+          </FadeIn>
+          <Footer />
+        </>
+      )}
     </DocuSignShell>
     {unavailableCallout && (
       <div
