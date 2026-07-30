@@ -1734,23 +1734,22 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
   // ═══ SIMPLE: Student/Parent Handbook Sign-Off (id: w1) ═══
   'w1': {
     tasks: [
-      { id: '1', title: 'Review Student/Parent Handbook', type: 'Approval', team: 'Family', assignee: 'Jordan Rivera', assigneeInitials: 'JR', status: 'In progress', dueDate: '9/3/26', isDueSoon: true },
-      { id: '2', title: 'Parent/Guardian Signature', type: 'Sign', team: 'Family', assignee: 'Maria Rivera', assigneeInitials: 'MR', status: 'Not started', dueDate: '9/5/26' },
-      { id: '3', title: 'Student Signature', type: 'Sign', team: 'Family', assignee: 'Jordan Rivera', assigneeInitials: 'JR', status: 'Not started', dueDate: '9/5/26' },
+      { id: '1', title: 'Review Student/Parent Handbook', type: 'Approval', team: 'Family', assignee: 'Jordan Rivera', assigneeInitials: 'JR', status: 'Completed', dueDate: '9/3/26' },
+      { id: '2', title: 'Parent/Guardian Signature', type: 'Sign', team: 'Family', assignee: 'Maria Rivera', assigneeInitials: 'MR', status: 'Completed', dueDate: '9/5/26' },
+      { id: '3', title: 'Student Signature', type: 'Sign', team: 'Family', assignee: 'Jordan Rivera', assigneeInitials: 'JR', status: 'Completed', dueDate: '9/5/26' },
     ],
     documents: [
-      { id: '1', name: 'Student/Parent Handbook Acknowledgment', commentCount: 0, status: 'Pending Signature', dateModified: '8/28/2026', signatureProgress: { signed: 0, total: 2, waitingFor: 'Maria Rivera' } },
+      { id: '1', name: 'Student/Parent Handbook Acknowledgment', commentCount: 0, status: 'Completed', dateModified: '8/28/2026' },
     ],
     supplementalDocs: [
       { id: '2', name: 'Student/Parent Handbook 2025–2026', owner: 'Riverside Unified School District', ownerInitials: 'RU', dateModified: '8/15/2026' },
       { id: '3', name: 'Code of Conduct', owner: 'Riverside Unified School District', ownerInitials: 'RU', dateModified: '8/15/2026' },
       { id: '4', name: 'Technology Acceptable Use Policy', owner: 'Riverside Unified School District', ownerInitials: 'RU', dateModified: '8/15/2026' },
     ],
-    attentionItems: [
-      { id: '1', item: 'Signatures Outstanding', description: 'Parent/guardian and student signatures due before the first day of school', riskLevel: 'Medium', alertMessage: 'The handbook sign-off is due Sep 5. Would you like to send the Rivera family a reminder?' },
-    ],
+    attentionItems: [],
     activity: [
-      { id: '1', icon: 'send', user: 'Riverside Unified School District', action: 'Sent handbook acknowledgment for signature', time: '2 hours ago' },
+      { id: '1', icon: 'status-check', user: 'Maria Rivera', action: 'Signed the handbook acknowledgment', time: '2 hours ago' },
+      { id: '4', icon: 'send', user: 'Riverside Unified School District', action: 'Sent handbook acknowledgment for signature', time: '2 hours ago' },
       { id: '2', icon: 'upload', user: 'Front Office', action: 'Attached Student/Parent Handbook 2025–2026', time: '1 day ago' },
       { id: '3', icon: 'edit', user: 'Front Office', action: 'Created the acknowledgment sign-off', time: '1 day ago' },
     ],
@@ -2271,7 +2270,7 @@ const documentColumns: any[] = [
   },
 ];
 
-/* ═════════════════════════════════���═════
+/* ══���══════════════════════════════���═════
    Folders Data — hierarchical folder/document tree
    ═══════════════════════════════════════ */
 
@@ -2630,7 +2629,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�����������═���������������═���═�����������═════��══════════════��═════════
+/* ══�����������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════════════════ */
 
@@ -3469,7 +3468,7 @@ const VALID_TABS: TabId[] = ['home', 'agreements', 'templates', 'insights', 'adm
 /* ════════════════════════════��══════════
    Agreement Detail View (Navigator Viewer)
    Full-screen dialog with PDF viewer + detail sidebar
-   ���════════════════════��═════════════════ */
+   ���═══���════════════════��═════════════════ */
 
 const AGREEMENT_DETAIL = {
   fileName: 'Batterii MLA_00992.pdf',
@@ -6555,6 +6554,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // with a unique id, all resolve their NDA-specific content).
   const isNDADraft = agreement.workspaceKind === 'nda' || agreement.id === 'nda-draft';
 
+  // Student/Parent Handbook Sign-Off space (Simple Use Case). Used to trim the
+  // workspace UI (no Value column, no Team column) for this simple scenario.
+  const isHandbookSpace = agreement.id === 'w1';
+
   // Get workspace data for the agreement. NDA workspaces fall back to the shared
   // NDA template when they have a unique (non-seeded) id.
   const workspaceData = AGREEMENT_WORKSPACE_DATA[agreement.id]
@@ -7037,7 +7040,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>Status</th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '12%' }}>Value</th>
+                          {!isHandbookSpace && (
+                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '12%' }}>Value</th>
+                          )}
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>
                             <Inline gap="xsmall" align="center">Last modified <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
@@ -7108,9 +7113,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       </div>
                                     )}
                                   </td>
-                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                    <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>NA</Text>
-                                  </td>
+                                  {!isHandbookSpace && (
+                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                      <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>NA</Text>
+                                    </td>
+                                  )}
                                   <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
                                     {envelope.documents[0]?.dateModified}
                                   </td>
@@ -7142,9 +7149,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                       {/* Status inherited from envelope */}
                                     </td>
-                                    <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                      {/* Value inherited from envelope */}
-                                    </td>
+                                    {!isHandbookSpace && (
+                                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                        {/* Value inherited from envelope */}
+                                      </td>
+                                    )}
                                     <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                       {/* Date inherited from envelope */}
                                     </td>
@@ -7223,9 +7232,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                                 )}
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                                <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{doc.value || 'NA'}</Text>
-                              </td>
+                              {!isHandbookSpace && (
+                                <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{doc.value || 'NA'}</Text>
+                                </td>
+                              )}
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
@@ -7429,7 +7440,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <thead>
                   <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
-                    {!isUploadedDocAgreement && !isNDADraft && (
+                    {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
                       <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
                     )}
                     <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
@@ -7457,7 +7468,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           </div>
                         </Inline>
                       </td>
-                      {!isUploadedDocAgreement && !isNDADraft && (
+                      {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
                         <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
                       )}
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
@@ -8776,10 +8787,10 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           name: 'Student/Parent Handbook Sign-Off',
           party: 'Riverside Unified School District',
           partyLogo: 'RU',
-          status: 'In Progress',
-          statusIcon: 'clock',
-          statusKind: 'info',
-          statusSub: 'Awaiting Signature',
+          status: 'Completed',
+          statusIcon: 'status-check',
+          statusKind: 'success',
+          statusSub: 'Fully Signed',
           dealValue: '—',
           agreementType: 'Acknowledgment',
           entityKind: 'space',
