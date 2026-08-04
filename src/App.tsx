@@ -1705,7 +1705,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════������������══════════════════
+/* �����══════════���═══════��������������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -6642,6 +6642,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // with a unique id, all resolve their NDA-specific content).
   const isNDADraft = agreement.workspaceKind === 'nda' || agreement.id === 'nda-draft';
 
+  // In the Simple Use Case the "NDA" modal is actually the Permission Slip flow,
+  // so an NDA-draft workspace here really holds a Permission Slip document. Used
+  // to relabel the document shown inside the space.
+  const { version } = usePrototypeVersion();
+  const isPermissionSlipDraft = version === 'simple' && isNDADraft;
+
   // Student/Parent Handbook Sign-Off space (Simple Use Case). Used to trim the
   // workspace UI (no Value column, no Team column) for this simple scenario.
   const isHandbookSpace = agreement.id === 'w1';
@@ -6705,7 +6711,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
     // Show the most recently added documents first: addedDocuments is appended
     // newest-last, so reverse it and place it ahead of the base documents.
-    const combined = [...[...addedDocs].reverse(), ...baseDocs] as DealDocument[];
+    let combined = [...[...addedDocs].reverse(), ...baseDocs] as DealDocument[];
+    // In the Simple Use Case, an NDA-draft space is really a Permission Slip, so
+    // relabel the templated "Non-Disclosure Agreement" document accordingly.
+    if (isPermissionSlipDraft) {
+      combined = combined.map(doc =>
+        doc.name === 'Non-Disclosure Agreement' ? { ...doc, name: 'Permission Slip' } : doc
+      );
+    }
     // Apply Pending Signature status to any document sent for signature,
     // keeping the document in its place in the list.
     if (allSignedDocs.length === 0) return combined;
@@ -6718,7 +6731,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         signatureProgress: { signed: 0, total: 1, waitingFor: sent.recipient },
       };
     }) as DealDocument[];
-  }, [workspaceData.documents, isNDADraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments, allSignedDocs]);
+  }, [workspaceData.documents, isNDADraft, isPermissionSlipDraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments, allSignedDocs]);
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
@@ -9688,7 +9701,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           entityKind: 'space',
           workspaceKind: 'nda',
           name: protoVersion === 'simple' ? 'Permission for Museum' : 'Untitled Agreement Space',
-          documentNames: ['Non-Disclosure Agreement'],
+          documentNames: protoVersion === 'simple' ? ['Permission Slip'] : ['Non-Disclosure Agreement'],
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
           externalParticipants: data.receivingParty ? [data.receivingParty] : [],
