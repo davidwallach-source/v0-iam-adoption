@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════��������������������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������══════��═════════════════════════════
+/* ═������═════����═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -3609,7 +3609,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ═════════════════════════════��════════��
+/* ═════════════════════════════����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -6799,15 +6799,33 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
+  // The Permission Slip space (Simple Use Case) shows a real activity feed based
+  // on the steps actually taken — created, and sent for signature when applicable
+  // — rather than the placeholder sample feed. Ordered newest-first to match the
+  // live `sentActivity` events that get prepended above it.
+  const permissionSlipActivity = (() => {
+    const wasSent = agreement.workspaceKind === 'permission-slip' || (isNDADraft && ndaSentForSignature);
+    const studentName = savedNDAData?.receivingParty?.trim();
+    const recipient = (ndaRecipientName || uploadedDocAgreement?.recipientName || '').trim();
+    const events: { id: string; icon: IconName; user: string; action: string; time: string }[] = [];
+    if (wasSent) {
+      events.push({ id: 'ps-sent', icon: 'send', user: 'You', action: `Sent the Permission Slip to ${recipient || 'the parent/guardian'} for signature`, time: 'Just now' });
+    }
+    events.push({ id: 'ps-created', icon: 'edit', user: 'You', action: `Created the Permission Slip${studentName ? ` for ${studentName}` : ''}`, time: wasSent ? 'Moments ago' : 'Just now' });
+    return events;
+  })();
+
   // A saved-blank draft has only just been created, so its activity feed should
   // reflect that single real event rather than the default rich sample feed.
   const currentActivity = [
     ...sentActivity,
-    ...((isUploadedDocAgreement && uploadedDocAgreement?.isDraft)
-      ? [
-          { id: 'draft-create', icon: 'document' as IconName, user: 'You', action: `Created ${uploadedDocAgreement.documents[0] || 'draft document'}`, time: 'Just now' },
-        ]
-      : workspaceData.activity),
+    ...(isPermissionSlipSpace
+      ? permissionSlipActivity
+      : (isUploadedDocAgreement && uploadedDocAgreement?.isDraft)
+        ? [
+            { id: 'draft-create', icon: 'document' as IconName, user: 'You', action: `Created ${uploadedDocAgreement.documents[0] || 'draft document'}`, time: 'Just now' },
+          ]
+        : workspaceData.activity),
   ];
   const currentTasks = useMemo(() => {
     // Reverse so the most recently added approval task appears at the top,
@@ -7700,6 +7718,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onSave={() => {
           if (pendingPreviewDoc) {
             setAddedDocuments(prev => [...prev, pendingPreviewDoc]);
+            // Reflect the newly added document in the Permission Slip space's
+            // activity feed as a live event.
+            if (isPermissionSlipSpace) {
+              const added = pendingPreviewDoc;
+              setSentActivity(prev => [
+                { id: `activity-doc-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Added ${added} to the space`, time: 'Just now' },
+                ...prev,
+              ]);
+            }
             showToast('Your document was added');
           }
           setPendingPreviewDoc(null);
