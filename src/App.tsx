@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════����������������������������������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������═══��������═════════════════════════════
+/* ═������═══���������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -2738,7 +2738,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�������������═���������������═���═�������������════��══════════════��═════════
+/* ══���������������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════������══════════ */
 
@@ -5338,6 +5338,11 @@ interface WorkspaceViewProps {
   // document-preview header CTA). Their status is shown as Pending Signature
   // without replacing the workspace or removing the document.
   injectedSignatureDocs?: { name: string; recipient: string }[];
+  // Documents sent for signature from within this workspace, persisted in the
+  // parent (keyed by agreement id) so their Pending Signature status survives
+  // navigating away from the workspace and back.
+  persistedSignedDocs?: { name: string; recipient: string }[];
+  onSignDocs?: (docs: { name: string; recipient: string }[]) => void;
   // Deep-link entry points: auto-open an overlay when the workspace mounts from
   // a scenario URL, prefilled with the provided data.
   initialOverlay?: 'upload-request' | 'vendor-onboarding' | null;
@@ -6623,7 +6628,7 @@ function EditableSpaceName({ name, onRename }: { name: string; onRename?: (name:
   );
 }
 
-function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -6669,7 +6674,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // the local doc preview). We keep each document in place and only change its
   // status to Pending Signature — the workspace name, other documents, and
   // needs-attention sections are left untouched.
-  const [signedDocs, setSignedDocs] = useState<{ name: string; recipient: string }[]>([]);
+  // Seed from the parent-persisted list so a document's Pending Signature status
+  // survives navigating away from this space and back.
+  const [signedDocs, setSignedDocs] = useState<{ name: string; recipient: string }[]>(persistedSignedDocs ?? []);
   const allSignedDocs = useMemo(
     () => [...(injectedSignatureDocs ?? []), ...signedDocs],
     [injectedSignatureDocs, signedDocs],
@@ -6679,10 +6686,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     const recipientNames = recipients.map(r => r.name);
     const recipient = recipientNames[0] || 'Recipient';
     // Mark each sent document as Pending Signature (status change only).
+    const newlySigned = documentNames.map(name => ({ name, recipient }));
     setSignedDocs(prev => [
       ...prev,
       ...documentNames.filter(name => !prev.some(d => d.name === name)).map(name => ({ name, recipient })),
     ]);
+    // Persist to the parent so the status survives leaving and re-entering.
+    onSignDocs?.(newlySigned);
     // Add a Sign task for the sent documents.
     const newTask: DealTask = {
       id: `task-sign-${Date.now()}`,
@@ -8751,6 +8761,9 @@ export default function App() {
   // Documents added to a space via Add Document → Upload, persisted per agreement
   // id so they survive navigating away from the workspace and back.
   const [addedDocsById, setAddedDocsById] = useState<Record<string, string[]>>({});
+  // Documents sent for signature from within a space, persisted per agreement id
+  // so their Pending Signature status survives leaving and re-entering the space.
+  const [signedDocsById, setSignedDocsById] = useState<Record<string, { name: string; recipient: string }[]>>({});
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
@@ -9677,6 +9690,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
         injectedTasks={workspaceApprovalTasks}
         injectedSignatureDocs={workspaceSignatureDocs}
+        persistedSignedDocs={signedDocsById[selectedAgreement.id] ?? []}
+        onSignDocs={(docs) => {
+          const id = selectedAgreement.id;
+          setSignedDocsById(prev => {
+            const existing = prev[id] ?? [];
+            const merged = [...existing];
+            docs.forEach(d => { if (!merged.some(m => m.name === d.name)) merged.push(d); });
+            return { ...prev, [id]: merged };
+          });
+        }}
         initialOverlay={selectedAgreement.id === SCENARIO_WORKSPACE_ID ? wsInitialOverlay : null}
         uploadRequestPrefill={{
           title: 'Certificate of Insurance',
