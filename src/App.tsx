@@ -1705,7 +1705,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════������══════════════════
+/* �����══════════���═══════��������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -1745,7 +1745,7 @@ interface Agreement {
   // Identifies special workspaces (NDA / blank-document) whose content is
   // resolved by kind rather than by a fixed id, so multiple can coexist in a
   // single session without overwriting one another.
-  workspaceKind?: 'nda' | 'uploaded';
+  workspaceKind?: 'nda' | 'uploaded' | 'permission-slip';
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
@@ -2920,7 +2920,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��════════���════════════════════════════
+/* ═��════════����════════════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3369,7 +3369,7 @@ function HomePage() {
   );
 }
 
-/* ═════���═════════════════════════════════
+/* ═════���════════════════════��════════════
    Insights — Overview sub-view
    ═══════════════════════════════════════ */
 
@@ -6653,7 +6653,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     || AGREEMENT_WORKSPACE_DATA['1'];
   
   // Check if this is an uploaded/blank document agreement.
-  const isUploadedDocAgreement = agreement.workspaceKind === 'uploaded' || agreement.id === 'uploaded-doc';
+  const isUploadedDocAgreement = agreement.workspaceKind === 'uploaded' || agreement.workspaceKind === 'permission-slip' || agreement.id === 'uploaded-doc';
 
   // Update NDA document status if sent for signature
   const modifiedDocuments = useMemo(() => {
@@ -6906,6 +6906,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           <Inline gap="medium" align="center">
             <EditableSpaceName name={agreement.name} onRename={onRename} />
             {(() => {
+              // Permission Slip spaces (Simple Use Case) don't show a party tag.
+              if (agreement.workspaceKind === 'permission-slip') return null;
               const partyName = agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null);
               if (!partyName) return null;
               return (
@@ -9858,7 +9860,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         } else {
           // Uploaded document flow - create a new agreement space
           const docName = documents && documents.length > 0 ? documents[0] : 'Non-Disclosure Agreement';
-          
+
+          // Simple Use Case: sending a Permission Slip creates a purpose-named
+          // agreement space and drops the recipient party tag.
+          const isPermissionSlipFlow = rootPreparePreselectedDocs.some(doc => doc === 'Permission Slip');
+
           // Store the uploaded document info under a unique id so each uploaded
           // document workspace persists independently.
           const newId = `uploaded-${Date.now()}`;
@@ -9868,8 +9874,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           const uploadedAgreement: Agreement = {
             id: newId,
             entityKind: 'space',
-            workspaceKind: 'uploaded',
-            name: 'Untitled Agreement Space',
+            workspaceKind: isPermissionSlipFlow ? 'permission-slip' : 'uploaded',
+            name: isPermissionSlipFlow ? 'Permission for Museum Visit' : 'Untitled Agreement Space',
             documentNames: documents && documents.length > 0 ? documents : [docName],
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
