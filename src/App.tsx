@@ -1705,7 +1705,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════����������══════════════════
+/* �����══════════���═══════������������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -9680,12 +9680,14 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setNdaAgreementId(ndaId);
         setNdaDataById(prev => ({ ...prev, [ndaId]: { data, sentForSignature: prev[ndaId]?.sentForSignature ?? false, recipientName: prev[ndaId]?.recipientName ?? '' } }));
         
-        // Create a draft NDA agreement object
+        // Create a draft NDA agreement object. In the Simple Use Case this modal
+        // is the Permission Slip flow, so the space is always titled the same way
+        // whether it was sent or just saved as a draft.
         const ndaAgreement: Agreement = {
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: 'Untitled Agreement Space',
+          name: protoVersion === 'simple' ? 'Permission for Museum' : 'Untitled Agreement Space',
           documentNames: ['Non-Disclosure Agreement'],
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -9881,7 +9883,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: newId,
             entityKind: 'space',
             workspaceKind: isPermissionSlipFlow ? 'permission-slip' : 'uploaded',
-            name: isPermissionSlipFlow ? 'Permission for Museum Visit' : 'Untitled Agreement Space',
+            name: isPermissionSlipFlow ? 'Permission for Museum' : 'Untitled Agreement Space',
             documentNames: documents && documents.length > 0 ? documents : [docName],
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
