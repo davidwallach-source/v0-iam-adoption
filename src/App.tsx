@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������������������������══════════════
+/* ═══════════════════════��������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������════════════════════════════════════
+/* ═������══════��═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -3609,7 +3609,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ══════════════════════════════════════��
+/* ═════════════════════════════��════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -6984,7 +6984,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <EditableSpaceName name={agreement.name} onRename={onRename} />
             {(() => {
               // Permission Slip spaces (Simple Use Case) don't show a party tag.
-              if (agreement.workspaceKind === 'permission-slip') return null;
+              // Covers both the saved-draft (nda) and sent (permission-slip) variants.
+              if (isPermissionSlipSpace) return null;
               const partyName = agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null);
               if (!partyName) return null;
               return (
@@ -8459,7 +8460,7 @@ function buildScenarioAgreement(): Agreement {
   };
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
+/* ───────────────────────────────────────────────────────��──────────────────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
