@@ -309,12 +309,21 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
     onPreviewDocument?.(fileName);
   };
 
-  const agreements = [
-    { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
-    { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
-    { id: 'purchase', title: 'Purchase Agreement', description: 'Initiate a purchase with a new or existing vendor.' },
-    { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
-  ];
+  // The Simple Use Case version tailors the Start New options for a
+  // school/education scenario and drops the "New Request" option.
+  const { version } = usePrototypeVersion();
+  const agreements = version === 'simple'
+    ? [
+        { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
+        { id: 'nda', title: 'Permission Slip', description: 'Fill and send a standard permission slip.' },
+        { id: 'purchase', title: 'Field Trip', description: 'Includes permission slips, vendor contracts, and waivers.' },
+      ]
+    : [
+        { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
+        { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
+        { id: 'purchase', title: 'Purchase Agreement', description: 'Initiate a purchase with a new or existing vendor.' },
+        { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
+      ];
 
   return (
     <Modal open={open} onClose={onClose} size="full">
@@ -2272,7 +2281,7 @@ const documentColumns: any[] = [
 
 /* ══���══════════════════════════════���═════
    Folders Data — hierarchical folder/document tree
-   ═════════════════════��═════════════════ */
+   ═════════════════════���═════════════════ */
 
 interface FolderNode {
   id: string;
@@ -2631,7 +2640,7 @@ const partyColumns: any[] = [
 
 /* ══�����������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
-   ═══════════�����════════════════���══════════ */
+   ═══════════�����═══════════════������══════════ */
 
 interface RequestItem {
   id: string;
