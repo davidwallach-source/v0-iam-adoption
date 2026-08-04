@@ -1705,7 +1705,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════���═══════════════════
+/* �����══════════���═══════������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -9737,9 +9737,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           tasksPending: 1,
         };
         
-        // Close the NDA modal and open Prepare screen with NDA document
+        // Close the NDA modal and open Prepare screen with the document.
+        // In the Simple Use Case this flow is a Permission Slip, so the Prepare
+        // thumbnail must reflect that instead of "Non-Disclosure Agreement".
         setShowNDAModal(false);
-        setRootPreparePreselectedDocs(['Non-Disclosure Agreement']);
+        setRootPreparePreselectedDocs([protoVersion === 'simple' ? 'Permission Slip' : 'Non-Disclosure Agreement']);
         setShowRootPrepare(true);
       }}
     />
