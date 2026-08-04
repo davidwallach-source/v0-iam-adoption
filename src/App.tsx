@@ -51,23 +51,37 @@ import {
    Add menu (Document).
    ═══════════════════════════════════════ */
 
+interface PickerFile { name: string; kind: string; size: string; modified: string }
+
 interface FilePickerDialogProps {
   open: boolean;
   onCancel: () => void;
   onOpen: (fileName: string) => void;
+  // Optional custom file list. When omitted, the default vendor/procurement
+  // files are shown. The Permission Slip space passes a school-relevant list.
+  files?: PickerFile[];
 }
 
-function FilePickerDialog({ open, onCancel, onOpen }: FilePickerDialogProps) {
-  // Finder-style file list. "New Vendor MSA" stays pinned at the top.
-  const pickerFiles = [
-    { name: 'New Vendor MSA', kind: 'PDF Document', size: '248 KB', modified: 'Today, 9:41 AM' },
-    { name: 'Master Services Template', kind: 'Word Document', size: '182 KB', modified: 'Yesterday, 4:12 PM' },
-    { name: 'Vendor Onboarding Packet', kind: 'PDF Document', size: '1.4 MB', modified: 'May 8, 2026' },
-    { name: '2026 Budget Proposal', kind: 'Word Document', size: '96 KB', modified: 'May 2, 2026' },
-    { name: 'Statement of Work Q3', kind: 'PDF Document', size: '311 KB', modified: 'Apr 28, 2026' },
-    { name: 'Non-Disclosure Agreement', kind: 'PDF Document', size: '204 KB', modified: 'Apr 24, 2026' },
-  ];
+// Default Finder-style file list. "New Vendor MSA" stays pinned at the top.
+const DEFAULT_PICKER_FILES: PickerFile[] = [
+  { name: 'New Vendor MSA', kind: 'PDF Document', size: '248 KB', modified: 'Today, 9:41 AM' },
+  { name: 'Master Services Template', kind: 'Word Document', size: '182 KB', modified: 'Yesterday, 4:12 PM' },
+  { name: 'Vendor Onboarding Packet', kind: 'PDF Document', size: '1.4 MB', modified: 'May 8, 2026' },
+  { name: '2026 Budget Proposal', kind: 'Word Document', size: '96 KB', modified: 'May 2, 2026' },
+  { name: 'Statement of Work Q3', kind: 'PDF Document', size: '311 KB', modified: 'Apr 28, 2026' },
+  { name: 'Non-Disclosure Agreement', kind: 'PDF Document', size: '204 KB', modified: 'Apr 24, 2026' },
+];
+
+function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogProps) {
+  const pickerFiles = files && files.length > 0 ? files : DEFAULT_PICKER_FILES;
   const [selectedFile, setSelectedFile] = useState(pickerFiles[0].name);
+
+  // Keep the default selection in sync with the active file list (e.g. when the
+  // school-specific list is provided) so the first row is preselected.
+  useEffect(() => {
+    if (open) setSelectedFile(pickerFiles[0].name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, files]);
 
   if (!open) return null;
 
@@ -1705,7 +1719,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════����������������══════════════════
+/* �����══════════���═══════������������������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -3847,10 +3861,45 @@ const DOC_LIBRARY: Record<string, DocData> = {
       ]},
     ],
   },
+  waiver: {
+    fileName: 'Field Trip Liability Waiver.docx',
+    hideClauseStatus: true,
+    hideEditToolbar: true,
+    title: 'FIELD TRIP LIABILITY WAIVER & RELEASE',
+    parties: 'Riverside Unified School District & Parent/Guardian',
+    effectiveDate: 'September 5, 2026',
+    pages: 2,
+    summary: 'This Liability Waiver and Release governs a student\u2019s participation in a school-sponsored field trip. The parent or legal guardian acknowledges the nature of the activity, assumes the associated risks, authorizes emergency medical care, and releases Riverside Unified School District and its staff from liability to the extent permitted by law.',
+    clauses: [
+      { num: '1', heading: 'Activity & Participation', status: 'approved', runs: [
+        t('The student named on the accompanying permission slip has been invited to participate in a school-sponsored field trip organized and supervised by Riverside Unified School District staff. Participation is voluntary. This waiver applies to all transportation to and from the destination and to all activities that take place during the trip.'),
+      ]},
+      { num: '2', heading: 'Assumption of Risk', status: 'approved', runs: [
+        t('The parent or legal guardian understands that field trips involve inherent risks, including but not limited to travel by bus or other vehicle, walking tours, and participation in on-site activities. The parent/guardian knowingly and voluntarily assumes all such risks on behalf of the student and themselves.'),
+      ]},
+      { num: '3', heading: 'Emergency Medical Authorization', status: 'approved', runs: [
+        t('In the event of illness or injury during the field trip, the parent/guardian authorizes school staff to secure necessary first aid and emergency medical treatment for the student. The parent/guardian agrees to be responsible for any resulting medical costs and confirms that the emergency contact and health information on file with the school is accurate and current.'),
+      ]},
+      { num: '4', heading: 'Release of Liability', status: 'approved', runs: [
+        t('To the fullest extent permitted by law, the parent/guardian releases and holds harmless Riverside Unified School District, its board, employees, and chaperones from any and all claims, demands, or causes of action arising out of the student\u2019s participation in the field trip, except those resulting from gross negligence or willful misconduct.'),
+      ]},
+      { num: '5', heading: 'Code of Conduct', status: 'approved', runs: [
+        t('The student is expected to follow the school Code of Conduct and all instructions from supervising staff throughout the field trip. The parent/guardian understands that failure to comply may result in the student being sent home at the parent/guardian\u2019s expense.'),
+      ]},
+    ],
+    keyTerms: [
+      { label: 'Document Type', value: 'Liability Waiver & Release' },
+      { label: 'Activity Date', value: 'September 5, 2026' },
+      { label: 'School District', value: 'Riverside Unified' },
+      { label: 'Destination', value: 'City Science Museum' },
+      { label: 'Signature Required', value: 'Parent/Guardian' },
+    ],
+  },
 };
 
 function resolveDoc(name: string): DocData {
   const key = (name || '').toLowerCase();
+  if (key.includes('waiver') || key.includes('release of liability') || key.includes('liability release')) return DOC_LIBRARY.waiver;
   if (key.includes('nda') || key.includes('non-disclosure') || key.includes('non disclosure') || key.includes('nondisclosure')) return DOC_LIBRARY.nda;
   if (key.includes('data processing') || key.includes('dpa')) return DOC_LIBRARY.dpa;
   if (key.includes('security') || key.includes('compliance') || key.includes('addendum')) return DOC_LIBRARY.addendum;
@@ -6649,6 +6698,19 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // to relabel the document shown inside the space.
   const { version } = usePrototypeVersion();
   const isPermissionSlipDraft = version === 'simple' && isNDADraft;
+  // The Permission Slip agreement space, covering both the saved-draft (nda) and
+  // sent (permission-slip) variants. Used to tailor the Add Document → Upload
+  // file picker to a school administrator/teacher context.
+  const isPermissionSlipSpace = version === 'simple' && (isPermissionSlipDraft || agreement.workspaceKind === 'permission-slip');
+  // School-relevant file picker list, with a Field Trip Liability Waiver first.
+  const permissionSlipPickerFiles: PickerFile[] = [
+    { name: 'Field Trip Liability Waiver', kind: 'PDF Document', size: '186 KB', modified: 'Today, 8:52 AM' },
+    { name: 'Parent Permission Slip', kind: 'Word Document', size: '124 KB', modified: 'Yesterday, 3:20 PM' },
+    { name: 'Student Emergency Contact Form', kind: 'PDF Document', size: '98 KB', modified: 'May 9, 2026' },
+    { name: 'Medical Authorization Form', kind: 'PDF Document', size: '142 KB', modified: 'May 6, 2026' },
+    { name: 'Chaperone Volunteer Agreement', kind: 'Word Document', size: '110 KB', modified: 'May 2, 2026' },
+    { name: 'Student Code of Conduct', kind: 'PDF Document', size: '156 KB', modified: 'Apr 27, 2026' },
+  ];
 
   // Student/Parent Handbook Sign-Off space (Simple Use Case). Used to trim the
   // workspace UI (no Value column, no Team column) for this simple scenario.
@@ -7616,9 +7678,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onSend={handleSendForSignature}
       />
 
-      {/* Add menu → Document: open the macOS file picker, then the Doc Preview */}
+      {/* Add menu → Document: open the macOS file picker, then the Doc Preview.
+          In the Permission Slip space the picker shows school-relevant files. */}
       <FilePickerDialog
         open={showFilePicker}
+        files={isPermissionSlipSpace ? permissionSlipPickerFiles : undefined}
         onCancel={() => setShowFilePicker(false)}
         onOpen={(fileName) => {
           setShowFilePicker(false);
