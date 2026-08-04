@@ -1705,7 +1705,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════��������══════════════════
+/* �����══════════���═══════����������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -2920,7 +2920,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��════════����════════════════════════════
+/* ═��══════���═����════════════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -8868,31 +8868,37 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   /* ���─ View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
-    // In the Simple Use Case version the All Agreements list is reduced to a
-    // single Agreement Space — a Waiver. Everything else (click-through,
-    // filtering, sorting) works exactly the same against this smaller dataset.
+    // In the Simple Use Case version the All Agreements list starts as a single
+    // seeded Agreement Space (the Handbook Sign-Off). Newly created agreements
+    // (Permission Slip, Start Blank, Field Trip, etc.) must still appear here,
+    // matching the Standard behavior — so we append any runtime-created rows.
+    // Runtime-created rows are those in `agreementsList` whose id isn't part of
+    // the original static seed data.
+    const handbookSeed: Agreement = {
+      id: 'w1',
+      name: 'Student/Parent Handbook Sign-Off',
+      party: 'Riverside Unified School District',
+      partyLogo: 'RU',
+      status: 'Completed',
+      statusIcon: 'status-check',
+      statusKind: 'success',
+      statusSub: 'Fully Signed',
+      dealValue: '—',
+      agreementType: 'Acknowledgment',
+      entityKind: 'space',
+      termLength: '2025–2026 School Year',
+      closeDate: 'Sep 5, 2026',
+      date: '28/7/2026',
+      time: '09:00',
+      action: 'Edit',
+      documentsCount: 1,
+      tasksCount: 1,
+      tasksPending: 1,
+    };
+    const seedIds = new Set(AGREEMENTS_DATA.map(a => a.id));
+    const createdAgreements = agreementsList.filter(a => !seedIds.has(a.id));
     const sourceList: Agreement[] = protoVersion === 'simple'
-      ? [{
-          id: 'w1',
-          name: 'Student/Parent Handbook Sign-Off',
-          party: 'Riverside Unified School District',
-          partyLogo: 'RU',
-          status: 'Completed',
-          statusIcon: 'status-check',
-          statusKind: 'success',
-          statusSub: 'Fully Signed',
-          dealValue: '—',
-          agreementType: 'Acknowledgment',
-          entityKind: 'space',
-          termLength: '2025–2026 School Year',
-          closeDate: 'Sep 5, 2026',
-          date: '28/7/2026',
-          time: '09:00',
-          action: 'Edit',
-          documentsCount: 1,
-          tasksCount: 1,
-          tasksPending: 1,
-        }]
+      ? [...createdAgreements, handbookSeed]
       : agreementsList;
 
     let list: Agreement[];
