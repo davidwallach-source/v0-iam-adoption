@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������════������═════════════════════════════
+/* ═������═══��������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -2738,7 +2738,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�����������═���������������═���═�������������════��══════════════��═════════
+/* ══�������������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════������══════════ */
 
@@ -5328,6 +5328,10 @@ interface WorkspaceViewProps {
   ndaSentForSignature?: boolean;
   ndaRecipientName?: string;
   uploadedDocAgreement?: { documents: string[], recipientName: string, isDraft?: boolean } | null;
+  // Documents added to this space via Add Document → Upload, persisted in the
+  // parent (keyed by agreement id) so they survive navigating away and back.
+  persistedAddedDocs?: string[];
+  onAddDocument?: (documentName: string) => void;
   onPreviewDocument?: (documentName: string) => void;
   injectedTasks?: DealTask[];
   // Documents sent for signature from outside this component (e.g. the global
@@ -6619,7 +6623,7 @@ function EditableSpaceName({ name, onRename }: { name: string; onRename?: (name:
   );
 }
 
-function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, onPreviewDocument, injectedTasks, injectedSignatureDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -6642,7 +6646,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   }, [initialOverlay]);
 
   const [pendingPreviewDoc, setPendingPreviewDoc] = useState<string | null>(null);
-  const [addedDocuments, setAddedDocuments] = useState<string[]>([]);
+  // Seed from the parent-persisted list so documents added earlier still show
+  // after navigating away from this space and back.
+  const [addedDocuments, setAddedDocuments] = useState<string[]>(persistedAddedDocs ?? []);
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
@@ -7722,7 +7728,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onClose={() => setPendingPreviewDoc(null)}
         onSave={() => {
           if (pendingPreviewDoc) {
-            setAddedDocuments(prev => [...prev, pendingPreviewDoc]);
+            setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
+            onAddDocument?.(pendingPreviewDoc);
             // Reflect the newly added document in the Permission Slip space's
             // activity feed as a live event.
             if (isPermissionSlipSpace) {
@@ -7739,12 +7746,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onSendForApproval={(name) => {
           // Also add the document to this space's Documents table (in addition
           // to the approval task) so it persists after the preview closes.
-          if (pendingPreviewDoc) setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
+          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); }
           setPendingPreviewDoc(null);
           setApprovalModalDoc(name);
         }}
         onSendForSignature={(name) => {
-          if (pendingPreviewDoc) setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
+          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); }
           setPendingPreviewDoc(null);
           setPreparePreselectedDocs([name]);
           setShowPrepare(true);
@@ -8500,7 +8507,7 @@ function buildScenarioAgreement(): Agreement {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��────────────────────────────────────────────── */
+   ───────────────────────────��──────────────────���─────────────────────────── */
 export type PrototypeVersion = 'standard' | 'simple';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
@@ -8741,6 +8748,9 @@ export default function App() {
   // of overwriting a shared fixed-id entry.
   const [ndaDataById, setNdaDataById] = useState<Record<string, { data: NDAFormData | null; sentForSignature: boolean; recipientName: string }>>({});
   const [uploadedDocById, setUploadedDocById] = useState<Record<string, { documents: string[]; recipientName: string; isDraft?: boolean }>>({});
+  // Documents added to a space via Add Document → Upload, persisted per agreement
+  // id so they survive navigating away from the workspace and back.
+  const [addedDocsById, setAddedDocsById] = useState<Record<string, string[]>>({});
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
@@ -9655,6 +9665,15 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         ndaSentForSignature={ndaDataById[selectedAgreement.id]?.sentForSignature ?? false}
         ndaRecipientName={ndaDataById[selectedAgreement.id]?.recipientName ?? ''}
         uploadedDocAgreement={uploadedDocById[selectedAgreement.id] ?? null}
+        persistedAddedDocs={addedDocsById[selectedAgreement.id] ?? []}
+        onAddDocument={(name) => {
+          const id = selectedAgreement.id;
+          setAddedDocsById(prev => {
+            const existing = prev[id] ?? [];
+            if (existing.includes(name)) return prev;
+            return { ...prev, [id]: [...existing, name] };
+          });
+        }}
         onPreviewDocument={(name) => { setPreviewOrigin('agreement'); setPreviewDocName(name); }}
         injectedTasks={workspaceApprovalTasks}
         injectedSignatureDocs={workspaceSignatureDocs}
