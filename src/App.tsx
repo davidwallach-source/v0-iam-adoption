@@ -941,19 +941,27 @@ interface InstantNDAModalProps {
 }
 
 function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialData }: InstantNDAModalProps) {
+  // In the Simple Use Case version this flow fills out an actual Permission
+  // Slip (instead of an NDA). The three field-data slots are re-purposed:
+  //   receivingParty -> Student Name
+  //   effectiveDate  -> Activity Date
+  //   duration       -> Parent/Guardian Name
+  const { version } = usePrototypeVersion();
+  const isPermissionSlip = version === 'simple';
+
   const [receivingParty, setReceivingParty] = useState(initialData?.receivingParty || '');
   const [effectiveDate, setEffectiveDate] = useState(initialData?.effectiveDate || '');
-  const [duration, setDuration] = useState(initialData?.duration || '12');
+  const [duration, setDuration] = useState(initialData?.duration || (isPermissionSlip ? '' : '12'));
   const highlightData = true;
-  
+
   // Reset form when initialData changes (opening with new data)
   useEffect(() => {
     if (open) {
       setReceivingParty(initialData?.receivingParty || '');
       setEffectiveDate(initialData?.effectiveDate || '');
-      setDuration(initialData?.duration || '12');
+      setDuration(initialData?.duration || (isPermissionSlip ? '' : '12'));
     }
-  }, [open, initialData]);
+  }, [open, initialData, isPermissionSlip]);
   
   const handleSave = () => {
     onSave({
@@ -1039,10 +1047,10 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
           {/* Sender Field Data section */}
           <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, display: 'block' }}>Sender Field Data</Text>
 
-          {/* Receiving Party */}
+          {/* Field 1 — Receiving Party / Student Name */}
           <div style={{ marginBottom: 20 }}>
-            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Receiving Party</Text>
-            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>The party receiving confidential information.</Text>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>{isPermissionSlip ? 'Student Name' : 'Receiving Party'}</Text>
+            <Text size="xs" color="secondary" style={{ marginBottom: 8, display: 'block' }}>{isPermissionSlip ? 'The student participating in the activity.' : 'The party receiving confidential information.'}</Text>
             <Input
               value={receivingParty}
               onChange={(e) => setReceivingParty(e.target.value)}
@@ -1051,9 +1059,9 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
             />
           </div>
 
-          {/* Effective Date */}
+          {/* Field 2 — Effective Date / Activity Date */}
           <div style={{ marginBottom: 20 }}>
-            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Effective Date</Text>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>{isPermissionSlip ? 'Activity Date' : 'Effective Date'}</Text>
             <Input
               type="date"
               value={effectiveDate}
@@ -1063,11 +1071,11 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
             />
           </div>
 
-          {/* Duration */}
+          {/* Field 3 — Duration / Parent/Guardian Name */}
           <div style={{ marginBottom: 20 }}>
-            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>Duration (months)</Text>
+            <Text size="sm" weight="medium" style={{ marginBottom: 4, display: 'block' }}>{isPermissionSlip ? 'Parent/Guardian Name' : 'Duration (months)'}</Text>
             <Input
-              type="number"
+              type={isPermissionSlip ? 'text' : 'number'}
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               placeholder=""
@@ -1102,12 +1110,21 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
               fontWeight: 600,
               marginBottom: 8,
               color: '#130032',
-            }}>Non-Disclosure Agreement</h1>
+            }}>{isPermissionSlip ? 'Permission Slip' : 'Non-Disclosure Agreement'}</h1>
 
             {/* Title metadata */}
             <div style={{ textAlign: 'center', fontSize: 14, lineHeight: 1.6, color: '#6B6B7B', marginBottom: 32 }}>
-              <div>Acme Corporation & Receiving Party</div>
-              <div>Effective Date: January 15, 2026</div>
+              {isPermissionSlip ? (
+                <>
+                  <div>Riverside Unified School District</div>
+                  <div>Student Activity Authorization</div>
+                </>
+              ) : (
+                <>
+                  <div>Acme Corporation & Receiving Party</div>
+                  <div>Effective Date: January 15, 2026</div>
+                </>
+              )}
             </div>
 
             {/* Field values header */}
@@ -1117,46 +1134,86 @@ function InstantNDAModal({ open, onClose, onSave, onSendForSignature, initialDat
               marginBottom: 32,
               color: '#130032',
             }}>
-              <span>Receiving Party: {renderFieldValue(receivingParty, 'Receiving Party')}</span>
-              <span style={{ margin: '0 16px' }}>Effective Date: {renderFieldValue(effectiveDate, 'Effective Date')}</span>
-              <span style={{ margin: '0 16px' }}>Duration (months): {renderFieldValue(duration, 'Duration', true)}</span>
+              {isPermissionSlip ? (
+                <>
+                  <span>Student Name: {renderFieldValue(receivingParty, 'Student Name')}</span>
+                  <span style={{ margin: '0 16px' }}>Activity Date: {renderFieldValue(effectiveDate, 'Activity Date')}</span>
+                  <span style={{ margin: '0 16px' }}>Parent/Guardian: {renderFieldValue(duration, 'Parent/Guardian Name')}</span>
+                </>
+              ) : (
+                <>
+                  <span>Receiving Party: {renderFieldValue(receivingParty, 'Receiving Party')}</span>
+                  <span style={{ margin: '0 16px' }}>Effective Date: {renderFieldValue(effectiveDate, 'Effective Date')}</span>
+                  <span style={{ margin: '0 16px' }}>Duration (months): {renderFieldValue(duration, 'Duration', true)}</span>
+                </>
+              )}
             </div>
 
-            {/* Section 1 */}
-            <div style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>1. Definition of Confidential Information</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
-                For purposes of this Agreement, "Confidential Information" shall include all information or data that has or could have commercial value or other utility in the business in which Disclosing Party is engaged.
-              </p>
-            </div>
+            {isPermissionSlip ? (
+              <>
+                {/* Section 1 */}
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>1. Activity Details</h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                    The student named above has been invited to participate in a school-sponsored activity. This activity will take place on the date indicated and will be supervised by school staff. Transportation, where applicable, will be arranged by the school.
+                  </p>
+                </div>
 
-            {/* Section 2 */}
-            <div style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>2. Obligations of Receiving Party</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
-                Receiving Party agrees to: (a) hold the Confidential Information in strict confidence; (b) not to use the Confidential Information for any purpose other than evaluating a potential business relationship; (c) not to disclose Confidential Information to any third parties.
-              </p>
-            </div>
+                {/* Section 2 */}
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>2. Parental Consent</h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                    I, the parent or legal guardian of the student named above, give my permission for my child to participate in this activity. I understand the nature of the activity and accept the terms of participation.
+                  </p>
+                </div>
 
-            {/* Section 3 */}
-            <div style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>3. Term</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
-                This Agreement shall remain in effect for the duration specified above from the Effective Date, unless terminated earlier by either party with 30 days written notice.
-              </p>
-            </div>
+                {/* Section 3 */}
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>3. Emergency & Medical Authorization</h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                    In the event of an emergency, I authorize school staff to secure necessary medical treatment for my child. I confirm the emergency contact information on file with the school is current.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Section 1 */}
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>1. Definition of Confidential Information</h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                    For purposes of this Agreement, "Confidential Information" shall include all information or data that has or could have commercial value or other utility in the business in which Disclosing Party is engaged.
+                  </p>
+                </div>
+
+                {/* Section 2 */}
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>2. Obligations of Receiving Party</h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                    Receiving Party agrees to: (a) hold the Confidential Information in strict confidence; (b) not to use the Confidential Information for any purpose other than evaluating a potential business relationship; (c) not to disclose Confidential Information to any third parties.
+                  </p>
+                </div>
+
+                {/* Section 3 */}
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#130032' }}>3. Term</h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: '#130032', margin: 0 }}>
+                    This Agreement shall remain in effect for the duration specified above from the Effective Date, unless terminated earlier by either party with 30 days written notice.
+                  </p>
+                </div>
+              </>
+            )}
 
             {/* Signature lines */}
             <div style={{ borderTop: '1px solid #E5E1EC', marginTop: 40, paddingTop: 40, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 40 }}>Acme Corporation</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 40 }}>{isPermissionSlip ? 'Parent/Guardian' : 'Acme Corporation'}</div>
                 <div style={{ borderBottom: '1px solid #130032', marginBottom: 8 }} />
-                <div style={{ fontSize: 14, color: '#6B6B7B' }}>Authorized Signature</div>
+                <div style={{ fontSize: 14, color: '#6B6B7B' }}>{isPermissionSlip ? 'Parent/Guardian Signature' : 'Authorized Signature'}</div>
               </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 40 }}>Receiving Party</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 40 }}>{isPermissionSlip ? 'School Representative' : 'Receiving Party'}</div>
                 <div style={{ borderBottom: '1px solid #130032', marginBottom: 8 }} />
-                <div style={{ fontSize: 14, color: '#6B6B7B' }}>Authorized Signature</div>
+                <div style={{ fontSize: 14, color: '#6B6B7B' }}>{isPermissionSlip ? 'Staff Signature' : 'Authorized Signature'}</div>
               </div>
             </div>
           </div>
@@ -1219,7 +1276,22 @@ const VENDOR_OPTIONS = [
   'TerraScale Inc.',
 ];
 
+// Field-trip destinations/vendors used by the Simple Use Case version.
+const FIELD_TRIP_VENDOR_OPTIONS = [
+  'City Science Museum',
+  'State Natural History Museum',
+  'Sunrise Charter Buses',
+  'Riverside Zoo & Aquarium',
+  'Regional Art Gallery',
+  'Coastal Marine Center',
+];
+
 function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalProps) {
+  // In the Simple Use Case version this flow sets up a Field Trip package
+  // (instead of a vendor Purchase Agreement).
+  const { version } = usePrototypeVersion();
+  const isFieldTrip = version === 'simple';
+
   const [title, setTitle] = useState('');
   const [vendor, setVendor] = useState('');
   const [vendorOpen, setVendorOpen] = useState(false);
@@ -1233,7 +1305,8 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
 
   if (!open) return null;
 
-  const filteredVendors = VENDOR_OPTIONS.filter(v =>
+  const vendorOptions = isFieldTrip ? FIELD_TRIP_VENDOR_OPTIONS : VENDOR_OPTIONS;
+  const filteredVendors = vendorOptions.filter(v =>
     v.toLowerCase().includes(vendor.toLowerCase())
   );
 
@@ -1300,7 +1373,7 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
             onClick={onClose}
           >Start New</span>
           <Icon name="chevron-right" size={14} color="var(--ink-text-secondary)" />
-          <span style={{ color: '#130032', fontWeight: 500 }}>Purchase Agreement</span>
+          <span style={{ color: '#130032', fontWeight: 500 }}>{isFieldTrip ? 'Field Trip' : 'Purchase Agreement'}</span>
         </div>
         <button
           onClick={onClose}
@@ -1315,17 +1388,17 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', padding: '48px 24px' }}>
         <div style={{ width: '100%', maxWidth: 600 }}>
           {/* Title */}
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: '#130032', margin: '0 0 8px 0' }}>Purchase Agreement</h1>
-          <p style={{ fontSize: 14, color: 'var(--ink-text-secondary)', margin: '0 0 40px 0' }}>Initiate a procurement workflow</p>
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: '#130032', margin: '0 0 8px 0' }}>{isFieldTrip ? 'Field Trip' : 'Purchase Agreement'}</h1>
+          <p style={{ fontSize: 14, color: 'var(--ink-text-secondary)', margin: '0 0 40px 0' }}>{isFieldTrip ? 'Set up a field trip agreement package' : 'Initiate a procurement workflow'}</p>
 
           {/* Title field */}
           <div style={{ marginBottom: 28 }}>
             <label style={fieldLabelStyle}>
-              Title <span style={requiredStar}>*</span>
+              {isFieldTrip ? 'Trip Name' : 'Title'} <span style={requiredStar}>*</span>
             </label>
             <input
               style={inputStyle}
-              placeholder="Name of purchase request"
+              placeholder={isFieldTrip ? 'Name of the field trip' : 'Name of purchase request'}
               value={title}
               onChange={e => setTitle(e.target.value)}
             />
@@ -1334,7 +1407,7 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
           {/* Vendors field */}
           <div style={{ marginBottom: 28, position: 'relative' }}>
             <label style={fieldLabelStyle}>
-              Vendors <span style={requiredStar}>*</span>
+              {isFieldTrip ? 'Destination / Vendor' : 'Vendors'} <span style={requiredStar}>*</span>
             </label>
             <div style={{ position: 'relative' }}>
               <input
@@ -1411,16 +1484,16 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
             </div>
           </div>
 
-          {/* Purchase Description */}
+          {/* Description */}
           <div style={{ marginBottom: 28 }}>
-            <label style={fieldLabelStyle}>Purchase Description</label>
+            <label style={fieldLabelStyle}>{isFieldTrip ? 'Trip Description' : 'Purchase Description'}</label>
             <textarea
               style={{
                 ...inputStyle,
                 height: 100,
                 resize: 'vertical',
               } as React.CSSProperties}
-              placeholder="Briefly describe purchase request"
+              placeholder={isFieldTrip ? 'Briefly describe the field trip' : 'Briefly describe purchase request'}
               value={description}
               onChange={e => setDescription(e.target.value)}
             />
@@ -1453,20 +1526,26 @@ function PurchaseRequestModal({ open, onClose, onNext }: PurchaseRequestModalPro
                   )}
                 </div>
                 <span onClick={() => setDocumentSource(opt)}>
-                  {opt === '1st-party' ? '1st party (Fontara)' : '3rd party (from vendor)'}
+                  {isFieldTrip
+                    ? (opt === '1st-party' ? 'School-provided documents' : 'Documents from vendor')
+                    : (opt === '1st-party' ? '1st party (Fontara)' : '3rd party (from vendor)')}
                 </span>
               </label>
             ))}
           </div>
 
-          {/* Additional Purchase Requirements */}
+          {/* Additional Requirements */}
           <div style={{ marginBottom: 40 }}>
-            <label style={{ ...fieldLabelStyle, marginBottom: 12 }}>Additional Purchase Requirements</label>
-            {([
+            <label style={{ ...fieldLabelStyle, marginBottom: 12 }}>{isFieldTrip ? 'Include in this package' : 'Additional Purchase Requirements'}</label>
+            {(isFieldTrip ? ([
+              { key: 'warranty', label: 'Permission slips' },
+              { key: 'compliance', label: 'Vendor contracts' },
+              { key: 'specifications', label: 'Liability waivers' },
+            ] as const) : ([
               { key: 'warranty', label: 'Warranty or support' },
               { key: 'compliance', label: 'Compliance certifications' },
               { key: 'specifications', label: 'Detailed specifications or project milestones' },
-            ] as const).map(({ key, label }) => (
+            ] as const)).map(({ key, label }) => (
               <label
                 key={key}
                 style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, cursor: 'pointer', fontSize: 14, color: '#130032' }}
@@ -3470,7 +3549,7 @@ function Footer() {
 
 /* ════════════��═════════════���════════════
    App
-   ═══════════════════════════════════════ */
+   ═════════════════════════════════��═════ */
 
 const VALID_TABS: TabId[] = ['home', 'agreements', 'templates', 'insights', 'admin'];
 
@@ -8307,7 +8386,7 @@ function buildScenarioAgreement(): Agreement {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ────────────────────────────────────────────────────────────────────────── */
+   ───────────────────────────��────────────────────────────────────────────── */
 export type PrototypeVersion = 'standard' | 'simple';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
