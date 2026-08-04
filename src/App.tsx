@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������������������������������������������══════════════
+/* ═══════════════════════������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������═══���������═════════════════════════════
+/* ═������══�����������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -2738,7 +2738,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══���������������═���������������═���═�������������════��══════════════��═════════
+/* ══�����������������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════������══════════ */
 
@@ -9091,22 +9091,33 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const filteredAgreements = useMemo(() => {
     const q = search.toLowerCase();
-    return viewAgreements.filter((a) => {
-      if (q && !(a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q))) return false;
-      if (filterParty.size > 0 && !filterParty.has(a.party)) return false;
-      if (filterType.size > 0) {
-        // Prefer the explicit entityKind flag; fall back to the documentsCount
-        // heuristic (multi-document agreements are "Agreement Spaces").
-        const kind = a.entityKind
-          ? (a.entityKind === 'space' ? 'Agreement Spaces' : 'Documents')
-          : ((a.documentsCount ?? 1) > 1 ? 'Agreement Spaces' : 'Documents');
-        if (!filterType.has(kind)) return false;
-      }
-      if (filterStatus.size > 0 && !filterStatus.has(a.status)) return false;
-      if (filterOwner.size > 0 && !filterOwner.has(ownerOf(a))) return false;
-      return true;
-    });
-  }, [search, viewAgreements, filterParty, filterType, filterStatus, filterOwner, ownerOf]);
+    return viewAgreements
+      .filter((a) => {
+        if (q && !(a.name.toLowerCase().includes(q) || a.party.toLowerCase().includes(q))) return false;
+        if (filterParty.size > 0 && !filterParty.has(a.party)) return false;
+        if (filterType.size > 0) {
+          // Prefer the explicit entityKind flag; fall back to the documentsCount
+          // heuristic (multi-document agreements are "Agreement Spaces").
+          const kind = a.entityKind
+            ? (a.entityKind === 'space' ? 'Agreement Spaces' : 'Documents')
+            : ((a.documentsCount ?? 1) > 1 ? 'Agreement Spaces' : 'Documents');
+          if (!filterType.has(kind)) return false;
+        }
+        if (filterStatus.size > 0 && !filterStatus.has(a.status)) return false;
+        if (filterOwner.size > 0 && !filterOwner.has(ownerOf(a))) return false;
+        return true;
+      })
+      // Reflect documents added to a space (via Add Document → Upload) in the
+      // row's document subtitle, so e.g. the waiver appears after being added.
+      .map((a) => {
+        const added = addedDocsById[a.id];
+        if (!added || added.length === 0) return a;
+        const base = a.documentNames ?? [];
+        const merged = [...base];
+        added.forEach((name) => { if (!merged.includes(name)) merged.push(name); });
+        return { ...a, documentNames: merged, documentsCount: merged.length };
+      });
+  }, [search, viewAgreements, filterParty, filterType, filterStatus, filterOwner, ownerOf, addedDocsById]);
 
   // When "Documents" is chosen in the Type filter, the list shows individual
   // documents with document-specific columns instead of agreements.
