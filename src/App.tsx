@@ -1705,7 +1705,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports';
 
-/* �����══════════���═══════��������������══════════════════
+/* �����══════════���═══════����������������══════════════════
    Agreement Workspace Data (Sales Use Case)
    An Agreement Workspace is a dynamic package of 
    documents, data, and tasks required to execute 
@@ -2179,8 +2179,8 @@ function RowRenameInput({ value, onChange, onCommit, onCancel }: {
   );
 }
 
-function createAgreementColumns(rename: AgreementRenameControls) {
-  return [
+function createAgreementColumns(rename: AgreementRenameControls, hideParties = false) {
+  const columns = [
   {
     key: 'name',
     header: 'Agreement Space',
@@ -2274,6 +2274,8 @@ function createAgreementColumns(rename: AgreementRenameControls) {
     ),
   },
   ];
+  // In the Simple Use Case the Parties column is hidden from the All Agreements table.
+  return hideParties ? columns.filter(col => col.key !== 'parties') : columns;
 }
 
 /* ═══════════════════════════════════════
@@ -8631,8 +8633,8 @@ export default function App() {
       onStartRename: startRename,
       onCommitRename: commitRename,
       onCancelRename: cancelRename,
-    }),
-    [renamingId, renameDraft, setRenameDraftValue, startRename, commitRename, cancelRename],
+    }, protoVersion === 'simple'),
+    [renamingId, renameDraft, setRenameDraftValue, startRename, commitRename, cancelRename, protoVersion],
   );
   const [showNDAModal, setShowNDAModal] = useState(false);
   const [savedNDAData, setSavedNDAData] = useState<NDAFormData | null>(null);
