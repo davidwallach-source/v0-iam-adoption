@@ -2272,7 +2272,7 @@ const documentColumns: any[] = [
 
 /* ══���══════════════════════════════���═════
    Folders Data — hierarchical folder/document tree
-   ═══════════════════════════════════════ */
+   ═════════════════════��═════════════════ */
 
 interface FolderNode {
   id: string;
@@ -2631,7 +2631,7 @@ const partyColumns: any[] = [
 
 /* ══�����������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
-   ═══════════�����═══════════════════════════ */
+   ═══════════�����════════════════���══════════ */
 
 interface RequestItem {
   id: string;
@@ -9350,7 +9350,14 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       onClose={() => setUserMenuOpen(false)}
       userName={globalNavConfig.user.name}
       version={protoVersion}
-      onSelectVersion={setProtoVersion}
+      onSelectVersion={(v) => {
+        setProtoVersion(v);
+        // Switching into the Simple Use Case lands on the Agreements page
+        // (rather than Home) since the single Waiver space is the focus.
+        if (v === 'simple') {
+          handleTabClick('agreements');
+        }
+      }}
     />
     <DocuSignShell
       globalNav={globalNavConfig}
