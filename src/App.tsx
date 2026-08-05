@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������������������������������������������══════════════
+/* ═══════════════════════����������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═�������═�������������═════════════════════════════
+/* ═��������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -2738,7 +2738,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ══�����������������═���������������═���═�������������════��══════════════��═════════
+/* ���═�����������������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════������══════════ */
 
@@ -6853,17 +6853,21 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     // matching the sentTasks ordering used in each branch below.
     const injected = [...(injectedTasks ?? [])].reverse();
     const base = (() => {
-    // For NDA agreements sent for signature, create Sign NDA task
+    // For NDA agreements sent for signature, create Sign NDA task. The assignee
+    // reflects the Receiving Party (same value shown as "Waiting for..." in the
+    // Overview Status column), preferring the recipient entered on the Prepare
+    // screen and falling back to the receiving party captured in the NDA form.
     if (isNDADraft && ndaSentForSignature) {
-      const ndaRecipientInitials = ndaRecipientName 
-        ? ndaRecipientName.split(' ').map(n => n[0]).join('').toUpperCase()
+      const ndaAssignee = ndaRecipientName || savedNDAData?.receivingParty || 'Recipient';
+      const ndaRecipientInitials = (ndaRecipientName || savedNDAData?.receivingParty)
+        ? ndaAssignee.split(/\s+/).map(n => n[0]).join('').slice(0, 2).toUpperCase()
         : 'RP';
       const signNdaTask = {
         id: 'sign-nda',
         title: 'Sign NDA',
         type: 'Sign' as const,
         team: '',
-        assignee: ndaRecipientName || 'Recipient',
+        assignee: ndaAssignee,
         assigneeInitials: ndaRecipientInitials,
         status: 'In progress',
         dueDate: '--',
