@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════��������������������������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������═�������������═════════════════════════════
+/* ═�������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -6897,10 +6897,20 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       // Include any additional tasks added via Add menu (like Wire Transfer)
       return [signTask, ...[...sentTasks].reverse()];
     }
+    // For the Instant NDA (standard version), the base task's Assigned To should
+    // reflect the Receiving Party entered in the NDA form, not the default "You".
+    if (isNDADraft && !isPermissionSlipSpace) {
+      const rp = (savedNDAData?.receivingParty || ndaRecipientName || '').trim();
+      if (rp) {
+        const rpInitials = rp.split(/\s+/).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        const ndaTasks = workspaceData.tasks.map(t => ({ ...t, assignee: rp, assigneeInitials: rpInitials }));
+        return [...[...sentTasks].reverse(), ...ndaTasks];
+      }
+    }
     return [...[...sentTasks].reverse(), ...workspaceData.tasks];
     })();
     return [...injected, ...base];
-  }, [workspaceData.tasks, sentTasks, isNDADraft, ndaSentForSignature, isUploadedDocAgreement, uploadedDocAgreement, injectedTasks]);
+  }, [workspaceData.tasks, sentTasks, isNDADraft, ndaSentForSignature, isUploadedDocAgreement, uploadedDocAgreement, injectedTasks, isPermissionSlipSpace, savedNDAData, ndaRecipientName]);
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
@@ -9177,7 +9187,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const isRequestsView = sidebarView === 'requests';
   const isFoldersView = sidebarView === 'folders';
 
-  /* ─�� Folders view: navigation + inline expansion ── */
+  /* ─�� Folders view: navigation + inline expansion ���─ */
   const toggleFolderExpand = useCallback((id: string) => {
     setExpandedFolders((prev) => {
       const next = new Set(prev);
