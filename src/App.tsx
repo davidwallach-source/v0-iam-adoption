@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════������������������������������������������������������������������������══════════════
+/* ═══════════════════════��������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������══�����������═════════════════════════════
+/* ═������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -9852,7 +9852,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: protoVersion === 'simple' ? 'Permission for Museum' : 'Untitled Agreement Space',
+          // After saving, the Instant NDA space is titled "NDA, [Recipient Name]".
+          name: protoVersion === 'simple' ? 'Permission for Museum' : (data.receivingParty ? `NDA, ${data.receivingParty}` : 'NDA'),
           documentNames: protoVersion === 'simple' ? ['Permission Slip'] : ['Non-Disclosure Agreement'],
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -9892,7 +9893,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: data.receivingParty ? `NDA - ${data.receivingParty}` : 'Non-Disclosure Agreement (Draft)',
+          name: data.receivingParty ? `NDA, ${data.receivingParty}` : 'NDA',
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
           externalParticipants: data.receivingParty ? [data.receivingParty] : [],
@@ -10000,11 +10001,15 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setNdaSentForSignature(true);
           const ndaId = ndaAgreementId ?? `nda-${Date.now()}`;
           setNdaDataById(prev => ({ ...prev, [ndaId]: { data: prev[ndaId]?.data ?? savedNDAData, sentForSignature: true, recipientName } }));
+          // After sending for signature, title the space "NDA, [Recipient Name]",
+          // preferring the recipient entered on the Prepare screen and falling
+          // back to the receiving party captured in the NDA modal.
+          const ndaTitleRecipient = recipientName || savedNDAData?.receivingParty || '';
           const sentNdaAgreement: Agreement = {
             id: ndaId,
             entityKind: 'space',
             workspaceKind: 'nda',
-            name: 'Untitled Agreement Space',
+            name: ndaTitleRecipient ? `NDA, ${ndaTitleRecipient}` : 'NDA',
             documentNames: ['Non-Disclosure Agreement'],
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
