@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������������������������������������������������══════════════
+/* ═══════════════════════������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═���������═�������������═════════════════════════════
+/* ═����������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -3156,7 +3156,7 @@ function HomePage() {
       <div style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px 40px' }}>
         <Stack gap="none" style={{ gap: 20 }}>
 
-          {/* ── Tasks ── */}
+          {/* ── Tasks ─�� */}
           <div {...getStaggerProps(0)}>
             <div style={{
               background: 'var(--ink-white-100)',
@@ -8556,6 +8556,30 @@ function buildScenarioAgreement(): Agreement {
   };
 }
 
+/* Build an agreement-space name from the document(s) it was created with, plus
+   the people it involves — the "[document name(s)], [people]" convention.
+   - 1 document  → that document's name
+   - N documents → "First document +N more" (per the multi-doc naming choice)
+   - people are appended after a comma when present (single name, or
+     "First person +N more" for multiple), mirroring the document treatment.
+   Users can still rename the space afterwards; this only sets the initial name. */
+function buildSpaceName(documentNames: (string | undefined)[], people: (string | undefined)[] = []): string {
+  const docs = documentNames.filter((d): d is string => !!d && d.trim().length > 0);
+  const ppl = people.filter((p): p is string => !!p && p.trim().length > 0);
+
+  const docPart =
+    docs.length === 0 ? 'Untitled Agreement Space'
+    : docs.length === 1 ? docs[0]
+    : `${docs[0]} +${docs.length - 1} more`;
+
+  const peoplePart =
+    ppl.length === 0 ? ''
+    : ppl.length === 1 ? ppl[0]
+    : `${ppl[0]} +${ppl.length - 1} more`;
+
+  return peoplePart ? `${docPart}, ${peoplePart}` : docPart;
+}
+
 /* ───────────────────────────────────────────────────────��──────────────────
    Prototype version switcher
    ---------------------------------------------------------------------------
@@ -9788,7 +9812,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: newId,
             entityKind: 'space',
             workspaceKind: 'uploaded',
-            name: 'Untitled Agreement Space',
+            // Draft (worked on before sending): named after its document. No
+            // recipient yet, so the name is just the document name.
+            name: buildSpaceName([docName], []),
             documentNames: [docName],
             party: '—',
             partyLogo: 'UA',
@@ -9798,7 +9824,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             statusSub: 'Draft',
             dealValue: '—',
             agreementType: 'Master Services Agreement',
-            termLength: '—',
+            termLength: '���',
             closeDate: '—',
             date: new Date().toLocaleDateString('en-GB'),
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
@@ -9895,13 +9921,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         // Create a draft NDA agreement object. In the Simple Use Case this modal
         // is the Permission Slip flow, so the space is always titled the same way
         // whether it was sent or just saved as a draft.
+        // Name the space after its document(s) plus the receiving party, e.g.
+        // "Non-Disclosure Agreement, Globex Corp" (or "Permission Slip, …" in the
+        // Simple Use Case). Users can rename afterwards.
+        const ndaDraftDocs = protoVersion === 'simple' ? ['Permission Slip'] : ['Non-Disclosure Agreement'];
         const ndaAgreement: Agreement = {
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          // After saving, the Instant NDA space is titled "NDA, [Recipient Name]".
-          name: protoVersion === 'simple' ? 'Permission for Museum' : (data.receivingParty ? `NDA, ${data.receivingParty}` : 'NDA'),
-          documentNames: protoVersion === 'simple' ? ['Permission Slip'] : ['Non-Disclosure Agreement'],
+          name: buildSpaceName(ndaDraftDocs, [data.receivingParty]),
+          documentNames: ndaDraftDocs,
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
           externalParticipants: data.receivingParty ? [data.receivingParty] : [],
@@ -9936,11 +9965,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setNdaAgreementId(ndaId);
         setNdaDataById(prev => ({ ...prev, [ndaId]: { data, sentForSignature: false, recipientName: prev[ndaId]?.recipientName ?? '' } }));
         
+        const ndaSendDocs = protoVersion === 'simple' ? ['Permission Slip'] : ['Non-Disclosure Agreement'];
         const ndaAgreement: Agreement = {
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: data.receivingParty ? `NDA, ${data.receivingParty}` : 'NDA',
+          name: buildSpaceName(ndaSendDocs, [data.receivingParty]),
+          documentNames: ndaSendDocs,
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
           externalParticipants: data.receivingParty ? [data.receivingParty] : [],
@@ -10048,16 +10079,19 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setNdaSentForSignature(true);
           const ndaId = ndaAgreementId ?? `nda-${Date.now()}`;
           setNdaDataById(prev => ({ ...prev, [ndaId]: { data: prev[ndaId]?.data ?? savedNDAData, sentForSignature: true, recipientName } }));
-          // After sending for signature, title the space "NDA, [Recipient Name]",
-          // preferring the recipient entered on the Prepare screen and falling
-          // back to the receiving party captured in the NDA modal.
-          const ndaTitleRecipient = recipientName || savedNDAData?.receivingParty || '';
+          // Name the sent envelope after its document(s) plus the people it was
+          // sent to — preferring the Prepare-screen recipients and falling back
+          // to the receiving party captured in the NDA modal.
+          const sentNdaDocs = documents && documents.length > 0 ? documents : ['Non-Disclosure Agreement'];
+          const sentNdaPeople = recipientNames.length > 0
+            ? recipientNames
+            : (savedNDAData?.receivingParty ? [savedNDAData.receivingParty] : []);
           const sentNdaAgreement: Agreement = {
             id: ndaId,
             entityKind: 'space',
             workspaceKind: 'nda',
-            name: ndaTitleRecipient ? `NDA, ${ndaTitleRecipient}` : 'NDA',
-            documentNames: ['Non-Disclosure Agreement'],
+            name: buildSpaceName(sentNdaDocs, sentNdaPeople),
+            documentNames: sentNdaDocs,
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
             externalParticipants: Array.from(new Set([
@@ -10102,13 +10136,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           const newId = `uploaded-${Date.now()}`;
           setUploadedDocById(prev => ({ ...prev, [newId]: { documents: documents || [], recipientName } }));
           
+          // Name the space after its document(s) plus the recipient(s), e.g.
+          // "Master Service Agreement (MSA), Bruce Wallach". Users can rename it.
+          const uploadedDocNames = documents && documents.length > 0 ? documents : [docName];
           // Create a new agreement for the uploaded document
           const uploadedAgreement: Agreement = {
             id: newId,
             entityKind: 'space',
             workspaceKind: isPermissionSlipFlow ? 'permission-slip' : 'uploaded',
-            name: isPermissionSlipFlow ? 'Permission for Museum' : 'Untitled Agreement Space',
-            documentNames: documents && documents.length > 0 ? documents : [docName],
+            name: buildSpaceName(uploadedDocNames, recipientNames),
+            documentNames: uploadedDocNames,
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
             externalParticipants: recipientNames,
