@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════������������������������������������������������������������������������������══════════════
+/* ═══════════════════════�������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═����������═�������������═════════════════════════════
+/* ═�����������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -4630,7 +4630,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
         </div>
       </div>
 
-      {/* ── Toolbar ── */}
+      {/* ��─ Toolbar ── */}
       {!doc.hideEditToolbar && (
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, height: 48, padding: '0 16px',
@@ -8556,28 +8556,16 @@ function buildScenarioAgreement(): Agreement {
   };
 }
 
-/* Build an agreement-space name from the document(s) it was created with, plus
-   the people it involves — the "[document name(s)], [people]" convention.
+/* Build an agreement-space name from the document(s) it was created with.
    - 1 document  → that document's name
    - N documents → "First document +N more" (per the multi-doc naming choice)
-   - people are appended after a comma when present (single name, or
-     "First person +N more" for multiple), mirroring the document treatment.
    Users can still rename the space afterwards; this only sets the initial name. */
-function buildSpaceName(documentNames: (string | undefined)[], people: (string | undefined)[] = []): string {
+function buildSpaceName(documentNames: (string | undefined)[]): string {
   const docs = documentNames.filter((d): d is string => !!d && d.trim().length > 0);
-  const ppl = people.filter((p): p is string => !!p && p.trim().length > 0);
 
-  const docPart =
-    docs.length === 0 ? 'Untitled Agreement Space'
+  return docs.length === 0 ? 'Untitled Agreement Space'
     : docs.length === 1 ? docs[0]
     : `${docs[0]} +${docs.length - 1} more`;
-
-  const peoplePart =
-    ppl.length === 0 ? ''
-    : ppl.length === 1 ? ppl[0]
-    : `${ppl[0]} +${ppl.length - 1} more`;
-
-  return peoplePart ? `${docPart}, ${peoplePart}` : docPart;
 }
 
 /* ───────────────────────────────────────────────────────��──────────────────
@@ -9814,7 +9802,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             workspaceKind: 'uploaded',
             // Draft (worked on before sending): named after its document. No
             // recipient yet, so the name is just the document name.
-            name: buildSpaceName([docName], []),
+            name: buildSpaceName([docName]),
             documentNames: [docName],
             party: '—',
             partyLogo: 'UA',
@@ -9929,7 +9917,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: buildSpaceName(ndaDraftDocs, [data.receivingParty]),
+          name: buildSpaceName(ndaDraftDocs),
           documentNames: ndaDraftDocs,
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -9970,7 +9958,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           id: ndaId,
           entityKind: 'space',
           workspaceKind: 'nda',
-          name: buildSpaceName(ndaSendDocs, [data.receivingParty]),
+          name: buildSpaceName(ndaSendDocs),
           documentNames: ndaSendDocs,
           party: data.receivingParty || 'Receiving Party',
           partyLogo: data.receivingParty ? data.receivingParty.substring(0, 2).toUpperCase() : 'NDA',
@@ -10079,18 +10067,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           setNdaSentForSignature(true);
           const ndaId = ndaAgreementId ?? `nda-${Date.now()}`;
           setNdaDataById(prev => ({ ...prev, [ndaId]: { data: prev[ndaId]?.data ?? savedNDAData, sentForSignature: true, recipientName } }));
-          // Name the sent envelope after its document(s) plus the people it was
-          // sent to — preferring the Prepare-screen recipients and falling back
-          // to the receiving party captured in the NDA modal.
+          // Name the sent envelope after its document(s) only.
           const sentNdaDocs = documents && documents.length > 0 ? documents : ['Non-Disclosure Agreement'];
-          const sentNdaPeople = recipientNames.length > 0
-            ? recipientNames
-            : (savedNDAData?.receivingParty ? [savedNDAData.receivingParty] : []);
           const sentNdaAgreement: Agreement = {
             id: ndaId,
             entityKind: 'space',
             workspaceKind: 'nda',
-            name: buildSpaceName(sentNdaDocs, sentNdaPeople),
+            name: buildSpaceName(sentNdaDocs),
             documentNames: sentNdaDocs,
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
@@ -10144,7 +10127,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: newId,
             entityKind: 'space',
             workspaceKind: isPermissionSlipFlow ? 'permission-slip' : 'uploaded',
-            name: buildSpaceName(uploadedDocNames, recipientNames),
+            name: buildSpaceName(uploadedDocNames),
             documentNames: uploadedDocNames,
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
