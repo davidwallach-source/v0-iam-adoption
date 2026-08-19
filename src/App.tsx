@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════����������������������������������������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═��������═�������������═════════════════════════════
+/* ═���������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -1760,6 +1760,14 @@ interface Agreement {
   // resolved by kind rather than by a fixed id, so multiple can coexist in a
   // single session without overwriting one another.
   workspaceKind?: 'nda' | 'uploaded' | 'permission-slip';
+  // Set when the space contains a single sent signature envelope. Drives the
+  // progress-bar Status treatment (progress track + "Waiting for [recipient]")
+  // in the All Agreements table, matching how the space itself renders it.
+  signatureProgress?: {
+    signed: number;
+    total: number;
+    waitingFor: string;
+  };
 }
 
 const AGREEMENTS_DATA: Agreement[] = [
@@ -2198,6 +2206,27 @@ function RowRenameInput({ value, onChange, onCommit, onCancel }: {
   );
 }
 
+// Status treatment for a single-envelope signature request: a thin progress
+// track with a leading dot, above a "Waiting for [recipient]" line. Mirrors the
+// treatment used inside the agreement space's Documents tab so the All
+// Agreements Status column matches it.
+function SignatureProgressStatus({ progress }: { progress: NonNullable<Agreement['signatureProgress']> }) {
+  const pct = progress.total > 0 ? (progress.signed / progress.total) * 100 : 0;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 140 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
+        <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
+          <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, background: 'var(--ink-cobalt-80)' }} />
+        </div>
+      </div>
+      <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        Waiting for {progress.waitingFor}
+      </Text>
+    </div>
+  );
+}
+
 function createAgreementColumns(rename: AgreementRenameControls, hideParties = false) {
   const columns = [
   {
@@ -2230,12 +2259,16 @@ function createAgreementColumns(rename: AgreementRenameControls, hideParties = f
     header: 'Status',
     width: '15%',
     cell: (row: Agreement) => (
-      <StatusLight
-        noFill
-        className={/^in (progress|review)$/i.test(row.status) ? 'status-black' : undefined}
-        kind={row.statusKind === 'success' ? 'success' : row.statusKind === 'warning' ? 'warning' : row.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-        text={row.status}
-      />
+      row.signatureProgress ? (
+        <SignatureProgressStatus progress={row.signatureProgress} />
+      ) : (
+        <StatusLight
+          noFill
+          className={/^in (progress|review)$/i.test(row.status) ? 'status-black' : undefined}
+          kind={row.statusKind === 'success' ? 'success' : row.statusKind === 'warning' ? 'warning' : row.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+          text={row.status}
+        />
+      )
     ),
   },
   {
@@ -10045,6 +10078,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             documentsCount: 1,
             tasksCount: 1,
             tasksPending: 1,
+            // Single sent envelope → progress-bar Status treatment on the list,
+            // waiting on the recipient card's Name (fall back to receiving party).
+            signatureProgress: {
+              signed: 0,
+              total: recipientNames.length || 1,
+              waitingFor: recipientName || savedNDAData?.receivingParty || 'Recipient',
+            },
           };
           addNewAgreement(sentNdaAgreement);
           setSelectedAgreement(sentNdaAgreement);
@@ -10086,6 +10126,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             documentsCount: documents?.length || 1,
             tasksCount: 1,
             tasksPending: 1,
+            // Single sent envelope → progress-bar Status treatment on the list,
+            // waiting on the recipient card's Name field.
+            signatureProgress: {
+              signed: 0,
+              total: recipientNames.length || 1,
+              waitingFor: recipientName || 'Recipient',
+            },
           };
           
           setSelectedAgreement(uploadedAgreement);
