@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════��������������������������������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═������������═�������������═════════════════════════════
+/* ��������������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -3562,7 +3562,7 @@ function AdminPage() {
 
 /* ═══════════════════════�������═══════════════
    Footer
-   ════��═══�������������������════════════════════════════ */
+   ════��═══��������������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -7006,16 +7006,23 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   }, [currentDocuments, sentEnvelopes]);
 
   const currentSupplementalDocs = workspaceData.supplementalDocs;
+  // Segmented-control ("toggle") style: the active segment is a raised white
+  // pill with a subtle border/shadow and bold dark text; inactive segments are
+  // transparent with muted text. Segments sit inside a light-gray pill track
+  // (see the wrapping container below).
   const tabStyle = (isActive: boolean): CSSProperties => ({
-    padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
-    border: 'none',
-    background: 'none',
-    borderBottom: isActive ? '2px solid var(--ink-neutral-140)' : '2px solid transparent',
+    padding: '6px 20px',
+    border: isActive ? '1px solid var(--ink-border-subtle)' : '1px solid transparent',
+    borderRadius: 8,
+    background: isActive ? 'var(--ink-bg-color-default)' : 'transparent',
+    boxShadow: isActive ? '0 1px 2px rgba(19, 0, 50, 0.08)' : 'none',
     color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
     cursor: 'pointer',
     fontSize: 'var(--ink-font-size-sm)',
-    fontWeight: isActive ? 600 : 400,
+    fontWeight: isActive ? 600 : 500,
     fontFamily: 'var(--ink-font-family-default)',
+    transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
+    whiteSpace: 'nowrap',
   });
 
   // Maps a document/task status string to a StatusLight kind so statuses render
@@ -7152,10 +7159,18 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           </Inline>
         </div>
 
-        {/* Tabs — constrained, no top border */}
-        <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0, paddingTop: 'var(--ink-spacing-100)' }}>
-          <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-          <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+        {/* Tabs — segmented-control toggle inside a light-gray pill track */}
+        <div style={{ ...innerStyle, paddingTop: 'var(--ink-spacing-150)', paddingBottom: 'var(--ink-spacing-150)' }}>
+          <div style={{
+            display: 'inline-flex',
+            gap: 4,
+            padding: 4,
+            borderRadius: 10,
+            background: 'var(--ink-bg-color-secondary)',
+          }}>
+            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+          </div>
         </div>
       </div>
 
