@@ -7006,23 +7006,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   }, [currentDocuments, sentEnvelopes]);
 
   const currentSupplementalDocs = workspaceData.supplementalDocs;
-  // Segmented-control ("toggle") style: the active segment is a raised white
-  // pill with a subtle border/shadow and bold dark text; inactive segments are
-  // transparent with muted text. Segments sit inside a light-gray pill track
-  // (see the wrapping container below).
   const tabStyle = (isActive: boolean): CSSProperties => ({
-    padding: '6px 20px',
-    border: isActive ? '1px solid var(--ink-border-subtle)' : '1px solid transparent',
-    borderRadius: 8,
-    background: isActive ? 'var(--ink-bg-color-default)' : 'transparent',
-    boxShadow: isActive ? '0 1px 2px rgba(19, 0, 50, 0.08)' : 'none',
+    padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
+    border: 'none',
+    background: 'none',
+    borderBottom: isActive ? '2px solid var(--ink-neutral-140)' : '2px solid transparent',
     color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
     cursor: 'pointer',
     fontSize: 'var(--ink-font-size-sm)',
-    fontWeight: isActive ? 600 : 500,
+    fontWeight: isActive ? 600 : 400,
     fontFamily: 'var(--ink-font-family-default)',
-    transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
-    whiteSpace: 'nowrap',
   });
 
   // Maps a document/task status string to a StatusLight kind so statuses render
@@ -7159,18 +7152,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           </Inline>
         </div>
 
-        {/* Tabs — segmented-control toggle inside a light-gray pill track */}
-        <div style={{ ...innerStyle, paddingTop: 'var(--ink-spacing-150)', paddingBottom: 'var(--ink-spacing-150)' }}>
-          <div style={{
-            display: 'inline-flex',
-            gap: 4,
-            padding: 4,
-            borderRadius: 10,
-            background: 'var(--ink-bg-color-secondary)',
-          }}>
-            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-          </div>
+        {/* Tabs — constrained, no top border */}
+        <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0, paddingTop: 'var(--ink-spacing-100)' }}>
+          <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+          <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
         </div>
       </div>
 
@@ -7588,29 +7573,41 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             {/* Right sidebar */}
             <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
-              {/* Sidebar tabs */}
-              <div style={{ display: 'flex', borderBottom: '1px solid var(--ink-border-subtle)', padding: '0 var(--ink-spacing-300)' }}>
-                {(['activity', 'details'] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setSidebarTab(tab)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '14px 4px 12px 4px',
-                      marginRight: 24,
-                      fontSize: 'var(--ink-font-size-sm)',
-                      fontWeight: sidebarTab === tab ? 600 : 400,
-                      color: sidebarTab === tab ? 'var(--ink-text-default)' : 'var(--ink-text-secondary)',
-                      borderBottom: sidebarTab === tab ? '2px solid var(--ink-text-default)' : 'none',
-                      transition: 'color 0.15s',
-                      position: 'relative',
-                    }}
-                  >
-                    {tab === 'activity' ? 'Activity' : 'Details'}
-                  </button>
-                ))}
+              {/* Sidebar tabs — segmented-control toggle inside a light-gray pill track */}
+              <div style={{ display: 'flex', borderBottom: '1px solid var(--ink-border-subtle)', padding: 'var(--ink-spacing-300)' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  gap: 4,
+                  padding: 4,
+                  borderRadius: 10,
+                  background: 'var(--ink-bg-color-secondary)',
+                }}>
+                  {(['activity', 'details'] as const).map((tab) => {
+                    const isActive = sidebarTab === tab;
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => setSidebarTab(tab)}
+                        style={{
+                          padding: '6px 20px',
+                          border: isActive ? '1px solid var(--ink-border-subtle)' : '1px solid transparent',
+                          borderRadius: 8,
+                          background: isActive ? 'var(--ink-bg-color-default)' : 'transparent',
+                          boxShadow: isActive ? '0 1px 2px rgba(19, 0, 50, 0.08)' : 'none',
+                          color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
+                          cursor: 'pointer',
+                          fontSize: 'var(--ink-font-size-sm)',
+                          fontWeight: isActive ? 600 : 500,
+                          fontFamily: 'var(--ink-font-family-default)',
+                          transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {tab === 'activity' ? 'Activity' : 'Details'}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Activity tab content */}
