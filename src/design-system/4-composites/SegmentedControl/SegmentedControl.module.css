@@ -1,0 +1,63 @@
+/* Segmented Control — a single-choice control for switching between views.
+   Light-gray pill track wrapping segments; the selected segment is a raised
+   white pill with a subtle border and shadow. */
+
+.track {
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--ink-spacing-1);
+  padding: var(--ink-spacing-1);
+  border-radius: var(--ink-radius-md);
+  background: var(--ink-bg-color-subtle);
+  font-family: var(--ink-font-family);
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ink-spacing-1);
+  min-height: 28px;
+  padding: var(--ink-spacing-1) var(--ink-spacing-4);
+  border: 1px solid transparent;
+  border-radius: var(--ink-radius-sm);
+  background: transparent;
+  color: var(--ink-font-color-secondary);
+  font-family: var(--ink-font-family);
+  font-size: var(--ink-font-size-md);
+  font-weight: var(--ink-font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--ink-motion-duration-200) var(--ink-motion-curve-opacity),
+    color var(--ink-motion-duration-200) var(--ink-motion-curve-opacity),
+    box-shadow var(--ink-motion-duration-200) var(--ink-motion-curve-opacity),
+    border-color var(--ink-motion-duration-200) var(--ink-motion-curve-opacity);
+}
+
+.segment:hover:not(.selected):not(.disabled) {
+  color: var(--ink-font-color-default);
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--ink-cobalt-60);
+  outline-offset: -2px;
+}
+
+.segment.selected {
+  background: var(--ink-bg-color-default);
+  border-color: var(--ink-border-color-subtle);
+  box-shadow: 0 1px 2px rgba(19, 0, 50, 0.08);
+  color: var(--ink-font-color-primary);
+  font-weight: var(--ink-font-weight-semibold);
+}
+
+.segment.disabled {
+  color: var(--ink-font-color-disabled);
+  cursor: not-allowed;
+}
+
+.segment .icon {
+  display: inline-flex;
+  align-items: center;
+}

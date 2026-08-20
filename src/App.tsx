@@ -34,6 +34,7 @@ import {
   Link,
   ProgressBar,
   SearchInput,
+  SegmentedControl,
   Alert,
   AlertBadge,
   Modal,
@@ -1647,7 +1648,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════���������������������������������������������������������������������������������══════════════
+/* ═══════════════════════����������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -7573,41 +7574,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             {/* Right sidebar */}
             <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
-              {/* Sidebar tabs — segmented-control toggle inside a light-gray pill track */}
+              {/* Sidebar tabs — Segmented Control from the design system */}
               <div style={{ display: 'flex', borderBottom: '1px solid var(--ink-border-subtle)', padding: 'var(--ink-spacing-300)' }}>
-                <div style={{
-                  display: 'inline-flex',
-                  gap: 4,
-                  padding: 4,
-                  borderRadius: 10,
-                  background: 'var(--ink-bg-color-secondary)',
-                }}>
-                  {(['activity', 'details'] as const).map((tab) => {
-                    const isActive = sidebarTab === tab;
-                    return (
-                      <button
-                        key={tab}
-                        onClick={() => setSidebarTab(tab)}
-                        style={{
-                          padding: '6px 20px',
-                          border: isActive ? '1px solid var(--ink-border-subtle)' : '1px solid transparent',
-                          borderRadius: 8,
-                          background: isActive ? 'var(--ink-bg-color-default)' : 'transparent',
-                          boxShadow: isActive ? '0 1px 2px rgba(19, 0, 50, 0.08)' : 'none',
-                          color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
-                          cursor: 'pointer',
-                          fontSize: 'var(--ink-font-size-sm)',
-                          fontWeight: isActive ? 600 : 500,
-                          fontFamily: 'var(--ink-font-family-default)',
-                          transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {tab === 'activity' ? 'Activity' : 'Details'}
-                      </button>
-                    );
-                  })}
-                </div>
+                <SegmentedControl
+                  accessibilityText="Sidebar view"
+                  value={sidebarTab}
+                  onChange={(v) => setSidebarTab(v as 'activity' | 'details')}
+                  options={[
+                    { value: 'activity', label: 'Activity' },
+                    { value: 'details', label: 'Details' },
+                  ]}
+                />
               </div>
 
               {/* Activity tab content */}

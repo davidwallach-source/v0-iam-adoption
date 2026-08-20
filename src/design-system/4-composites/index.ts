@@ -18,6 +18,8 @@ export { Modal } from './Modal';
 export { Pagination } from './Pagination';
 export { Popover } from './Popover';
 export { SearchInput } from './SearchInput';
+export { SegmentedControl } from './SegmentedControl';
+export type { SegmentedControlProps, SegmentedControlOption } from './SegmentedControl';
 export { Stepper } from './Stepper';
 export { Table } from './Table';
 export { Tabs } from './Tabs';
