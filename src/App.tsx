@@ -6480,7 +6480,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   );
 }
 
-function AddDocumentMenu({ onUpload, onUseTemplate }: { onUpload?: () => void; onUseTemplate?: () => void }) {
+function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onUpload?: () => void; onUseTemplate?: () => void; variant?: 'primary' | 'tertiary' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -6495,9 +6495,30 @@ function AddDocumentMenu({ onUpload, onUseTemplate }: { onUpload?: () => void; o
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
+  // The document icon used for the tertiary "Add" CTA on the Documents table.
+  const documentIcon = (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M13 2H4V18H16V5L13 2ZM6 16V4H12V6H14V16H6ZM13 10H7V8H13V10ZM13 14H7V12H13V14Z" fill="currentColor" fillOpacity="0.9" />
+    </svg>
+  );
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add Document</Button>
+      {variant === 'tertiary' ? (
+        <Button
+          kind="tertiary"
+          size="small"
+          startElement={documentIcon}
+          endElement={<Icon name="chevron-down" size={14} color="var(--ink-cta-font-color-tertiary)" />}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => { setOpen(o => !o); }}
+        >
+          Add
+        </Button>
+      ) : (
+        <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add Document</Button>
+      )}
 
       {open && (
         <div style={{
@@ -7223,8 +7244,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--ink-spacing-200)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                  <AddDocumentMenu
+                    variant="tertiary"
+                    onUpload={() => setShowFilePicker(true)}
+                    onUseTemplate={() => setShowFilePicker(true)}
+                  />
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
