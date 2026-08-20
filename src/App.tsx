@@ -1647,7 +1647,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������������������������������������══════════════
+/* ═══════════════════════��������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -1710,7 +1710,7 @@ function FadeIn({ children, keyProp: _keyProp }: { children: React.ReactNode; ke
   return <div {...fade}>{children}</div>;
 }
 
-/* ═�����������═�������������═════════════════════════════
+/* ═������������═�������������═════════════════════════════
    Types
    ═══════════════════════════════════════ */
 
@@ -8556,16 +8556,12 @@ function buildScenarioAgreement(): Agreement {
   };
 }
 
-/* Build an agreement-space name from the document(s) it was created with.
-   - 1 document  → that document's name
-   - N documents → "First document +N more" (per the multi-doc naming choice)
-   Users can still rename the space afterwards; this only sets the initial name. */
-function buildSpaceName(documentNames: (string | undefined)[]): string {
-  const docs = documentNames.filter((d): d is string => !!d && d.trim().length > 0);
-
-  return docs.length === 0 ? 'Untitled Agreement Space'
-    : docs.length === 1 ? docs[0]
-    : `${docs[0]} +${docs.length - 1} more`;
+/* Every newly created agreement space starts as "Untitled Agreement Space".
+   Users can rename it afterwards (handled separately by the rename controls);
+   this only sets the initial name. The documentNames argument is accepted so
+   existing call sites stay unchanged, but it does not affect the name. */
+function buildSpaceName(_documentNames?: (string | undefined)[]): string {
+  return 'Untitled Agreement Space';
 }
 
 /* ───────────────────────────────────────────────────────��──────────────────
