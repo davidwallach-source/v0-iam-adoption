@@ -24,6 +24,8 @@ export interface SegmentedControlProps {
   onChange: (value: string) => void;
   /** Required accessible name for the group */
   accessibilityText: string;
+  /** Stretch the control to fill its container, with segments sharing width equally */
+  fullWidth?: boolean;
   /** Additional className applied to the track */
   className?: string;
 }
@@ -38,6 +40,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
   value,
   onChange,
   accessibilityText,
+  fullWidth = false,
   className,
 }) => {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -70,7 +73,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
       data-ink-component="SegmentedControl"
       role="radiogroup"
       aria-label={accessibilityText}
-      className={cn(styles.track, className)}
+      className={cn(styles.track, fullWidth && styles.fullWidth, className)}
     >
       {options.map((option, index) => {
         const isSelected = option.value === value;

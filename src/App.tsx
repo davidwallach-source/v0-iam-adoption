@@ -7654,9 +7654,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             {/* Right sidebar */}
             <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
               {/* Sidebar tabs — Segmented Control from the design system */}
-              <div style={{ display: 'flex', borderBottom: '1px solid var(--ink-border-subtle)', padding: 'var(--ink-spacing-300)' }}>
+              <div style={{ display: 'flex', padding: 'var(--ink-spacing-300)' }}>
                 <SegmentedControl
                   accessibilityText="Sidebar view"
+                  fullWidth
                   value={sidebarTab}
                   onChange={(v) => setSidebarTab(v as 'activity' | 'details')}
                   options={[
