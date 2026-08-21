@@ -1648,7 +1648,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════����������������������������������������������������������������������������������══════════════
+/* ═══════════════════════�����������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -6374,10 +6374,13 @@ interface AddMenuProps {
   onUploadRequest?: () => void;
   onNewVendorOnboarding?: () => void;
   onDocument?: () => void;
+  onUpload?: () => void;
+  onUseTemplate?: () => void;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate }: AddMenuProps) {
   const [open, setOpen] = useState(false);
+  const [docSubOpen, setDocSubOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   // Close on outside click
@@ -6385,6 +6388,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
+        setDocSubOpen(false);
       }
     }
     if (open) document.addEventListener('mousedown', handleClick);
@@ -6393,7 +6397,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Other</Button>
+      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }}>Add New</Button>
 
       {open && (
         <div style={{
@@ -6408,6 +6412,57 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           minWidth: 264,
           padding: 4,
         }}>
+          {/* Document — with an overflow caret leading to Upload / Use a Template */}
+          <div
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setDocSubOpen(true)}
+            onMouseLeave={() => setDocSubOpen(false)}
+          >
+            <MenuRow
+              icon={
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 2H4V18H16V5L13 2ZM6 16V4H12V6H14V16H6ZM13 10H7V8H13V10ZM13 14H7V12H13V14Z" fill="#130032" fillOpacity="0.9" />
+                </svg>
+              }
+              label="Document"
+              chevron
+              onClick={() => { setOpen(false); setDocSubOpen(false); onDocument?.(); }}
+            />
+            {docSubOpen && (
+              <div style={{
+                position: 'absolute',
+                top: -4,
+                right: 'calc(100% + 6px)',
+                background: 'white',
+                border: '1px solid var(--ink-border-subtle)',
+                borderRadius: 8,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                zIndex: 201,
+                minWidth: 200,
+                padding: 4,
+              }}>
+                <MenuRow
+                  icon={
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
+                    </svg>
+                  }
+                  label="Upload"
+                  onClick={() => { setOpen(false); setDocSubOpen(false); onUpload?.(); }}
+                />
+                <MenuRow
+                  icon={
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 9V15H6V9H18ZM20 7H4V17H20V7ZM19 3H5V5H19V3ZM14 19H5V21H14V19ZM10 11H8V13H10V11ZM13 11H11V13H13V11ZM16 11H14V13H16V11Z" fill="#130032" fillOpacity="0.9"/>
+                    </svg>
+                  }
+                  label="Use a template"
+                  onClick={() => { setOpen(false); setDocSubOpen(false); onUseTemplate?.(); }}
+                />
+              </div>
+            )}
+          </div>
+
           {/* Signature Request */}
           <MenuRow
             icon={
@@ -6698,7 +6753,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // Deep-link entry point: open the requested overlay (prefilled) whenever the
   // scenario URL sets initialOverlay. Keyed on initialOverlay (not just mount)
   // so it fires reliably regardless of the order in which the workspace mounts
-  // and the prop settles — this avoids a race where the overlay silently
+  // and the prop settles �� this avoids a race where the overlay silently
   // never opens.
   useEffect(() => {
     if (initialOverlay === 'upload-request') setShowUploadRequest(true);
@@ -7144,11 +7199,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
             </div>
             <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
-              <AddDocumentMenu
+              <AddMenu
                 onUpload={() => setShowFilePicker(true)}
                 onUseTemplate={() => setShowFilePicker(true)}
-              />
-              <AddMenu
                 onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
                 onUploadRequest={() => setShowUploadRequest(true)}
               onAddWireTransfer={() => {
