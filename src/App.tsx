@@ -6933,7 +6933,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                 </span>
               </div>
               <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
+                <div style={{ fontSize: 15, fontWeight: 400, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
                   Sent by {envelope.sentBy} {envelope.sentAt}
                 </div>
               </div>
@@ -6972,7 +6972,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                     {isSigned && r.at && (
                       <div style={{ fontSize: 13, color: green, marginBottom: 4 }}>{r.at}</div>
                     )}
-                    <div style={{ fontSize: 15, fontWeight: 600, color: muted ? 'var(--ink-font-color-secondary)' : 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
+                    <div style={{ fontSize: 15, fontWeight: isActive ? 600 : 400, color: muted ? 'var(--ink-font-color-secondary)' : 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
                       {phraseFor(r)}
                     </div>
                     {r.email && (
