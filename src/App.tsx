@@ -6738,6 +6738,242 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
   );
 }
 
+// ─── Envelope detail panel ──────────────────────────────────────────────────
+// An "envelope" is created when one or more documents are sent for signature.
+// Clicking one inside an agreement space slides this panel in from the right.
+type EnvelopeRecipientStatus = 'signed' | 'needs-sign' | 'needs-view' | 'receives-copy';
+
+interface EnvelopeRecipient {
+  id: string;
+  name: string;
+  email?: string;
+  status: EnvelopeRecipientStatus;
+  at?: string; // timestamp shown for recipients who have acted
+}
+
+interface OpenEnvelope {
+  name: string;              // envelope name shown at the top of the panel
+  sentBy: string;            // "Sent by {sentBy} {sentAt}"
+  sentAt: string;            // relative time, e.g. "yesterday"
+  documentNames: string[];   // documents inside the envelope (drives the carousel)
+  recipients: EnvelopeRecipient[];
+}
+
+// Synthesize a plausible, ordered recipient list from the data we hold for an
+// envelope (its named participants + signature progress). Always yields at
+// least one recipient plus a trailing "receives a finished copy" entry so the
+// panel can always show who is on the envelope — whether one recipient or many.
+function buildEnvelopeRecipients(
+  names: string[],
+  sig?: { signed: number; total: number; waitingFor: string },
+): EnvelopeRecipient[] {
+  const signedTimes = ['Today at 2:46 pm', 'Today at 11:20 am', 'Yesterday at 4:15 pm', 'Yesterday at 9:02 am'];
+  const emailFor = (name: string) =>
+    `${name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]+/g, '')}@email.com`;
+
+  const signed = sig?.signed ?? 0;
+  const waitingFor = sig?.waitingFor?.trim() || undefined;
+  let ordered = names.map(n => n.trim()).filter(Boolean);
+  // Make sure the person we're waiting on appears right after those who signed.
+  if (waitingFor && !ordered.includes(waitingFor)) {
+    ordered = [...ordered.slice(0, signed), waitingFor, ...ordered.slice(signed)];
+  }
+  const total = Math.max(sig?.total ?? ordered.length, ordered.length, 1);
+  while (ordered.length < total) ordered.push(`Recipient ${ordered.length + 1}`);
+  ordered = ordered.slice(0, total);
+
+  const recipients: EnvelopeRecipient[] = ordered.map((name, i) => ({
+    id: `r-${i}`,
+    name,
+    email: emailFor(name),
+    status: i < signed ? 'signed' : 'needs-sign',
+    at: i < signed ? signedTimes[Math.min(i, signedTimes.length - 1)] : undefined,
+  }));
+  // The sender always receives the completed copy.
+  recipients.push({ id: 'cc', name: 'You', status: 'receives-copy' });
+  return recipients;
+}
+
+function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose: () => void }) {
+  const [entered, setEntered] = useState(false);
+  const [docIndex, setDocIndex] = useState(0);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const docs = envelope.documentNames.length ? envelope.documentNames : [envelope.name];
+  const multi = docs.length > 1;
+  const currentDoc = docs[Math.min(docIndex, docs.length - 1)];
+
+  const signable = envelope.recipients.filter(r => r.status !== 'receives-copy');
+  const completeCount = signable.filter(r => r.status === 'signed').length;
+  // The active recipient is the first who has not yet completed.
+  const activeIndex = envelope.recipients.findIndex(r => r.status !== 'signed');
+
+  const green = '#0C7C59';
+  const navy = 'var(--ink-cobalt-80)';
+
+  const phraseFor = (r: EnvelopeRecipient) => {
+    switch (r.status) {
+      case 'signed': return `${r.name} signed`;
+      case 'needs-view': return `${r.name} needs to view`;
+      case 'receives-copy': return 'You receive a finished copy';
+      default: return `${r.name} needs to sign`;
+    }
+  };
+
+  return (
+    <>
+      {/* Transparent click-away layer — the space stays visible behind the panel */}
+      <div
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, zIndex: 1079, background: 'transparent' }}
+      />
+      <aside
+        role="dialog"
+        aria-label={`${envelope.name} envelope details`}
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          height: '100vh',
+          width: 424,
+          background: 'white',
+          borderTopLeftRadius: 20,
+          boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)',
+          zIndex: 1080,
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
+          transform: entered ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
+          fontFamily: 'var(--ink-font-family)',
+        }}
+      >
+        {/* Header — envelope name + close X pinned upper right */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '24px 20px 16px' }}>
+          <h2 style={{ margin: 0, flex: 1, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink-font-color-default)' }}>
+            {envelope.name}
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, margin: '-4px -4px 0 0', display: 'flex', color: 'var(--ink-font-color-default)', flexShrink: 0 }}
+          >
+            <Icon name="close" size={22} />
+          </button>
+        </div>
+
+        {/* Document thumbnail on a #130032 background */}
+        <div style={{ padding: '0 20px' }}>
+          <div style={{ background: '#130032', borderRadius: 6, padding: 16, display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '100%', maxWidth: 288, background: 'white', borderRadius: 2, padding: '28px 26px', minHeight: 300, boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22 }}>
+                <span style={{ width: 22, height: 22, borderRadius: 5, background: 'var(--ink-cobalt-80)', display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-font-color-default)' }}>Document</span>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-font-color-default)', marginBottom: 12 }}>{currentDoc}</div>
+              {[100, 96, 92, 98, 88, 94, 70].map((w, i) => (
+                <div key={i} style={{ height: 5, width: `${w}%`, background: 'var(--ink-border-subtle)', borderRadius: 2, marginBottom: 8 }} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Document name + sent-by, with page counter + carousel arrows if multi-doc */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px 20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentDoc}</div>
+            <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)' }}>Sent by {envelope.sentBy} {envelope.sentAt}</div>
+          </div>
+          {multi && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>
+                <strong style={{ fontWeight: 700 }}>{docIndex + 1}</strong> of {docs.length}
+              </span>
+              <button
+                onClick={() => setDocIndex(i => Math.max(0, i - 1))}
+                disabled={docIndex === 0}
+                aria-label="Previous document"
+                style={{ background: 'none', border: 'none', cursor: docIndex === 0 ? 'default' : 'pointer', padding: 2, display: 'flex', color: docIndex === 0 ? 'var(--ink-border-subtle)' : 'var(--ink-font-color-default)' }}
+              >
+                <Icon name="chevron-left" size={20} />
+              </button>
+              <button
+                onClick={() => setDocIndex(i => Math.min(docs.length - 1, i + 1))}
+                disabled={docIndex === docs.length - 1}
+                aria-label="Next document"
+                style={{ background: 'none', border: 'none', cursor: docIndex === docs.length - 1 ? 'default' : 'pointer', padding: 2, display: 'flex', color: docIndex === docs.length - 1 ? 'var(--ink-border-subtle)' : 'var(--ink-font-color-default)' }}
+              >
+                <Icon name="chevron-right" size={20} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Recipients timeline */}
+        <div style={{ padding: '20px' }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 20 }}>
+            Recipients ({completeCount} of {signable.length} complete)
+          </div>
+          <div>
+            {envelope.recipients.map((r, i) => {
+              const isLast = i === envelope.recipients.length - 1;
+              const isActive = i === activeIndex;
+              const isSigned = r.status === 'signed';
+              const muted = !isSigned && !isActive;
+              // Connector below a node is navy while the flow is still "completed"
+              // through this node, then turns subtle for the remaining recipients.
+              const connectorColor = isSigned ? navy : 'var(--ink-border-subtle)';
+              return (
+                <div key={r.id} style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: isLast ? 0 : 28 }}>
+                  {!isLast && (
+                    <div style={{ position: 'absolute', left: 11, top: 22, bottom: 0, width: 2, background: connectorColor }} />
+                  )}
+                  {/* Marker */}
+                  <div style={{ width: 24, display: 'flex', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
+                    {isSigned ? (
+                      <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'white', border: `2px solid ${green}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon name="check" size={13} color={green} />
+                      </span>
+                    ) : isActive ? (
+                      <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: 14, height: 14, borderRadius: '50%', background: navy }} />
+                      </span>
+                    ) : (
+                      <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--ink-border-emphasis, #C4C0CE)' }} />
+                      </span>
+                    )}
+                  </div>
+                  {/* Content */}
+                  <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+                    {isSigned && r.at && (
+                      <div style={{ fontSize: 13, color: green, marginBottom: 4 }}>{r.at}</div>
+                    )}
+                    <div style={{ fontSize: 15, fontWeight: 600, color: muted ? 'var(--ink-font-color-secondary)' : 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
+                      {phraseFor(r)}
+                    </div>
+                    {r.email && (
+                      <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.email}</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
@@ -6778,6 +7014,28 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   };
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
+  const [openEnvelope, setOpenEnvelope] = useState<OpenEnvelope | null>(null);
+
+  // Build the envelope-panel payload for a sent envelope/document. Recipients
+  // come from the agreement's named participants + signature progress, so the
+  // panel always reflects who is actually on the envelope (one or many).
+  const openEnvelopePanel = (opts: {
+    envelopeName: string;
+    documentNames: string[];
+    signatureProgress?: { signed: number; total: number; waitingFor: string };
+    dateModified?: string;
+  }) => {
+    const participantNames = (agreement.externalParticipants && agreement.externalParticipants.length
+      ? agreement.externalParticipants
+      : (agreement.party && agreement.party !== '—' ? [agreement.party] : []));
+    setOpenEnvelope({
+      name: opts.envelopeName,
+      sentBy: 'you',
+      sentAt: 'yesterday',
+      documentNames: opts.documentNames,
+      recipients: buildEnvelopeRecipients(participantNames, opts.signatureProgress),
+    });
+  };
 
   // Handler for when documents are sent for signature
   // Documents sent for signature from within this workspace (batch action or
@@ -7469,11 +7727,20 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       <Icon name="envelope" size={16} color="var(--ink-text-secondary)" />
                                       <div>
                                         <Tooltip text={envelopeDocNames.join(', ')} location="below">
-                                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
+                                          <button
+                                            type="button"
+                                            onClick={() => openEnvelopePanel({
+                                              envelopeName: agreement.name,
+                                              documentNames: envelopeDocNames,
+                                              signatureProgress: envelope.signatureProgress,
+                                              dateModified: envelope.documents[0]?.dateModified,
+                                            })}
+                                            style={{ display: 'block', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                                          >
                                             <Text size="sm" weight="medium">
                                               Document Packet
                                             </Text>
-                                          </div>
+                                          </button>
                                         </Tooltip>
                                         <Text size="xs" color="secondary">Sent to: {envelope.waitingFor || envelope.signatureProgress?.waitingFor || 'recipient'}</Text>
                                       </div>
@@ -7588,7 +7855,22 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
-                                  <Text size="sm">{doc.name}</Text>
+                                  {doc.signatureProgress ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => openEnvelopePanel({
+                                        envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                                        documentNames: [doc.name],
+                                        signatureProgress: doc.signatureProgress,
+                                        dateModified: doc.lastModified || doc.dateModified,
+                                      })}
+                                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--ink-cobalt-80)', fontWeight: 600, fontFamily: 'var(--ink-font-family)', fontSize: 'var(--ink-font-size-sm)' }}
+                                    >
+                                      {doc.name}
+                                    </button>
+                                  ) : (
+                                    <Text size="sm">{doc.name}</Text>
+                                  )}
                                   {doc.commentCount && (
                                     <AlertBadge value={doc.commentCount} kind="emphasis" />
                                   )}
@@ -8040,6 +8322,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
           </button>
         </div>
+      )}
+
+      {/* Envelope detail panel */}
+      {openEnvelope && (
+        <EnvelopePanel envelope={openEnvelope} onClose={() => setOpenEnvelope(null)} />
       )}
 
       {/* Party History Panel */}
