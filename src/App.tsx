@@ -1648,7 +1648,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════������������������������������������������������������������������������������������══════════════
+/* ═══════════════════════�������������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -6797,6 +6797,7 @@ function buildEnvelopeRecipients(
 function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose: () => void }) {
   const [entered, setEntered] = useState(false);
   const [docIndex, setDocIndex] = useState(0);
+  const [showFooterMenu, setShowFooterMenu] = useState(false);
   useEffect(() => {
     const t = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(t);
@@ -6915,11 +6916,8 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           )}
         </div>
 
-        {/* Recipients timeline */}
-        <div style={{ padding: '20px' }}>
-          <div style={{ fontSize: 16, fontWeight: 500, color: '#5A4D70', marginBottom: 20 }}>
-            Recipients ({completeCount} of {signable.length} complete)
-          </div>
+        {/* Recipients timeline — fills remaining space so the footer pins to the bottom */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px' }}>
           <div>
             {envelope.recipients.map((r, i) => {
               const isLast = i === envelope.recipients.length - 1;
@@ -6966,6 +6964,47 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
               );
             })}
           </div>
+        </div>
+
+        {/* Footer — pinned to the bottom with an overflow menu + primary CTA */}
+        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, position: 'relative' }}>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowFooterMenu(v => !v)}
+              aria-label="More actions"
+              aria-haspopup="menu"
+              aria-expanded={showFooterMenu}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
+            >
+              <Icon name="more-vertical" size={20} />
+            </button>
+            {showFooterMenu && (
+              <>
+                <div onClick={() => setShowFooterMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 1 }} />
+                <div
+                  role="menu"
+                  style={{ position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, zIndex: 2, minWidth: 180, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
+                >
+                  {['Void envelope', 'Download', 'View history'].map(label => (
+                    <button
+                      key={label}
+                      role="menuitem"
+                      onClick={() => setShowFooterMenu(false)}
+                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => setShowFooterMenu(false)}
+            style={{ background: 'var(--ink-cobalt-80)', color: 'white', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 16, fontWeight: 600, fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
+          >
+            Remind Signers
+          </button>
         </div>
       </aside>
     </>
@@ -9808,7 +9847,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     return viewTemplates.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
   }, [search, viewTemplates]);
 
-  /* ── Reports filtered data ── */
+  /* ── Reports filtered data ─�� */
   const viewReports = useMemo(() => {
     if (insightsSidebarView === 'dashboards') return REPORTS_DATA.filter(r => r.type === 'dashboard');
     return REPORTS_DATA;
