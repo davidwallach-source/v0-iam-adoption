@@ -5391,6 +5391,9 @@ interface WorkspaceViewProps {
   initialOverlay?: 'upload-request' | 'vendor-onboarding' | null;
   uploadRequestPrefill?: Partial<UploadRequestData> | null;
   vendorOnboardingPrefill?: Partial<VendorOnboardingData> | null;
+  // True when the workspace is entered immediately after sending an envelope.
+  // Suppresses the single-envelope auto-open and fires a success toast instead.
+  justSentEnvelope?: boolean;
 }
 
 /* ═══════════════════════════════════════
@@ -7030,7 +7033,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
   );
 }
 
-function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -7412,6 +7415,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const didAutoOpenEnvelope = useRef(false);
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
+    // Entering the space right after sending an envelope: never auto-open the
+    // panel — instead confirm the send with a success toast.
+    if (justSentEnvelope) {
+      didAutoOpenEnvelope.current = true;
+      showToast('Your documents were sent for signature.');
+      return;
+    }
     const envelopeItems = processedDocuments.filter(
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
     );
@@ -8404,8 +8414,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Toast (bottom-left) */}
       {toast && (
         <div style={{ position: 'fixed', bottom: 32, left: 32, zIndex: 1300, display: 'flex', alignItems: 'center', gap: 16, minWidth: 360, maxWidth: 520, padding: '18px 20px', borderRadius: 12, background: '#2A1A45', boxShadow: '0 12px 32px rgba(19,0,50,0.28)', fontFamily: 'var(--ink-font-family)' }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }} aria-hidden="true">
-            <path d="M5 12.5l4.5 4.5L19 7.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }} aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="#3DBE8B" strokeWidth="2" />
+            <path d="M8 12l2.5 2.5L16 9" stroke="#3DBE8B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span style={{ flex: 1, fontSize: 16, color: 'white' }}>{toast}</span>
           <button
@@ -9357,6 +9368,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // Deep-link scenario: which overlay (if any) the Tally Inc workspace should
   // auto-open when it mounts, and the prefill data for those overlays.
   const [wsInitialOverlay, setWsInitialOverlay] = useState<'upload-request' | 'vendor-onboarding' | null>(null);
+  // True when we navigate into a space immediately after sending an envelope, so
+  // the workspace shows a success toast instead of auto-opening the panel.
+  const [justSentEnvelope, setJustSentEnvelope] = useState(false);
 
   /* ── Predictable scenario deep links (?flow=…) ── */
   useEffect(() => {
@@ -10089,6 +10103,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           sidebarView === 'completed' ? 'No completed agreements' :
           'No agreements match your search'
         } onRowClick={(row: Agreement) => {
+          setJustSentEnvelope(false);
           setSelectedAgreement(row);
           setShowDealWorkspace(true);
         }} pagination={protoVersion === 'simple' ? undefined : { page: 1, pageSize: 25, totalItems: filteredAgreements.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
@@ -10242,12 +10257,14 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       <WorkspaceView 
         agreement={selectedAgreement} 
         onRename={(name) => handleRenameAgreement(selectedAgreement.id, name)}
+        justSentEnvelope={justSentEnvelope}
         onClose={() => {
           setShowDealWorkspace(false);
           setSelectedAgreement(null);
           setWorkspaceApprovalTasks([]);
           setWorkspaceSignatureDocs([]);
           setWsInitialOverlay(null);
+          setJustSentEnvelope(false);
         }}
         onEditNDA={() => {
           // Edit the NDA that owns this workspace (reuse its id + data).
@@ -10616,6 +10633,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           };
           addNewAgreement(sentNdaAgreement);
           setSelectedAgreement(sentNdaAgreement);
+          setJustSentEnvelope(true);
           setShowDealWorkspace(true);
         } else {
           // Uploaded document flow - create a new agreement space
@@ -10667,6 +10685,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           };
           
           setSelectedAgreement(uploadedAgreement);
+          setJustSentEnvelope(true);
           setShowDealWorkspace(true);
           addNewAgreement(uploadedAgreement);
         }
