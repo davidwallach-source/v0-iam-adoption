@@ -1648,7 +1648,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════��������������������������������������������������������������������������������������══════════════
+/* ═══════════════════════���������������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -6915,8 +6915,8 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           )}
         </div>
 
-        {/* Recipients timeline — fills remaining space so the footer pins to the bottom */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px' }}>
+        {/* Recipients timeline — fills remaining space so the footer pins to the bottom; 8px above the first node */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '28px 20px 20px' }}>
           <div>
             {envelope.recipients.map((r, i) => {
               const isLast = i === envelope.recipients.length - 1;
@@ -6927,7 +6927,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
               // through this node, then turns subtle for the remaining recipients.
               const connectorColor = isSigned ? navy : 'var(--ink-border-subtle)';
               return (
-                <div key={r.id} style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: isLast ? 0 : 28 }}>
+                <div key={r.id} style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: isLast ? 0 : 36 }}>
                   {!isLast && (
                     <div style={{ position: 'absolute', left: 11, top: 22, bottom: 0, width: 2, background: connectorColor }} />
                   )}
