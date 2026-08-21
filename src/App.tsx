@@ -1614,6 +1614,15 @@ const tableRowStaggerStyles = `
   }
 }
 
+/* Subtle pulse for the current step dot in the envelope timeline */
+@keyframes envelopeDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(75, 42, 224, 0.35); }
+  50% { box-shadow: 0 0 0 5px rgba(75, 42, 224, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .envelope-current-dot { animation: none !important; }
+}
+
 /* Apply staggered entrance to DataTable body rows */
 [data-ink-component="DataTable"] tbody tr {
   animation: inkRowEntrance 300ms cubic-bezier(0.33, 0, 0.67, 1) backwards;
@@ -2580,7 +2589,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═══════════════════════════════════════
+/* ════════════════════════════════════��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -6885,12 +6894,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
         </div>
 
-        {/* Sent-by subtext, with page counter + carousel arrows if multi-doc — 20px top/bottom padding */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)' }}>Sent by {envelope.sentBy} {envelope.sentAt}</div>
-          </div>
-          {multi && (
+        {/* Page counter + carousel arrows if multi-doc — 20px top/bottom padding */}
+        {multi && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>
                 <strong style={{ fontWeight: 700 }}>{docIndex + 1}</strong> of {docs.length}
@@ -6912,12 +6918,26 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                 <Icon name="chevron-right" size={20} />
               </button>
             </div>
-          )}
         </div>
+        )}
 
         {/* Recipients timeline — fills remaining space so the footer pins to the bottom; 8px above the first node */}
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '28px 20px 20px' }}>
           <div>
+            {/* First step — the envelope was sent; complete, solid black dot */}
+            <div style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: 36 }}>
+              <div style={{ position: 'absolute', left: 11, top: 22, bottom: 0, width: 2, background: navy }} />
+              <div style={{ width: 24, display: 'flex', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
+                <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--ink-font-color-default)' }} />
+                </span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
+                  Sent by {envelope.sentBy} {envelope.sentAt}
+                </div>
+              </div>
+            </div>
             {envelope.recipients.map((r, i) => {
               const isLast = i === envelope.recipients.length - 1;
               const isActive = i === activeIndex;
@@ -6939,7 +6959,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                       </span>
                     ) : isActive ? (
                       <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ width: 14, height: 14, borderRadius: '50%', background: navy }} />
+                        <span className="envelope-current-dot" style={{ width: 14, height: 14, borderRadius: '50%', background: navy, animation: 'envelopeDotPulse 2s ease-in-out infinite' }} />
                       </span>
                     ) : (
                       <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
