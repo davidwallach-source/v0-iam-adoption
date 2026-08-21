@@ -6986,16 +6986,16 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         </div>
 
         {/* Footer — pinned to the bottom with an overflow menu + primary CTA */}
-        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, position: 'relative' }}>
+        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, position: 'relative' }}>
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setShowFooterMenu(v => !v)}
               aria-label="More actions"
               aria-haspopup="menu"
               aria-expanded={showFooterMenu}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
             >
-              <Icon name="more-vertical" size={20} />
+              <Icon name="more-vertical" size={18} />
             </button>
             {showFooterMenu && (
               <>
@@ -7020,7 +7020,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
           <button
             onClick={() => setShowFooterMenu(false)}
-            style={{ background: 'var(--ink-cobalt-80)', color: 'white', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 16, fontWeight: 600, fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
+            style={{ background: 'var(--ink-cobalt-80)', color: 'white', border: 'none', borderRadius: 6, padding: '6px 16px', fontSize: 14, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
           >
             Remind Signers
           </button>
