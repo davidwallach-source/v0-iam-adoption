@@ -7074,6 +7074,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
   const [openEnvelope, setOpenEnvelope] = useState<OpenEnvelope | null>(null);
+  // Id of the table row whose envelope panel is currently open, so that row
+  // stays highlighted (and only that row) while the panel is open.
+  const [openEnvelopeRowId, setOpenEnvelopeRowId] = useState<string | null>(null);
 
   // Build the envelope-panel payload for a sent envelope/document. Recipients
   // come from the agreement's named participants + signature progress, so the
@@ -7083,6 +7086,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     documentNames: string[];
     signatureProgress?: { signed: number; total: number; waitingFor: string };
     dateModified?: string;
+    rowId?: string;
   }) => {
     // For Instant NDA / Permission Slip spaces, `party` / `externalParticipants`
     // hold document metadata (the Receiving Party / Student Name), NOT a
@@ -7102,6 +7106,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       documentNames: opts.documentNames,
       recipients: buildEnvelopeRecipients(participantNames, opts.signatureProgress),
     });
+    setOpenEnvelopeRowId(opts.rowId ?? null);
   };
 
   // Handler for when documents are sent for signature
@@ -7435,6 +7440,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         documentNames: envelopeDocNames,
         signatureProgress: only.signatureProgress,
         dateModified: only.documents[0]?.dateModified,
+        rowId: `env-${only.envelopeId}`,
       });
     } else {
       const doc = only as DealDocument;
@@ -7443,6 +7449,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         documentNames: [doc.name],
         signatureProgress: doc.signatureProgress,
         dateModified: doc.lastModified || doc.dateModified,
+        rowId: doc.id,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -7820,10 +7827,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           if ('isEnvelope' in item && item.isEnvelope) {
                             const envelope = item;
                             const envelopeDocNames = envelope.documentNames || envelope.documents.map(d => d.name);
+                            const envelopeRowId = `env-${envelope.envelopeId}`;
+                            const isEnvelopeOpen = openEnvelopeRowId === envelopeRowId;
                             return (
                               <React.Fragment key={`env-${envelope.envelopeId}`}>
                                 {/* Envelope parent row */}
-                                <tr style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                                <tr style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}>
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                     <input
                                       type="checkbox"
@@ -7842,6 +7851,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                               documentNames: envelopeDocNames,
                                               signatureProgress: envelope.signatureProgress,
                                               dateModified: envelope.documents[0]?.dateModified,
+                                              rowId: envelopeRowId,
                                             })}
                                             style={{ display: 'block', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
                                           >
@@ -7943,6 +7953,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           // Handle regular document rows
                           const doc = item as DealDocument;
                           const isSelected = selectedDocs.has(doc.id);
+                          const isOpen = openEnvelopeRowId === doc.id;
+                          const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
                           return (
                             <tr
                               key={doc.id}
@@ -7951,10 +7963,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 documentNames: [doc.name],
                                 signatureProgress: doc.signatureProgress,
                                 dateModified: doc.lastModified || doc.dateModified,
+                                rowId: doc.id,
                               })}
-                              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.background = isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent'; }}
-                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent', cursor: 'pointer' }}
+                              onMouseEnter={(e) => { if (!isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = restingBg; }}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: 'pointer' }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
@@ -8431,7 +8444,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
       {/* Envelope detail panel */}
       {openEnvelope && (
-        <EnvelopePanel envelope={openEnvelope} onClose={() => setOpenEnvelope(null)} />
+        <EnvelopePanel envelope={openEnvelope} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
       )}
 
       {/* Party History Panel */}
