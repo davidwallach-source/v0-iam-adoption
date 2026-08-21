@@ -1648,7 +1648,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�����������������������������������������������������������������������������������══════════════
+/* ═══════════════════════������������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -6870,16 +6870,17 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </button>
         </div>
 
-        {/* Document thumbnail on a #130032 background */}
+        {/* Document thumbnail on a #130032 background — 238px tall, doc bleeds off the bottom edge */}
         <div style={{ padding: '0 20px' }}>
-          <div style={{ background: '#130032', borderRadius: 6, padding: 16, display: 'flex', justifyContent: 'center' }}>
-            <div style={{ width: '100%', maxWidth: 288, background: 'white', borderRadius: 2, padding: '28px 26px', minHeight: 300, boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
+          <div style={{ height: 238, background: '#130032', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+            {/* No bottom padding: the page is anchored to the top so it's cut off at the bottom */}
+            <div style={{ width: '100%', maxWidth: 288, background: 'white', padding: '28px 26px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22 }}>
                 <span style={{ width: 22, height: 22, borderRadius: 5, background: 'var(--ink-cobalt-80)', display: 'inline-block', flexShrink: 0 }} />
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-font-color-default)' }}>Document</span>
               </div>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-font-color-default)', marginBottom: 12 }}>{currentDoc}</div>
-              {[100, 96, 92, 98, 88, 94, 70].map((w, i) => (
+              {[100, 96, 92, 98, 88, 94, 70, 90, 84, 96, 78].map((w, i) => (
                 <div key={i} style={{ height: 5, width: `${w}%`, background: 'var(--ink-border-subtle)', borderRadius: 2, marginBottom: 8 }} />
               ))}
             </div>
@@ -6919,7 +6920,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
 
         {/* Recipients timeline */}
         <div style={{ padding: '20px' }}>
-          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 20 }}>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#5A4D70', marginBottom: 20 }}>
             Recipients ({completeCount} of {signable.length} complete)
           </div>
           <div>
@@ -7864,7 +7865,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                         signatureProgress: doc.signatureProgress,
                                         dateModified: doc.lastModified || doc.dateModified,
                                       })}
-                                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--ink-cobalt-80)', fontWeight: 600, fontFamily: 'var(--ink-font-family)', fontSize: 'var(--ink-font-size-sm)' }}
+                                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--ink-font-color-default)', fontWeight: 500, fontFamily: 'var(--ink-font-family)', fontSize: 'var(--ink-font-size-sm)' }}
                                     >
                                       {doc.name}
                                     </button>
