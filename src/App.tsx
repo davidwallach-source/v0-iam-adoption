@@ -6847,7 +6847,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
       />
       <aside
         role="dialog"
-        aria-label={`${envelope.name} envelope details`}
+        aria-label={`${docs[0]} envelope details`}
         style={{
           position: 'fixed',
           bottom: 0,
@@ -6869,7 +6869,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         {/* Header — envelope name + close X pinned upper right — fixed 48px tall */}
         <div style={{ height: 48, boxSizing: 'border-box', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
           <h2 style={{ margin: 0, flex: 1, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink-font-color-default)' }}>
-            {envelope.name}
+            {docs[0]}
           </h2>
           <button
             onClick={onClose}
