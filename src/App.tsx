@@ -3076,7 +3076,7 @@ function HomePage() {
         textAlign: 'center',
       }}>
         <Heading level={3} style={{ color: 'white', fontWeight: 400, marginBottom: 'var(--ink-spacing-300)' }}>
-          Welcome back, Akshat Mishra
+          Welcome back, Pat Price
         </Heading>
         <Inline gap="small" justify="center">
           <Button kind="brand" menuTrigger>Start</Button>
@@ -3417,7 +3417,7 @@ function AdminPage() {
   );
 }
 
-/* ═══════════════════════�������═══════════════
+/* ═══════════════════════��������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
