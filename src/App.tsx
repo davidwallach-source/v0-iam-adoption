@@ -3041,7 +3041,7 @@ function DocPreview({ hasLogo, hasForm }: { hasLogo?: boolean; hasForm?: boolean
   );
 }
 
-function HomePage() {
+function HomePage({ onUnavailable }: { onUnavailable: (e: React.MouseEvent) => void }) {
   const getStaggerProps = useStaggerEntrance(6, { baseDelay: 100, staggerInterval: 60, duration: 400, distance: 12 });
 
   const activity = [
@@ -3079,7 +3079,7 @@ function HomePage() {
           Welcome back, Pat Price
         </Heading>
         <Inline gap="small" justify="center">
-          <Button kind="brand" menuTrigger>Start</Button>
+          <Button kind="brand" menuTrigger onClick={onUnavailable}>Start</Button>
           {[
             { icon: 'send' as const, label: 'Send an Envelope' },
             { icon: 'ai-spark-filled' as const, label: 'Send with AI' },
@@ -3088,6 +3088,7 @@ function HomePage() {
             <button
               key={btn.label}
               className="banner-btn"
+              onClick={onUnavailable}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-125)',
                 padding: 'var(--ink-spacing-125) var(--ink-spacing-250)', background: 'transparent',
@@ -3110,7 +3111,7 @@ function HomePage() {
             <div {...getStaggerProps(0)}>
             <Card radius="large" className="home-card">
               <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline justify="between" align="center" style={{ paddingBottom: 'var(--ink-spacing-150)' }}>
+                <Inline justify="between" align="center" onClick={onUnavailable} style={{ paddingBottom: 'var(--ink-spacing-150)', cursor: 'pointer' }}>
                   <SectionLabel>Tasks</SectionLabel>
                   <Icon name="chevron-right" size={18} />
                 </Inline>
@@ -3136,9 +3137,11 @@ function HomePage() {
                     justify="between"
                     align="center"
                     className="activity-row"
+                    onClick={onUnavailable}
                     style={{
                       padding: 'var(--ink-spacing-150) 0',
                       borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
+                      cursor: 'pointer',
                     }}
                   >
                     <Stack gap="none" style={{ gap: "var(--ink-spacing-25)" }}>
@@ -3160,13 +3163,13 @@ function HomePage() {
             <div {...getStaggerProps(2)}>
             <Card radius="large" className="home-card">
               <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline justify="between" align="center" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                <Inline justify="between" align="center" onClick={onUnavailable} style={{ marginBottom: 'var(--ink-spacing-200)', cursor: 'pointer' }}>
                   <SectionLabel>Favorite Templates</SectionLabel>
                   <Icon name="chevron-right" size={18} />
                 </Inline>
                 <Grid columns={3} gap="medium">
                   {favoriteTemplates.map((t) => (
-                    <Card key={t.name} radius="medium" className="home-card activity-row" style={{ padding: 0 }}>
+                    <Card key={t.name} radius="medium" className="home-card activity-row" onClick={onUnavailable} style={{ padding: 0, cursor: 'pointer' }}>
                       <Stack gap="small" style={{ padding: 'var(--ink-spacing-150)' }}>
                         <div style={{ height: 140, background: '#f5f5f5', borderRadius: 'var(--ink-radius-sm)', position: 'relative', overflow: 'hidden', padding: 6 }}>
                           {/* Mock document preview */}
@@ -3208,11 +3211,11 @@ function HomePage() {
                       </Stack>
                     </Card>
                   ))}
-                  <Card radius="medium" className="home-card activity-row" style={{ padding: 0 }}>
+                  <Card radius="medium" className="home-card activity-row" onClick={onUnavailable} style={{ padding: 0, cursor: 'pointer' }}>
                     <Stack gap="small" align="center" justify="center" style={{ padding: 'var(--ink-spacing-200)', height: '100%' }}>
                       <Text size="sm" weight="semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}>Add Favorite Template</Text>
                       <Text size="xs" color="secondary" style={{ textAlign: 'center' }}>Send future documents faster with favorited templates.</Text>
-                      <Button kind="secondary" size="small">Browse templates</Button>
+                      <Button kind="secondary" size="small" onClick={onUnavailable}>Browse templates</Button>
                     </Stack>
                   </Card>
                 </Grid>
@@ -3223,25 +3226,25 @@ function HomePage() {
             {/* Promo cards */}
             <div {...getStaggerProps(3)}>
             <Grid columns={2} gap="medium">
-              <Card radius="large" className="home-card promo-card activity-row" noPadding>
+              <Card radius="large" className="home-card promo-card activity-row" noPadding onClick={onUnavailable} style={{ cursor: 'pointer' }}>
                 <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
                   <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
                     <img src="/illustration-bulk-send.svg" alt="" width={72} height={72} />
                   </div>
                   <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
                     <Text size="sm" weight="medium">Save time with bulk send</Text>
-                    <Text size="xs" color="secondary">No need to send separate envelopes. Import a bulk list and each recipient receives a unique copy. <span style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>Learn More</span></Text>
+                    <Text size="xs" color="secondary">No need to send separate envelopes. Import a bulk list and each recipient receives a unique copy. <span onClick={onUnavailable} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>Learn More</span></Text>
                   </Stack>
                 </Inline>
               </Card>
-              <Card radius="large" className="home-card promo-card activity-row" noPadding>
+              <Card radius="large" className="home-card promo-card activity-row" noPadding onClick={onUnavailable} style={{ cursor: 'pointer' }}>
                 <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
                   <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
                     <img src="/illustration-help.svg" alt="" width={72} height={72} />
                   </div>
                   <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
                     <Text size="sm" weight="medium">Need help getting started?</Text>
-                    <Text size="xs" color="secondary">Get help with basic questions. <span style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>View Our Guide</span></Text>
+                    <Text size="xs" color="secondary">Get help with basic questions. <span onClick={onUnavailable} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>View Our Guide</span></Text>
                   </Stack>
                 </Inline>
               </Card>
@@ -3260,10 +3263,12 @@ function HomePage() {
                       key={i}
                       justify="between"
                       className="overview-row"
+                      onClick={onUnavailable}
                       style={{
                         padding: 'var(--ink-spacing-150) var(--ink-spacing-50)',
                         borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
                         borderRadius: 'var(--ink-radius-sm)',
+                        cursor: 'pointer',
                       }}
                     >
                       <Text size="sm">{item.label}</Text>
@@ -6662,7 +6667,7 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
   );
 }
 
-// ─�������� Envelope detail panel ──────────────────────────────────────────────────
+// ─��������� Envelope detail panel ──────────────────────────────────────────────────
 // An "envelope" is created when one or more documents are sent for signature.
 // Clicking one inside an agreement space slides this panel in from the right.
 type EnvelopeRecipientStatus = 'signed' | 'needs-sign' | 'needs-view' | 'receives-copy';
@@ -9413,6 +9418,15 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     }
   }, []);
 
+  // Home page CTAs: anchor the callout to the clicked element. stopPropagation
+  // keeps the anchor on the innermost clickable (e.g. a "Learn More" link
+  // rather than its surrounding card) when clickables are nested.
+  const handleHomeUnavailableClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setUnavailableCallout({ left: rect.left + rect.width / 2, top: rect.bottom });
+  }, []);
+
   // Dismiss the callout on any outside click or on Escape.
   useEffect(() => {
     if (!unavailableCallout) return;
@@ -10132,7 +10146,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   };
 
   const contentMap: Record<TabId, JSX.Element> = {
-    home: <HomePage />,
+    home: <HomePage onUnavailable={handleHomeUnavailableClick} />,
     agreements: isFoldersView ? foldersContent : agreementsContent,
     templates: templatesContent,
     insights: insightsContent,
@@ -10220,7 +10234,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             background: 'var(--ink-font-color-default)',
           }}
         />
-        This page isn&apos;t available in the prototype
+        This isn&apos;t available in this prototype
       </div>
     )}
     {showAgreementDetail && (
