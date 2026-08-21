@@ -7404,6 +7404,40 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     return [...standalone, ...envelopeRows];
   }, [currentDocuments, sentEnvelopes]);
 
+  // When landing in a space (e.g. arriving from the Agreements page) that holds
+  // exactly ONE envelope, open the envelope panel automatically. An "envelope"
+  // is a sent packet row or a standalone document that has signature progress;
+  // draft documents that were never sent don't count. Runs once on mount so it
+  // only fires on entry, never while working inside the space.
+  const didAutoOpenEnvelope = useRef(false);
+  useEffect(() => {
+    if (didAutoOpenEnvelope.current) return;
+    const envelopeItems = processedDocuments.filter(
+      (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
+    );
+    if (envelopeItems.length !== 1) return;
+    didAutoOpenEnvelope.current = true;
+    const only = envelopeItems[0];
+    if ('isEnvelope' in only && only.isEnvelope) {
+      const envelopeDocNames = only.documentNames || only.documents.map((d) => d.name);
+      openEnvelopePanel({
+        envelopeName: agreement.name,
+        documentNames: envelopeDocNames,
+        signatureProgress: only.signatureProgress,
+        dateModified: only.documents[0]?.dateModified,
+      });
+    } else {
+      const doc = only as DealDocument;
+      openEnvelopePanel({
+        envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+        documentNames: [doc.name],
+        signatureProgress: doc.signatureProgress,
+        dateModified: doc.lastModified || doc.dateModified,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const currentSupplementalDocs = workspaceData.supplementalDocs;
   const tabStyle = (isActive: boolean): CSSProperties => ({
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
