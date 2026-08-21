@@ -3417,7 +3417,7 @@ function AdminPage() {
   );
 }
 
-/* ═══════════════════════���������═══════════════
+/* ═══════════════════════�����������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
@@ -6662,7 +6662,7 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
   );
 }
 
-// ─������ Envelope detail panel ──────────────────────────────────────────────────
+// ─�������� Envelope detail panel ──────────────────────────────────────────────────
 // An "envelope" is created when one or more documents are sent for signature.
 // Clicking one inside an agreement space slides this panel in from the right.
 type EnvelopeRecipientStatus = 'signed' | 'needs-sign' | 'needs-view' | 'receives-copy';
@@ -9489,7 +9489,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         title: 'Envelope Templates',
         icon: 'layout-grid' as const,
         items: [
-          { id: 'my-templates', label: 'My Templates', icon: 'person' as const, onClick: () => handleUnavailableSidebarClick('my-templates') },
+          { id: 'my-templates', label: 'My Templates', icon: 'person' as const, onClick: () => setTemplatesSidebarView('my-templates') },
           { id: 'shared-with-me', label: 'Shared with Me', icon: 'people' as const, onClick: () => handleUnavailableSidebarClick('shared-with-me') },
           { id: 'favorites', label: 'Favorites', icon: 'star' as const, onClick: () => handleUnavailableSidebarClick('favorites') },
           { id: 'show-more', label: 'Show More', nested: true, onClick: () => handleUnavailableSidebarClick('show-more') },
