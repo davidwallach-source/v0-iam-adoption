@@ -3042,394 +3042,241 @@ function DocPreview({ hasLogo, hasForm }: { hasLogo?: boolean; hasForm?: boolean
 }
 
 function HomePage() {
-  const getStaggerProps = useStaggerEntrance(5, { baseDelay: 80, staggerInterval: 60, duration: 380, distance: 10 });
+  const getStaggerProps = useStaggerEntrance(6, { baseDelay: 100, staggerInterval: 60, duration: 400, distance: 12 });
 
-  // Tasks for Sales use case
-  const tasks = [
-    {
-      icon: 'status-check' as const,
-      title: 'Finance Approval',
-      description: 'Momentum Driver MSA 2026',
-      badge: 'Due today',
-      badgeColor: 'var(--ink-red-80)',
-    },
-    {
-      icon: 'edit' as const,
-      title: 'Review Redlines',
-      description: 'TechStart Platform Agreement',
-      badge: 'Due in 2 days',
-      badgeColor: 'var(--ink-orange-60)',
-    },
-    {
-      icon: 'eye' as const,
-      title: 'Review SOW Terms',
-      description: 'CloudCo Services SOW',
-      sub: 'From: Legal Team',
-    },
-    {
-      icon: 'document' as const,
-      title: 'Upload Security Addendum',
-      description: 'Acme Solutions Renewal',
-      sub: 'From: Security Team',
-    },
-  ];
-
-  // Agreement activity for Sales
   const activity = [
-    { name: 'GlobalTech Enterprise Deal',     time: '2 hours ago', type: 'completed' as const },
-    { name: 'Momentum Driver MSA 2026',       time: '4 hours ago', type: 'waiting' as const,  progress: 75 },
-    { name: 'TechStart Platform Agreement',   time: '1 day ago',   type: 'waiting' as const,  progress: 45 },
-    { name: 'CloudCo Services SOW',           time: '2 days ago',  type: 'expiring' as const  },
-    { name: 'Innovate Labs Partnership',      time: '3 days ago',  type: 'completed' as const },
+    { name: 'Complete with Docusign: rhi.pdf, Sample_Service_Agreement.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
+    { name: 'Here is your signed document: Sample_Service_Agreement.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
+    { name: 'Complete with Docusign: rhi.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
+    { name: 'Change Order.docx', time: 'Expiring on 07/31/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
+    { name: 'SOW(2).docx', time: 'Expiring on 06/30/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
+    { name: 'SOW(1).docx', time: 'Expiring on 06/30/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
   ];
 
-  // Templates for Sales
-  const templates = [
-    { name: 'Master Service Agreement', sub: 'Document Template',  badge: 'Favorite',     badgeColor: 'var(--ink-cobalt-100)', hasLogo: true,  hasForm: false },
-    { name: 'Statement of Work',        sub: 'Document Template',  badge: 'Favorite',     badgeColor: 'var(--ink-cobalt-100)', hasLogo: false, hasForm: false },
-    { name: 'Enterprise NDA',           sub: 'Envelope Template',  badge: 'Sales',        badgeColor: 'var(--ink-green-80)',   hasLogo: false, hasForm: true  },
-    { name: 'Order Form',               sub: 'Web Form Template',  badge: 'Sales',        badgeColor: 'var(--ink-green-80)',   hasLogo: true,  hasForm: false },
+  const overview = [
+    { label: 'Open requests', value: 7 },
+    { label: 'Waiting for others', value: 0 },
+    { label: 'Expiring soon', value: 0 },
+    { label: 'Completed', value: 0 },
+    { label: 'Upcoming renewals', value: 0 },
   ];
 
-  // Recommended for Sales
-  const recommended = [
-    { icon: 'ai-spark-filled' as const, label: 'Accelerate deal velocity with AI', active: true },
-    { icon: 'document' as const,        label: 'Standardize contract language' },
-    { icon: 'workflow' as const,        label: 'Automate approval workflows' },
+  const favoriteTemplates = [
+    { name: 'quick send', lastUsed: 'Last used on 03/13/2026' },
+    { name: 'shared template info', lastUsed: 'Last used on 08/12/2025' },
   ];
 
   return (
-    /* Gradient flows from #DBD6FE at top to #FFFFFF at bottom, covering both hero and cards */
-    <div style={{
-      background: 'linear-gradient(180deg, #DBD6FE 0%, #ffffff 420px)',
-      minHeight: '100%',
-    }}>
-      {/* ── Hero banner — transparent so gradient shows through ── */}
+    <Stack gap="none">
+      {/* Welcome banner */}
       <div style={{
+        background: 'linear-gradient(174deg, var(--ink-cobalt-100, #4C00FB) 1.48%, var(--ink-cobalt-140, #260559) 97.92%)',
+        color: 'white',
+        padding: '100px var(--ink-spacing-300) 72px',
         textAlign: 'center',
-        padding: '40px 24px 52px',
       }}>
-        {/* Greeting */}
-        <div style={{ fontSize: 24, fontWeight: 400, color: '#130032', marginBottom: 16, fontFamily: 'var(--ink-font-family)' }}>
-          Welcome, Kathie Brown
-        </div>
-
-        {/* Stats pill */}
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 0,
-          background: 'rgba(255,255,255,0.55)',
-          border: '1px solid rgba(19,0,50,0.12)',
-          borderRadius: 'var(--ink-radius-size-full)',
-          padding: '7px 20px',
-          marginBottom: 32,
-          fontSize: 13,
-          color: '#130032',
-          fontFamily: 'var(--ink-font-family)',
-        }}>
-          <span>2 expiring soon</span>
-          <span style={{ margin: '0 14px', opacity: 0.3 }}>|</span>
-          <span>3 open requests</span>
-          <span style={{ margin: '0 14px', opacity: 0.3 }}>|</span>
-          <span>8 upcoming renewals</span>
-        </div>
-
-        {/* Action buttons row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 56 }}>
+        <Heading level={3} style={{ color: 'white', fontWeight: 400, marginBottom: 'var(--ink-spacing-300)' }}>
+          Welcome back, Akshat Mishra
+        </Heading>
+        <Inline gap="small" justify="center">
+          <Button kind="brand" menuTrigger>Start</Button>
           {[
-            { icon: 'plus' as const,      label: 'Start',            onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
-            { icon: 'send' as const,      label: 'Get\nSignatures',  onClick: () => {} },
-            { icon: 'edit' as const,      label: 'Sign a\nDocument', onClick: () => {} },
-            { icon: 'templates' as const, label: 'Use\nTemplate',    onClick: () => {} },
+            { icon: 'send' as const, label: 'Send an Envelope' },
+            { icon: 'ai-spark-filled' as const, label: 'Send with AI' },
+            { icon: 'templates' as const, label: 'Create a Request' },
           ].map((btn) => (
-            <div key={btn.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={btn.onClick}>
-              {/* Setting color on the wrapper resolves currentColor to white for all child SVG paths */}
-              <div style={{
-                width: 48, height: 48,
-                background: 'var(--ink-cobalt-100)',
-                borderRadius: 'var(--ink-radius-size-s)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#ffffff',
-              }}>
-                <Icon name={btn.icon} size={22} />
-              </div>
-              <div style={{ color: '#130032', fontSize: 13, textAlign: 'center', lineHeight: 1.4, whiteSpace: 'pre-line', fontFamily: 'var(--ink-font-family)' }}>
-                {btn.label}
-              </div>
-            </div>
+            <button
+              key={btn.label}
+              className="banner-btn"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-125)',
+                padding: 'var(--ink-spacing-125) var(--ink-spacing-250)', background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.25)', borderRadius: 'var(--ink-radius-sm)',
+                color: 'white', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <Icon name={btn.icon} size={16} color="white" /> {btn.label}
+            </button>
           ))}
-        </div>
+        </Inline>
       </div>
 
-      {/* ── Page body — sits on the gradient, no background of its own ── */}
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px 40px' }}>
-        <Stack gap="none" style={{ gap: 20 }}>
-
-          {/* ── Tasks ─�� */}
-          <div {...getStaggerProps(0)}>
-            <div style={{
-              background: 'var(--ink-white-100)',
-              borderRadius: 'var(--ink-radius-size-m)',
-              border: '1px solid var(--ink-neutral-fade-10)',
-              boxShadow: 'var(--ink-shadow-sm)',
-              padding: '20px 24px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>Tasks</span>
-                <Button kind="tertiary" size="small">View all</Button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-                {tasks.map((task, i) => (
-                  <div key={i} style={{
-                    background: 'var(--ink-white-100)',
-                    border: '1px solid var(--ink-neutral-fade-10)',
-                    borderRadius: 'var(--ink-radius-size-s)',
-                    padding: '12px 12px 14px',
-                    boxShadow: 'var(--ink-shadow-xs)',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                      <Icon name={task.icon} size={18} />
-                      <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)', marginBottom: 4, lineHeight: 1.3 }}>{task.title}</div>
-                    <div style={{ fontSize: 13, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)', lineHeight: 1.4, marginBottom: task.badge ? 8 : 0 }}>{task.description}</div>
-                    {task.sub && <div style={{ fontSize: 13, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)' }}>{task.sub}</div>}
-                    {task.badge && (
-                      <div style={{
-                        display: 'inline-block',
-                        marginTop: 6,
-                        padding: '2px 8px',
-                        borderRadius: 'var(--ink-radius-size-xs)',
-                        background: task.badgeColor,
-                        color: 'var(--ink-white-100)',
-                        fontSize: 12,
-                        fontWeight: 500,
-                        fontFamily: 'var(--ink-font-family)',
-                      }}>
-                        {task.badge}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+      {/* Main content */}
+      <Container style={{ maxWidth: 1120, padding: 'var(--ink-spacing-400) var(--ink-spacing-400)' }}>
+        <Inline gap="large" align="start">
+          {/* Left column */}
+          <Stack gap="medium" style={{ flex: 1 }}>
+            {/* Tasks */}
+            <div {...getStaggerProps(0)}>
+            <Card radius="large" className="home-card">
+              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
+                <Inline justify="between" align="center" style={{ paddingBottom: 'var(--ink-spacing-150)' }}>
+                  <SectionLabel>Tasks</SectionLabel>
+                  <Icon name="chevron-right" size={18} />
+                </Inline>
+                <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-250) 0 var(--ink-spacing-150)' }}>
+                  <Text size="lg" weight="regular">You don&apos;t have any tasks yet</Text>
+                  <Text size="sm" color="secondary">When you have new tasks assigned to you, they will show up here.</Text>
+                </Stack>
+              </Stack>
+            </Card>
             </div>
-          </div>
 
-          {/* ── Agreement activity ── */}
-          <div {...getStaggerProps(1)}>
-            <div style={{
-              background: 'var(--ink-white-100)',
-              borderRadius: 'var(--ink-radius-size-m)',
-              border: '1px solid var(--ink-neutral-fade-10)',
-              boxShadow: 'var(--ink-shadow-sm)',
-              padding: '20px 24px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>Agreement activity</span>
-                  <Icon name="info" size={15} color="var(--ink-font-color-secondary)" />
-                </div>
-                <Button kind="tertiary" size="small">View all</Button>
-              </div>
-              {activity.map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '13px 0',
-                  borderTop: i > 0 ? '1px solid var(--ink-neutral-fade-10)' : 'none',
-                  cursor: 'pointer',
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)', marginBottom: 2 }}>{item.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)' }}>{item.time}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                    {item.type === 'completed' && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Icon name="status-check" size={16} color="var(--ink-green-80)" />
-                        <span style={{ fontSize: 13, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>Completed</span>
-                      </div>
-                    )}
-                    {item.type === 'waiting' && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-                          <div style={{ width: 80, height: 4, background: 'var(--ink-neutral-30)', borderRadius: 2, overflow: 'hidden' }}>
-                            <div style={{ width: `${item.progress}%`, height: '100%', background: 'var(--ink-cobalt-90)', borderRadius: 2 }} />
+            {/* Agreement Activity */}
+            <div {...getStaggerProps(1)}>
+            <Card radius="large" className="home-card">
+              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
+                <Inline gap="none" align="center" style={{ gap: 'var(--ink-spacing-50)', marginBottom: 'var(--ink-spacing-150)' }}>
+                  <SectionLabel>Agreement Activity</SectionLabel>
+                  <Icon name="info" size={14} />
+                </Inline>
+                {activity.map((item, i) => (
+                  <Inline
+                    key={i}
+                    justify="between"
+                    align="center"
+                    className="activity-row"
+                    style={{
+                      padding: 'var(--ink-spacing-150) 0',
+                      borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
+                    }}
+                  >
+                    <Stack gap="none" style={{ gap: "var(--ink-spacing-25)" }}>
+                      <Text size="sm">{item.name}</Text>
+                      <Text size="xs" color="secondary" style={{ textDecoration: 'underline', textDecorationColor: 'var(--ink-border-subtle)' }}>{item.time}</Text>
+                    </Stack>
+                    <Inline gap="small" align="center" style={{ flexShrink: 0 }}>
+                      <Icon name={item.statusIcon} size={14} />
+                      <Text size="xs" color="secondary">{item.status}</Text>
+                      <Icon name="chevron-right" size={14} />
+                    </Inline>
+                  </Inline>
+                ))}
+              </Stack>
+            </Card>
+            </div>
+
+            {/* Favorite Templates */}
+            <div {...getStaggerProps(2)}>
+            <Card radius="large" className="home-card">
+              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
+                <Inline justify="between" align="center" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
+                  <SectionLabel>Favorite Templates</SectionLabel>
+                  <Icon name="chevron-right" size={18} />
+                </Inline>
+                <Grid columns={3} gap="medium">
+                  {favoriteTemplates.map((t) => (
+                    <Card key={t.name} radius="medium" className="home-card activity-row" style={{ padding: 0 }}>
+                      <Stack gap="small" style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <div style={{ height: 140, background: '#f5f5f5', borderRadius: 'var(--ink-radius-sm)', position: 'relative', overflow: 'hidden', padding: 6 }}>
+                          {/* Mock document preview */}
+                          <div style={{ background: 'white', borderRadius: 3, height: '100%', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                            {/* Header area */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ height: 5, width: '35%', background: '#ddd', borderRadius: 1 }} />
+                              <div style={{ height: 5, width: '15%', background: '#e8e8e8', borderRadius: 1 }} />
+                            </div>
+                            <div style={{ height: 1, background: '#eee' }} />
+                            {/* Table-like rows */}
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <div style={{ height: 4, width: '25%', background: '#e5e5e5', borderRadius: 1 }} />
+                              <div style={{ height: 4, width: '20%', background: '#efefef', borderRadius: 1 }} />
+                              <div style={{ height: 4, width: '30%', background: '#efefef', borderRadius: 1 }} />
+                            </div>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <div style={{ height: 4, width: '25%', background: '#efefef', borderRadius: 1 }} />
+                              <div style={{ height: 4, width: '20%', background: '#f2f2f2', borderRadius: 1 }} />
+                              <div style={{ height: 4, width: '30%', background: '#f2f2f2', borderRadius: 1 }} />
+                            </div>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <div style={{ height: 4, width: '25%', background: '#efefef', borderRadius: 1 }} />
+                              <div style={{ height: 4, width: '20%', background: '#f2f2f2', borderRadius: 1 }} />
+                              <div style={{ height: 4, width: '30%', background: '#f2f2f2', borderRadius: 1 }} />
+                            </div>
+                            <div style={{ height: 1, background: '#eee', marginTop: 2 }} />
+                            {/* More text lines */}
+                            <div style={{ height: 3, width: '70%', background: '#efefef', borderRadius: 1 }} />
+                            <div style={{ height: 3, width: '50%', background: '#f2f2f2', borderRadius: 1 }} />
                           </div>
-                          <span style={{ fontSize: 12, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)' }}>Waiting for 2 others</span>
+                          {/* Favorite badge */}
+                          <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: 10, padding: '2px 6px', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Icon name="star" size={9} color="gold" /> Favorite
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    {item.type === 'expiring' && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <Icon name="status-warn" size={16} color="var(--ink-orange-60)" />
-                          <span style={{ fontSize: 13, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>Expiring soon</span>
-                        </div>
-                        <span style={{ fontSize: 12, color: 'var(--ink-cobalt-90)', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'var(--ink-font-family)' }}>View Details</span>
-                      </div>
-                    )}
-                    <Icon name="chevron-right" size={16} color="var(--ink-font-color-secondary)" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Templates ── */}
-          <div {...getStaggerProps(2)}>
-            <div style={{
-              background: 'var(--ink-white-100)',
-              borderRadius: 'var(--ink-radius-size-m)',
-              border: '1px solid var(--ink-neutral-fade-10)',
-              boxShadow: 'var(--ink-shadow-sm)',
-              padding: '20px 24px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>Templates</span>
-                <Button kind="tertiary" size="small">View all</Button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-                {templates.map((t, i) => (
-                  <div key={i} style={{
-                    background: 'var(--ink-white-100)',
-                    border: '1px solid var(--ink-neutral-fade-10)',
-                    borderRadius: 'var(--ink-radius-size-s)',
-                    overflow: 'hidden',
-                    boxShadow: 'var(--ink-shadow-xs)',
-                    cursor: 'pointer',
-                  }}>
-                    {/* Document preview area */}
-                    <div style={{ background: 'var(--ink-neutral-10)', height: 148, position: 'relative', padding: 12 }}>
-                      <span style={{
-                        position: 'absolute', top: 8, right: 8, zIndex: 1,
-                        padding: '3px 8px',
-                        borderRadius: 'var(--ink-radius-size-xs)',
-                        background: t.badgeColor,
-                        color: 'var(--ink-white-100)',
-                        fontSize: 11,
-                        fontWeight: 500,
-                        fontFamily: 'var(--ink-font-family)',
-                      }}>
-                        {t.badge}
-                      </span>
-                      <DocPreview hasLogo={t.hasLogo} hasForm={t.hasForm} />
-                    </div>
-                    {/* Label */}
-                    <div style={{ padding: '10px 12px 12px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)', marginBottom: 2 }}>{t.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)' }}>{t.sub}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ── Recommended for you ── */}
-          <div {...getStaggerProps(3)}>
-            <div style={{
-              background: 'var(--ink-white-100)',
-              borderRadius: 'var(--ink-radius-size-m)',
-              border: '1px solid var(--ink-neutral-fade-10)',
-              boxShadow: 'var(--ink-shadow-sm)',
-              padding: '20px 24px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>Recommended for you</span>
-                <Button kind="tertiary" size="small">View all</Button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr 220px', gap: 24 }}>
-                {/* Left: action list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {recommended.map((r, i) => (
-                    <div key={i} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '10px 10px',
-                      borderRadius: 'var(--ink-radius-size-s)',
-                      background: r.active ? 'var(--ink-cobalt-10)' : 'transparent',
-                      cursor: 'pointer',
-                      border: r.active ? '1px solid var(--ink-cobalt-30)' : '1px solid transparent',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 'var(--ink-radius-size-xs)',
-                          background: r.active ? 'var(--ink-cobalt-100)' : 'var(--ink-neutral-20)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        }}>
-                          <Icon name={r.icon} size={16} color={r.active ? 'var(--ink-white-100)' : 'var(--ink-font-color-secondary)'} />
-                        </div>
-                        <span style={{ fontSize: 13, fontWeight: r.active ? 500 : 400, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)', lineHeight: 1.35 }}>{r.label}</span>
-                      </div>
-                      <Icon name="chevron-right" size={14} color="var(--ink-font-color-secondary)" />
-                    </div>
+                        <Text size="sm" weight="medium" style={{ color: 'var(--ink-cobalt-90)' }}>{t.name}</Text>
+                        <Text size="xs" color="secondary">{t.lastUsed}</Text>
+                      </Stack>
+                    </Card>
                   ))}
-                </div>
-
-                {/* Center: description */}
-                <div style={{ padding: '4px 0' }}>
-                  <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)', lineHeight: 1.3, marginBottom: 10 }}>
-                    Centralize your requests in Agreement Desk
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)', lineHeight: 1.55, marginBottom: 18 }}>
-                    Learn how to create intake forms and manage documents through every stage of the signing process.
-                  </div>
-                  <Button kind="brand" size="small">Watch Video</Button>
-                </div>
-
-                {/* Right: video thumbnail */}
-                <div style={{
-                  background: 'linear-gradient(135deg, var(--ink-neutral-120) 0%, var(--ink-cobalt-100) 100%)',
-                  borderRadius: 'var(--ink-radius-size-s)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  minHeight: 130,
-                }}>
-                  <div style={{
-                    width: 44, height: 44,
-                    background: 'rgba(255,255,255,0.9)',
-                    borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <div style={{
-                      width: 0, height: 0,
-                      borderTop: '9px solid transparent',
-                      borderBottom: '9px solid transparent',
-                      borderLeft: '15px solid var(--ink-cobalt-100)',
-                      marginLeft: 4,
-                    }} />
-                  </div>
-                </div>
-              </div>
+                  <Card radius="medium" className="home-card activity-row" style={{ padding: 0 }}>
+                    <Stack gap="small" align="center" justify="center" style={{ padding: 'var(--ink-spacing-200)', height: '100%' }}>
+                      <Text size="sm" weight="semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}>Add Favorite Template</Text>
+                      <Text size="xs" color="secondary" style={{ textAlign: 'center' }}>Send future documents faster with favorited templates.</Text>
+                      <Button kind="secondary" size="small">Browse templates</Button>
+                    </Stack>
+                  </Card>
+                </Grid>
+              </Stack>
+            </Card>
             </div>
-          </div>
 
-          {/* ── Research panel / footer links ── */}
-          <div {...getStaggerProps(4)}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '8px 0' }}>
-              <div style={{ maxWidth: 480 }}>
-                <div style={{ fontSize: 13, color: 'var(--ink-font-color-secondary)', fontFamily: 'var(--ink-font-family)', lineHeight: 1.5, marginBottom: 4 }}>
-                  Want to participate in DocuSign research studies such as surveys, interviews, and testing of new product ideas and features?
-                </div>
-                <Link href="#" style={{ fontSize: 13 }}>Join our Product Experience Research Panel</Link>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-                {[
-                  { icon: 'help' as const,   label: 'Support Home'  },
-                  { icon: 'people' as const,  label: 'Community'     },
-                  { icon: 'shield' as const,  label: 'Trust Center'  },
-                ].map((l) => (
-                  <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                    <Icon name={l.icon} size={15} color="var(--ink-font-color-secondary)" />
-                    <span style={{ fontSize: 13, color: 'var(--ink-font-color-default)', fontFamily: 'var(--ink-font-family)' }}>{l.label}</span>
+            {/* Promo cards */}
+            <div {...getStaggerProps(3)}>
+            <Grid columns={2} gap="medium">
+              <Card radius="large" className="home-card promo-card activity-row" noPadding>
+                <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
+                  <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
+                    <img src="/illustration-bulk-send.svg" alt="" width={72} height={72} />
                   </div>
-                ))}
-              </div>
+                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
+                    <Text size="sm" weight="medium">Save time with bulk send</Text>
+                    <Text size="xs" color="secondary">No need to send separate envelopes. Import a bulk list and each recipient receives a unique copy. <span style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>Learn More</span></Text>
+                  </Stack>
+                </Inline>
+              </Card>
+              <Card radius="large" className="home-card promo-card activity-row" noPadding>
+                <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
+                  <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
+                    <img src="/illustration-help.svg" alt="" width={72} height={72} />
+                  </div>
+                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
+                    <Text size="sm" weight="medium">Need help getting started?</Text>
+                    <Text size="xs" color="secondary">Get help with basic questions. <span style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>View Our Guide</span></Text>
+                  </Stack>
+                </Inline>
+              </Card>
+            </Grid>
             </div>
-          </div>
+          </Stack>
 
-        </Stack>
-      </div>
-    </div>
+          {/* Right column - Overview */}
+          <div style={{ width: 220, flexShrink: 0, ...getStaggerProps(4).style }}>
+            <Card radius="large" className="home-card">
+              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200)' }}>
+                <SectionLabel>Overview</SectionLabel>
+                <Stack gap="none" style={{ marginTop: 'var(--ink-spacing-150)' }}>
+                  {overview.map((item, i) => (
+                    <Inline
+                      key={i}
+                      justify="between"
+                      className="overview-row"
+                      style={{
+                        padding: 'var(--ink-spacing-150) var(--ink-spacing-50)',
+                        borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
+                        borderRadius: 'var(--ink-radius-sm)',
+                      }}
+                    >
+                      <Text size="sm">{item.label}</Text>
+                      <Text size="sm" weight="semibold">{item.value}</Text>
+                    </Inline>
+                  ))}
+                </Stack>
+              </Stack>
+            </Card>
+          </div>
+        </Inline>
+      </Container>
+    </Stack>
   );
 }
 
