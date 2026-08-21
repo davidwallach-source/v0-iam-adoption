@@ -7900,8 +7900,19 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           const doc = item as DealDocument;
                           const isSelected = selectedDocs.has(doc.id);
                           return (
-                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent' }}>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                            <tr
+                              key={doc.id}
+                              onClick={() => openEnvelopePanel({
+                                envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                                documentNames: [doc.name],
+                                signatureProgress: doc.signatureProgress,
+                                dateModified: doc.lastModified || doc.dateModified,
+                              })}
+                              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent'; }}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent', cursor: 'pointer' }}
+                            >
+                              <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
                                   type="checkbox"
                                   checked={isSelected}
@@ -7919,22 +7930,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
-                                  {doc.signatureProgress ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => openEnvelopePanel({
-                                        envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
-                                        documentNames: [doc.name],
-                                        signatureProgress: doc.signatureProgress,
-                                        dateModified: doc.lastModified || doc.dateModified,
-                                      })}
-                                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--ink-font-color-default)', fontWeight: 500, fontFamily: 'var(--ink-font-family)', fontSize: 'var(--ink-font-size-sm)' }}
-                                    >
-                                      {doc.name}
-                                    </button>
-                                  ) : (
-                                    <Text size="sm">{doc.name}</Text>
-                                  )}
+                                  <Text size="sm" style={doc.signatureProgress ? { fontWeight: 500 } : undefined}>{doc.name}</Text>
                                   {doc.commentCount && (
                                     <AlertBadge value={doc.commentCount} kind="emphasis" />
                                   )}
@@ -7983,7 +7979,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 </td>
                               )}
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                   <Button
                                     kind="secondary"
