@@ -5362,6 +5362,71 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
   );
 }
 
+// Inline overflow menu for table rows inside the workspace. The shared Dropdown
+// component portals to document.body at z-index 1055, which renders BEHIND the
+// WorkspaceView overlay (z-index 1060) — so its menu is invisible here. This
+// renders the menu at a fixed position computed from the trigger, above the
+// workspace, matching the envelope panel's inline menu styling.
+function RowOverflowMenu({ items }: { items: { label: string; onClick: () => void }[] }) {
+  const [open, setOpen] = useState(false);
+  // `top` positions the menu below the trigger; `bottom` flips it above when
+  // there isn't enough room below (e.g. rows near the viewport bottom, which
+  // otherwise render the menu completely off-screen).
+  const [coords, setCoords] = useState<{ top?: number; bottom?: number; right: number }>({ top: 0, right: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const toggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      const estHeight = items.length * 41 + 12;
+      const right = window.innerWidth - r.right;
+      if (r.bottom + estHeight > window.innerHeight - 8) {
+        setCoords({ bottom: window.innerHeight - r.top + 6, right });
+      } else {
+        setCoords({ top: r.bottom + 6, right });
+      }
+    }
+    setOpen((v) => !v);
+  };
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggle}
+        aria-label="More options"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
+      >
+        <Icon name="overflow-vertical" size={18} />
+      </button>
+      {open && (
+        <>
+          <div onClick={(e) => { e.stopPropagation(); setOpen(false); }} style={{ position: 'fixed', inset: 0, zIndex: 1070 }} />
+          <div
+            role="menu"
+            style={{ position: 'fixed', top: coords.top, bottom: coords.bottom, right: coords.right, zIndex: 1071, minWidth: 180, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
+          >
+            {items.map((item) => (
+              <button
+                key={item.label}
+                role="menuitem"
+                onClick={(e) => { e.stopPropagation(); setOpen(false); item.onClick(); }}
+                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 interface WorkspaceViewProps {
   agreement: Agreement;
   onClose: () => void;
@@ -7727,16 +7792,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               }}>Due today</span>
                             )}
                           </div>
-                          <Dropdown
-                            position="bottom"
-                            align="end"
+                          <RowOverflowMenu
                             items={[
                               { label: 'View history', onClick: () => showToast('Opening history.') },
                               { label: 'Download', onClick: () => showToast('Downloading.') },
                             ]}
-                          >
-                            <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
-                          </Dropdown>
+                          />
                         </div>
                         <Text size="sm" weight="semibold">{item.item}</Text>
                         <Text size="xs" color="secondary">{item.description}</Text>
@@ -7924,9 +7985,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                     <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                                      <Dropdown position="bottom" align="end" items={envelopeOverflowItems()}>
-                                        <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
-                                      </Dropdown>
+                                      <RowOverflowMenu items={envelopeOverflowItems()} />
                                     </Inline>
                                   </td>
                                 </tr>
@@ -8070,18 +8129,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
                                     </Button>
                                   )}
-                                  <Dropdown
-                                    position="bottom"
-                                    align="end"
+                                  <RowOverflowMenu
                                     items={doc.signatureProgress
                                       ? envelopeOverflowItems()
                                       : [
                                           { label: 'Download', onClick: () => showToast('Downloading document.') },
                                           { label: 'View history', onClick: () => showToast('Opening document history.') },
                                         ]}
-                                  >
-                                    <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
-                                  </Dropdown>
+                                  />
                                 </Inline>
                               </td>
                             </tr>
@@ -8129,16 +8184,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       onPreviewDocument?.(doc.name);
                                     }
                                   }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
-                                  <Dropdown
-                                    position="bottom"
-                                    align="end"
+                                  <RowOverflowMenu
                                     items={[
                                       { label: 'Download', onClick: () => showToast('Downloading document.') },
                                       { label: 'View history', onClick: () => showToast('Opening document history.') },
                                     ]}
-                                  >
-                                    <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
-                                  </Dropdown>
+                                  />
                                 </Inline>
                               </td>
                             </tr>
