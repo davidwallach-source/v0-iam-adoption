@@ -6870,9 +6870,10 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </button>
         </div>
 
-        {/* Document thumbnail on a #130032 background — 238px tall, doc bleeds off the bottom edge */}
-        <div style={{ padding: '0 20px' }}>
-          <div style={{ height: 238, background: '#130032', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+        {/* Document thumbnail on a #130032 background — 238px tall, edge-to-edge, doc bleeds off the bottom edge */}
+        <div>
+          {/* Navy background spans the full panel width; doc preview sits 16px from the top */}
+          <div style={{ height: 238, background: '#130032', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16 }}>
             {/* No bottom padding: the page is anchored to the top so it's cut off at the bottom */}
             <div style={{ width: '100%', maxWidth: 288, background: 'white', padding: '28px 26px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22 }}>
@@ -8986,7 +8987,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ───────────────────────────────────────────────────────��──────────────────
+/* ────────────────────────────────────────��──────────────��──────────────────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
