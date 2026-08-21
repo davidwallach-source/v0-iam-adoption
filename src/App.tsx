@@ -7081,9 +7081,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     signatureProgress?: { signed: number; total: number; waitingFor: string };
     dateModified?: string;
   }) => {
-    const participantNames = (agreement.externalParticipants && agreement.externalParticipants.length
-      ? agreement.externalParticipants
-      : (agreement.party && agreement.party !== '—' ? [agreement.party] : []));
+    // For Instant NDA / Permission Slip spaces, `party` / `externalParticipants`
+    // hold document metadata (the Receiving Party / Student Name), NOT a
+    // recipient. Those must never seed the timeline — only the people actually
+    // added as Recipients on the Prepare page (carried in signatureProgress.
+    // waitingFor) belong there.
+    const partyIsDocMetadata = agreement.workspaceKind === 'nda' || agreement.workspaceKind === 'permission-slip';
+    const participantNames = partyIsDocMetadata
+      ? []
+      : (agreement.externalParticipants && agreement.externalParticipants.length
+        ? agreement.externalParticipants
+        : (agreement.party && agreement.party !== '—' ? [agreement.party] : []));
     setOpenEnvelope({
       name: opts.envelopeName,
       sentBy: 'you',
