@@ -24,7 +24,7 @@
   background: transparent;
   color: var(--ink-font-color-secondary);
   font-family: var(--ink-font-family);
-  font-size: var(--ink-font-size-md);
+  font-size: var(--ink-font-size-sm);
   font-weight: var(--ink-font-weight-medium);
   white-space: nowrap;
   cursor: pointer;
