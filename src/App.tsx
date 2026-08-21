@@ -7078,6 +7078,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // stays highlighted (and only that row) while the panel is open.
   const [openEnvelopeRowId, setOpenEnvelopeRowId] = useState<string | null>(null);
 
+  // Overflow-menu items for a sent envelope row (Void / Download / View history).
+  const envelopeOverflowItems = () => [
+    { label: 'Void envelope', onClick: () => showToast('Envelope voided.') },
+    { label: 'Download', onClick: () => showToast('Downloading documents.') },
+    { label: 'View history', onClick: () => showToast('Opening envelope history.') },
+  ];
+
   // Build the envelope-panel payload for a sent envelope/document. Recipients
   // come from the agreement's named participants + signature progress, so the
   // panel always reflects who is actually on the envelope (one or many).
@@ -7720,7 +7727,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               }}>Due today</span>
                             )}
                           </div>
-                          <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                          <Dropdown
+                            position="bottom"
+                            align="end"
+                            items={[
+                              { label: 'View history', onClick: () => showToast('Opening history.') },
+                              { label: 'Download', onClick: () => showToast('Downloading.') },
+                            ]}
+                          >
+                            <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
+                          </Dropdown>
                         </div>
                         <Text size="sm" weight="semibold">{item.item}</Text>
                         <Text size="xs" color="secondary">{item.description}</Text>
@@ -7905,16 +7921,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
                                     {envelope.documents[0]?.dateModified}
                                   </td>
-                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                    <Button kind="secondary" size="small" onClick={() => {
-                                      if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                        onEditNDA();
-                                      } else {
-                                        onPreviewDocument?.(doc.name);
-                                      }
-                                    }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
-                                      <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                    <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                      <Dropdown position="bottom" align="end" items={envelopeOverflowItems()}>
+                                        <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                      </Dropdown>
                                     </Inline>
                                   </td>
                                 </tr>
@@ -8038,23 +8050,38 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                  <Button
-                                    kind="secondary"
-                                    size="small"
-                                    onClick={() => {
-                                      if (doc.id.startsWith('added-')) {
-                                        // Documents added via the Add → Document flow open in the local Doc Preview.
-                                        setPendingPreviewDoc(doc.name);
-                                      } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                        onEditNDA();
-                                      } else {
-                                        onPreviewDocument?.(doc.name);
-                                      }
-                                    }}
+                                  {doc.signatureProgress ? (
+                                    <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                  ) : (
+                                    <Button
+                                      kind="secondary"
+                                      size="small"
+                                      onClick={() => {
+                                        if (doc.id.startsWith('added-')) {
+                                          // Documents added via the Add → Document flow open in the local Doc Preview.
+                                          setPendingPreviewDoc(doc.name);
+                                        } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                          onEditNDA();
+                                        } else {
+                                          onPreviewDocument?.(doc.name);
+                                        }
+                                      }}
+                                    >
+                                      {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                                    </Button>
+                                  )}
+                                  <Dropdown
+                                    position="bottom"
+                                    align="end"
+                                    items={doc.signatureProgress
+                                      ? envelopeOverflowItems()
+                                      : [
+                                          { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                          { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                        ]}
                                   >
-                                    {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
-                                  </Button>
-                                  <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                    <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                  </Dropdown>
                                 </Inline>
                               </td>
                             </tr>
@@ -8102,7 +8129,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       onPreviewDocument?.(doc.name);
                                     }
                                   }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
-                                  <IconButton icon="dots-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                  <Dropdown
+                                    position="bottom"
+                                    align="end"
+                                    items={[
+                                      { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                      { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                    ]}
+                                  >
+                                    <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More options" />
+                                  </Dropdown>
                                 </Inline>
                               </td>
                             </tr>
