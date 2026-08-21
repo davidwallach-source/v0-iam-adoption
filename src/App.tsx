@@ -1648,7 +1648,7 @@ const tableRowStaggerStyles = `
   }
   `;
 
-/* ═══════════════════════�������������������������������������������������������������������������������������══════════════
+/* ═══════════════════════��������������������������������������������������������������������������������������══════════════
    Entrance Animation Hooks
    ═══════════════════════════════════════ */
 
@@ -6857,15 +6857,15 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           fontFamily: 'var(--ink-font-family)',
         }}
       >
-        {/* Header — envelope name + close X pinned upper right */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '24px 20px 16px' }}>
+        {/* Header — envelope name + close X pinned upper right — fixed 56px tall */}
+        <div style={{ height: 56, boxSizing: 'border-box', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
           <h2 style={{ margin: 0, flex: 1, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink-font-color-default)' }}>
             {envelope.name}
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, margin: '-4px -4px 0 0', display: 'flex', color: 'var(--ink-font-color-default)', flexShrink: 0 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, margin: '0 -4px 0 0', display: 'flex', color: 'var(--ink-font-color-default)', flexShrink: 0 }}
           >
             <Icon name="close" size={22} />
           </button>
@@ -6885,10 +6885,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
         </div>
 
-        {/* Document name + sent-by, with page counter + carousel arrows if multi-doc */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px 20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+        {/* Sent-by subtext, with page counter + carousel arrows if multi-doc — 20px top/bottom padding */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-font-color-default)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentDoc}</div>
             <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)' }}>Sent by {envelope.sentBy} {envelope.sentAt}</div>
           </div>
           {multi && (
@@ -9022,7 +9021,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ────────────────────────────────────────��──────────────��──────────────────
+/* ──────────���─────────────────────────────��──────────────��──────────────────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
