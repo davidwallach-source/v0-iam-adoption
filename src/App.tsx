@@ -6661,7 +6661,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
 // Click-to-edit Agreement Space title shown in the workspace header. Clicking
 // the name turns it into an inline text field (Google Docs style); Enter or
 // blur commits, Escape cancels.
-function EditableSpaceName({ name, onRename }: { name: string; onRename?: (name: string) => void }) {
+function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; onRename?: (name: string) => void; titleSize?: number }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -6672,14 +6672,14 @@ function EditableSpaceName({ name, onRename }: { name: string; onRename?: (name:
   }, [editing]);
 
   const titleFontStyle: React.CSSProperties = {
-    fontSize: 20,
+    fontSize: titleSize,
     fontWeight: 600,
     fontFamily: 'var(--ink-font-family)',
     color: 'var(--ink-font-color-default)',
-    lineHeight: 1.3,
+    lineHeight: 1.2,
   };
 
-  if (!onRename) return <Heading level={3} style={{ margin: 0 }}>{name}</Heading>;
+  if (!onRename) return <Heading level={1} style={{ margin: 0, fontSize: titleSize }}>{name}</Heading>;
 
   const commit = () => {
     const trimmed = draft.trim();
@@ -7138,67 +7138,22 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     }}>
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'var(--ink-bg-color-canvas-page)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-        {/* Header row — back arrow + title on left, actions on right */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: 'var(--ink-spacing-150) var(--ink-spacing-200)', gap: 12 }}>
-          <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, flexShrink: 0 }}>
-            <Icon name="arrow-left" size={20} />
-          </button>
-          <Inline gap="medium" align="center">
-            <EditableSpaceName name={agreement.name} onRename={onRename} />
-            {(() => {
-              // Permission Slip spaces (Simple Use Case) don't show a party tag.
-              // Covers both the saved-draft (nda) and sent (permission-slip) variants.
-              if (isPermissionSlipSpace) return null;
-              const partyName = agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null);
-              if (!partyName) return null;
-              return (
-                <button
-                  type="button"
-                  onClick={() => setShowPartyHistory(true)}
-                  aria-label={`View history for ${partyName}`}
-                  title={`View history for ${partyName}`}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--ink-cobalt-20)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--ink-cobalt-10)'; }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '4px 10px',
-                    borderRadius: 8,
-                    border: 'none',
-                    background: 'var(--ink-cobalt-10)',
-                    color: 'var(--ink-cobalt-90)',
-                    fontFamily: 'var(--ink-font-family)',
-                    fontSize: 'var(--ink-font-size-sm)',
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    cursor: 'pointer',
-                    transition: 'background 0.15s',
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-                    <path d="M8 12H6V10H8V12ZM8 14H6V16H8V14ZM8 6H6V8H8V6ZM8 18H4V4.49L10 2.69V7L12 6V0L2 3V18H1V20H8V18ZM15 7.9C14.39 7.9 13.9 8.39 13.9 9C13.9 9.61 14.39 10.1 15 10.1C15.61 10.1 16.1 9.61 16.1 9C16.1 8.39 15.61 7.9 15 7.9ZM15 6C16.66 6 18 7.34 18 9C18 10.66 16.66 12 15 12C13.34 12 12 10.66 12 9C12 7.34 13.34 6 15 6ZM20 17C20 14.79 18.21 13 16 13H14C11.79 13 10 14.79 10 17V20H12V16.88C12 15.78 12.77 15 13.88 15H16.13C17.23 15 18.01 15.77 18.01 16.88V20H20.01V17H20Z" fill="currentColor" />
-                  </svg>
-                  {partyName}
-                </button>
-              );
-            })()}
-            <StatusLight
-              noFill
-              className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
-              kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-              text={agreement.status}
-            />
-          </Inline>
-          <div style={{ flex: 1 }} />
-          <Inline gap="small" align="center">
-            <div style={{ display: 'flex' }}>
-              <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-              <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-              <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
-            </div>
-            <IconButton icon="comment" variant="tertiary" size="small" aria-label="Comments" />
+        {/* 224px-tall header: actions row, H1, key extractions, then tabs */}
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 224, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
+
+          {/* Top actions row — back arrow on the left, actions on the right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0 }}>
+              <Icon name="arrow-left" size={20} />
+            </button>
+            <div style={{ flex: 1 }} />
+            <Inline gap="small" align="center">
+              <div style={{ display: 'flex' }}>
+                <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
+                <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
+                <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
+              </div>
+              <IconButton icon="duplicate" variant="tertiary" size="small" aria-label="Related agreements" />
               <AddMenu
                 onUpload={() => setShowFilePicker(true)}
                 onUseTemplate={() => setShowFilePicker(true)}
@@ -7224,13 +7179,81 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               }}
               onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
             />
-          </Inline>
-        </div>
+            </Inline>
+          </div>
 
-        {/* Tabs — constrained, no top border */}
-        <div style={{ ...innerStyle, alignItems: 'stretch', gap: 0, paddingTop: 'var(--ink-spacing-100)' }}>
-          <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-          <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+          {/* Space name (H1) — moved below the actions row */}
+          <div style={{ marginTop: 'var(--ink-spacing-300)' }}>
+            <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} />
+          </div>
+
+          {/* Key extractions — surfaced below the H1, relevant per use case */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 'var(--ink-spacing-200)', flexWrap: 'wrap' }}>
+            {(() => {
+              const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
+              const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
+              const docCount = agreement.documentsCount ?? 1;
+              const termMonths = (() => { const m = /(\d+)\s*month/i.exec(agreement.termLength ?? ''); return m ? parseInt(m[1], 10) : null; })();
+              const expiryLabel = termMonths
+                ? (termMonths % 12 === 0
+                    ? (termMonths / 12 === 1 ? 'Expires in a year' : `Expires in ${termMonths / 12} years`)
+                    : `Expires in ${termMonths} months`)
+                : null;
+              const dealValue = agreement.dealValue && agreement.dealValue !== '—' ? agreement.dealValue : null;
+              return (
+                <>
+                  <StatusLight
+                    noFill
+                    className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
+                    kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+                    text={agreement.status}
+                  />
+                  {partyName && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPartyHistory(true)}
+                      aria-label={`View history for ${partyName}`}
+                      title={`View history for ${partyName}`}
+                      style={{ ...itemStyle, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--ink-cobalt-80)', fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
+                    >
+                      <Icon name="building-person" size={18} color="var(--ink-cobalt-80)" />
+                      {partyName}
+                    </button>
+                  )}
+                  <span style={itemStyle}>
+                    <Icon name="document" size={18} color="var(--ink-font-color-secondary)" />
+                    {docCount} Document{docCount === 1 ? '' : 's'}
+                  </span>
+                  {expiryLabel && (
+                    <span style={itemStyle}>
+                      <Icon name="refresh" size={18} color="var(--ink-font-color-secondary)" />
+                      {expiryLabel}
+                    </span>
+                  )}
+                  {termMonths && (
+                    <span style={itemStyle}>
+                      <Icon name="calendar" size={18} color="var(--ink-font-color-secondary)" />
+                      {termMonths} month term
+                    </span>
+                  )}
+                  {!termMonths && dealValue && (
+                    <span style={itemStyle}>
+                      <Icon name="document" size={18} color="var(--ink-font-color-secondary)" />
+                      {dealValue}
+                    </span>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+
+          <div style={{ flex: 1 }} />
+
+          {/* Tabs — pinned to the bottom of the header */}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+          </div>
         </div>
       </div>
 
