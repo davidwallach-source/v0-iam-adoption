@@ -7187,19 +7187,82 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} />
           </div>
 
-          {/* Key extractions — surfaced below the H1, relevant per use case */}
+          {/* Key extractions — surfaced below the H1, tailored to the agreement's use case */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 'var(--ink-spacing-200)', flexWrap: 'wrap' }}>
             {(() => {
               const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
+              const secondary = 'var(--ink-font-color-secondary)';
+
+              // --- Facts extracted from the agreement ---
               const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
               const docCount = agreement.documentsCount ?? 1;
               const termMonths = (() => { const m = /(\d+)\s*month/i.exec(agreement.termLength ?? ''); return m ? parseInt(m[1], 10) : null; })();
-              const expiryLabel = termMonths
-                ? (termMonths % 12 === 0
-                    ? (termMonths / 12 === 1 ? 'Expires in a year' : `Expires in ${termMonths / 12} years`)
-                    : `Expires in ${termMonths} months`)
-                : null;
+              const isOneTime = /one-?time/i.test(agreement.termLength ?? '');
               const dealValue = agreement.dealValue && agreement.dealValue !== '—' ? agreement.dealValue : null;
+              const closeDate = agreement.closeDate && agreement.closeDate !== '—' ? agreement.closeDate : null;
+
+              // --- Classify the use case from the agreement type ---
+              const rawType = (agreement.agreementType ?? '').toLowerCase();
+              const useCase: 'nda' | 'renewal' | 'services' | 'procurement' | 'sales' | 'generic' =
+                /nda|non-?disclosure|confidential/.test(rawType) ? 'nda' :
+                /renewal/.test(rawType) ? 'renewal' :
+                /statement of work|\bsow\b|consulting/.test(rawType) ? 'services' :
+                /supply|purchase order|\brfp\b|procurement|vendor/.test(rawType) ? 'procurement' :
+                /license|saas|subscription|partnership|enterprise|master|msa/.test(rawType) ? 'sales' :
+                'generic';
+
+              // Contextual noun for the monetary figure.
+              const valueNoun =
+                useCase === 'services' ? 'project value' :
+                useCase === 'renewal' ? 'renewal value' :
+                useCase === 'procurement' ? (/purchase order/.test(rawType) ? 'order value' : 'contract value') :
+                'total value';
+
+              // "Expires"/"Renews" phrasing for the term horizon.
+              const horizonVerb = useCase === 'renewal' ? 'Renews' : 'Expires';
+              const horizonLabel = termMonths
+                ? (termMonths % 12 === 0
+                    ? (termMonths / 12 === 1 ? `${horizonVerb} in a year` : `${horizonVerb} in ${termMonths / 12} years`)
+                    : `${horizonVerb} in ${termMonths} months`)
+                : null;
+
+              // --- Reusable item builders ---
+              const text = (key: string, icon: IconName, label: React.ReactNode, color = secondary): React.ReactNode => (
+                <span key={key} style={itemStyle}>
+                  <Icon name={icon} size={18} color={color} />
+                  {label}
+                </span>
+              );
+              const valueItem = dealValue ? text('value', 'currency-dollar', <><strong style={{ fontWeight: 600 }}>{dealValue}</strong>&nbsp;{valueNoun}</>, 'var(--ink-font-color-default)') : null;
+              const docItem = text('docs', 'document', `${docCount} Document${docCount === 1 ? '' : 's'}`);
+              const termItem = termMonths ? text('term', 'calendar', `${termMonths} month term`) : (isOneTime ? text('term', 'calendar', 'One-time') : null);
+              const horizonItem = horizonLabel ? text('horizon', 'refresh', horizonLabel) : null;
+              const closeItem = closeDate ? text('close', 'clock', `Closes ${closeDate}`) : null;
+
+              // --- Compose the most relevant items per use case (max 4 after party) ---
+              let extras: (React.ReactNode | null)[];
+              switch (useCase) {
+                case 'nda':
+                  // Confidentiality-focused: no monetary value on an NDA.
+                  extras = [text('confidential', 'shield', 'Confidential'), docItem, termItem, horizonItem];
+                  break;
+                case 'sales':
+                  extras = [valueItem, termItem, horizonItem, docItem];
+                  break;
+                case 'procurement':
+                  extras = [valueItem, termItem, horizonItem, docItem];
+                  break;
+                case 'services':
+                  extras = [valueItem, termItem, closeItem, docItem];
+                  break;
+                case 'renewal':
+                  extras = [valueItem, horizonItem, termItem, docItem];
+                  break;
+                default:
+                  extras = [valueItem, docItem, horizonItem, termItem];
+              }
+              const visibleExtras = extras.filter(Boolean).slice(0, 4);
+
               return (
                 <>
                   <StatusLight
@@ -7220,28 +7283,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       {partyName}
                     </button>
                   )}
-                  <span style={itemStyle}>
-                    <Icon name="document" size={18} color="var(--ink-font-color-secondary)" />
-                    {docCount} Document{docCount === 1 ? '' : 's'}
-                  </span>
-                  {expiryLabel && (
-                    <span style={itemStyle}>
-                      <Icon name="refresh" size={18} color="var(--ink-font-color-secondary)" />
-                      {expiryLabel}
-                    </span>
-                  )}
-                  {termMonths && (
-                    <span style={itemStyle}>
-                      <Icon name="calendar" size={18} color="var(--ink-font-color-secondary)" />
-                      {termMonths} month term
-                    </span>
-                  )}
-                  {!termMonths && dealValue && (
-                    <span style={itemStyle}>
-                      <Icon name="document" size={18} color="var(--ink-font-color-secondary)" />
-                      {dealValue}
-                    </span>
-                  )}
+                  {visibleExtras}
                 </>
               );
             })()}
