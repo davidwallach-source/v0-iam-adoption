@@ -6875,11 +6875,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           {/* Navy background spans the full panel width; doc preview sits 16px from the top */}
           <div style={{ height: 238, background: '#130032', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16 }}>
             {/* No bottom padding: the page is anchored to the top so it's cut off at the bottom */}
-            <div style={{ width: '100%', maxWidth: 288, background: 'white', padding: '28px 26px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22 }}>
-                <span style={{ width: 22, height: 22, borderRadius: 5, background: 'var(--ink-cobalt-80)', display: 'inline-block', flexShrink: 0 }} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-font-color-default)' }}>Document</span>
-              </div>
+            <div style={{ width: '100%', maxWidth: 288, background: 'white', padding: '32px 26px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-font-color-default)', marginBottom: 12 }}>{currentDoc}</div>
               {[100, 96, 92, 98, 88, 94, 70, 90, 84, 96, 78].map((w, i) => (
                 <div key={i} style={{ height: 5, width: `${w}%`, background: 'var(--ink-border-subtle)', borderRadius: 2, marginBottom: 8 }} />
@@ -6921,7 +6917,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
 
         {/* Recipients timeline */}
         <div style={{ padding: '20px' }}>
-          <div style={{ fontSize: 16, fontWeight: 600, color: '#5A4D70', marginBottom: 20 }}>
+          <div style={{ fontSize: 16, fontWeight: 500, color: '#5A4D70', marginBottom: 20 }}>
             Recipients ({completeCount} of {signable.length} complete)
           </div>
           <div>
@@ -6950,7 +6946,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                       </span>
                     ) : (
                       <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--ink-border-emphasis, #C4C0CE)' }} />
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#D6D2DE' }} />
                       </span>
                     )}
                   </div>
