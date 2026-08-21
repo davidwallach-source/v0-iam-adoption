@@ -3417,7 +3417,7 @@ function AdminPage() {
   );
 }
 
-/* ═══════════════════════��������═══════════════
+/* ═══════════════════════���������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
@@ -6662,7 +6662,7 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
   );
 }
 
-// ─── Envelope detail panel ──────────────────────────────────────────────────
+// ──��� Envelope detail panel ──────────────────────────────────────────────────
 // An "envelope" is created when one or more documents are sent for signature.
 // Clicking one inside an agreement space slides this panel in from the right.
 type EnvelopeRecipientStatus = 'signed' | 'needs-sign' | 'needs-view' | 'receives-copy';
@@ -9417,7 +9417,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     navItems: [
       { id: 'home',       label: 'Home',        active: activeTab === 'home',       onClick: () => handleTabClick('home') },
       { id: 'agreements', label: 'Agreements',   active: activeTab === 'agreements', onClick: () => handleTabClick('agreements') },
-      { id: 'templates',  label: 'Templates',    active: false, onClick: () => handleUnavailableTabClick('templates') },
+      { id: 'templates',  label: 'Templates',    active: activeTab === 'templates', onClick: () => handleTabClick('templates') },
       { id: 'insights',   label: 'Insights',     active: false, onClick: () => handleUnavailableTabClick('insights') },
       { id: 'admin',      label: 'Admin',        active: false, onClick: () => handleUnavailableTabClick('admin') },
     ],
@@ -9468,11 +9468,14 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     sections: [
       {
         id: 'envelope-templates',
+        headerLabel: true,
+        title: 'Envelope Templates',
+        icon: 'layout-grid' as const,
         items: [
-          { id: 'envelope-templates-header', label: 'Envelope Templates', icon: 'templates' as const, onClick: () => setTemplatesSidebarView('my-templates') },
-          { id: 'my-templates', label: 'My Templates', nested: true, onClick: () => setTemplatesSidebarView('my-templates') },
-          { id: 'shared-with-me', label: 'Shared with Me', nested: true, onClick: () => setTemplatesSidebarView('shared-with-me') },
-          { id: 'favorites', label: 'Favorites', nested: true, onClick: () => setTemplatesSidebarView('favorites') },
+          { id: 'my-templates', label: 'My Templates', icon: 'person' as const, onClick: () => setTemplatesSidebarView('my-templates') },
+          { id: 'shared-with-me', label: 'Shared with Me', icon: 'people' as const, onClick: () => setTemplatesSidebarView('shared-with-me') },
+          { id: 'favorites', label: 'Favorites', icon: 'star' as const, onClick: () => setTemplatesSidebarView('favorites') },
+          { id: 'show-more', label: 'Show More', nested: true, onClick: () => setTemplatesSidebarView('all-templates') },
         ],
       },
       {
@@ -9485,13 +9488,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       },
       {
         id: 'web-forms',
+        headerLabel: true,
+        title: 'Web Forms',
+        icon: 'layout-grid' as const,
         hasDivider: true,
         items: [
-          { id: 'web-forms-header', label: 'Web Forms', icon: 'globe-language' as const },
-          { id: 'my-web-forms', label: 'My Web Forms', nested: true },
-          { id: 'shared-web-forms', label: 'Shared with Me', nested: true },
-          { id: 'all-web-forms', label: 'All Web Forms', nested: true, onClick: () => setTemplatesSidebarView('all-templates') },
-          { id: 'template-gallery', label: 'Template Gallery', nested: true, badge: 'New' },
+          { id: 'shared-web-forms', label: 'Shared with Me', icon: 'people' as const },
+          { id: 'all-web-forms', label: 'All Web Forms', icon: 'globe-language' as const, onClick: () => setTemplatesSidebarView('all-templates') },
         ],
       },
     ],
@@ -9886,47 +9889,47 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     overview: 'Overview', dashboards: 'Dashboards', reports: 'Reports',
   };
 
-  /* ��─ Templates content ── */
+  /* ── Templates content — "My Templates" empty state ── */
   const templatesContent = (
-    <AgreementTableView
-      pageHeader={
-        <PageHeader
-          title={TEMPLATE_VIEW_LABELS[templatesSidebarView]}
-          actions={
-            <>
-              <Button kind="secondary" startElement={<Icon name="upload" size={16} />}>Upload</Button>
-              <Button kind="secondary">New Template</Button>
-            </>
-          }
+    <div style={{ padding: 'var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+      <Heading level={1} style={{ margin: 0, fontWeight: 400 }}>
+        {TEMPLATE_VIEW_LABELS[templatesSidebarView]}
+      </Heading>
+
+      {/* Filter row */}
+      <Inline gap="small" align="center" style={{ marginTop: 'var(--ink-spacing-250)', flexWrap: 'wrap' }}>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder={`Search ${TEMPLATE_VIEW_LABELS[templatesSidebarView]}`}
+          style={{ width: 300 }}
         />
-      }
-      filterBar={
-        <FilterBar
-          search={{
-            value: search,
-            onChange: setSearch,
-            placeholder: 'Search templates...',
-          }}
-          filters={
-            <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
-              <Button kind="secondary" size="small" menuTrigger>Owner</Button>
-              <Button kind="secondary" size="small" menuTrigger>Shared</Button>
-              <Button kind="secondary" size="small" startElement={<Icon name="filter" size={14} />}>All Filters</Button>
-            </Inline>
-          }
-        />
-      }
-    >
-      <DataTable
-        columns={templateColumns}
-        data={filteredTemplates}
-        getRowKey={(row) => row.id}
-        stickyHeader
-        showColumnControl
-        emptyMessage="No templates found"
-        pagination={{ page: 1, pageSize: 25, totalItems: filteredTemplates.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }}
-      />
-    </AgreementTableView>
+        <Button kind="secondary" menuTrigger>Date</Button>
+        <Button kind="secondary" menuTrigger>Advanced search</Button>
+        <Button kind="secondary" onClick={() => setSearch('')} style={{ marginLeft: 'var(--ink-spacing-150)' }}>Clear</Button>
+      </Inline>
+
+      {/* Empty state */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--ink-spacing-500)', padding: 'var(--ink-spacing-600) var(--ink-spacing-300)', flexWrap: 'wrap' }}>
+        <img src="/illustration-templates-empty.svg" alt="" width={300} height={286} style={{ flexShrink: 0 }} />
+        <div style={{ maxWidth: 400 }}>
+          <Heading level={2} style={{ margin: 0, fontWeight: 400 }}>Resending the same envelopes?</Heading>
+          <Text size="lg" style={{ display: 'block', marginTop: 'var(--ink-spacing-150)', color: 'var(--ink-font-secondary)' }}>
+            Save documents, placeholder recipients and fields as a template so you can save time.
+          </Text>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--ink-border-subtle)', paddingTop: 'var(--ink-spacing-200)' }}>
+        <Button kind="secondary" menuTrigger>25 / Page</Button>
+        <Inline gap="small" align="center">
+          <Text size="sm" weight="semibold">Page 1</Text>
+          <IconButton icon="chevron-left" variant="tertiary" size="small" aria-label="Previous page" />
+          <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="Next page" />
+        </Inline>
+      </div>
+    </div>
   );
 
   /* ── Insights content ── */
