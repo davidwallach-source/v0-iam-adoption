@@ -5396,7 +5396,7 @@ interface WorkspaceViewProps {
   justSentEnvelope?: boolean;
 }
 
-/* ═══════════════════════════════════════
+/* ���══════════════════════════════════════
    PrepareScreen Component (Signature Request Flow)
    ═══════════════════════════════════════ */
 
@@ -6835,9 +6835,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
   const phraseFor = (r: EnvelopeRecipient) => {
     switch (r.status) {
       case 'signed': return `${r.name} signed`;
-      case 'needs-view': return `${r.name} needs to view`;
+      case 'needs-view': return `Waiting on ${r.name} to view`;
       case 'receives-copy': return 'You receive a finished copy';
-      default: return `${r.name} needs to sign`;
+      default: return `Waiting on ${r.name} to sign`;
     }
   };
 
@@ -10390,7 +10390,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             dealValue: '—',
             agreementType: 'Master Services Agreement',
             termLength: '���',
-            closeDate: '—',
+            closeDate: '���',
             date: new Date().toLocaleDateString('en-GB'),
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
             action: 'View',
