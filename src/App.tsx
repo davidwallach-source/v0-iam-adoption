@@ -6662,7 +6662,7 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
   );
 }
 
-// ──��� Envelope detail panel ──────────────────────────────────────────────────
+// ─������ Envelope detail panel ──────────────────────────────────────────────────
 // An "envelope" is created when one or more documents are sent for signature.
 // Clicking one inside an agreement space slides this panel in from the right.
 type EnvelopeRecipientStatus = 'signed' | 'needs-sign' | 'needs-view' | 'receives-copy';
@@ -8774,7 +8774,7 @@ function AgreementDetailView({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* Row 2: Document controls bar — full width */}
+      {/* Row 2: Document controls bar �� full width */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         gap: 'var(--ink-spacing-200)', padding: 'var(--ink-spacing-50) var(--ink-spacing-100)',
@@ -9392,6 +9392,23 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     }
   }, []);
 
+  // Anchor the "not available in the prototype" callout beneath any clicked
+  // element (used for the Templates page's CTAs).
+  const handleUnavailableElementClick = useCallback((e: React.MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setUnavailableCallout({ left: rect.left + rect.width / 2, top: rect.bottom });
+  }, []);
+
+  // Anchor the callout beneath a LocalNav item (which exposes its id as
+  // data-item-id but does not pass a click event) for the Templates left rail.
+  const handleUnavailableSidebarClick = useCallback((itemId: string) => {
+    const el = document.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setUnavailableCallout({ left: rect.left + rect.width / 2, top: rect.bottom });
+    }
+  }, []);
+
   // Dismiss the callout on any outside click or on Escape.
   useEffect(() => {
     if (!unavailableCallout) return;
@@ -9472,18 +9489,18 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         title: 'Envelope Templates',
         icon: 'layout-grid' as const,
         items: [
-          { id: 'my-templates', label: 'My Templates', icon: 'person' as const, onClick: () => setTemplatesSidebarView('my-templates') },
-          { id: 'shared-with-me', label: 'Shared with Me', icon: 'people' as const, onClick: () => setTemplatesSidebarView('shared-with-me') },
-          { id: 'favorites', label: 'Favorites', icon: 'star' as const, onClick: () => setTemplatesSidebarView('favorites') },
-          { id: 'show-more', label: 'Show More', nested: true, onClick: () => setTemplatesSidebarView('all-templates') },
+          { id: 'my-templates', label: 'My Templates', icon: 'person' as const, onClick: () => handleUnavailableSidebarClick('my-templates') },
+          { id: 'shared-with-me', label: 'Shared with Me', icon: 'people' as const, onClick: () => handleUnavailableSidebarClick('shared-with-me') },
+          { id: 'favorites', label: 'Favorites', icon: 'star' as const, onClick: () => handleUnavailableSidebarClick('favorites') },
+          { id: 'show-more', label: 'Show More', nested: true, onClick: () => handleUnavailableSidebarClick('show-more') },
         ],
       },
       {
         id: 'other-templates',
         hasDivider: true,
         items: [
-          { id: 'document-templates', label: 'Document Templates', icon: 'document' as const, badge: 'New' },
-          { id: 'workflow-templates', label: 'Workflow Templates', icon: 'workflow' as const, badge: 'New' },
+          { id: 'document-templates', label: 'Document Templates', icon: 'document' as const, badge: 'New', onClick: () => handleUnavailableSidebarClick('document-templates') },
+          { id: 'workflow-templates', label: 'Workflow Templates', icon: 'workflow' as const, badge: 'New', onClick: () => handleUnavailableSidebarClick('workflow-templates') },
         ],
       },
       {
@@ -9493,8 +9510,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         icon: 'layout-grid' as const,
         hasDivider: true,
         items: [
-          { id: 'shared-web-forms', label: 'Shared with Me', icon: 'people' as const },
-          { id: 'all-web-forms', label: 'All Web Forms', icon: 'globe-language' as const, onClick: () => setTemplatesSidebarView('all-templates') },
+          { id: 'shared-web-forms', label: 'Shared with Me', icon: 'people' as const, onClick: () => handleUnavailableSidebarClick('shared-web-forms') },
+          { id: 'all-web-forms', label: 'All Web Forms', icon: 'globe-language' as const, onClick: () => handleUnavailableSidebarClick('all-web-forms') },
         ],
       },
     ],
@@ -9898,15 +9915,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
       {/* Filter row */}
       <Inline gap="small" align="center" style={{ marginTop: 'var(--ink-spacing-250)', flexWrap: 'wrap' }}>
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder={`Search ${TEMPLATE_VIEW_LABELS[templatesSidebarView]}`}
-          style={{ width: 300 }}
-        />
-        <Button kind="secondary" menuTrigger>Date</Button>
-        <Button kind="secondary" menuTrigger>Advanced search</Button>
-        <Button kind="secondary" onClick={() => setSearch('')} style={{ marginLeft: 'var(--ink-spacing-150)' }}>Clear</Button>
+        <div onClick={handleUnavailableElementClick} style={{ display: 'inline-flex' }}>
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder={`Search ${TEMPLATE_VIEW_LABELS[templatesSidebarView]}`}
+            style={{ width: 300, pointerEvents: 'none' }}
+          />
+        </div>
+        <Button kind="secondary" menuTrigger onClick={handleUnavailableElementClick}>Date</Button>
+        <Button kind="secondary" menuTrigger onClick={handleUnavailableElementClick}>Advanced search</Button>
+        <Button kind="secondary" onClick={handleUnavailableElementClick} style={{ marginLeft: 'var(--ink-spacing-150)' }}>Clear</Button>
       </Inline>
 
       {/* Empty state */}
@@ -9922,11 +9941,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
       {/* Pagination */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--ink-border-subtle)', paddingTop: 'var(--ink-spacing-200)' }}>
-        <Button kind="secondary" menuTrigger>25 / Page</Button>
+        <Button kind="secondary" menuTrigger onClick={handleUnavailableElementClick}>25 / Page</Button>
         <Inline gap="small" align="center">
           <Text size="sm" weight="semibold">Page 1</Text>
-          <IconButton icon="chevron-left" variant="tertiary" size="small" aria-label="Previous page" />
-          <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="Next page" />
+          <IconButton icon="chevron-left" variant="tertiary" size="small" aria-label="Previous page" onClick={handleUnavailableElementClick} />
+          <IconButton icon="chevron-right" variant="tertiary" size="small" aria-label="Next page" onClick={handleUnavailableElementClick} />
         </Inline>
       </div>
     </div>

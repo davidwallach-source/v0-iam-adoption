@@ -282,6 +282,7 @@ export const LocalNav: React.FC<LocalNavProps> = ({
                   // Collapsed view: icon only with tooltip
                   <Tooltip content={item.label} side="right">
                     <button
+                      data-item-id={item.id}
                       className={`${styles.itemCollapsed} ${isItemActive ? styles.active : ''}`}
                       onClick={() => handleItemClick(item)}
                       aria-label={item.label}
@@ -297,6 +298,7 @@ export const LocalNav: React.FC<LocalNavProps> = ({
                     <div
                       role="button"
                       tabIndex={0}
+                      data-item-id={item.id}
                       className={`${styles.item} ${isItemActive ? styles.active : ''} ${
                         item.nested ? styles.nested : ''
                       } ${styles.hasMenu} ${item.icon ? styles.hasIcon : ''}`}
@@ -330,6 +332,7 @@ export const LocalNav: React.FC<LocalNavProps> = ({
                     </div>
                   ) : (
                     <button
+                      data-item-id={item.id}
                       className={`${styles.item} ${isItemActive ? styles.active : ''} ${
                         item.nested ? styles.nested : ''
                       } ${item.icon ? styles.hasIcon : ''}`}
