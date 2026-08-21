@@ -6850,24 +6850,24 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         aria-label={`${envelope.name} envelope details`}
         style={{
           position: 'fixed',
-          top: 0,
-          right: 0,
-          height: '100vh',
-          width: 424,
+          bottom: 0,
+          left: 0,
+          height: '90vh',
+          width: 360,
           background: 'white',
-          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
           boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)',
           zIndex: 1080,
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
-          transform: entered ? 'translateX(0)' : 'translateX(100%)',
+          transform: entered ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
           fontFamily: 'var(--ink-font-family)',
         }}
       >
-        {/* Header — envelope name + close X pinned upper right — fixed 56px tall */}
-        <div style={{ height: 56, boxSizing: 'border-box', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
+        {/* Header — envelope name + close X pinned upper right — fixed 48px tall */}
+        <div style={{ height: 48, boxSizing: 'border-box', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
           <h2 style={{ margin: 0, flex: 1, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink-font-color-default)' }}>
             {envelope.name}
           </h2>
