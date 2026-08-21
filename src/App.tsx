@@ -7872,20 +7872,24 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           const doc = item as DealDocument;
                           const isSelected = selectedDocs.has(doc.id);
                           const isOpen = openEnvelopeRowId === doc.id;
+                          // The envelope panel is only meaningful for envelopes — documents
+                          // that have been sent for signature (i.e. have signatureProgress).
+                          // Documents still being worked on should not open the panel.
+                          const isEnvelopeDoc = !!doc.signatureProgress;
                           const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
                           return (
                             <tr
                               key={doc.id}
-                              onClick={() => openEnvelopePanel({
+                              onClick={isEnvelopeDoc ? () => openEnvelopePanel({
                                 envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
                                 documentNames: [doc.name],
                                 signatureProgress: doc.signatureProgress,
                                 dateModified: doc.lastModified || doc.dateModified,
                                 rowId: doc.id,
-                              })}
-                              onMouseEnter={(e) => { if (!isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
+                              }) : undefined}
+                              onMouseEnter={(e) => { if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.background = restingBg; }}
-                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: 'pointer' }}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: isEnvelopeDoc ? 'pointer' : 'default' }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
