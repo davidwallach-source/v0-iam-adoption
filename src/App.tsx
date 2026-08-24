@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����════════════════════════════
+/* ═��══════���═����═══════���════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -6311,6 +6311,19 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   const [open, setOpen] = useState(false);
   const [docSubOpen, setDocSubOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const closeSubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Open the Document submenu, cancelling any pending close so moving the
+  // cursor diagonally across the gap toward the submenu doesn't dismiss it.
+  const openDocSub = () => {
+    if (closeSubTimer.current) clearTimeout(closeSubTimer.current);
+    setDocSubOpen(true);
+  };
+  // Close after a short delay, giving the cursor time to bridge the gap.
+  const scheduleCloseDocSub = () => {
+    if (closeSubTimer.current) clearTimeout(closeSubTimer.current);
+    closeSubTimer.current = setTimeout(() => setDocSubOpen(false), 220);
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -6323,6 +6336,9 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
     if (open) document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
+
+  // Clear any pending submenu timer on unmount.
+  useEffect(() => () => { if (closeSubTimer.current) clearTimeout(closeSubTimer.current); }, []);
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -6344,8 +6360,8 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           {/* Document — with an overflow caret leading to Upload / Use a Template */}
           <div
             style={{ position: 'relative' }}
-            onMouseEnter={() => setDocSubOpen(true)}
-            onMouseLeave={() => setDocSubOpen(false)}
+            onMouseEnter={openDocSub}
+            onMouseLeave={scheduleCloseDocSub}
           >
             <MenuRow
               icon={
@@ -6358,7 +6374,10 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               onClick={() => { setOpen(false); setDocSubOpen(false); onDocument?.(); }}
             />
             {docSubOpen && (
-              <div style={{
+              <div
+                onMouseEnter={openDocSub}
+                onMouseLeave={scheduleCloseDocSub}
+                style={{
                 position: 'absolute',
                 top: -4,
                 right: 'calc(100% + 6px)',
@@ -6370,6 +6389,9 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 minWidth: 200,
                 padding: 4,
               }}>
+                {/* Invisible bridge covering the gap between the row and the
+                    submenu so the cursor can travel across without closing it. */}
+                <div style={{ position: 'absolute', top: 0, bottom: 0, right: -8, width: 8 }} aria-hidden="true" />
                 <MenuRow
                   icon={
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
