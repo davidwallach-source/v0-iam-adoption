@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�������════════════════════
+/* ═��══════���═����═══════���������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������������══════════════════════���════════ */
+   ═══════�������������������������══════════════════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -7017,6 +7017,22 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // away from this space and back (which unmounts this component).
   const [pinnedDocNames, setPinnedDocNames] = useState<string[]>(persistedPinnedDocNames ?? []);
   const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(persistedPinnedTaskId ?? null);
+  // The "Send for Signature" CTA in the document preview header (opened via
+  // onPreviewDocument) sends through the root-level Prepare flow, which stays
+  // outside this component and reports back by growing injectedSignatureDocs.
+  // Detect newly-added names here so that path pins + lands on Overview too.
+  const prevInjectedSigNamesRef = useRef<string[]>((injectedSignatureDocs ?? []).map(d => d.name));
+  useEffect(() => {
+    const names = (injectedSignatureDocs ?? []).map(d => d.name);
+    const prevNames = prevInjectedSigNamesRef.current;
+    const newlyAdded = names.filter(n => !prevNames.includes(n));
+    prevInjectedSigNamesRef.current = names;
+    if (newlyAdded.length > 0) {
+      setPinnedDocNames(newlyAdded);
+      onPinDocNames?.(newlyAdded);
+      setActiveTab('overview');
+    }
+  }, [injectedSignatureDocs]);
   const [approvalModalDoc, setApprovalModalDoc] = useState<string | null>(null);
   const [sentActivity, setSentActivity] = useState<{ id: string; icon: IconName; user: string; action: string; time: string }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
@@ -8946,7 +8962,7 @@ function AgreementDetailView({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {/* Document viewer — RIGHT side */}
+        {/* Document viewer ��� RIGHT side */}
         <div style={{
           background: 'var(--ink-bg-color-subtle)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
