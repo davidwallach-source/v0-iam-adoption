@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���════════════════════
+/* ═��══════���═����═══════�����════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������������═══════════════════════════════ */
+   ═══════�������������������������══════════════════════���════════ */
 
 function AdminPage() {
   return (
@@ -7001,6 +7001,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [preparePreselectedDocs, setPreparePreselectedDocs] = useState<string[]>([]);
   const [sentEnvelopes, setSentEnvelopes] = useState<{ envelopeId: string; documents: string[]; recipients: string[]; sentAt: string }[]>([]);
   const [sentTasks, setSentTasks] = useState<DealTask[]>([]);
+  // After a send, pin the just-sent item to the top of its list: document
+  // names for a signature send (Overview tab), a task id for an upload send
+  // (Tasks tab). This is display ordering only and doesn't affect the data.
+  const [pinnedDocNames, setPinnedDocNames] = useState<string[]>([]);
+  const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(null);
   const [approvalModalDoc, setApprovalModalDoc] = useState<string | null>(null);
   const [sentActivity, setSentActivity] = useState<{ id: string; icon: IconName; user: string; action: string; time: string }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
@@ -7094,6 +7099,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     setSentTasks(prev => [...prev, newTask]);
     // Clear selection after sending
     setSelectedDocs(new Set());
+    // Land on the Overview tab with the just-sent document(s) pinned first.
+    setPinnedDocNames(documentNames);
+    setActiveTab('overview');
   };
 
   // Determine if this is an NDA draft (matched by kind so multiple NDAs, each
@@ -7302,6 +7310,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     return [...injected, ...base];
   }, [workspaceData.tasks, sentTasks, isNDADraft, ndaSentForSignature, isUploadedDocAgreement, uploadedDocAgreement, injectedTasks, isPermissionSlipSpace, savedNDAData, ndaRecipientName]);
 
+  // Pin the just-sent upload task to the top of the Tasks list.
+  const orderedTasks = useMemo(() => {
+    if (!pinnedTaskId) return currentTasks;
+    const idx = currentTasks.findIndex(t => t.id === pinnedTaskId);
+    if (idx < 0) return currentTasks;
+    return [currentTasks[idx], ...currentTasks.slice(0, idx), ...currentTasks.slice(idx + 1)];
+  }, [currentTasks, pinnedTaskId]);
+
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
   const processedDocuments = useMemo(() => {
@@ -7355,8 +7371,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       });
     });
     
-    return [...standalone, ...envelopeRows];
-  }, [currentDocuments, sentEnvelopes]);
+    const combined = [...standalone, ...envelopeRows];
+    // Pin the just-sent document(s) to the top of the Overview list.
+    if (pinnedDocNames.length === 0) return combined;
+    const rowNames = (item: DealDocument | EnvelopeRow): string[] =>
+      ('isEnvelope' in item && item.isEnvelope)
+        ? (item.documentNames || item.documents.map(d => d.name))
+        : [(item as DealDocument).name];
+    const isPinned = (item: DealDocument | EnvelopeRow) => rowNames(item).some(n => pinnedDocNames.includes(n));
+    return [...combined.filter(isPinned), ...combined.filter(item => !isPinned(item))];
+  }, [currentDocuments, sentEnvelopes, pinnedDocNames]);
 
   // When landing in a space (e.g. arriving from the Agreements page) that holds
   // exactly ONE envelope, open the envelope panel automatically. An "envelope"
@@ -8202,7 +8226,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   </tr>
                 </thead>
                 <tbody>
-                  {currentTasks.map((task) => (
+                  {orderedTasks.map((task) => (
                     <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
@@ -8338,8 +8362,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             const d = new Date(data.dueDate + 'T00:00:00');
             formattedDueDate = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
           }
+          const uploadTaskId = `upload-request-${Date.now()}`;
           setSentTasks(prev => [...prev, {
-            id: `upload-request-${Date.now()}`,
+            id: uploadTaskId,
             title: data.title,
             type: 'Upload' as const,
             team: '',
@@ -8353,6 +8378,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             { id: `activity-upload-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Sent an upload request${data.title ? ` "${data.title}"` : ''}${assignee ? ` to ${assignee}` : ''}`, time: 'Just now' },
             ...prev,
           ]);
+          // Land on the Tasks tab with the just-sent upload task pinned first.
+          setPinnedTaskId(uploadTaskId);
+          setActiveTab('tasks');
           showToast('Upload request sent out');
         }}
       />
