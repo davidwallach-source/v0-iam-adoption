@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�����════════════════════
+/* ═��══════���═����═══════�������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -5311,6 +5311,15 @@ interface WorkspaceViewProps {
   // True when the workspace is entered immediately after sending an envelope.
   // Suppresses the single-envelope auto-open and fires a success toast instead.
   justSentEnvelope?: boolean;
+  // Document name(s) just sent for signature, persisted in the parent (keyed by
+  // agreement id) so they stay pinned to the top of the Overview documents list
+  // even after navigating away from the workspace and back.
+  persistedPinnedDocNames?: string[];
+  onPinDocNames?: (names: string[]) => void;
+  // Upload task id just sent, persisted the same way so it stays pinned to the
+  // top of the Tasks list.
+  persistedPinnedTaskId?: string | null;
+  onPinTaskId?: (id: string) => void;
 }
 
 /* ���══════════════════════════════════════
@@ -6972,7 +6981,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
   );
 }
 
-function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
@@ -7004,8 +7013,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // After a send, pin the just-sent item to the top of its list: document
   // names for a signature send (Overview tab), a task id for an upload send
   // (Tasks tab). This is display ordering only and doesn't affect the data.
-  const [pinnedDocNames, setPinnedDocNames] = useState<string[]>([]);
-  const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(null);
+  // Seeded from the parent-persisted value so the pin survives navigating
+  // away from this space and back (which unmounts this component).
+  const [pinnedDocNames, setPinnedDocNames] = useState<string[]>(persistedPinnedDocNames ?? []);
+  const [pinnedTaskId, setPinnedTaskId] = useState<string | null>(persistedPinnedTaskId ?? null);
   const [approvalModalDoc, setApprovalModalDoc] = useState<string | null>(null);
   const [sentActivity, setSentActivity] = useState<{ id: string; icon: IconName; user: string; action: string; time: string }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
@@ -7100,7 +7111,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     // Clear selection after sending
     setSelectedDocs(new Set());
     // Land on the Overview tab with the just-sent document(s) pinned first.
+    // Persisted in the parent so the pin survives leaving and re-entering.
     setPinnedDocNames(documentNames);
+    onPinDocNames?.(documentNames);
     setActiveTab('overview');
   };
 
@@ -8379,7 +8392,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             ...prev,
           ]);
           // Land on the Tasks tab with the just-sent upload task pinned first.
+          // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(uploadTaskId);
+          onPinTaskId?.(uploadTaskId);
           setActiveTab('tasks');
           showToast('Upload request sent out');
         }}
@@ -9351,6 +9366,11 @@ export default function App() {
   // Documents sent for signature from within a space, persisted per agreement id
   // so their Pending Signature status survives leaving and re-entering the space.
   const [signedDocsById, setSignedDocsById] = useState<Record<string, { name: string; recipient: string }[]>>({});
+  // Just-sent document names / upload task id to pin to the top of the
+  // Overview / Tasks lists, persisted per agreement id so the ordering
+  // survives leaving and re-entering the space.
+  const [pinnedDocNamesById, setPinnedDocNamesById] = useState<Record<string, string[]>>({});
+  const [pinnedTaskIdById, setPinnedTaskIdById] = useState<Record<string, string>>({});
   const [ndaSentForSignature, setNdaSentForSignature] = useState(false);
   const [ndaRecipientName, setNdaRecipientName] = useState<string>('');
   const [rootPreparePreselectedDocs, setRootPreparePreselectedDocs] = useState<string[]>([]);
@@ -10334,6 +10354,16 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             docs.forEach(d => { if (!merged.some(m => m.name === d.name)) merged.push(d); });
             return { ...prev, [id]: merged };
           });
+        }}
+        persistedPinnedDocNames={pinnedDocNamesById[selectedAgreement.id] ?? []}
+        onPinDocNames={(names) => {
+          const id = selectedAgreement.id;
+          setPinnedDocNamesById(prev => ({ ...prev, [id]: names }));
+        }}
+        persistedPinnedTaskId={pinnedTaskIdById[selectedAgreement.id] ?? null}
+        onPinTaskId={(taskId) => {
+          const id = selectedAgreement.id;
+          setPinnedTaskIdById(prev => ({ ...prev, [id]: taskId }));
         }}
         initialOverlay={selectedAgreement.id === SCENARIO_WORKSPACE_ID ? wsInitialOverlay : null}
         uploadRequestPrefill={{
