@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���������════════════════════
+/* ═��══════���═����═══════�����������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -8429,8 +8429,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           const formattedDueDate = data.dueDate
             ? (() => { const d = new Date(data.dueDate + 'T00:00:00'); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`; })()
             : `${due.getMonth() + 1}/${due.getDate()}/${due.getFullYear().toString().slice(-2)}`;
+          const vendorOnboardingTaskId = `vendor-onboarding-${Date.now()}`;
           setSentTasks(prev => [...prev, {
-            id: `vendor-onboarding-${Date.now()}`,
+            id: vendorOnboardingTaskId,
             title: `New Vendor Onboarding — ${data.vendorName}`,
             type: 'Other' as const,
             team: '',
@@ -8444,6 +8445,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up onboarding for ${data.vendorName}`, time: 'Just now' },
             ...prev,
           ]);
+          // Land on the Tasks tab with the just-created onboarding task pinned first.
+          // Persisted in the parent so the pin survives leaving and re-entering.
+          setPinnedTaskId(vendorOnboardingTaskId);
+          onPinTaskId?.(vendorOnboardingTaskId);
+          setActiveTab('tasks');
           showToast('Vendor onboarding workflow created');
         }}
       />
@@ -9460,7 +9466,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ���� Sync hash ↔ state ── */
+  /* ������ Sync hash ↔ state ── */
   useEffect(() => {
     const onHashChange = () => {
       setActiveTab(getTabFromHash());
