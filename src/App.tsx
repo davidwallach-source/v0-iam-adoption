@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�����������════════════════════
+/* ═��══════���═����═══════�������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -9142,11 +9142,14 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
    ───────────────────────────��──────────────────���─────────────────────────── */
-export type PrototypeVersion = 'standard' | 'simple';
+export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
   { id: 'standard', label: 'Standard', description: 'The full-featured experience' },
   { id: 'simple', label: 'Simple Use Case', description: 'Streamlined for simple use cases' },
+  // Duplicates the Standard experience as-is for now; paywall entry points
+  // (contextual plan upgrades) will branch off this version in future work.
+  { id: 'paywalls', label: 'Paywalls', description: 'Contextual plan upgrades' },
 ];
 
 interface PrototypeVersionContextValue {
