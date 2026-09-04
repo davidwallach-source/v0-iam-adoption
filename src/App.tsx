@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�������������════════════════════
+/* ═��══════���═����═══════���������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -6317,6 +6317,8 @@ interface AddMenuProps {
 }
 
 function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate }: AddMenuProps) {
+  const { version } = usePrototypeVersion();
+  const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
   const [docSubOpen, setDocSubOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -6465,28 +6467,34 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               </svg>
             }
             label="Identity verification"
+            crown={isPaywalls}
             onClick={() => { setOpen(false); }}
           />
 
           {/* Divider */}
           <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
 
+          {/* Wire Transfer Request is hidden in the Paywalls version. */}
+          {!isPaywalls && (
+            <MenuRow
+              icon={
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                </svg>
+              }
+              label="Wire Transfer Request"
+              onClick={() => { setOpen(false); onAddWireTransfer?.(); }}
+            />
+          )}
+          {/* Labeled "Workflows" and feature-gated in the Paywalls version. */}
           <MenuRow
             icon={
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
               </svg>
             }
-            label="Wire Transfer Request"
-            onClick={() => { setOpen(false); onAddWireTransfer?.(); }}
-          />
-          <MenuRow
-            icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-              </svg>
-            }
-            label="New Vendor Onboarding"
+            label={isPaywalls ? "Workflows" : "New Vendor Onboarding"}
+            crown={isPaywalls}
             onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
           />
         </div>
