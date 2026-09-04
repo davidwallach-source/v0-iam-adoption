@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�������������������════════════════════
+/* ═��══════���═����═══════���������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -6466,7 +6466,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
               <MenuRow
                 label="Identity Verification"
-                description="IDs securely confirmed and stored"
+                description="Securely confirm and store IDs"
                 crown
                 onClick={() => { setOpen(false); }}
               />
