@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���������������════════════════════
+/* ═��══════���═����═══════�����������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������������══════════════════���═══���════════ */
+   ═══════�������������������������══════════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -6450,53 +6450,97 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           {/* Divider */}
           <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
 
-          {/* Flattened task items (formerly "Other Tasks" submenu) */}
-          <MenuRow
-            icon={
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
-              </svg>
-            }
-            label="Upload request"
-            onClick={() => { setOpen(false); onUploadRequest?.(); }}
-          />
-          <MenuRow
-            icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 6V18H4V6H20ZM21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM13 15C13 13.35 11.65 12 10 12H8C6.35 12 5 13.35 5 15V16H7V15C7 14.45 7.45 14 8 14H10C10.55 14 11 14.45 11 15V16H13V15ZM11 9C11 7.9 10.1 7 9 7C7.9 7 7 7.9 7 9C7 10.1 7.9 11 9 11C10.1 11 11 10.1 11 9ZM19 8H14V10H19V8ZM19 12H14V14H19V12Z" fill="#130032" fillOpacity="0.9"/>
-              </svg>
-            }
-            label="Identity verification"
-            crown={isPaywalls}
-            onClick={() => { setOpen(false); }}
-          />
+          {isPaywalls ? (
+            <>
+              {/* Paywalls version: each gated feature is a two-line row with a
+                  feature-gate crown, separated by dividers. */}
+              <MenuRow
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Upload Request"
+                description="Ask people to securely submit files"
+                crown
+                onClick={() => { setOpen(false); onUploadRequest?.(); }}
+              />
 
-          {/* Divider */}
-          <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+              {/* Divider */}
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
 
-          {/* Wire Transfer Request is hidden in the Paywalls version. */}
-          {!isPaywalls && (
-            <MenuRow
-              icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-                </svg>
-              }
-              label="Wire Transfer Request"
-              onClick={() => { setOpen(false); onAddWireTransfer?.(); }}
-            />
+              <MenuRow
+                icon={
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6V18H4V6H20ZM21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM13 15C13 13.35 11.65 12 10 12H8C6.35 12 5 13.35 5 15V16H7V15C7 14.45 7.45 14 8 14H10C10.55 14 11 14.45 11 15V16H13V15ZM11 9C11 7.9 10.1 7 9 7C7.9 7 7 7.9 7 9C7 10.1 7.9 11 9 11C10.1 11 11 10.1 11 9ZM19 8H14V10H19V8ZM19 12H14V14H19V12Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Identity Verification"
+                description="IDs securely confirmed and stored"
+                crown
+                onClick={() => { setOpen(false); }}
+              />
+
+              {/* Divider */}
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+
+              <MenuRow
+                icon={
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Workflow"
+                description="Automate multi-step processes"
+                crown
+                onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
+              />
+            </>
+          ) : (
+            <>
+              {/* Flattened task items (formerly "Other Tasks" submenu) */}
+              <MenuRow
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Upload request"
+                onClick={() => { setOpen(false); onUploadRequest?.(); }}
+              />
+              <MenuRow
+                icon={
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6V18H4V6H20ZM21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM13 15C13 13.35 11.65 12 10 12H8C6.35 12 5 13.35 5 15V16H7V15C7 14.45 7.45 14 8 14H10C10.55 14 11 14.45 11 15V16H13V15ZM11 9C11 7.9 10.1 7 9 7C7.9 7 7 7.9 7 9C7 10.1 7.9 11 9 11C10.1 11 11 10.1 11 9ZM19 8H14V10H19V8ZM19 12H14V14H19V12Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Identity verification"
+                onClick={() => { setOpen(false); }}
+              />
+
+              {/* Divider */}
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+
+              <MenuRow
+                icon={
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Wire Transfer Request"
+                onClick={() => { setOpen(false); onAddWireTransfer?.(); }}
+              />
+              <MenuRow
+                icon={
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="New Vendor Onboarding"
+                onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
+              />
+            </>
           )}
-          {/* Labeled "Workflows" and feature-gated in the Paywalls version. */}
-          <MenuRow
-            icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-              </svg>
-            }
-            label={isPaywalls ? "Workflows" : "New Vendor Onboarding"}
-            crown={isPaywalls}
-            onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
-          />
         </div>
       )}
     </div>
@@ -6580,9 +6624,10 @@ function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onU
   );
 }
 
-function MenuRow({ icon, label, onClick, chevron, crown }: {
+function MenuRow({ icon, label, description, onClick, chevron, crown }: {
   icon: React.ReactNode;
   label: string;
+  description?: string;
   onClick?: () => void;
   chevron?: boolean;
   crown?: boolean;
@@ -6595,7 +6640,7 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 10,
-        padding: '9px 14px',
+        padding: description ? '11px 14px' : '9px 14px',
         fontSize: 14,
         color: '#130032',
         cursor: 'pointer',
@@ -6608,9 +6653,16 @@ function MenuRow({ icon, label, onClick, chevron, crown }: {
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: description ? 'flex-start' : 'center', gap: 10 }}>
         <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
-        <span>{label}</span>
+        {description ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span>{label}</span>
+            <span style={{ fontSize: 13, color: 'var(--ink-neutral-fade-70, #6B6484)' }}>{description}</span>
+          </div>
+        ) : (
+          <span>{label}</span>
+        )}
       </div>
       {chevron && (
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginLeft: 8, flexShrink: 0 }}>
