@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���������������������════════════════════
+/* ═��══════���═����═══════�����������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -6376,7 +6376,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           >
             <MenuRow
               icon={
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="24" height="24" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M13 2H4V18H16V5L13 2ZM6 16V4H12V6H14V16H6ZM13 10H7V8H13V10ZM13 14H7V12H13V14Z" fill="#130032" fillOpacity="0.9" />
                 </svg>
               }
@@ -6439,7 +6439,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           {/* Form */}
           <MenuRow
             icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 9V15H6V9H18ZM20 7H4V17H20V7ZM19 3H5V5H19V3ZM14 19H5V21H14V19ZM10 11H8V13H10V11ZM13 11H11V13H13V11ZM16 11H14V13H16V11Z" fill="#130032" fillOpacity="0.9"/>
               </svg>
             }
@@ -6486,7 +6486,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
               {/* Flattened task items (formerly "Other Tasks" submenu) */}
               <MenuRow
                 icon={
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="24" height="24" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M13.65 12L11 9.34V18H9V9.34L6.35 12L5 10.65L9.43 6.23C9.59 6.07 9.8 6 10 6C10.2 6 10.41 6.07 10.57 6.23L15 10.65L13.65 12ZM16 2H4V4H16V2Z" fill="#130032" fillOpacity="0.9"/>
                   </svg>
                 }
@@ -6639,7 +6639,7 @@ function MenuRow({ icon, label, description, onClick, chevron, crown }: {
       onClick={onClick}
     >
       <div style={{ display: 'flex', alignItems: description ? 'flex-start' : 'center', gap: 10 }}>
-        {icon && <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>}
+        {icon && <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 24, height: 24 }}>{icon}</span>}
         {description ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span>{label}</span>
