@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�����������������������������════════════════════
+/* ═��══════���═����═══════�������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════��������������������������══���═══════���═══════���═══���════════ */
+   ═══════����������������������������══���═══════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -8761,7 +8761,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   aria-hidden="true"
                   style={{ width: 240, height: 'auto', flexShrink: 0, display: 'block' }}
                 />
-                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)' }}>
+                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)', transform: 'translateY(16px)' }}>
                   <Heading as="h2" size="lg" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
                     Gain Insights
                   </Heading>
