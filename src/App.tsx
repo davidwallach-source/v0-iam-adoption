@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���������������������������════════════════════
+/* ═��══════���═����═══════�����������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������������══���═══════���═══════���═══���════════ */
+   ═══════��������������������������══���═══════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -8765,7 +8765,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   <Heading as="h2" size="lg" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
                     Gain Insights
                   </Heading>
-                  <Text size="md" color="secondary" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)' }}>
+                  <Text size="md" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)', color: '#3d3a4e' }}>
                     Dig into historical contracts with this party to iIdentify opportunities, risks, key data points, and much more.
                   </Text>
                   <Button
