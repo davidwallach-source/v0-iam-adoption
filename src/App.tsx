@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�������������������������════════════════════
+/* ═��══════���═����═══════���������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -8749,24 +8749,24 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 style={{
                   pointerEvents: 'auto',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-end',
                   gap: 'var(--ink-spacing-400)',
-                  padding: '0 var(--ink-spacing-400) var(--ink-spacing-500)',
+                  padding: '0 var(--ink-spacing-400) 0',
                   width: '100%',
                 }}
               >
                 <img
-                  src="/doc-stack.svg"
+                  src="/doc-stack-2.svg"
                   alt=""
                   aria-hidden="true"
-                  style={{ width: 240, height: 'auto', flexShrink: 0 }}
+                  style={{ width: 240, height: 'auto', flexShrink: 0, display: 'block' }}
                 />
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)' }}>
                   <Heading as="h2" size="lg" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
-                    See Into Agreements
+                    Gain Insights
                   </Heading>
                   <Text size="md" color="secondary" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)' }}>
-                    Dig into historical contracts with this party to identify opportunities, risks, gain insights and much more.
+                    Dig into historical contracts with this party to iIdentify opportunities, risks, key data points, and much more.
                   </Text>
                   <Button
                     kind="primary"
