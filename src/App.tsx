@@ -34,6 +34,7 @@ import {
   Drawer,
   Link,
   ProgressBar,
+  Switch,
   SearchInput,
   SegmentedControl,
   Alert,
@@ -2985,7 +2986,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════�������═����═══════�����������������������������������════════════════════
+/* ═��══════���������═����═══════�����������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3043,246 +3044,311 @@ function DocPreview({ hasLogo, hasForm }: { hasLogo?: boolean; hasForm?: boolean
 }
 
 function HomePage({ onUnavailable }: { onUnavailable: (e: React.MouseEvent) => void }) {
-  const getStaggerProps = useStaggerEntrance(6, { baseDelay: 100, staggerInterval: 60, duration: 400, distance: 12 });
+  const getStaggerProps = useStaggerEntrance(7, { baseDelay: 80, staggerInterval: 70, duration: 400, distance: 12 });
 
-  const activity = [
-    { name: 'Complete with Docusign: rhi.pdf, Sample_Service_Agreement.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
-    { name: 'Here is your signed document: Sample_Service_Agreement.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
-    { name: 'Complete with Docusign: rhi.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
-    { name: 'Change Order.docx', time: 'Expiring on 07/31/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
-    { name: 'SOW(2).docx', time: 'Expiring on 06/30/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
-    { name: 'SOW(1).docx', time: 'Expiring on 06/30/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
+  const quickActions: { label: string; primary?: boolean; icon?: IconName }[] = [
+    { label: 'Start', primary: true },
+    { label: 'Send an Envelope' },
+    { label: 'Create a Request' },
+    { label: 'Create Purchase Requisition', icon: 'templates' },
   ];
 
-  const overview = [
-    { label: 'Open requests', value: 7 },
-    { label: 'Waiting for others', value: 0 },
-    { label: 'Expiring soon', value: 0 },
-    { label: 'Completed', value: 0 },
-    { label: 'Upcoming renewals', value: 0 },
+  const catchUp: { icon: IconName; text: string }[] = [
+    { icon: 'spark', text: 'An Agreement Desk request is stalled and needs attention' },
+    { icon: 'refresh', text: 'An agreement will auto-renew soon with no decision made' },
+    { icon: 'clipboard', text: 'Obligations are due this week and need review' },
+    { icon: 'document-pencil', text: 'A supplier reported a data breach or other notable event' },
   ];
 
-  const favoriteTemplates = [
-    { name: 'quick send', lastUsed: 'Last used on 03/13/2026' },
-    { name: 'shared template info', lastUsed: 'Last used on 08/12/2025' },
+  const tasks: { title: string; status: string; kind: 'error' | 'warn' | 'from' }[] = [
+    { title: 'Resolve comment', status: 'Due tomorrow', kind: 'error' },
+    { title: 'Needs to sign', status: 'Assigned 5 days ago', kind: 'warn' },
+    { title: 'Create or upload document', status: 'From: Sam Sender', kind: 'from' },
+    { title: 'Needs to view', status: 'From: Sam Sender', kind: 'from' },
   ];
+  const taskDesc = 'Complete with Docusign: Alex Greene Closing Disclosure Jan 12, 2024';
+
+  const vendorSpend = [
+    { name: 'Datadog', amount: '$410K', pct: 31 },
+    { name: 'Vercel', amount: '$312K', pct: 23 },
+    { name: 'Atlassian', amount: '$265K', pct: 20 },
+    { name: 'Okta', amount: '$180K', pct: 13 },
+  ];
+
+  const obligations = [
+    { name: 'Datadog', count: 4, pct: 30 },
+    { name: 'Vercel', count: 3, pct: 23 },
+    { name: 'Atlassian', count: 2, pct: 15 },
+    { name: 'Okta', count: 3, pct: 23 },
+  ];
+
+  const recent = [
+    { name: 'Q3 Vendor Services Agreement', activity: 'Acme Corp signed on Aug 26 at 2:00pm', status: 'Complete', dot: 'var(--ink-bg-success-emphasis)' },
+    { name: 'Consulting Agreement — Phase 2', activity: 'Meridian Partners opened yesterday at 2:30 PM', status: 'Waiting for others', dot: 'var(--ink-neutral-50)' },
+    { name: 'Master Service Agreement', activity: 'DataFlow Systems started a draft on Aug 23 at 3:10 PM', status: 'Draft', dot: 'var(--ink-neutral-50)' },
+    { name: 'Annual Maintenance Contract', activity: 'Skybridge Ltd viewed on Aug 22 at 11:00 AM', status: 'Expiring Soon', dot: 'var(--ink-bg-warning-emphasis)' },
+  ];
+
+  const recommended: { eyebrow: string; selected?: boolean; icon?: IconName; title: string; desc: string; link: string }[] = [
+    { eyebrow: 'Selected integration', selected: true, title: 'Connect to Salesforce', desc: 'Generate, send, and track agreements directly from Salesforce. Cut manual work and speed up close.', link: 'Connect to Salesforce' },
+    { eyebrow: 'Your account setup actions', icon: 'paint-palette', title: 'Apply your brand', desc: 'Customize your logo, colors, and company details so everything your signers see feels on-brand and builds trust.', link: 'Customize your Branding' },
+    { eyebrow: 'Your account setup actions', icon: 'device-mobile', title: 'Make on-the-go signing easier', desc: 'Let your signers review and sign agreements from anywhere, and speed turnaround times without tying them to a desk.', link: 'Enable Mobile Signing' },
+    { eyebrow: 'Your account setup actions', icon: 'person-plus', title: 'Invite your team', desc: 'Add your coworkers so they can collaborate on documents, share templates, and keep all agreement activity in one place.', link: 'Invite Your Team' },
+  ];
+
+  const cardBase: React.CSSProperties = { border: '1px solid var(--ink-neutral-fade-5)', boxShadow: '0 1px 3px rgba(19,0,50,0.05)' };
+  const iconBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, border: 'none', background: 'none', color: 'var(--ink-font-secondary)', cursor: 'pointer', borderRadius: 6, padding: 0 };
+  const squareBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, border: '1px solid var(--ink-border-subtle)', background: 'var(--ink-white-100)', color: 'var(--ink-font-color-default)', cursor: 'pointer', borderRadius: 8, padding: 0, flexShrink: 0 };
+  const viewAllBtn: React.CSSProperties = { border: '1px solid var(--ink-border-subtle)', background: 'var(--ink-white-100)', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--ink-font-color-default)' };
+  const chip: React.CSSProperties = { padding: '4px 10px', borderRadius: 999, background: 'var(--ink-neutral-fade-5)', fontSize: 12, color: 'var(--ink-font-secondary)', cursor: 'pointer', whiteSpace: 'nowrap' };
+  const sectionTitle: React.CSSProperties = { margin: 0, fontWeight: 500 };
+  const pad = 28;
+
+  const DropdownPill = ({ label }: { label: string }) => (
+    <button onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', fontSize: 13, cursor: 'pointer', color: 'var(--ink-font-color-default)', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+      {label} <Icon name="chevron-down" size={14} />
+    </button>
+  );
+
+  const SalesforceCloud = () => (
+    <svg width="30" height="21" viewBox="0 0 24 16" aria-hidden="true" style={{ display: 'block' }}>
+      <path d="M9.8 3.3a4 4 0 0 1 6.9 1 3.4 3.4 0 0 1 4.3 3.3 3.4 3.4 0 0 1-3.4 3.4H6.1A3.6 3.6 0 0 1 5.6 4a3.6 3.6 0 0 1 4.2-.7z" fill="#00A1E0" />
+    </svg>
+  );
 
   return (
-    <Stack gap="none">
-      {/* Welcome banner */}
-      <div style={{
-        background: 'linear-gradient(174deg, var(--ink-cobalt-100, #4C00FB) 1.48%, var(--ink-cobalt-140, #260559) 97.92%)',
-        color: 'white',
-        padding: '100px var(--ink-spacing-300) 72px',
-        textAlign: 'center',
-      }}>
-        <Heading level={3} style={{ color: 'white', fontWeight: 400, marginBottom: 'var(--ink-spacing-300)' }}>
-          Welcome back, Pat Price
-        </Heading>
-        <Inline gap="small" justify="center">
-          <Button kind="brand" menuTrigger onClick={onUnavailable}>Start</Button>
-          {[
-            { icon: 'send' as const, label: 'Send an Envelope' },
-            { icon: 'ai-spark-filled' as const, label: 'Send with AI' },
-            { icon: 'templates' as const, label: 'Create a Request' },
-          ].map((btn) => (
-            <button
-              key={btn.label}
-              className="banner-btn"
-              onClick={onUnavailable}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-125)',
-                padding: 'var(--ink-spacing-125) var(--ink-spacing-250)', background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.25)', borderRadius: 'var(--ink-radius-sm)',
-                color: 'white', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              <Icon name={btn.icon} size={16} color="white" /> {btn.label}
-            </button>
-          ))}
-        </Inline>
-      </div>
-
-      {/* Main content */}
-      <Container style={{ maxWidth: 1120, padding: 'var(--ink-spacing-400) var(--ink-spacing-400)' }}>
-        <Inline gap="large" align="start">
-          {/* Left column */}
-          <Stack gap="medium" style={{ flex: 1 }}>
-            {/* Tasks */}
-            <div {...getStaggerProps(0)}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline justify="between" align="center" onClick={onUnavailable} style={{ paddingBottom: 'var(--ink-spacing-150)', cursor: 'pointer' }}>
-                  <SectionLabel>Tasks</SectionLabel>
-                  <Icon name="chevron-right" size={18} />
-                </Inline>
-                <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-250) 0 var(--ink-spacing-150)' }}>
-                  <Text size="lg" weight="regular">You don&apos;t have any tasks yet</Text>
-                  <Text size="sm" color="secondary">When you have new tasks assigned to you, they will show up here.</Text>
-                </Stack>
-              </Stack>
-            </Card>
+    <div style={{ background: 'linear-gradient(180deg, var(--ink-white-100) 0%, #F1EEFB 42%, #E7E2F7 100%)', minHeight: '100%' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '8px 40px 24px' }}>
+        {/* Hero */}
+        <div style={{ ...getStaggerProps(0).style, textAlign: 'center', padding: '48px 0 40px' }}>
+          <Heading level={2} style={{ fontWeight: 400, color: 'var(--ink-font-color-default)', marginBottom: 24 }}>
+            Hi Kathie, let&apos;s move your agreements forward
+          </Heading>
+          <div style={{ maxWidth: 600, margin: '0 auto' }}>
+            <div onClick={onUnavailable} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 8px 8px 18px', background: 'var(--ink-white-100)', border: '1px solid var(--ink-neutral-fade-15)', borderRadius: 999, boxShadow: '0 2px 8px rgba(19,0,50,0.06)', cursor: 'pointer' }}>
+              <Icon name="plus" size={20} color="var(--ink-font-color-default)" />
+              <span style={{ flex: 1, textAlign: 'left', color: 'var(--ink-font-secondary)', fontSize: 15 }}>Analyze supplier risk with AI</span>
+              <button onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 999, background: 'var(--ink-cobalt-140)', color: 'var(--ink-white-100)', border: 'none', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
+                <Icon name="ai-iris-filled" size={16} color="var(--ink-white-100)" /> Ask Iris
+              </button>
             </div>
-
-            {/* Agreement Activity */}
-            <div {...getStaggerProps(1)}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline gap="none" align="center" style={{ gap: 'var(--ink-spacing-50)', marginBottom: 'var(--ink-spacing-150)' }}>
-                  <SectionLabel>Agreement Activity</SectionLabel>
-                  <Icon name="info" size={14} />
-                </Inline>
-                {activity.map((item, i) => (
-                  <Inline
-                    key={i}
-                    justify="between"
-                    align="center"
-                    className="activity-row"
-                    onClick={onUnavailable}
-                    style={{
-                      padding: 'var(--ink-spacing-150) 0',
-                      borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Stack gap="none" style={{ gap: "var(--ink-spacing-25)" }}>
-                      <Text size="sm">{item.name}</Text>
-                      <Text size="xs" color="secondary" style={{ textDecoration: 'underline', textDecorationColor: 'var(--ink-border-subtle)' }}>{item.time}</Text>
-                    </Stack>
-                    <Inline gap="small" align="center" style={{ flexShrink: 0 }}>
-                      <Icon name={item.statusIcon} size={14} />
-                      <Text size="xs" color="secondary">{item.status}</Text>
-                      <Icon name="chevron-right" size={14} />
-                    </Inline>
-                  </Inline>
-                ))}
-              </Stack>
-            </Card>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
+              {quickActions.map((a) => (
+                <button key={a.label} onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', borderRadius: 999, border: 'none', background: a.primary ? 'var(--ink-cobalt-20)' : 'var(--ink-neutral-fade-5)', color: 'var(--ink-font-color-default)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  {a.label}{a.icon ? <Icon name={a.icon} size={14} /> : null}
+                </button>
+              ))}
             </div>
-
-            {/* Favorite Templates */}
-            <div {...getStaggerProps(2)}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline justify="between" align="center" onClick={onUnavailable} style={{ marginBottom: 'var(--ink-spacing-200)', cursor: 'pointer' }}>
-                  <SectionLabel>Favorite Templates</SectionLabel>
-                  <Icon name="chevron-right" size={18} />
-                </Inline>
-                <Grid columns={3} gap="medium">
-                  {favoriteTemplates.map((t) => (
-                    <Card key={t.name} radius="medium" className="home-card activity-row" onClick={onUnavailable} style={{ padding: 0, cursor: 'pointer' }}>
-                      <Stack gap="small" style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <div style={{ height: 140, background: '#f5f5f5', borderRadius: 'var(--ink-radius-sm)', position: 'relative', overflow: 'hidden', padding: 6 }}>
-                          {/* Mock document preview */}
-                          <div style={{ background: 'white', borderRadius: 3, height: '100%', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                            {/* Header area */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div style={{ height: 5, width: '35%', background: '#ddd', borderRadius: 1 }} />
-                              <div style={{ height: 5, width: '15%', background: '#e8e8e8', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ height: 1, background: '#eee' }} />
-                            {/* Table-like rows */}
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <div style={{ height: 4, width: '25%', background: '#e5e5e5', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '20%', background: '#efefef', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '30%', background: '#efefef', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <div style={{ height: 4, width: '25%', background: '#efefef', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '20%', background: '#f2f2f2', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '30%', background: '#f2f2f2', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <div style={{ height: 4, width: '25%', background: '#efefef', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '20%', background: '#f2f2f2', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '30%', background: '#f2f2f2', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ height: 1, background: '#eee', marginTop: 2 }} />
-                            {/* More text lines */}
-                            <div style={{ height: 3, width: '70%', background: '#efefef', borderRadius: 1 }} />
-                            <div style={{ height: 3, width: '50%', background: '#f2f2f2', borderRadius: 1 }} />
-                          </div>
-                          {/* Favorite badge */}
-                          <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: 10, padding: '2px 6px', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <Icon name="star" size={9} color="gold" /> Favorite
-                          </div>
-                        </div>
-                        <Text size="sm" weight="medium" style={{ color: 'var(--ink-cobalt-90)' }}>{t.name}</Text>
-                        <Text size="xs" color="secondary">{t.lastUsed}</Text>
-                      </Stack>
-                    </Card>
-                  ))}
-                  <Card radius="medium" className="home-card activity-row" onClick={onUnavailable} style={{ padding: 0, cursor: 'pointer' }}>
-                    <Stack gap="small" align="center" justify="center" style={{ padding: 'var(--ink-spacing-200)', height: '100%' }}>
-                      <Text size="sm" weight="semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}>Add Favorite Template</Text>
-                      <Text size="xs" color="secondary" style={{ textAlign: 'center' }}>Send future documents faster with favorited templates.</Text>
-                      <Button kind="secondary" size="small" onClick={onUnavailable}>Browse templates</Button>
-                    </Stack>
-                  </Card>
-                </Grid>
-              </Stack>
-            </Card>
-            </div>
-
-            {/* Promo cards */}
-            <div {...getStaggerProps(3)}>
-            <Grid columns={2} gap="medium">
-              <Card radius="large" className="home-card promo-card activity-row" noPadding onClick={onUnavailable} style={{ cursor: 'pointer' }}>
-                <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
-                  <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
-                    <img src="/illustration-bulk-send.svg" alt="" width={72} height={72} />
-                  </div>
-                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                    <Text size="sm" weight="medium">Save time with bulk send</Text>
-                    <Text size="xs" color="secondary">No need to send separate envelopes. Import a bulk list and each recipient receives a unique copy. <span onClick={onUnavailable} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>Learn More</span></Text>
-                  </Stack>
-                </Inline>
-              </Card>
-              <Card radius="large" className="home-card promo-card activity-row" noPadding onClick={onUnavailable} style={{ cursor: 'pointer' }}>
-                <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
-                  <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
-                    <img src="/illustration-help.svg" alt="" width={72} height={72} />
-                  </div>
-                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                    <Text size="sm" weight="medium">Need help getting started?</Text>
-                    <Text size="xs" color="secondary">Get help with basic questions. <span onClick={onUnavailable} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>View Our Guide</span></Text>
-                  </Stack>
-                </Inline>
-              </Card>
-            </Grid>
-            </div>
-          </Stack>
-
-          {/* Right column - Overview */}
-          <div style={{ width: 220, flexShrink: 0, ...getStaggerProps(4).style }}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200)' }}>
-                <SectionLabel>Overview</SectionLabel>
-                <Stack gap="none" style={{ marginTop: 'var(--ink-spacing-150)' }}>
-                  {overview.map((item, i) => (
-                    <Inline
-                      key={i}
-                      justify="between"
-                      className="overview-row"
-                      onClick={onUnavailable}
-                      style={{
-                        padding: 'var(--ink-spacing-150) var(--ink-spacing-50)',
-                        borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
-                        borderRadius: 'var(--ink-radius-sm)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Text size="sm">{item.label}</Text>
-                      <Text size="sm" weight="semibold">{item.value}</Text>
-                    </Inline>
-                  ))}
-                </Stack>
-              </Stack>
-            </Card>
           </div>
-        </Inline>
-      </Container>
-    </Stack>
+        </div>
+
+        {/* Catch me up */}
+        <div style={getStaggerProps(1).style}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 8 }}>
+                <Heading level={4} style={sectionTitle}>Catch me up</Heading>
+                <button onClick={onUnavailable} aria-label="Customize catch me up" style={{ ...squareBtn, width: 34, height: 34 }}><Icon name="layout-grid" size={18} /></button>
+              </Inline>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 48 }}>
+                {catchUp.map((item, i) => (
+                  <div key={i} onClick={onUnavailable} className="activity-row" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 0', borderBottom: i < 2 ? '1px solid var(--ink-border-subtle)' : 'none', cursor: 'pointer' }}>
+                    <Icon name={item.icon} size={20} color="var(--ink-cobalt-100)" />
+                    <span style={{ flex: 1, fontSize: 14, color: 'var(--ink-font-color-default)' }}>{item.text}</span>
+                    <Icon name="chevron-right" size={18} color="var(--ink-font-secondary)" />
+                  </div>
+                ))}
+              </div>
+              <div onClick={onUnavailable} style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, padding: '14px 18px', background: 'var(--ink-cobalt-10)', borderRadius: 12, cursor: 'pointer' }}>
+                <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-100)" />
+                <span style={{ flex: 1, fontSize: 14, color: 'var(--ink-font-color-default)', lineHeight: 1.5 }}>
+                  3 agreements in Today&apos;s Focus are tied to <strong>$4.7M in total account value</strong> — <strong>2 are at risk of churn</strong> based on declining engagement scores over the last 90 days.
+                </span>
+                <Icon name="chevron-down" size={18} color="var(--ink-font-secondary)" />
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Tasks */}
+        <div style={{ ...getStaggerProps(2).style, marginTop: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 20 }}>
+                <Heading level={4} style={sectionTitle}>Tasks</Heading>
+                <button onClick={onUnavailable} style={viewAllBtn}>View All</button>
+              </Inline>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                {tasks.map((t, i) => (
+                  <div key={i} style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 150 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>{t.title}</span>
+                      <button onClick={onUnavailable} aria-label="Task options" style={iconBtn}><Icon name="more-vertical" size={16} /></button>
+                    </div>
+                    <span style={{ fontSize: 12, color: 'var(--ink-font-secondary)', lineHeight: 1.5, flex: 1 }}>{taskDesc}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--ink-font-secondary)' }}>
+                        {t.kind === 'error' && <Icon name="status-error" size={14} color="var(--ink-bg-error-emphasis)" />}
+                        {t.kind === 'warn' && <Icon name="status-warn" size={14} color="var(--ink-bg-warning-emphasis)" />}
+                        {t.status}
+                      </span>
+                      <button onClick={onUnavailable} aria-label="Open task" style={squareBtn}><Icon name="arrow-right" size={16} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Vendor spend + Upcoming obligations */}
+        <div style={{ ...getStaggerProps(3).style, marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="start">
+                <div>
+                  <Heading level={4} style={sectionTitle}>Vendor spend</Heading>
+                  <span style={{ fontSize: 12, color: 'var(--ink-font-secondary)' }}>By vendor · Software &amp; SaaS · year to date</span>
+                </div>
+                <DropdownPill label="Software & Saas" />
+              </Inline>
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '20px 0' }} />
+              <div style={{ fontSize: 32, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 22 }}>$1.33M</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {vendorSpend.map((v) => (
+                  <div key={v.name}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)' }}>{v.name}</span>
+                      <span style={{ fontSize: 13, color: 'var(--ink-font-secondary)' }}>{v.amount} · {v.pct}%</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 999, background: 'var(--ink-neutral-fade-10)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${v.pct}%`, background: 'var(--ink-cobalt-130)', borderRadius: 999 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="start">
+                <div>
+                  <Heading level={4} style={sectionTitle}>Upcoming obligations</Heading>
+                  <span style={{ fontSize: 12, color: 'var(--ink-font-secondary)' }}>By supplier · Software &amp; SaaS</span>
+                </div>
+                <DropdownPill label="Software & Saas" />
+              </Inline>
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '20px 0' }} />
+              <div style={{ fontSize: 32, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 22 }}>15 Obligations</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {obligations.map((o) => (
+                  <div key={o.name}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)' }}>{o.name}</span>
+                      <span style={{ fontSize: 13, color: 'var(--ink-font-secondary)' }}>{o.count} obligations</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, height: 6 }}>
+                      <div style={{ width: `${o.pct}%`, background: 'var(--ink-cobalt-130)', borderRadius: 999 }} />
+                      <div style={{ flex: 1, background: 'var(--ink-neutral-fade-10)', borderRadius: 999 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Recent agreements */}
+        <div style={{ ...getStaggerProps(4).style, marginTop: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  <Heading level={4} style={sectionTitle}>Recent agreements</Heading>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['3 Waiting for others', '2 Expiring soon', '9 Completed'].map((c) => (
+                      <span key={c} onClick={onUnavailable} style={chip}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+                <button onClick={onUnavailable} style={viewAllBtn}>View All</button>
+              </Inline>
+              <div>
+                {recent.map((r, i) => (
+                  <div key={i} onClick={onUnavailable} className="activity-row" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.6fr auto', alignItems: 'center', gap: 16, padding: '18px 0', borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none', cursor: 'pointer' }}>
+                    <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)' }}>{r.name}</span>
+                    <span style={{ fontSize: 14, color: 'var(--ink-font-secondary)' }}>{r.activity}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, justifySelf: 'end' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 999, background: r.dot }} />
+                        <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' }}>{r.status}</span>
+                      </span>
+                      <Icon name="chevron-right" size={16} color="var(--ink-font-secondary)" />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Recommended for you */}
+        <div style={{ ...getStaggerProps(5).style, marginTop: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Heading level={4} style={{ ...sectionTitle, marginBottom: 20 }}>Recommended for you</Heading>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                {recommended.map((c, i) => (
+                  <div key={i} style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '8px 14px', background: c.selected ? 'var(--ink-cobalt-10)' : 'var(--ink-neutral-fade-5)' }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.03em', color: c.selected ? 'var(--ink-cobalt-100)' : 'var(--ink-font-secondary)' }}>{c.eyebrow}</span>
+                    </div>
+                    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        {c.selected ? <SalesforceCloud /> : <Icon name={c.icon!} size={22} color="var(--ink-cobalt-100)" />}
+                        <button onClick={onUnavailable} aria-label="Options" style={iconBtn}><Icon name="more-vertical" size={16} /></button>
+                      </div>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>{c.title}</span>
+                      <span style={{ fontSize: 12.5, color: 'var(--ink-font-secondary)', lineHeight: 1.5, flex: 1 }}>{c.desc}</span>
+                      <button onClick={onUnavailable} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8, paddingTop: 12, borderTop: '1px solid var(--ink-border-subtle)', background: 'none', border: 'none', borderTopWidth: 1, borderTopStyle: 'solid', borderTopColor: 'var(--ink-border-subtle)', color: 'var(--ink-cobalt-100)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', width: '100%' }}>
+                        <span style={{ textDecoration: 'underline' }}>{c.link}</span>
+                        <Icon name="templates" size={16} color="var(--ink-cobalt-100)" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+                <button onClick={onUnavailable} style={{ ...viewAllBtn, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 14 }}>
+                  <Icon name="layout-grid" size={16} /> Customize
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Research / experience footer */}
+        <div style={{ ...getStaggerProps(6).style, marginTop: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 24, flexWrap: 'wrap' }}>
+          <div style={{ maxWidth: 640 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <Switch defaultChecked onChange={() => {}} />
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-font-color-default)' }}>New Homepage Experience</span>
+            </div>
+            <span style={{ fontSize: 13, color: 'var(--ink-font-secondary)', lineHeight: 1.5 }}>Want to participate in Docusign research studies, such as surveys, interviews, and testing of new product ideas and features?</span>
+            <div style={{ marginTop: 8 }}>
+              <span onClick={onUnavailable} style={{ fontSize: 13, color: 'var(--ink-cobalt-100)', textDecoration: 'underline', cursor: 'pointer' }}>Join our Product Experience Research Panel</span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
+            {([{ icon: 'help', label: 'Support Home' }, { icon: 'people', label: 'Community' }, { icon: 'shield', label: 'Trust Center' }] as { icon: IconName; label: string }[]).map((l) => (
+              <span key={l.label} onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--ink-font-color-default)', cursor: 'pointer' }}>
+                <Icon name={l.icon} size={16} color="var(--ink-font-secondary)" /> {l.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -3408,7 +3474,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═════��═�����������������������������══���═══════���═══════���═══���════════ */
+   ════�����═�����������������������������══���═══════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -9987,7 +10053,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ������ Sync hash ↔ state ── */
+  /* �������� Sync hash ↔ state ── */
   useEffect(() => {
     const onHashChange = () => {
       setActiveTab(getTabFromHash());
