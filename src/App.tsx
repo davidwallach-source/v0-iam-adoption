@@ -2985,7 +2985,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════�����═����═══════�����������������������������������════════════════════
+/* ═��══════�������═����═══════�����������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -6732,7 +6732,9 @@ function PaywallUpgradeModal({ kind, onClose }: { kind: 'upload' | 'idv' | 'work
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       style={{
-        position: 'fixed', inset: 0, zIndex: 3000,
+        // The parties modal is launched from inside the party-history panel
+        // (zIndex 100000), so it must sit above it; other kinds stay at 3000.
+        position: 'fixed', inset: 0, zIndex: kind === 'parties' ? 100001 : 3000,
         background: 'var(--ink-bg-scrim, rgba(19,0,50,0.4))',
         backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
