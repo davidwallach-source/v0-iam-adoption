@@ -23,6 +23,20 @@
   overflow: hidden;
 }
 
+/* SideRail layout — full-height left rail + content laid out horizontally */
+.shellRail {
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.rail {
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .sidebar {
   flex-shrink: 0;
   height: 100%;

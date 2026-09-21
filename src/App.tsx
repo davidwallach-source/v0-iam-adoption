@@ -10141,6 +10141,45 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     onUserMenuClick: () => setUserMenuOpen(o => !o),
   };
 
+  /* ── SideRail — left navigation (Northstar duotone) ── */
+  const sideRailConfig = {
+    logo: <img src="/docusign-logo-white.svg" alt="Docusign" />,
+    onToggleCollapse: () => {},
+    createLabel: 'Create',
+    onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
+    items: [
+      { id: 'home', label: 'Home', icon: 'home' as const, active: activeTab === 'home', onClick: () => handleTabClick('home') },
+      { id: 'iris', label: 'Iris', customIcon: <IrisIcon />, onClick: () => handleUnavailableTabClick('iris') },
+      {
+        id: 'agreements',
+        label: 'Agreements',
+        icon: 'envelope' as const,
+        active: activeTab === 'agreements',
+        onClick: () => handleTabClick('agreements'),
+        children: [
+          { id: 'all-agreements-rail', label: 'All Agreements', onClick: () => handleTabClick('agreements') },
+          { id: 'templates-rail', label: 'Templates', onClick: () => handleTabClick('templates') },
+        ],
+      },
+      { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => handleUnavailableTabClick('parties') },
+      { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => handleUnavailableTabClick('requests') },
+      {
+        id: 'insights',
+        label: 'Insights',
+        icon: 'chart-bar' as const,
+        active: activeTab === 'insights',
+        onClick: () => handleTabClick('insights'),
+        children: [
+          { id: 'overview-rail', label: 'Overview', onClick: () => handleTabClick('insights') },
+          { id: 'dashboards-rail', label: 'Dashboards', onClick: () => handleTabClick('insights') },
+        ],
+      },
+      { id: 'more', label: '6 more', muted: true, onClick: () => handleUnavailableTabClick('more'), children: [
+        { id: 'admin-rail', label: 'Admin', onClick: () => handleUnavailableTabClick('admin') },
+      ] },
+    ],
+  };
+
   /* ── LocalNav — Agreements tab ── */
   const agreementsSidebar = {
     headerLabel: 'Start',
@@ -10853,7 +10892,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       }}
     />
     <DocuSignShell
-      globalNav={globalNavConfig}
+      sideRail={sideRailConfig}
       localNav={sidebarMap[activeTab]}
     >
       {/* In the Simple Use Case version, fill the content column so the footer

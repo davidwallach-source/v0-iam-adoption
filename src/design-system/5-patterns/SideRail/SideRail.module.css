@@ -1,0 +1,225 @@
+@import '../../1-tokens/tokens.css';
+
+/*
+ * SideRail — DocuSign "duotone" dark navigation rail.
+ * These color values are intentionally literal: the rail is a distinct dark
+ * surface that sits outside the light app theme, matching the Northstar
+ * prototype's duotone treatment.
+ */
+.rail {
+  --rail-bg: #1a1147;
+  --rail-active: #3a2f86;
+  --rail-active-border: rgba(255, 255, 255, 0.14);
+  --rail-hover: rgba(255, 255, 255, 0.07);
+  --rail-border-subtle: rgba(255, 255, 255, 0.16);
+  --rail-text: #ffffff;
+  --rail-text-muted: #9a92bd;
+  --rail-icon: #ece9f8;
+
+  flex-shrink: 0;
+  width: 260px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px 16px;
+  background: var(--rail-bg);
+  color: var(--rail-text);
+  font-family: var(--ink-font-family-sans, 'DS Indigo', system-ui, sans-serif);
+  overflow-y: auto;
+}
+
+/* ── Header: logo + collapse toggle ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 8px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo :global(img),
+.logo :global(svg) {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rail-text-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.toggle:hover {
+  background: var(--rail-hover);
+  color: var(--rail-text);
+}
+
+/* ── Create CTA ── */
+.createButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid var(--rail-border-subtle);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--rail-text);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.createButton:hover {
+  background: var(--rail-hover);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.createIcon {
+  color: var(--rail-text);
+}
+
+/* ── Navigation list ── */
+.list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rowWrapper {
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--rail-text);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.row:hover {
+  background: var(--rail-hover);
+}
+
+.rowActive,
+.rowActive:hover {
+  background: var(--rail-active);
+  border-color: var(--rail-active-border);
+  font-weight: 700;
+}
+
+.rowMuted .label {
+  color: var(--rail-text-muted);
+  font-weight: 500;
+}
+
+.rowLeading {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--rail-icon);
+}
+
+.customIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.customIcon :global(svg) {
+  width: 24px;
+  height: 24px;
+}
+
+.iconPlaceholder {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--rail-text-muted);
+  transition: transform 150ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* ── Nested items ── */
+.subList {
+  list-style: none;
+  margin: 2px 0 4px;
+  padding: 0 0 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowNested {
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.rowNested .label {
+  color: var(--rail-text-muted);
+}
+
+.rowNested.rowActive .label,
+.rowNested:hover .label {
+  color: var(--rail-text);
+}
