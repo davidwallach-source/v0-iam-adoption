@@ -10871,8 +10871,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
     agreements: undefined,
-    templates: templatesSidebar,
-    insights: insightsSidebar,
+    templates: undefined,
+    insights: undefined,
     admin: undefined,
   };
 
