@@ -16,6 +16,8 @@ export interface SideRailItem {
   active?: boolean;
   /** Render the label in a de-emphasized color (e.g. the "6 more" row) */
   muted?: boolean;
+  /** Draw a divider line above this item (used inside expanded submenus) */
+  hasDividerBefore?: boolean;
   /** Click handler for the row itself */
   onClick?: () => void;
   /** Nested items. When present, a chevron is shown and the row expands/collapses. */
@@ -68,19 +70,17 @@ const RailRow: React.FC<RailRowProps> = ({ item, nested, collapsed, onRowEnter, 
   const [expanded, setExpanded] = useState(!!item.defaultExpanded);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const rowClasses = [
-    styles.row,
+  // Chevron / expand affordance only shows in the expanded (non-collapsed) rail.
+  const showChevron = !collapsed && hasChildren;
+
+  const mainClasses = [
+    styles.rowMain,
     nested ? styles.rowNested : '',
     item.active ? styles.rowActive : '',
     item.muted ? styles.rowMuted : '',
   ]
     .filter(Boolean)
     .join(' ');
-
-  const handleClick = () => {
-    if (!collapsed && hasChildren) setExpanded((v) => !v);
-    item.onClick?.();
-  };
 
   const renderIcon = () =>
     item.customIcon ? (
@@ -92,51 +92,65 @@ const RailRow: React.FC<RailRowProps> = ({ item, nested, collapsed, onRowEnter, 
     );
 
   return (
-    <li
-      className={styles.rowWrapper}
-      onMouseEnter={collapsed ? () => onRowEnter(item, buttonRef.current) : undefined}
-      onMouseLeave={collapsed ? onRowLeave : undefined}
-    >
-      <button
-        ref={buttonRef}
-        type="button"
-        className={rowClasses}
-        onClick={handleClick}
-        data-item-id={item.id}
-        data-nav-id={item.id}
-        aria-current={item.active ? 'page' : undefined}
-        aria-expanded={!collapsed && hasChildren ? expanded : undefined}
-        aria-label={collapsed ? item.label : undefined}
-        title={collapsed ? item.label : undefined}
+    <>
+      {item.hasDividerBefore && <li className={styles.dividerItem} aria-hidden="true" />}
+      <li
+        className={styles.rowWrapper}
+        onMouseEnter={collapsed ? () => onRowEnter(item, buttonRef.current) : undefined}
+        onMouseLeave={collapsed ? onRowLeave : undefined}
       >
-        <span className={styles.rowLeading}>
-          {renderIcon()}
-          {!collapsed && <span className={styles.label}>{item.label}</span>}
-        </span>
-        {!collapsed && hasChildren && (
-          <Icon
-            name="chevron-right"
-            size={20}
-            className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}
-          />
-        )}
-      </button>
+        {/* Split button: the row navigates, the chevron (if any) expands/collapses. */}
+        <div className={styles.row}>
+          <button
+            ref={buttonRef}
+            type="button"
+            className={mainClasses}
+            onClick={() => item.onClick?.()}
+            data-item-id={item.id}
+            data-nav-id={item.id}
+            aria-current={item.active ? 'page' : undefined}
+            aria-label={collapsed ? item.label : undefined}
+            title={collapsed ? item.label : undefined}
+          >
+            <span className={styles.rowLeading}>
+              {renderIcon()}
+              {!collapsed && <span className={styles.label}>{item.label}</span>}
+            </span>
+          </button>
 
-      {!collapsed && hasChildren && expanded && (
-        <ul className={styles.subList}>
-          {item.children!.map((child) => (
-            <RailRow
-              key={child.id}
-              item={child}
-              nested
-              collapsed={collapsed}
-              onRowEnter={onRowEnter}
-              onRowLeave={onRowLeave}
-            />
-          ))}
-        </ul>
-      )}
-    </li>
+          {showChevron && (
+            <button
+              type="button"
+              className={`${styles.chevronButton} ${expanded ? styles.chevronButtonOpen : ''}`}
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+              aria-label={`${expanded ? 'Collapse' : 'Expand'} ${item.label}`}
+            >
+              <Icon
+                name="chevron-right"
+                size={20}
+                className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}
+              />
+            </button>
+          )}
+        </div>
+
+        {showChevron && expanded && (
+          <ul className={styles.subList}>
+            {item.children!.map((child) => (
+              <RailRow
+                key={child.id}
+                item={child}
+                nested
+                collapsed={collapsed}
+                onRowEnter={onRowEnter}
+                onRowLeave={onRowLeave}
+              />
+            ))}
+          </ul>
+        )}
+      </li>
+    </>
   );
 };
 
@@ -145,7 +159,9 @@ const RailRow: React.FC<RailRowProps> = ({ item, nested, collapsed, onRowEnter, 
  *
  * A full-height dark rail containing the brand logo with a collapse toggle,
  * a prominent Create CTA, and the primary navigation. Items can nest one level
- * deep (shown with a chevron that expands in place).
+ * deep. Nested parents render as split buttons: clicking the row navigates to
+ * the section's main page, while the trailing chevron expands/collapses the
+ * submenu in place.
  *
  * The panel toggle collapses the rail to an icon-only strip. While collapsed,
  * hovering an item reveals a light flyout with the item's label and any nested
@@ -251,20 +267,32 @@ export const SideRail: React.FC<SideRailProps> = ({
         >
           {flyoutHasChildren ? (
             <>
-              <div className={styles.flyoutTitle}>{flyout.item.label}</div>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.flyoutTitleButton}
+                onClick={() => {
+                  flyout.item.onClick?.();
+                  setFlyout(null);
+                }}
+              >
+                {flyout.item.label}
+              </button>
               {flyout.item.children!.map((child) => (
-                <button
-                  key={child.id}
-                  type="button"
-                  role="menuitem"
-                  className={`${styles.flyoutLink} ${child.muted ? styles.flyoutLinkMuted : ''}`}
-                  onClick={() => {
-                    child.onClick?.();
-                    setFlyout(null);
-                  }}
-                >
-                  {child.label}
-                </button>
+                <React.Fragment key={child.id}>
+                  {child.hasDividerBefore && <div className={styles.flyoutDivider} aria-hidden="true" />}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={`${styles.flyoutLink} ${child.muted ? styles.flyoutLinkMuted : ''}`}
+                    onClick={() => {
+                      child.onClick?.();
+                      setFlyout(null);
+                    }}
+                  >
+                    {child.label}
+                  </button>
+                </React.Fragment>
               ))}
             </>
           ) : (

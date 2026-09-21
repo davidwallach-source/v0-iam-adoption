@@ -10157,8 +10157,12 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         active: activeTab === 'agreements',
         onClick: () => handleTabClick('agreements'),
         children: [
-          { id: 'all-agreements-rail', label: 'All Agreements', onClick: () => handleTabClick('agreements') },
-          { id: 'templates-rail', label: 'Templates', onClick: () => handleTabClick('templates') },
+          { id: 'all-agreements-rail', label: 'All Agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
+          { id: 'drafts-rail', label: 'Drafts', onClick: () => handleUnavailableTabClick('drafts') },
+          { id: 'in-progress-rail', label: 'In Progress', onClick: () => { handleTabClick('agreements'); setSidebarView('in-progress'); } },
+          { id: 'agreement-manager-rail', label: 'Agreement Manager', onClick: () => handleUnavailableTabClick('agreement-manager') },
+          { id: 'deleted-rail', label: 'Deleted', onClick: () => handleUnavailableTabClick('deleted') },
+          { id: 'folders-rail', label: 'Folders', icon: 'folder' as const, hasDividerBefore: true, onClick: () => { handleTabClick('agreements'); setSidebarView('folders'); setFolderPath([]); setSearch(''); } },
         ],
       },
       { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => handleUnavailableTabClick('parties') },
@@ -10171,11 +10175,20 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         onClick: () => handleTabClick('insights'),
         children: [
           { id: 'overview-rail', label: 'Overview', onClick: () => handleTabClick('insights') },
-          { id: 'dashboards-rail', label: 'Dashboards', onClick: () => handleTabClick('insights') },
+          { id: 'dashboards-rail', label: 'Dashboards', onClick: () => handleUnavailableTabClick('dashboards') },
+          { id: 'reports-rail', label: 'Reports', onClick: () => handleUnavailableTabClick('reports') },
+          { id: 'renewals-rail', label: 'Renewals', onClick: () => handleUnavailableTabClick('renewals') },
+          { id: 'obligations-rail', label: 'Obligations', onClick: () => handleUnavailableTabClick('obligations') },
         ],
       },
       { id: 'more', label: '6 more', muted: true, onClick: () => handleUnavailableTabClick('more'), children: [
-        { id: 'admin-rail', label: 'Admin', onClick: () => handleUnavailableTabClick('admin') },
+        { id: 'templates-more', label: 'Templates', icon: 'layout-grid' as const, onClick: () => handleTabClick('templates') },
+        { id: 'automation-more', label: 'Automation', icon: 'workflow' as const, onClick: () => handleUnavailableTabClick('automation') },
+        { id: 'signatories-more', label: 'Signatories', icon: 'person' as const, onClick: () => handleUnavailableTabClick('signatories') },
+        { id: 'workspaces-more', label: 'Workspaces', icon: 'people' as const, onClick: () => handleUnavailableTabClick('workspaces') },
+        { id: 'powerforms-more', label: 'Powerforms', icon: 'bolt' as const, onClick: () => handleUnavailableTabClick('powerforms') },
+        { id: 'admin-more', label: 'Admin', icon: 'gear' as const, onClick: () => handleTabClick('admin') },
+        { id: 'edit-sidebar-more', label: 'Edit sidebar', icon: 'pencil' as const, hasDividerBefore: true, onClick: () => handleUnavailableTabClick('edit-sidebar') },
       ] },
     ],
   };
@@ -10857,7 +10870,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   /* ── Resolve content + sidebar ── */
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
-    agreements: agreementsSidebar,
+    agreements: undefined,
     templates: templatesSidebar,
     insights: insightsSidebar,
     admin: undefined,

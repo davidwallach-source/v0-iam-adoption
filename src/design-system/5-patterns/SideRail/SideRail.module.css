@@ -122,12 +122,21 @@
   list-style: none;
 }
 
+/* Split-button container: main navigation button + optional chevron toggle */
 .row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: stretch;
+  gap: 4px;
   width: 100%;
+  box-sizing: border-box;
+}
+
+.rowMain {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
   box-sizing: border-box;
   padding: 13px 16px;
   border: 1px solid transparent;
@@ -142,7 +151,7 @@
   transition: background 120ms ease, border-color 120ms ease;
 }
 
-.row:hover {
+.rowMain:hover {
   background: var(--rail-hover);
 }
 
@@ -156,6 +165,42 @@
 .rowMuted .label {
   color: var(--rail-text-muted);
   font-weight: 500;
+}
+
+/* Chevron toggle — separate hit target from the row (split button) */
+.chevronButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--rail-text-muted);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.chevronButton:hover {
+  background: var(--rail-hover);
+  color: var(--rail-text);
+}
+
+.chevronButtonOpen,
+.chevronButtonOpen:hover {
+  background: var(--rail-active);
+  border-color: var(--rail-active-border);
+  color: var(--rail-text);
+}
+
+/* Divider between groups of items inside an expanded submenu */
+.dividerItem {
+  list-style: none;
+  height: 1px;
+  margin: 8px 16px;
+  background: var(--rail-border-subtle);
 }
 
 .rowLeading {
@@ -260,6 +305,11 @@
 
 .railCollapsed .row {
   width: 48px;
+  justify-content: center;
+}
+
+.railCollapsed .rowMain {
+  width: 48px;
   height: 48px;
   padding: 0;
   justify-content: center;
@@ -328,4 +378,10 @@
 
 .flyoutLinkMuted {
   color: #6b6493;
+}
+
+.flyoutDivider {
+  height: 1px;
+  margin: 8px 14px;
+  background: rgba(26, 17, 71, 0.12);
 }
