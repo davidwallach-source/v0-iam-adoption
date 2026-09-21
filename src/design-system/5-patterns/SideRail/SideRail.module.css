@@ -27,6 +27,14 @@
   color: var(--rail-text);
   font-family: var(--ink-font-family-sans, 'DS Indigo', system-ui, sans-serif);
   overflow-y: auto;
+  transition: width 160ms ease;
+}
+
+/* ── Collapsed (icon-only) rail ── */
+.railCollapsed {
+  width: 76px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 /* ── Header: logo + collapse toggle ── */
@@ -222,4 +230,102 @@
 .rowNested.rowActive .label,
 .rowNested:hover .label {
   color: var(--rail-text);
+}
+
+/* ══ Collapsed-state overrides ══ */
+
+/* Header: center the toggle (logo is hidden) */
+.railCollapsed .header {
+  justify-content: center;
+  padding: 0;
+}
+
+/* Create CTA becomes a square icon button */
+.railCollapsed .createButton {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Rows become square, icon-only, centered */
+.railCollapsed .list {
+  align-items: center;
+}
+
+.railCollapsed .rowWrapper {
+  width: 48px;
+}
+
+.railCollapsed .row {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+}
+
+.railCollapsed .rowLeading {
+  gap: 0;
+  justify-content: center;
+}
+
+/* ── Hover flyout (light surface, escapes the dark rail) ── */
+.flyout {
+  position: fixed;
+  z-index: 1000;
+  min-width: 224px;
+  margin-left: 6px;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(20, 12, 55, 0.22), 0 2px 6px rgba(20, 12, 55, 0.12);
+  color: #1a1147;
+}
+
+.flyoutTitle,
+.flyoutTitleButton {
+  display: block;
+  padding: 8px 14px 10px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1a1147;
+}
+
+.flyoutTitleButton {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.flyoutTitleButton:hover {
+  background: rgba(26, 17, 71, 0.06);
+}
+
+.flyoutLink {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #1a1147;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.flyoutLink:hover {
+  background: rgba(26, 17, 71, 0.06);
+}
+
+.flyoutLinkMuted {
+  color: #6b6493;
 }
