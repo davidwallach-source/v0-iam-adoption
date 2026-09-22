@@ -87,12 +87,12 @@
   gap: 10px;
   width: 100%;
   margin-top: 24px;
-  padding: 14px 16px;
+  padding: 11px 16px;
   border: 1px solid var(--rail-border-subtle);
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
   color: var(--rail-text);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
@@ -138,14 +138,14 @@
   gap: 12px;
   min-width: 0;
   box-sizing: border-box;
-  padding: 13px 16px;
+  padding: 10px 12px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
   color: var(--rail-text);
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.25;
   text-align: left;
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease;
@@ -159,7 +159,7 @@
 .rowActive:hover {
   background: var(--rail-active);
   border-color: var(--rail-active-border);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .rowMuted .label {
@@ -206,7 +206,7 @@
 .rowLeading {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -256,16 +256,16 @@
 .subList {
   list-style: none;
   margin: 2px 0 4px;
-  padding: 0 0 0 40px;
+  padding: 0 0 0 44px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
 .rowNested {
-  padding: 10px 16px;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .rowNested .label {
@@ -337,7 +337,7 @@
 .flyoutTitleButton {
   display: block;
   padding: 8px 14px 10px;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.2;
   color: #1a1147;
@@ -364,8 +364,8 @@
   border-radius: 8px;
   background: transparent;
   color: #1a1147;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 400;
   line-height: 1.2;
   text-align: left;
   cursor: pointer;

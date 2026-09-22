@@ -86,7 +86,7 @@ const RailRow: React.FC<RailRowProps> = ({ item, nested, collapsed, onRowEnter, 
     item.customIcon ? (
       <span className={styles.customIcon}>{item.customIcon}</span>
     ) : item.icon ? (
-      <Icon name={item.icon} size={24} className={styles.icon} />
+      <Icon name={item.icon} size={20} className={styles.icon} />
     ) : (
       <span className={styles.iconPlaceholder} aria-hidden="true" />
     );
@@ -241,7 +241,7 @@ export const SideRail: React.FC<SideRailProps> = ({
         aria-label={collapsed ? createLabel : undefined}
         title={collapsed ? createLabel : undefined}
       >
-        <Icon name="plus" size={24} className={styles.createIcon} />
+        <Icon name="plus" size={20} className={styles.createIcon} />
         {!collapsed && <span className={styles.createLabel}>{createLabel}</span>}
       </button>
 
