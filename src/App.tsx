@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, createContext, useContext, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -33,6 +34,7 @@ import {
   Drawer,
   Link,
   ProgressBar,
+  Switch,
   SearchInput,
   SegmentedControl,
   Alert,
@@ -2984,7 +2986,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════�����������������������════════════════════
+/* ═��══════���������═����═══════�����������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3042,246 +3044,311 @@ function DocPreview({ hasLogo, hasForm }: { hasLogo?: boolean; hasForm?: boolean
 }
 
 function HomePage({ onUnavailable }: { onUnavailable: (e: React.MouseEvent) => void }) {
-  const getStaggerProps = useStaggerEntrance(6, { baseDelay: 100, staggerInterval: 60, duration: 400, distance: 12 });
+  const getStaggerProps = useStaggerEntrance(7, { baseDelay: 80, staggerInterval: 70, duration: 400, distance: 12 });
 
-  const activity = [
-    { name: 'Complete with Docusign: rhi.pdf, Sample_Service_Agreement.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
-    { name: 'Here is your signed document: Sample_Service_Agreement.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
-    { name: 'Complete with Docusign: rhi.pdf', time: '6 days ago', status: 'Voided', statusIcon: 'status-void' as const },
-    { name: 'Change Order.docx', time: 'Expiring on 07/31/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
-    { name: 'SOW(2).docx', time: 'Expiring on 06/30/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
-    { name: 'SOW(1).docx', time: 'Expiring on 06/30/2026', status: 'Expiring Soon', statusIcon: 'clock' as const },
+  const quickActions: { label: string; primary?: boolean; icon?: IconName }[] = [
+    { label: 'Start', primary: true },
+    { label: 'Send an Envelope' },
+    { label: 'Create a Request' },
+    { label: 'Create Purchase Requisition', icon: 'templates' },
   ];
 
-  const overview = [
-    { label: 'Open requests', value: 7 },
-    { label: 'Waiting for others', value: 0 },
-    { label: 'Expiring soon', value: 0 },
-    { label: 'Completed', value: 0 },
-    { label: 'Upcoming renewals', value: 0 },
+  const catchUp: { icon: IconName; text: string }[] = [
+    { icon: 'spark', text: 'An Agreement Desk request is stalled and needs attention' },
+    { icon: 'refresh', text: 'An agreement will auto-renew soon with no decision made' },
+    { icon: 'clipboard', text: 'Obligations are due this week and need review' },
+    { icon: 'document-pencil', text: 'A supplier reported a data breach or other notable event' },
   ];
 
-  const favoriteTemplates = [
-    { name: 'quick send', lastUsed: 'Last used on 03/13/2026' },
-    { name: 'shared template info', lastUsed: 'Last used on 08/12/2025' },
+  const tasks: { title: string; status: string; kind: 'error' | 'warn' | 'from' }[] = [
+    { title: 'Resolve comment', status: 'Due tomorrow', kind: 'error' },
+    { title: 'Needs to sign', status: 'Assigned 5 days ago', kind: 'warn' },
+    { title: 'Create or upload document', status: 'From: Sam Sender', kind: 'from' },
+    { title: 'Needs to view', status: 'From: Sam Sender', kind: 'from' },
   ];
+  const taskDesc = 'Complete with Docusign: Alex Greene Closing Disclosure Jan 12, 2024';
+
+  const vendorSpend = [
+    { name: 'Datadog', amount: '$410K', pct: 31 },
+    { name: 'Vercel', amount: '$312K', pct: 23 },
+    { name: 'Atlassian', amount: '$265K', pct: 20 },
+    { name: 'Okta', amount: '$180K', pct: 13 },
+  ];
+
+  const obligations = [
+    { name: 'Datadog', count: 4, pct: 30 },
+    { name: 'Vercel', count: 3, pct: 23 },
+    { name: 'Atlassian', count: 2, pct: 15 },
+    { name: 'Okta', count: 3, pct: 23 },
+  ];
+
+  const recent = [
+    { name: 'Q3 Vendor Services Agreement', activity: 'Acme Corp signed on Aug 26 at 2:00pm', status: 'Complete', dot: 'var(--ink-bg-success-emphasis)' },
+    { name: 'Consulting Agreement — Phase 2', activity: 'Meridian Partners opened yesterday at 2:30 PM', status: 'Waiting for others', dot: 'var(--ink-neutral-50)' },
+    { name: 'Master Service Agreement', activity: 'DataFlow Systems started a draft on Aug 23 at 3:10 PM', status: 'Draft', dot: 'var(--ink-neutral-50)' },
+    { name: 'Annual Maintenance Contract', activity: 'Skybridge Ltd viewed on Aug 22 at 11:00 AM', status: 'Expiring Soon', dot: 'var(--ink-bg-warning-emphasis)' },
+  ];
+
+  const recommended: { eyebrow: string; selected?: boolean; icon?: IconName; title: string; desc: string; link: string }[] = [
+    { eyebrow: 'Selected integration', selected: true, title: 'Connect to Salesforce', desc: 'Generate, send, and track agreements directly from Salesforce. Cut manual work and speed up close.', link: 'Connect to Salesforce' },
+    { eyebrow: 'Your account setup actions', icon: 'paint-palette', title: 'Apply your brand', desc: 'Customize your logo, colors, and company details so everything your signers see feels on-brand and builds trust.', link: 'Customize your Branding' },
+    { eyebrow: 'Your account setup actions', icon: 'device-mobile', title: 'Make on-the-go signing easier', desc: 'Let your signers review and sign agreements from anywhere, and speed turnaround times without tying them to a desk.', link: 'Enable Mobile Signing' },
+    { eyebrow: 'Your account setup actions', icon: 'person-plus', title: 'Invite your team', desc: 'Add your coworkers so they can collaborate on documents, share templates, and keep all agreement activity in one place.', link: 'Invite Your Team' },
+  ];
+
+  const cardBase: React.CSSProperties = { border: '1px solid var(--ink-neutral-fade-5)', boxShadow: '0 1px 3px rgba(19,0,50,0.05)' };
+  const iconBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, border: 'none', background: 'none', color: 'var(--ink-font-secondary)', cursor: 'pointer', borderRadius: 6, padding: 0 };
+  const squareBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, border: '1px solid var(--ink-border-subtle)', background: 'var(--ink-white-100)', color: 'var(--ink-font-color-default)', cursor: 'pointer', borderRadius: 8, padding: 0, flexShrink: 0 };
+  const viewAllBtn: React.CSSProperties = { border: '1px solid var(--ink-border-subtle)', background: 'var(--ink-white-100)', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', color: 'var(--ink-font-color-default)' };
+  const chip: React.CSSProperties = { padding: '4px 10px', borderRadius: 999, background: 'var(--ink-neutral-fade-5)', fontSize: 12, color: 'var(--ink-font-secondary)', cursor: 'pointer', whiteSpace: 'nowrap' };
+  const sectionTitle: React.CSSProperties = { margin: 0, fontWeight: 500 };
+  const pad = 28;
+
+  const DropdownPill = ({ label }: { label: string }) => (
+    <button onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', fontSize: 13, cursor: 'pointer', color: 'var(--ink-font-color-default)', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+      {label} <Icon name="chevron-down" size={14} />
+    </button>
+  );
+
+  const SalesforceCloud = () => (
+    <svg width="30" height="21" viewBox="0 0 24 16" aria-hidden="true" style={{ display: 'block' }}>
+      <path d="M9.8 3.3a4 4 0 0 1 6.9 1 3.4 3.4 0 0 1 4.3 3.3 3.4 3.4 0 0 1-3.4 3.4H6.1A3.6 3.6 0 0 1 5.6 4a3.6 3.6 0 0 1 4.2-.7z" fill="#00A1E0" />
+    </svg>
+  );
 
   return (
-    <Stack gap="none">
-      {/* Welcome banner */}
-      <div style={{
-        background: 'linear-gradient(174deg, var(--ink-cobalt-100, #4C00FB) 1.48%, var(--ink-cobalt-140, #260559) 97.92%)',
-        color: 'white',
-        padding: '100px var(--ink-spacing-300) 72px',
-        textAlign: 'center',
-      }}>
-        <Heading level={3} style={{ color: 'white', fontWeight: 400, marginBottom: 'var(--ink-spacing-300)' }}>
-          Welcome back, Pat Price
-        </Heading>
-        <Inline gap="small" justify="center">
-          <Button kind="brand" menuTrigger onClick={onUnavailable}>Start</Button>
-          {[
-            { icon: 'send' as const, label: 'Send an Envelope' },
-            { icon: 'ai-spark-filled' as const, label: 'Send with AI' },
-            { icon: 'templates' as const, label: 'Create a Request' },
-          ].map((btn) => (
-            <button
-              key={btn.label}
-              className="banner-btn"
-              onClick={onUnavailable}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-125)',
-                padding: 'var(--ink-spacing-125) var(--ink-spacing-250)', background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.25)', borderRadius: 'var(--ink-radius-sm)',
-                color: 'white', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              <Icon name={btn.icon} size={16} color="white" /> {btn.label}
-            </button>
-          ))}
-        </Inline>
-      </div>
-
-      {/* Main content */}
-      <Container style={{ maxWidth: 1120, padding: 'var(--ink-spacing-400) var(--ink-spacing-400)' }}>
-        <Inline gap="large" align="start">
-          {/* Left column */}
-          <Stack gap="medium" style={{ flex: 1 }}>
-            {/* Tasks */}
-            <div {...getStaggerProps(0)}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline justify="between" align="center" onClick={onUnavailable} style={{ paddingBottom: 'var(--ink-spacing-150)', cursor: 'pointer' }}>
-                  <SectionLabel>Tasks</SectionLabel>
-                  <Icon name="chevron-right" size={18} />
-                </Inline>
-                <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-250) 0 var(--ink-spacing-150)' }}>
-                  <Text size="lg" weight="regular">You don&apos;t have any tasks yet</Text>
-                  <Text size="sm" color="secondary">When you have new tasks assigned to you, they will show up here.</Text>
-                </Stack>
-              </Stack>
-            </Card>
+    <div style={{ background: 'linear-gradient(180deg, var(--ink-white-100) 0%, #F1EEFB 42%, #E7E2F7 100%)', minHeight: '100%' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '8px 40px 24px' }}>
+        {/* Hero */}
+        <div style={{ ...getStaggerProps(0).style, textAlign: 'center', padding: '48px 0 40px' }}>
+          <Heading level={2} style={{ fontWeight: 400, color: 'var(--ink-font-color-default)', marginBottom: 24 }}>
+            Hi Kathie, let&apos;s move your agreements forward
+          </Heading>
+          <div style={{ maxWidth: 600, margin: '0 auto' }}>
+            <div onClick={onUnavailable} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 8px 8px 18px', background: 'var(--ink-white-100)', border: '1px solid var(--ink-neutral-fade-15)', borderRadius: 999, boxShadow: '0 2px 8px rgba(19,0,50,0.06)', cursor: 'pointer' }}>
+              <Icon name="plus" size={20} color="var(--ink-font-color-default)" />
+              <span style={{ flex: 1, textAlign: 'left', color: 'var(--ink-font-secondary)', fontSize: 15 }}>Analyze supplier risk with AI</span>
+              <button onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 999, background: 'var(--ink-cobalt-140)', color: 'var(--ink-white-100)', border: 'none', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
+                <Icon name="ai-iris-filled" size={16} color="var(--ink-white-100)" /> Ask Iris
+              </button>
             </div>
-
-            {/* Agreement Activity */}
-            <div {...getStaggerProps(1)}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline gap="none" align="center" style={{ gap: 'var(--ink-spacing-50)', marginBottom: 'var(--ink-spacing-150)' }}>
-                  <SectionLabel>Agreement Activity</SectionLabel>
-                  <Icon name="info" size={14} />
-                </Inline>
-                {activity.map((item, i) => (
-                  <Inline
-                    key={i}
-                    justify="between"
-                    align="center"
-                    className="activity-row"
-                    onClick={onUnavailable}
-                    style={{
-                      padding: 'var(--ink-spacing-150) 0',
-                      borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Stack gap="none" style={{ gap: "var(--ink-spacing-25)" }}>
-                      <Text size="sm">{item.name}</Text>
-                      <Text size="xs" color="secondary" style={{ textDecoration: 'underline', textDecorationColor: 'var(--ink-border-subtle)' }}>{item.time}</Text>
-                    </Stack>
-                    <Inline gap="small" align="center" style={{ flexShrink: 0 }}>
-                      <Icon name={item.statusIcon} size={14} />
-                      <Text size="xs" color="secondary">{item.status}</Text>
-                      <Icon name="chevron-right" size={14} />
-                    </Inline>
-                  </Inline>
-                ))}
-              </Stack>
-            </Card>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
+              {quickActions.map((a) => (
+                <button key={a.label} onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', borderRadius: 999, border: 'none', background: a.primary ? 'var(--ink-cobalt-20)' : 'var(--ink-neutral-fade-5)', color: 'var(--ink-font-color-default)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  {a.label}{a.icon ? <Icon name={a.icon} size={14} /> : null}
+                </button>
+              ))}
             </div>
-
-            {/* Favorite Templates */}
-            <div {...getStaggerProps(2)}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                <Inline justify="between" align="center" onClick={onUnavailable} style={{ marginBottom: 'var(--ink-spacing-200)', cursor: 'pointer' }}>
-                  <SectionLabel>Favorite Templates</SectionLabel>
-                  <Icon name="chevron-right" size={18} />
-                </Inline>
-                <Grid columns={3} gap="medium">
-                  {favoriteTemplates.map((t) => (
-                    <Card key={t.name} radius="medium" className="home-card activity-row" onClick={onUnavailable} style={{ padding: 0, cursor: 'pointer' }}>
-                      <Stack gap="small" style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <div style={{ height: 140, background: '#f5f5f5', borderRadius: 'var(--ink-radius-sm)', position: 'relative', overflow: 'hidden', padding: 6 }}>
-                          {/* Mock document preview */}
-                          <div style={{ background: 'white', borderRadius: 3, height: '100%', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                            {/* Header area */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div style={{ height: 5, width: '35%', background: '#ddd', borderRadius: 1 }} />
-                              <div style={{ height: 5, width: '15%', background: '#e8e8e8', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ height: 1, background: '#eee' }} />
-                            {/* Table-like rows */}
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <div style={{ height: 4, width: '25%', background: '#e5e5e5', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '20%', background: '#efefef', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '30%', background: '#efefef', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <div style={{ height: 4, width: '25%', background: '#efefef', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '20%', background: '#f2f2f2', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '30%', background: '#f2f2f2', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <div style={{ height: 4, width: '25%', background: '#efefef', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '20%', background: '#f2f2f2', borderRadius: 1 }} />
-                              <div style={{ height: 4, width: '30%', background: '#f2f2f2', borderRadius: 1 }} />
-                            </div>
-                            <div style={{ height: 1, background: '#eee', marginTop: 2 }} />
-                            {/* More text lines */}
-                            <div style={{ height: 3, width: '70%', background: '#efefef', borderRadius: 1 }} />
-                            <div style={{ height: 3, width: '50%', background: '#f2f2f2', borderRadius: 1 }} />
-                          </div>
-                          {/* Favorite badge */}
-                          <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: 10, padding: '2px 6px', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <Icon name="star" size={9} color="gold" /> Favorite
-                          </div>
-                        </div>
-                        <Text size="sm" weight="medium" style={{ color: 'var(--ink-cobalt-90)' }}>{t.name}</Text>
-                        <Text size="xs" color="secondary">{t.lastUsed}</Text>
-                      </Stack>
-                    </Card>
-                  ))}
-                  <Card radius="medium" className="home-card activity-row" onClick={onUnavailable} style={{ padding: 0, cursor: 'pointer' }}>
-                    <Stack gap="small" align="center" justify="center" style={{ padding: 'var(--ink-spacing-200)', height: '100%' }}>
-                      <Text size="sm" weight="semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}>Add Favorite Template</Text>
-                      <Text size="xs" color="secondary" style={{ textAlign: 'center' }}>Send future documents faster with favorited templates.</Text>
-                      <Button kind="secondary" size="small" onClick={onUnavailable}>Browse templates</Button>
-                    </Stack>
-                  </Card>
-                </Grid>
-              </Stack>
-            </Card>
-            </div>
-
-            {/* Promo cards */}
-            <div {...getStaggerProps(3)}>
-            <Grid columns={2} gap="medium">
-              <Card radius="large" className="home-card promo-card activity-row" noPadding onClick={onUnavailable} style={{ cursor: 'pointer' }}>
-                <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
-                  <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
-                    <img src="/illustration-bulk-send.svg" alt="" width={72} height={72} />
-                  </div>
-                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                    <Text size="sm" weight="medium">Save time with bulk send</Text>
-                    <Text size="xs" color="secondary">No need to send separate envelopes. Import a bulk list and each recipient receives a unique copy. <span onClick={onUnavailable} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>Learn More</span></Text>
-                  </Stack>
-                </Inline>
-              </Card>
-              <Card radius="large" className="home-card promo-card activity-row" noPadding onClick={onUnavailable} style={{ cursor: 'pointer' }}>
-                <Inline gap="none" align="stretch" style={{ minHeight: '100%' }}>
-                  <div style={{ width: 120, flexShrink: 0, background: 'rgb(247, 246, 247)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ink-radius-lg) 0 0 var(--ink-radius-lg)', alignSelf: 'stretch' }}>
-                    <img src="/illustration-help.svg" alt="" width={72} height={72} />
-                  </div>
-                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-50)', padding: 'var(--ink-spacing-200) var(--ink-spacing-250)' }}>
-                    <Text size="sm" weight="medium">Need help getting started?</Text>
-                    <Text size="xs" color="secondary">Get help with basic questions. <span onClick={onUnavailable} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--ink-cobalt-90)' }}>View Our Guide</span></Text>
-                  </Stack>
-                </Inline>
-              </Card>
-            </Grid>
-            </div>
-          </Stack>
-
-          {/* Right column - Overview */}
-          <div style={{ width: 220, flexShrink: 0, ...getStaggerProps(4).style }}>
-            <Card radius="large" className="home-card">
-              <Stack gap="none" style={{ padding: 'var(--ink-spacing-200)' }}>
-                <SectionLabel>Overview</SectionLabel>
-                <Stack gap="none" style={{ marginTop: 'var(--ink-spacing-150)' }}>
-                  {overview.map((item, i) => (
-                    <Inline
-                      key={i}
-                      justify="between"
-                      className="overview-row"
-                      onClick={onUnavailable}
-                      style={{
-                        padding: 'var(--ink-spacing-150) var(--ink-spacing-50)',
-                        borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none',
-                        borderRadius: 'var(--ink-radius-sm)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Text size="sm">{item.label}</Text>
-                      <Text size="sm" weight="semibold">{item.value}</Text>
-                    </Inline>
-                  ))}
-                </Stack>
-              </Stack>
-            </Card>
           </div>
-        </Inline>
-      </Container>
-    </Stack>
+        </div>
+
+        {/* Catch me up */}
+        <div style={getStaggerProps(1).style}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 8 }}>
+                <Heading level={4} style={sectionTitle}>Catch me up</Heading>
+                <button onClick={onUnavailable} aria-label="Customize catch me up" style={{ ...squareBtn, width: 34, height: 34 }}><Icon name="layout-grid" size={18} /></button>
+              </Inline>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 48 }}>
+                {catchUp.map((item, i) => (
+                  <div key={i} onClick={onUnavailable} className="activity-row" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 0', borderBottom: i < 2 ? '1px solid var(--ink-border-subtle)' : 'none', cursor: 'pointer' }}>
+                    <Icon name={item.icon} size={20} color="var(--ink-cobalt-100)" />
+                    <span style={{ flex: 1, fontSize: 14, color: 'var(--ink-font-color-default)' }}>{item.text}</span>
+                    <Icon name="chevron-right" size={18} color="var(--ink-font-secondary)" />
+                  </div>
+                ))}
+              </div>
+              <div onClick={onUnavailable} style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, padding: '14px 18px', background: 'var(--ink-cobalt-10)', borderRadius: 12, cursor: 'pointer' }}>
+                <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-100)" />
+                <span style={{ flex: 1, fontSize: 14, color: 'var(--ink-font-color-default)', lineHeight: 1.5 }}>
+                  3 agreements in Today&apos;s Focus are tied to <strong>$4.7M in total account value</strong> — <strong>2 are at risk of churn</strong> based on declining engagement scores over the last 90 days.
+                </span>
+                <Icon name="chevron-down" size={18} color="var(--ink-font-secondary)" />
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Tasks */}
+        <div style={{ ...getStaggerProps(2).style, marginTop: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 20 }}>
+                <Heading level={4} style={sectionTitle}>Tasks</Heading>
+                <button onClick={onUnavailable} style={viewAllBtn}>View All</button>
+              </Inline>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                {tasks.map((t, i) => (
+                  <div key={i} style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 150 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>{t.title}</span>
+                      <button onClick={onUnavailable} aria-label="Task options" style={iconBtn}><Icon name="more-vertical" size={16} /></button>
+                    </div>
+                    <span style={{ fontSize: 12, color: 'var(--ink-font-secondary)', lineHeight: 1.5, flex: 1 }}>{taskDesc}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--ink-font-secondary)' }}>
+                        {t.kind === 'error' && <Icon name="status-error" size={14} color="var(--ink-bg-error-emphasis)" />}
+                        {t.kind === 'warn' && <Icon name="status-warn" size={14} color="var(--ink-bg-warning-emphasis)" />}
+                        {t.status}
+                      </span>
+                      <button onClick={onUnavailable} aria-label="Open task" style={squareBtn}><Icon name="arrow-right" size={16} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Vendor spend + Upcoming obligations */}
+        <div style={{ ...getStaggerProps(3).style, marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="start">
+                <div>
+                  <Heading level={4} style={sectionTitle}>Vendor spend</Heading>
+                  <span style={{ fontSize: 12, color: 'var(--ink-font-secondary)' }}>By vendor · Software &amp; SaaS · year to date</span>
+                </div>
+                <DropdownPill label="Software & Saas" />
+              </Inline>
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '20px 0' }} />
+              <div style={{ fontSize: 32, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 22 }}>$1.33M</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {vendorSpend.map((v) => (
+                  <div key={v.name}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)' }}>{v.name}</span>
+                      <span style={{ fontSize: 13, color: 'var(--ink-font-secondary)' }}>{v.amount} · {v.pct}%</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 999, background: 'var(--ink-neutral-fade-10)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${v.pct}%`, background: 'var(--ink-cobalt-130)', borderRadius: 999 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="start">
+                <div>
+                  <Heading level={4} style={sectionTitle}>Upcoming obligations</Heading>
+                  <span style={{ fontSize: 12, color: 'var(--ink-font-secondary)' }}>By supplier · Software &amp; SaaS</span>
+                </div>
+                <DropdownPill label="Software & Saas" />
+              </Inline>
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '20px 0' }} />
+              <div style={{ fontSize: 32, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 22 }}>15 Obligations</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {obligations.map((o) => (
+                  <div key={o.name}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)' }}>{o.name}</span>
+                      <span style={{ fontSize: 13, color: 'var(--ink-font-secondary)' }}>{o.count} obligations</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, height: 6 }}>
+                      <div style={{ width: `${o.pct}%`, background: 'var(--ink-cobalt-130)', borderRadius: 999 }} />
+                      <div style={{ flex: 1, background: 'var(--ink-neutral-fade-10)', borderRadius: 999 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Recent agreements */}
+        <div style={{ ...getStaggerProps(4).style, marginTop: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Inline justify="between" align="center" style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  <Heading level={4} style={sectionTitle}>Recent agreements</Heading>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['3 Waiting for others', '2 Expiring soon', '9 Completed'].map((c) => (
+                      <span key={c} onClick={onUnavailable} style={chip}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+                <button onClick={onUnavailable} style={viewAllBtn}>View All</button>
+              </Inline>
+              <div>
+                {recent.map((r, i) => (
+                  <div key={i} onClick={onUnavailable} className="activity-row" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.6fr auto', alignItems: 'center', gap: 16, padding: '18px 0', borderTop: i > 0 ? '1px solid var(--ink-border-subtle)' : 'none', cursor: 'pointer' }}>
+                    <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)' }}>{r.name}</span>
+                    <span style={{ fontSize: 14, color: 'var(--ink-font-secondary)' }}>{r.activity}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, justifySelf: 'end' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 999, background: r.dot }} />
+                        <span style={{ fontSize: 14, color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' }}>{r.status}</span>
+                      </span>
+                      <Icon name="chevron-right" size={16} color="var(--ink-font-secondary)" />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Recommended for you */}
+        <div style={{ ...getStaggerProps(5).style, marginTop: 20 }}>
+          <Card radius="large" className="home-card" style={cardBase}>
+            <div style={{ padding: pad }}>
+              <Heading level={4} style={{ ...sectionTitle, marginBottom: 20 }}>Recommended for you</Heading>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                {recommended.map((c, i) => (
+                  <div key={i} style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '8px 14px', background: c.selected ? 'var(--ink-cobalt-10)' : 'var(--ink-neutral-fade-5)' }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.03em', color: c.selected ? 'var(--ink-cobalt-100)' : 'var(--ink-font-secondary)' }}>{c.eyebrow}</span>
+                    </div>
+                    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        {c.selected ? <SalesforceCloud /> : <Icon name={c.icon!} size={22} color="var(--ink-cobalt-100)" />}
+                        <button onClick={onUnavailable} aria-label="Options" style={iconBtn}><Icon name="more-vertical" size={16} /></button>
+                      </div>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>{c.title}</span>
+                      <span style={{ fontSize: 12.5, color: 'var(--ink-font-secondary)', lineHeight: 1.5, flex: 1 }}>{c.desc}</span>
+                      <button onClick={onUnavailable} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8, paddingTop: 12, borderTop: '1px solid var(--ink-border-subtle)', background: 'none', border: 'none', borderTopWidth: 1, borderTopStyle: 'solid', borderTopColor: 'var(--ink-border-subtle)', color: 'var(--ink-cobalt-100)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', width: '100%' }}>
+                        <span style={{ textDecoration: 'underline' }}>{c.link}</span>
+                        <Icon name="templates" size={16} color="var(--ink-cobalt-100)" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+                <button onClick={onUnavailable} style={{ ...viewAllBtn, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 14 }}>
+                  <Icon name="layout-grid" size={16} /> Customize
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Research / experience footer */}
+        <div style={{ ...getStaggerProps(6).style, marginTop: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 24, flexWrap: 'wrap' }}>
+          <div style={{ maxWidth: 640 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <Switch defaultChecked onChange={() => {}} />
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-font-color-default)' }}>New Homepage Experience</span>
+            </div>
+            <span style={{ fontSize: 13, color: 'var(--ink-font-secondary)', lineHeight: 1.5 }}>Want to participate in Docusign research studies, such as surveys, interviews, and testing of new product ideas and features?</span>
+            <div style={{ marginTop: 8 }}>
+              <span onClick={onUnavailable} style={{ fontSize: 13, color: 'var(--ink-cobalt-100)', textDecoration: 'underline', cursor: 'pointer' }}>Join our Product Experience Research Panel</span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
+            {([{ icon: 'help', label: 'Support Home' }, { icon: 'people', label: 'Community' }, { icon: 'shield', label: 'Trust Center' }] as { icon: IconName; label: string }[]).map((l) => (
+              <span key={l.label} onClick={onUnavailable} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--ink-font-color-default)', cursor: 'pointer' }}>
+                <Icon name={l.icon} size={16} color="var(--ink-font-secondary)" /> {l.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -3407,7 +3474,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������������══════════���═══════���═══���════════ */
+   ════�����═�����������������������������══���═══════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -6321,6 +6388,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
   const [docSubOpen, setDocSubOpen] = useState(false);
+  const [paywallModal, setPaywallModal] = useState<'upload' | 'idv' | 'workflow' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const closeSubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -6458,7 +6526,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 label="Upload Request"
                 description="Ask people to securely submit files"
                 crown
-                onClick={() => { setOpen(false); onUploadRequest?.(); }}
+                onClick={() => { setOpen(false); setPaywallModal('upload'); }}
               />
 
               {/* Divider */}
@@ -6468,7 +6536,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 label="Identity Verification"
                 description="Securely confirm and store IDs"
                 crown
-                onClick={() => { setOpen(false); }}
+                onClick={() => { setOpen(false); setPaywallModal('idv'); }}
               />
 
               {/* Divider */}
@@ -6478,7 +6546,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 label="Workflow"
                 description="Automate multi-step processes"
                 crown
-                onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
+                onClick={() => { setOpen(false); setPaywallModal('workflow'); }}
               />
             </>
           ) : (
@@ -6527,6 +6595,10 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
             </>
           )}
         </div>
+      )}
+
+      {isPaywalls && paywallModal && (
+        <PaywallUpgradeModal kind={paywallModal} onClose={() => setPaywallModal(null)} />
       )}
     </div>
   );
@@ -6660,6 +6732,396 @@ function MenuRow({ icon, label, description, onClick, chevron, crown }: {
         </svg>
       )}
     </div>
+  );
+}
+
+// Per-feature copy for the paywall upgrade modal. Everything else (pricing,
+// payment, legal) is identical across the three gated features.
+const PAYWALL_MODAL_COPY: Record<'upload' | 'idv' | 'workflow' | 'parties', { title: string; description: string }> = {
+  upload: {
+    title: 'Add Upload Requests to your subscription',
+    description: 'Upload Requests allow you to ask people to add files to an agreement space. For example, requesting a Certificate of Insurance, or Pay Stubs.',
+  },
+  idv: {
+    title: 'Add Identify Verification to your subscription',
+    description: "Identity Verification ensures you know who you're doing business with, by protecting your business agreements and data from identity fraud with Docusign's advanced portfolio of solutions.",
+  },
+  workflow: {
+    title: 'Add Workflows to your subscription',
+    description: 'Build intelligent workflows and agents that connect pre and post signature steps like intake, document generation and conditional routing.',
+  },
+  parties: {
+    title: 'Add Agreement Manager to your subscription',
+    description: 'Find agreements, track commitments, and put AI agents to work on what\u2019s next\u2014all in one secure repository.',
+  },
+};
+
+const PAYWALL_BLUE = '#1A6DF0';
+const PAYWALL_GREEN = '#0E7C57';
+
+function PaywallInfoIcon({ color = '#8B8699' }: { color?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <circle cx="8" cy="8" r="6.4" stroke={color} strokeWidth="1.2" />
+      <circle cx="8" cy="5.1" r="0.85" fill={color} />
+      <rect x="7.35" y="6.9" width="1.3" height="4.2" rx="0.65" fill={color} />
+    </svg>
+  );
+}
+
+// Upgrade / add-on purchase modal shown when a feature-gated Add New item is
+// clicked in the paywalls prototype. Matches the Docusign subscription add-on
+// comp: quantity tiers, payment summary, proration breakdown, legal copy.
+function PaywallUpgradeModal({ kind, onClose }: { kind: 'upload' | 'idv' | 'workflow' | 'parties'; onClose: () => void }) {
+  const { title, description } = PAYWALL_MODAL_COPY[kind];
+  const [selected, setSelected] = useState(0);
+  const [breakdownOpen, setBreakdownOpen] = useState(true);
+
+  const tiers = [
+    { qty: '30/year', price: 'at $1/month' },
+    { qty: '60/year', price: 'at $2/month' },
+    { qty: '90/year', price: 'at $3/month' },
+    { qty: 'Custom', price: null as string | null },
+  ];
+
+  // Close on ESC.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const rowLabel = { fontSize: 15, color: '#130032' };
+  const linkStyle: React.CSSProperties = { color: PAYWALL_BLUE, textDecoration: 'underline', cursor: 'pointer' };
+
+  return createPortal(
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        // The parties modal is launched from inside the party-history panel
+        // (zIndex 100000), so it must sit above it; other kinds stay at 3000.
+        position: 'fixed', inset: 0, zIndex: kind === 'parties' ? 100001 : 3000,
+        background: 'var(--ink-bg-scrim, rgba(19,0,50,0.4))',
+        backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '40px 0', fontFamily: 'var(--ink-font-family)',
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        style={{
+          position: 'relative', width: 680, maxWidth: 'calc(100vw - 32px)',
+          maxHeight: 'calc(100vh - 80px)', overflowY: 'auto',
+          background: 'white', borderRadius: 16, boxShadow: '0 24px 64px rgba(19,0,50,0.24)',
+          padding: '40px 40px 32px',
+        }}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 4, color: '#130032' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+
+        {/* Title + description */}
+        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#130032', letterSpacing: '-0.2px', paddingRight: 32 }}>{title}</h2>
+        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: '#5A5568' }}>{description}</p>
+
+        {/* Quantity tiers */}
+        <div style={{ position: 'relative', marginTop: 28 }}>
+          <span style={{ position: 'absolute', top: -9, left: 0, zIndex: 2, background: '#C9F2DE', color: '#0B6E4F', fontSize: 12, fontWeight: 600, padding: '2px 8px', borderRadius: 4 }}>Recommended quantity</span>
+          <div style={{ display: 'flex' }}>
+            {tiers.map((t, i) => {
+              const isSelected = selected === i;
+              return (
+                <button
+                  key={t.qty}
+                  onClick={() => setSelected(i)}
+                  style={{
+                    flex: 1,
+                    minHeight: 68,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+                    cursor: 'pointer',
+                    background: isSelected ? '#EAF2FE' : 'white',
+                    border: isSelected ? `1.5px solid ${PAYWALL_BLUE}` : '1px solid #D9D7E0',
+                    borderRadius: isSelected ? 8 : (i === 0 ? '8px 0 0 8px' : i === tiers.length - 1 ? '0 8px 8px 0' : 0),
+                    marginLeft: !isSelected && i !== 0 ? -1 : 0,
+                    zIndex: isSelected ? 1 : 0,
+                    position: 'relative',
+                    fontFamily: 'var(--ink-font-family)',
+                  }}
+                >
+                  <span style={{ fontSize: 16, fontWeight: 700, color: '#130032' }}>{t.qty}</span>
+                  {t.price && <span style={{ fontSize: 13, color: isSelected ? PAYWALL_BLUE : '#8B8699' }}>{t.price}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <p style={{ margin: '16px 0 0', fontSize: 13, lineHeight: 1.5, color: '#5A5568' }}>
+          An overage charge of $0.50 per delivery will apply if you exceed your subscription limit. Additional tax may apply.
+        </p>
+
+        <div style={{ height: 1, background: '#E4E2E9', margin: '20px 0' }} />
+
+        {/* Payment method */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ ...rowLabel, display: 'inline-flex', alignItems: 'center', gap: 8 }}>Payment method <PaywallInfoIcon /></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#130032', fontSize: 15 }}>
+            <span style={{ fontWeight: 800, fontStyle: 'italic', color: '#1A1F71', fontSize: 13, letterSpacing: '0.3px' }}>VISA</span>
+            ending in 1111
+          </span>
+        </div>
+
+        {/* Subscription type */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
+          <span style={rowLabel}>Subscription type</span>
+          <span style={{ color: '#130032', fontSize: 15 }}>Annual | Billed monthly</span>
+        </div>
+
+        <div style={{ height: 1, background: '#E4E2E9', margin: '20px 0' }} />
+
+        {/* Due today */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 18, fontWeight: 700, color: '#130032' }}>Due today</span>
+          <button
+            onClick={() => setBreakdownOpen(o => !o)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 18, fontWeight: 700, color: '#130032', fontFamily: 'var(--ink-font-family)' }}
+            aria-expanded={breakdownOpen}
+            aria-label="Toggle cost breakdown"
+          >
+            $0.80
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transform: breakdownOpen ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.15s' }}>
+              <path d="M4 10L8 6L12 10" stroke="#130032" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        {breakdownOpen && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+              <span style={rowLabel}>Subtotal</span>
+              <span style={{ color: '#130032', fontSize: 15 }}>$1.00/month</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+              <span style={{ fontSize: 15, color: PAYWALL_GREEN, display: 'inline-flex', alignItems: 'center', gap: 8 }}>One-time proration <PaywallInfoIcon color={PAYWALL_GREEN} /></span>
+              <span style={{ color: PAYWALL_GREEN, fontSize: 15 }}>$0.20</span>
+            </div>
+          </>
+        )}
+
+        {/* Legal */}
+        <p style={{ margin: '16px 0 0', fontSize: 12, lineHeight: 1.6, color: '#8B8699' }}>
+          By selecting [CTA label], you agree to the above [increase/decrease/change] in your Annual | Billed monthly subscription. This subscription will automatically renew unless you <span style={linkStyle}>cancel</span>, pursuant to the terms above. If you cancel your subscription before renewal, you&apos;ll be responsible for the remaining balance on your annual subscription, including applicable taxes. You also agree to Docusign&apos;s <span style={linkStyle}>Terms &amp; Conditions</span> and <span style={linkStyle}>Privacy Notice</span>.
+        </p>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 28 }}>
+          <button
+            onClick={onClose}
+            style={{ height: 40, padding: '0 20px', border: 'none', background: 'transparent', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)', borderRadius: 4 }}
+          >Cancel</button>
+          <button
+            onClick={onClose}
+            style={{ height: 40, padding: '0 24px', border: 'none', background: PAYWALL_BLUE, color: 'white', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)', borderRadius: 4 }}
+          >Purchase</button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+// Two-column "add user licenses" upgrade modal shown when the collaborator
+// avatars in an Agreement Space header are clicked in the paywalls prototype.
+// Left: purple marketing panel; right: license quantity stepper + billing summary.
+function PaywallAddSeatsModal({ onClose }: { onClose: () => void }) {
+  const [qty, setQty] = useState(1);
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
+  const pricePerSeat = 80;
+  const dueToday = 70;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const rowLabel = { fontSize: 15, color: '#130032' };
+  const linkStyle: React.CSSProperties = { color: PAYWALL_BLUE, textDecoration: 'underline', cursor: 'pointer' };
+  const stepperBtn = (active: boolean): React.CSSProperties => ({
+    width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    border: active ? `1.5px solid ${PAYWALL_BLUE}` : '1px solid #D9D7E0',
+    background: 'white', borderRadius: 6, cursor: 'pointer', color: '#130032',
+    fontFamily: 'var(--ink-font-family)',
+  });
+
+  return createPortal(
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 3000,
+        background: 'var(--ink-bg-scrim, rgba(19,0,50,0.4))',
+        backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '40px 0', fontFamily: 'var(--ink-font-family)',
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Add user licenses"
+        style={{
+          position: 'relative', width: 940, maxWidth: 'calc(100vw - 32px)',
+          maxHeight: 'calc(100vh - 80px)', overflow: 'hidden',
+          background: 'white', borderRadius: 16, boxShadow: '0 24px 64px rgba(19,0,50,0.24)',
+          display: 'flex',
+        }}
+      >
+        {/* Left marketing panel */}
+        <div
+          style={{
+            width: 340, flexShrink: 0, background: '#2B0A5E', color: 'white',
+            padding: '40px 36px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
+          }}
+        >
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 20, letterSpacing: '-0.2px' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h11a5 5 0 0 1 0 10H9v6H4V4Z" fill="white"/></svg>
+            Docusign
+          </div>
+          <h3 style={{ margin: '36px 0 0', fontSize: 32, lineHeight: 1.15, fontWeight: 700, letterSpacing: '-0.5px' }}>Teams work better together</h3>
+          <p style={{ margin: '20px 0 0', fontSize: 15, lineHeight: 1.55, color: 'rgba(255,255,255,0.82)' }}>
+            Invite your coworkers to improve collaboration while increasing your agreement-management capabilities.
+          </p>
+          <div style={{ position: 'relative', marginTop: 36, flex: 1, minHeight: 220 }}>
+            <div style={{ position: 'absolute', left: 22, top: 8, bottom: -40, width: 3, background: 'linear-gradient(180deg,#7A3BFF,#C026D3)' }} />
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute', left: 0, right: -36, top: i * 84,
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  background: 'white', borderRadius: 999, padding: '10px 16px 10px 10px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.28)',
+                }}
+              >
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: ['#F5C6A5', '#B8C4CF', '#E0A87E'][i], flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ height: 8, borderRadius: 4, background: '#E4E2E9', width: '78%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right content panel */}
+        <div style={{ flex: 1, minWidth: 0, padding: '40px 40px 32px', overflowY: 'auto' }}>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 4, color: '#130032' }}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+
+          <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#130032', letterSpacing: '-0.2px', paddingRight: 32 }}>Add user licenses</h2>
+          <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: '#5A5568' }}>
+            You need to upgrade your plan to add more collaborators. Each user license includes all of your current advanced features.
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+            <PaywallInfoIcon />
+          </div>
+
+          {/* Quantity stepper */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={stepperBtn(false)} onClick={() => setQty(q => Math.max(1, q - 1))} aria-label="Decrease licenses">
+                  <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8h10" stroke="#130032" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                </button>
+                <button style={stepperBtn(true)} onClick={() => setQty(q => q + 1)} aria-label="Increase licenses">
+                  <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke={PAYWALL_BLUE} strokeWidth="1.5" strokeLinecap="round" /></svg>
+                </button>
+              </div>
+              <span style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{qty} user license{qty > 1 ? 's' : ''}</span>
+            </div>
+            <span style={{ fontSize: 15, color: '#130032' }}>${(qty * pricePerSeat).toFixed(2)}/month</span>
+          </div>
+
+          <div style={{ height: 1, background: '#E4E2E9', margin: '24px 0' }} />
+
+          {/* Payment method */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ ...rowLabel, display: 'inline-flex', alignItems: 'center', gap: 8 }}>Payment method <PaywallInfoIcon /></span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#130032', fontSize: 15 }}>
+              <span style={{ fontWeight: 800, fontStyle: 'italic', color: '#1A1F71', fontSize: 13, letterSpacing: '0.3px' }}>VISA</span>
+              ending in 1111
+            </span>
+          </div>
+
+          {/* Subscription type */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
+            <span style={rowLabel}>Subscription type</span>
+            <span style={{ color: '#130032', fontSize: 15 }}>Annual | Billed monthly</span>
+          </div>
+
+          {/* Discount */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
+            <span style={rowLabel}>Discount</span>
+            <span style={{ ...linkStyle, fontWeight: 600, textDecoration: 'none' }}>Add Promo Code</span>
+          </div>
+
+          <div style={{ height: 1, background: '#E4E2E9', margin: '24px 0' }} />
+
+          {/* Due today */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#130032' }}>Due today</span>
+            <button
+              onClick={() => setBreakdownOpen(o => !o)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 18, fontWeight: 700, color: '#130032', fontFamily: 'var(--ink-font-family)' }}
+              aria-expanded={breakdownOpen}
+              aria-label="Toggle cost breakdown"
+            >
+              ${dueToday.toFixed(2)}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transform: breakdownOpen ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.15s' }}>
+                <path d="M4 10L8 6L12 10" stroke="#130032" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+
+          {breakdownOpen && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+              <span style={rowLabel}>Subtotal</span>
+              <span style={{ color: '#130032', fontSize: 15 }}>${(qty * pricePerSeat).toFixed(2)}/month</span>
+            </div>
+          )}
+
+          {/* Legal */}
+          <p style={{ margin: '16px 0 0', fontSize: 12, lineHeight: 1.6, color: '#8B8699' }}>
+            By selecting [CTA label], you agree to the above [increase/decrease/change] in your Annual | Billed monthly subscription. This subscription will automatically renew unless you <span style={linkStyle}>cancel</span>, pursuant to the terms above. If you cancel your subscription before renewal, you&apos;ll be responsible for the remaining balance on your annual subscription, including applicable taxes. You also agree to Docusign&apos;s <span style={linkStyle}>Terms &amp; Conditions</span> and <span style={linkStyle}>Privacy Notice</span>.
+          </p>
+
+          {/* Footer */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 28 }}>
+            <button
+              onClick={onClose}
+              style={{ height: 40, padding: '0 24px', border: 'none', background: PAYWALL_BLUE, color: 'white', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)', borderRadius: 4 }}
+            >Purchase</button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -7089,6 +7551,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   };
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
+  const [showAgreementManagerModal, setShowAgreementManagerModal] = useState(false);
+  const [showAddSeatsModal, setShowAddSeatsModal] = useState(false);
   const [openEnvelope, setOpenEnvelope] = useState<OpenEnvelope | null>(null);
   // Id of the table row whose envelope panel is currently open, so that row
   // stays highlighted (and only that row) while the panel is open.
@@ -7565,7 +8029,20 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </button>
             <div style={{ flex: 1 }} />
             <Inline gap="small" align="center">
-              <div style={{ display: 'flex' }}>
+              <div
+                style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
+                {...(version === 'paywalls'
+                  ? {
+                      role: 'button',
+                      tabIndex: 0,
+                      'aria-label': 'Manage collaborators',
+                      onClick: () => setShowAddSeatsModal(true),
+                      onKeyDown: (e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAddSeatsModal(true); }
+                      },
+                    }
+                  : {})}
+              >
                 <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
                 <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
                 <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
@@ -8423,6 +8900,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         }}
       />
 
+      {/* Paywall: Agreement Manager upgrade modal (Gain Insights scrim CTA) */}
+      {version === 'paywalls' && showAgreementManagerModal && (
+        <PaywallUpgradeModal kind="parties" onClose={() => setShowAgreementManagerModal(false)} />
+      )}
+
+      {/* Paywall: Add user licenses modal (collaborator avatars) */}
+      {version === 'paywalls' && showAddSeatsModal && (
+        <PaywallAddSeatsModal onClose={() => setShowAddSeatsModal(false)} />
+      )}
+
       {/* Upload Request full-screen overlay */}
       <UploadRequestScreen
         open={showUploadRequest}
@@ -8727,6 +9214,58 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               </div>
             )}
           </div>
+
+          {/* Paywall scrim (paywalls version only) */}
+          {version === 'paywalls' && showPartyHistory && (
+            <div
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                right: 0,
+                width: '680px',
+                maxWidth: '100vw',
+                height: '58%',
+                zIndex: 100000,
+                display: 'flex',
+                alignItems: 'flex-end',
+                pointerEvents: 'none',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 26%, rgba(255,255,255,0.96) 48%, #FFFFFF 68%)',
+              }}
+            >
+              <div
+                style={{
+                  pointerEvents: 'auto',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  gap: 'var(--ink-spacing-400)',
+                  padding: '0 var(--ink-spacing-400) 0',
+                  width: '100%',
+                }}
+              >
+                <img
+                  src="/doc-stack-2.svg"
+                  alt=""
+                  aria-hidden="true"
+                  style={{ width: 240, height: 'auto', flexShrink: 0, display: 'block' }}
+                />
+                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)', transform: 'translateY(16px)' }}>
+                  <Heading as="h2" size="lg" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
+                    Gain Insights
+                  </Heading>
+                  <Text size="md" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)', color: '#3d3a4e' }}>
+                    Dig into historical contracts with this party to identify opportunities, risks, key data points, and much more.
+                  </Text>
+                  <Button
+                    kind="primary"
+                    style={{ background: '#4C00FB', borderColor: '#4C00FB', color: 'white' }}
+                    onClick={() => setShowAgreementManagerModal(true)}
+                  >
+                    Upgrade Plan
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
       </Drawer>
     </div>
   );
@@ -9514,7 +10053,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ������ Sync hash ↔ state ── */
+  /* �������� Sync hash ↔ state ── */
   useEffect(() => {
     const onHashChange = () => {
       setActiveTab(getTabFromHash());
