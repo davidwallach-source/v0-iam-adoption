@@ -4,18 +4,10 @@ import { GlobalNav } from '../../5-patterns/GlobalNav';
 import type { GlobalNavProps } from '../../5-patterns/GlobalNav';
 import { LocalNav } from '../../5-patterns/LocalNav';
 import type { LocalNavProps } from '../../5-patterns/LocalNav';
-import { SideRail } from '../../5-patterns/SideRail';
-import type { SideRailProps } from '../../5-patterns/SideRail';
 
 export interface DocuSignShellProps {
-  /**
-   * SideRail configuration. When provided, the primary navigation is rendered
-   * as a full-height left rail (replacing the top GlobalNav).
-   */
-  sideRail?: Omit<SideRailProps, 'className'>;
-
-  /** GlobalNav configuration (used when `sideRail` is not provided) */
-  globalNav?: Omit<GlobalNavProps, 'className'>;
+  /** GlobalNav configuration (required - always shown) */
+  globalNav: Omit<GlobalNavProps, 'className'>;
 
   /** LocalNav configuration (optional - some pages don't have sidebar) */
   localNav?: Omit<LocalNavProps, 'className'>;
@@ -51,7 +43,6 @@ export interface DocuSignShellProps {
  * </DocuSignShell>
  */
 export const DocuSignShell: React.FC<DocuSignShellProps> = ({
-  sideRail,
   globalNav,
   localNav,
   children,
@@ -59,37 +50,12 @@ export const DocuSignShell: React.FC<DocuSignShellProps> = ({
 }) => {
   const shellClasses = [styles.shell, className].filter(Boolean).join(' ');
 
-  /* SideRail layout: full-height left rail as the primary navigation. */
-  if (sideRail) {
-    return (
-      <div
-        data-ink-component="DocuSignShell"
-        className={`${shellClasses} ${styles.shellRail}`}
-      >
-        <aside className={styles.rail}>
-          <SideRail {...sideRail} />
-        </aside>
-
-        {/* Optional secondary (contextual) sidebar */}
-        {localNav && (
-          <aside className={styles.sidebar}>
-            <LocalNav {...localNav} />
-          </aside>
-        )}
-
-        <main className={styles.content}>{children}</main>
-      </div>
-    );
-  }
-
   return (
     <div data-ink-component="DocuSignShell" className={shellClasses}>
       {/* Header - GlobalNav */}
-      {globalNav && (
-        <header className={styles.header}>
-          <GlobalNav {...globalNav} />
-        </header>
-      )}
+      <header className={styles.header}>
+        <GlobalNav {...globalNav} />
+      </header>
 
       {/* Body - Sidebar + Content */}
       <div className={styles.body}>

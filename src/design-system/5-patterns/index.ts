@@ -5,5 +5,3 @@ export { FilterBar } from './FilterBar';
 export { GlobalNav } from './GlobalNav';
 export { LocalNav } from './LocalNav';
 export { PageHeader } from './PageHeader';
-export { SideRail } from './SideRail';
-export type { SideRailProps, SideRailItem } from './SideRail';
