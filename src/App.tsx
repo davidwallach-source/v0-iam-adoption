@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, createContext, useContext, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { Analytics } from '@vercel/analytics/react';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -11422,6 +11423,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         setRootPreparePreselectedDocs([]);
       }}
     />
+      <Analytics />
     </PrototypeVersionContext.Provider>
   );
 }
