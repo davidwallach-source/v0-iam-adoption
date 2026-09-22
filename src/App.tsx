@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, createContext, useContext, type CSSProperties } from 'react';
-import { createPortal } from 'react-dom';
 import {
   DocuSignShell,
   AgreementTableView,
@@ -2985,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════�������═����═══════�����������������������������������════════════════════
+/* ═��══════���═����═══════���������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3408,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═════��═�����������������������������══���═══════���═══════���═══���════════ */
+   ═══════�����������������������������══���═══════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -6322,7 +6321,6 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
   const [docSubOpen, setDocSubOpen] = useState(false);
-  const [paywallModal, setPaywallModal] = useState<'upload' | 'idv' | 'workflow' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const closeSubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -6460,7 +6458,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 label="Upload Request"
                 description="Ask people to securely submit files"
                 crown
-                onClick={() => { setOpen(false); setPaywallModal('upload'); }}
+                onClick={() => { setOpen(false); onUploadRequest?.(); }}
               />
 
               {/* Divider */}
@@ -6470,7 +6468,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 label="Identity Verification"
                 description="Securely confirm and store IDs"
                 crown
-                onClick={() => { setOpen(false); setPaywallModal('idv'); }}
+                onClick={() => { setOpen(false); }}
               />
 
               {/* Divider */}
@@ -6480,7 +6478,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 label="Workflow"
                 description="Automate multi-step processes"
                 crown
-                onClick={() => { setOpen(false); setPaywallModal('workflow'); }}
+                onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
               />
             </>
           ) : (
@@ -6529,10 +6527,6 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
             </>
           )}
         </div>
-      )}
-
-      {isPaywalls && paywallModal && (
-        <PaywallUpgradeModal kind={paywallModal} onClose={() => setPaywallModal(null)} />
       )}
     </div>
   );
@@ -6666,396 +6660,6 @@ function MenuRow({ icon, label, description, onClick, chevron, crown }: {
         </svg>
       )}
     </div>
-  );
-}
-
-// Per-feature copy for the paywall upgrade modal. Everything else (pricing,
-// payment, legal) is identical across the three gated features.
-const PAYWALL_MODAL_COPY: Record<'upload' | 'idv' | 'workflow' | 'parties', { title: string; description: string }> = {
-  upload: {
-    title: 'Add Upload Requests to your subscription',
-    description: 'Upload Requests allow you to ask people to add files to an agreement space. For example, requesting a Certificate of Insurance, or Pay Stubs.',
-  },
-  idv: {
-    title: 'Add Identify Verification to your subscription',
-    description: "Identity Verification ensures you know who you're doing business with, by protecting your business agreements and data from identity fraud with Docusign's advanced portfolio of solutions.",
-  },
-  workflow: {
-    title: 'Add Workflows to your subscription',
-    description: 'Build intelligent workflows and agents that connect pre and post signature steps like intake, document generation and conditional routing.',
-  },
-  parties: {
-    title: 'Add Agreement Manager to your subscription',
-    description: 'Find agreements, track commitments, and put AI agents to work on what\u2019s next\u2014all in one secure repository.',
-  },
-};
-
-const PAYWALL_BLUE = '#1A6DF0';
-const PAYWALL_GREEN = '#0E7C57';
-
-function PaywallInfoIcon({ color = '#8B8699' }: { color?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ flexShrink: 0 }}>
-      <circle cx="8" cy="8" r="6.4" stroke={color} strokeWidth="1.2" />
-      <circle cx="8" cy="5.1" r="0.85" fill={color} />
-      <rect x="7.35" y="6.9" width="1.3" height="4.2" rx="0.65" fill={color} />
-    </svg>
-  );
-}
-
-// Upgrade / add-on purchase modal shown when a feature-gated Add New item is
-// clicked in the paywalls prototype. Matches the Docusign subscription add-on
-// comp: quantity tiers, payment summary, proration breakdown, legal copy.
-function PaywallUpgradeModal({ kind, onClose }: { kind: 'upload' | 'idv' | 'workflow' | 'parties'; onClose: () => void }) {
-  const { title, description } = PAYWALL_MODAL_COPY[kind];
-  const [selected, setSelected] = useState(0);
-  const [breakdownOpen, setBreakdownOpen] = useState(true);
-
-  const tiers = [
-    { qty: '30/year', price: 'at $1/month' },
-    { qty: '60/year', price: 'at $2/month' },
-    { qty: '90/year', price: 'at $3/month' },
-    { qty: 'Custom', price: null as string | null },
-  ];
-
-  // Close on ESC.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  const rowLabel = { fontSize: 15, color: '#130032' };
-  const linkStyle: React.CSSProperties = { color: PAYWALL_BLUE, textDecoration: 'underline', cursor: 'pointer' };
-
-  return createPortal(
-    <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{
-        // The parties modal is launched from inside the party-history panel
-        // (zIndex 100000), so it must sit above it; other kinds stay at 3000.
-        position: 'fixed', inset: 0, zIndex: kind === 'parties' ? 100001 : 3000,
-        background: 'var(--ink-bg-scrim, rgba(19,0,50,0.4))',
-        backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '40px 0', fontFamily: 'var(--ink-font-family)',
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        style={{
-          position: 'relative', width: 680, maxWidth: 'calc(100vw - 32px)',
-          maxHeight: 'calc(100vh - 80px)', overflowY: 'auto',
-          background: 'white', borderRadius: 16, boxShadow: '0 24px 64px rgba(19,0,50,0.24)',
-          padding: '40px 40px 32px',
-        }}
-      >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 4, color: '#130032' }}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
-
-        {/* Title + description */}
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#130032', letterSpacing: '-0.2px', paddingRight: 32 }}>{title}</h2>
-        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: '#5A5568' }}>{description}</p>
-
-        {/* Quantity tiers */}
-        <div style={{ position: 'relative', marginTop: 28 }}>
-          <span style={{ position: 'absolute', top: -9, left: 0, zIndex: 2, background: '#C9F2DE', color: '#0B6E4F', fontSize: 12, fontWeight: 600, padding: '2px 8px', borderRadius: 4 }}>Recommended quantity</span>
-          <div style={{ display: 'flex' }}>
-            {tiers.map((t, i) => {
-              const isSelected = selected === i;
-              return (
-                <button
-                  key={t.qty}
-                  onClick={() => setSelected(i)}
-                  style={{
-                    flex: 1,
-                    minHeight: 68,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
-                    cursor: 'pointer',
-                    background: isSelected ? '#EAF2FE' : 'white',
-                    border: isSelected ? `1.5px solid ${PAYWALL_BLUE}` : '1px solid #D9D7E0',
-                    borderRadius: isSelected ? 8 : (i === 0 ? '8px 0 0 8px' : i === tiers.length - 1 ? '0 8px 8px 0' : 0),
-                    marginLeft: !isSelected && i !== 0 ? -1 : 0,
-                    zIndex: isSelected ? 1 : 0,
-                    position: 'relative',
-                    fontFamily: 'var(--ink-font-family)',
-                  }}
-                >
-                  <span style={{ fontSize: 16, fontWeight: 700, color: '#130032' }}>{t.qty}</span>
-                  {t.price && <span style={{ fontSize: 13, color: isSelected ? PAYWALL_BLUE : '#8B8699' }}>{t.price}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <p style={{ margin: '16px 0 0', fontSize: 13, lineHeight: 1.5, color: '#5A5568' }}>
-          An overage charge of $0.50 per delivery will apply if you exceed your subscription limit. Additional tax may apply.
-        </p>
-
-        <div style={{ height: 1, background: '#E4E2E9', margin: '20px 0' }} />
-
-        {/* Payment method */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ ...rowLabel, display: 'inline-flex', alignItems: 'center', gap: 8 }}>Payment method <PaywallInfoIcon /></span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#130032', fontSize: 15 }}>
-            <span style={{ fontWeight: 800, fontStyle: 'italic', color: '#1A1F71', fontSize: 13, letterSpacing: '0.3px' }}>VISA</span>
-            ending in 1111
-          </span>
-        </div>
-
-        {/* Subscription type */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-          <span style={rowLabel}>Subscription type</span>
-          <span style={{ color: '#130032', fontSize: 15 }}>Annual | Billed monthly</span>
-        </div>
-
-        <div style={{ height: 1, background: '#E4E2E9', margin: '20px 0' }} />
-
-        {/* Due today */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#130032' }}>Due today</span>
-          <button
-            onClick={() => setBreakdownOpen(o => !o)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 18, fontWeight: 700, color: '#130032', fontFamily: 'var(--ink-font-family)' }}
-            aria-expanded={breakdownOpen}
-            aria-label="Toggle cost breakdown"
-          >
-            $0.80
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transform: breakdownOpen ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.15s' }}>
-              <path d="M4 10L8 6L12 10" stroke="#130032" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-
-        {breakdownOpen && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-              <span style={rowLabel}>Subtotal</span>
-              <span style={{ color: '#130032', fontSize: 15 }}>$1.00/month</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-              <span style={{ fontSize: 15, color: PAYWALL_GREEN, display: 'inline-flex', alignItems: 'center', gap: 8 }}>One-time proration <PaywallInfoIcon color={PAYWALL_GREEN} /></span>
-              <span style={{ color: PAYWALL_GREEN, fontSize: 15 }}>$0.20</span>
-            </div>
-          </>
-        )}
-
-        {/* Legal */}
-        <p style={{ margin: '16px 0 0', fontSize: 12, lineHeight: 1.6, color: '#8B8699' }}>
-          By selecting [CTA label], you agree to the above [increase/decrease/change] in your Annual | Billed monthly subscription. This subscription will automatically renew unless you <span style={linkStyle}>cancel</span>, pursuant to the terms above. If you cancel your subscription before renewal, you&apos;ll be responsible for the remaining balance on your annual subscription, including applicable taxes. You also agree to Docusign&apos;s <span style={linkStyle}>Terms &amp; Conditions</span> and <span style={linkStyle}>Privacy Notice</span>.
-        </p>
-
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 28 }}>
-          <button
-            onClick={onClose}
-            style={{ height: 40, padding: '0 20px', border: 'none', background: 'transparent', color: '#130032', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)', borderRadius: 4 }}
-          >Cancel</button>
-          <button
-            onClick={onClose}
-            style={{ height: 40, padding: '0 24px', border: 'none', background: PAYWALL_BLUE, color: 'white', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)', borderRadius: 4 }}
-          >Purchase</button>
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-}
-
-// Two-column "add user licenses" upgrade modal shown when the collaborator
-// avatars in an Agreement Space header are clicked in the paywalls prototype.
-// Left: purple marketing panel; right: license quantity stepper + billing summary.
-function PaywallAddSeatsModal({ onClose }: { onClose: () => void }) {
-  const [qty, setQty] = useState(1);
-  const [breakdownOpen, setBreakdownOpen] = useState(false);
-  const pricePerSeat = 80;
-  const dueToday = 70;
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  const rowLabel = { fontSize: 15, color: '#130032' };
-  const linkStyle: React.CSSProperties = { color: PAYWALL_BLUE, textDecoration: 'underline', cursor: 'pointer' };
-  const stepperBtn = (active: boolean): React.CSSProperties => ({
-    width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    border: active ? `1.5px solid ${PAYWALL_BLUE}` : '1px solid #D9D7E0',
-    background: 'white', borderRadius: 6, cursor: 'pointer', color: '#130032',
-    fontFamily: 'var(--ink-font-family)',
-  });
-
-  return createPortal(
-    <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 3000,
-        background: 'var(--ink-bg-scrim, rgba(19,0,50,0.4))',
-        backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '40px 0', fontFamily: 'var(--ink-font-family)',
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Add user licenses"
-        style={{
-          position: 'relative', width: 940, maxWidth: 'calc(100vw - 32px)',
-          maxHeight: 'calc(100vh - 80px)', overflow: 'hidden',
-          background: 'white', borderRadius: 16, boxShadow: '0 24px 64px rgba(19,0,50,0.24)',
-          display: 'flex',
-        }}
-      >
-        {/* Left marketing panel */}
-        <div
-          style={{
-            width: 340, flexShrink: 0, background: '#2B0A5E', color: 'white',
-            padding: '40px 36px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
-          }}
-        >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 20, letterSpacing: '-0.2px' }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h11a5 5 0 0 1 0 10H9v6H4V4Z" fill="white"/></svg>
-            Docusign
-          </div>
-          <h3 style={{ margin: '36px 0 0', fontSize: 32, lineHeight: 1.15, fontWeight: 700, letterSpacing: '-0.5px' }}>Teams work better together</h3>
-          <p style={{ margin: '20px 0 0', fontSize: 15, lineHeight: 1.55, color: 'rgba(255,255,255,0.82)' }}>
-            Invite your coworkers to improve collaboration while increasing your agreement-management capabilities.
-          </p>
-          <div style={{ position: 'relative', marginTop: 36, flex: 1, minHeight: 220 }}>
-            <div style={{ position: 'absolute', left: 22, top: 8, bottom: -40, width: 3, background: 'linear-gradient(180deg,#7A3BFF,#C026D3)' }} />
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                style={{
-                  position: 'absolute', left: 0, right: -36, top: i * 84,
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  background: 'white', borderRadius: 999, padding: '10px 16px 10px 10px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.28)',
-                }}
-              >
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: ['#F5C6A5', '#B8C4CF', '#E0A87E'][i], flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ height: 8, borderRadius: 4, background: '#E4E2E9', width: '78%' }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right content panel */}
-        <div style={{ flex: 1, minWidth: 0, padding: '40px 40px 32px', overflowY: 'auto' }}>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 4, color: '#130032' }}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-
-          <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#130032', letterSpacing: '-0.2px', paddingRight: 32 }}>Add user licenses</h2>
-          <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: '#5A5568' }}>
-            You need to upgrade your plan to add more collaborators. Each user license includes all of your current advanced features.
-          </p>
-
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-            <PaywallInfoIcon />
-          </div>
-
-          {/* Quantity stepper */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button style={stepperBtn(false)} onClick={() => setQty(q => Math.max(1, q - 1))} aria-label="Decrease licenses">
-                  <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8h10" stroke="#130032" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                </button>
-                <button style={stepperBtn(true)} onClick={() => setQty(q => q + 1)} aria-label="Increase licenses">
-                  <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke={PAYWALL_BLUE} strokeWidth="1.5" strokeLinecap="round" /></svg>
-                </button>
-              </div>
-              <span style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{qty} user license{qty > 1 ? 's' : ''}</span>
-            </div>
-            <span style={{ fontSize: 15, color: '#130032' }}>${(qty * pricePerSeat).toFixed(2)}/month</span>
-          </div>
-
-          <div style={{ height: 1, background: '#E4E2E9', margin: '24px 0' }} />
-
-          {/* Payment method */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ ...rowLabel, display: 'inline-flex', alignItems: 'center', gap: 8 }}>Payment method <PaywallInfoIcon /></span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#130032', fontSize: 15 }}>
-              <span style={{ fontWeight: 800, fontStyle: 'italic', color: '#1A1F71', fontSize: 13, letterSpacing: '0.3px' }}>VISA</span>
-              ending in 1111
-            </span>
-          </div>
-
-          {/* Subscription type */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-            <span style={rowLabel}>Subscription type</span>
-            <span style={{ color: '#130032', fontSize: 15 }}>Annual | Billed monthly</span>
-          </div>
-
-          {/* Discount */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-            <span style={rowLabel}>Discount</span>
-            <span style={{ ...linkStyle, fontWeight: 600, textDecoration: 'none' }}>Add Promo Code</span>
-          </div>
-
-          <div style={{ height: 1, background: '#E4E2E9', margin: '24px 0' }} />
-
-          {/* Due today */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#130032' }}>Due today</span>
-            <button
-              onClick={() => setBreakdownOpen(o => !o)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 18, fontWeight: 700, color: '#130032', fontFamily: 'var(--ink-font-family)' }}
-              aria-expanded={breakdownOpen}
-              aria-label="Toggle cost breakdown"
-            >
-              ${dueToday.toFixed(2)}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transform: breakdownOpen ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.15s' }}>
-                <path d="M4 10L8 6L12 10" stroke="#130032" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-
-          {breakdownOpen && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-              <span style={rowLabel}>Subtotal</span>
-              <span style={{ color: '#130032', fontSize: 15 }}>${(qty * pricePerSeat).toFixed(2)}/month</span>
-            </div>
-          )}
-
-          {/* Legal */}
-          <p style={{ margin: '16px 0 0', fontSize: 12, lineHeight: 1.6, color: '#8B8699' }}>
-            By selecting [CTA label], you agree to the above [increase/decrease/change] in your Annual | Billed monthly subscription. This subscription will automatically renew unless you <span style={linkStyle}>cancel</span>, pursuant to the terms above. If you cancel your subscription before renewal, you&apos;ll be responsible for the remaining balance on your annual subscription, including applicable taxes. You also agree to Docusign&apos;s <span style={linkStyle}>Terms &amp; Conditions</span> and <span style={linkStyle}>Privacy Notice</span>.
-          </p>
-
-          {/* Footer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 28 }}>
-            <button
-              onClick={onClose}
-              style={{ height: 40, padding: '0 24px', border: 'none', background: PAYWALL_BLUE, color: 'white', cursor: 'pointer', fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)', borderRadius: 4 }}
-            >Purchase</button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body,
   );
 }
 
@@ -7485,8 +7089,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   };
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
-  const [showAgreementManagerModal, setShowAgreementManagerModal] = useState(false);
-  const [showAddSeatsModal, setShowAddSeatsModal] = useState(false);
   const [openEnvelope, setOpenEnvelope] = useState<OpenEnvelope | null>(null);
   // Id of the table row whose envelope panel is currently open, so that row
   // stays highlighted (and only that row) while the panel is open.
@@ -7963,20 +7565,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </button>
             <div style={{ flex: 1 }} />
             <Inline gap="small" align="center">
-              <div
-                style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
-                {...(version === 'paywalls'
-                  ? {
-                      role: 'button',
-                      tabIndex: 0,
-                      'aria-label': 'Manage collaborators',
-                      onClick: () => setShowAddSeatsModal(true),
-                      onKeyDown: (e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAddSeatsModal(true); }
-                      },
-                    }
-                  : {})}
-              >
+              <div style={{ display: 'flex' }}>
                 <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
                 <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
                 <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
@@ -8834,16 +8423,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         }}
       />
 
-      {/* Paywall: Agreement Manager upgrade modal (Gain Insights scrim CTA) */}
-      {version === 'paywalls' && showAgreementManagerModal && (
-        <PaywallUpgradeModal kind="parties" onClose={() => setShowAgreementManagerModal(false)} />
-      )}
-
-      {/* Paywall: Add user licenses modal (collaborator avatars) */}
-      {version === 'paywalls' && showAddSeatsModal && (
-        <PaywallAddSeatsModal onClose={() => setShowAddSeatsModal(false)} />
-      )}
-
       {/* Upload Request full-screen overlay */}
       <UploadRequestScreen
         open={showUploadRequest}
@@ -9192,7 +8771,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   <Button
                     kind="primary"
                     style={{ background: '#4C00FB', borderColor: '#4C00FB', color: 'white' }}
-                    onClick={() => setShowAgreementManagerModal(true)}
                   >
                     Upgrade Plan
                   </Button>
