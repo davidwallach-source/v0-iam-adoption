@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���������������������������������════════════════════
+/* ═��══════���═����═══════���������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�����������������������������══���═══════���═══════���═══���════════ */
+   ═══════�������������������������══���═══════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -8761,12 +8761,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   aria-hidden="true"
                   style={{ width: 240, height: 'auto', flexShrink: 0, display: 'block' }}
                 />
-                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)', transform: 'translateY(16px)' }}>
+                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)' }}>
                   <Heading as="h2" size="lg" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
                     Gain Insights
                   </Heading>
-                  <Text size="md" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)', color: '#3d3a4e' }}>
-                    Dig into historical contracts with this party to identify opportunities, risks, key data points, and much more.
+                  <Text size="md" color="secondary" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)' }}>
+                    Dig into historical contracts with this party to iIdentify opportunities, risks, key data points, and much more.
                   </Text>
                   <Button
                     kind="primary"
