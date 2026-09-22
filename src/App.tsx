@@ -2984,7 +2984,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���═����═══════���������������������������════════════════════
+/* ═��══════���═����═══════�����������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════════ */
 
@@ -3407,7 +3407,7 @@ function InsightsOverview() {
 
 /* ═══════════════════════════════════════
    Admin Page
-   ═══════�������������������������══���═══════���═══════���═══���════════ */
+   ═══════�������������������������══════════���═══════���═══���════════ */
 
 function AdminPage() {
   return (
@@ -8727,57 +8727,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               </div>
             )}
           </div>
-
-          {/* Paywall scrim (paywalls version only) */}
-          {version === 'paywalls' && showPartyHistory && (
-            <div
-              style={{
-                position: 'fixed',
-                bottom: 0,
-                right: 0,
-                width: '680px',
-                maxWidth: '100vw',
-                height: '58%',
-                zIndex: 100000,
-                display: 'flex',
-                alignItems: 'flex-end',
-                pointerEvents: 'none',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 26%, rgba(255,255,255,0.96) 48%, #FFFFFF 68%)',
-              }}
-            >
-              <div
-                style={{
-                  pointerEvents: 'auto',
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  gap: 'var(--ink-spacing-400)',
-                  padding: '0 var(--ink-spacing-400) 0',
-                  width: '100%',
-                }}
-              >
-                <img
-                  src="/doc-stack-2.svg"
-                  alt=""
-                  aria-hidden="true"
-                  style={{ width: 240, height: 'auto', flexShrink: 0, display: 'block' }}
-                />
-                <div style={{ flex: 1, minWidth: 0, paddingBottom: 'var(--ink-spacing-500)' }}>
-                  <Heading as="h2" size="lg" style={{ marginBottom: 'var(--ink-spacing-150)' }}>
-                    Gain Insights
-                  </Heading>
-                  <Text size="md" color="secondary" style={{ display: 'block', marginBottom: 'var(--ink-spacing-300)' }}>
-                    Dig into historical contracts with this party to iIdentify opportunities, risks, key data points, and much more.
-                  </Text>
-                  <Button
-                    kind="primary"
-                    style={{ background: '#4C00FB', borderColor: '#4C00FB', color: 'white' }}
-                  >
-                    Upgrade Plan
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
       </Drawer>
     </div>
   );
