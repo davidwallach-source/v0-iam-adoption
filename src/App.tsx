@@ -8243,7 +8243,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                           <Inline gap="small" align="center">
-                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
                             <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
                           </Inline>
                           <RowOverflowMenu
@@ -8258,10 +8257,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           {task.assignee === '--' ? (
                             <Text size="xs" color="secondary">Unassigned</Text>
                           ) : (
-                            <Inline gap="xsmall" align="center">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <Avatar initials={task.assigneeInitials} size="xsmall" />
                               <Text size="xs" color="secondary">{task.assignee}</Text>
-                            </Inline>
+                            </div>
                           )}
                           <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{task.dueDate}</Text>
                         </div>
@@ -10286,7 +10285,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     };
   }, [unavailableCallout]);
 
-  /* ── GlobalNav — matches production DocuSign comp ─��� */
+  /* ── GlobalNav — matches production DocuSign comp ─���� */
   const globalNavConfig = {
     logo: <img src="/docusign-logo.svg" alt="DocuSign" />,
     showAppSwitcher: false,
