@@ -8337,8 +8337,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             display: 'flex',
                             alignItems: 'center',
                             gap: 'var(--ink-spacing-200)',
-                            minHeight: 56,
-                            padding: 'var(--ink-spacing-150) 0',
+                            minHeight: 60,
+                            padding: '0',
                             borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
                             background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent',
                           }}
@@ -8364,7 +8364,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           <div style={{ width: 160, flexShrink: 0 }}>
                             <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                           </div>
-                          <div style={{ width: 130, flexShrink: 0, display: 'flex', justifyContent: 'flex-end' }}>
+                          <div style={{ width: 130, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {isHovered ? (
                               <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                 <Button
