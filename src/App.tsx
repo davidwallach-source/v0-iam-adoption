@@ -8440,19 +8440,35 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             </div>
 
-            {/* Right column — combined Activity / Messages module with a toggle */}
-            <div style={{ background: '#F6F7F6', padding: '2px var(--ink-spacing-300) var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
+            {/* Right column — combined Activity / Messages module with tabs */}
+            <div style={{ background: '#F6F7F6', padding: '2px var(--ink-spacing-300) var(--ink-spacing-300) var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
               <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)' }}>
-                  <SegmentedControl
-                    accessibilityText="Switch between activity and messages"
-                    value={activityView}
-                    onChange={(v) => setActivityView(v as 'activity' | 'messages')}
-                    options={[
-                      { value: 'activity', label: 'Activity' },
-                      { value: 'messages', label: `Messages (${spaceMessages.length})` },
-                    ]}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+                  <div style={{ display: 'flex', alignItems: 'stretch', gap: 'var(--ink-spacing-300)' }}>
+                    {(['activity', 'messages'] as const).map((v) => {
+                      const isActive = activityView === v;
+                      return (
+                        <button
+                          key={v}
+                          onClick={() => setActivityView(v)}
+                          style={{
+                            padding: 'var(--ink-spacing-100) 0',
+                            border: 'none',
+                            background: 'none',
+                            borderBottom: isActive ? '2px solid var(--ink-cobalt-100)' : '2px solid transparent',
+                            marginBottom: -1,
+                            color: isActive ? 'var(--ink-cobalt-100)' : 'rgba(0,0,0,0.55)',
+                            cursor: 'pointer',
+                            fontSize: 'var(--ink-font-size-sm)',
+                            fontWeight: isActive ? 600 : 400,
+                            fontFamily: 'var(--ink-font-family-default)',
+                          }}
+                        >
+                          {v === 'activity' ? 'Activity' : `Messages (${spaceMessages.length})`}
+                        </button>
+                      );
+                    })}
+                  </div>
                   {activityView === 'messages' && (
                     <IconButton icon="plus" variant="tertiary" size="small" aria-label="New message" onClick={() => showToast('New message')} />
                   )}
