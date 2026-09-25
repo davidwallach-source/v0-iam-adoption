@@ -8148,7 +8148,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Key extractions — light strip below the header/tabs */}
       <div style={{ background: '#F6F7F6' }}>
         <div style={{ ...innerStyle, padding: 'var(--ink-spacing-200) var(--ink-spacing-300)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', marginTop: 4 }}>
             {(() => {
               const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
               const secondary = 'var(--ink-font-color-secondary)';
@@ -8249,7 +8249,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto', marginTop: -4 }}>
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
@@ -8265,7 +8265,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                     <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Tasks</Text>
                     {orderedTasks.length > 3 && (
-                      <Button kind="tertiary" size="small" onClick={() => setActiveTab('tasks')}>View all</Button>
+                      <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('tasks'); }}>See all</Link>
                     )}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(orderedTasks.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
