@@ -7490,6 +7490,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
 
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
+  const [activityView, setActivityView] = useState<'activity' | 'messages'>('activity');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
@@ -8439,46 +8440,56 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             </div>
 
-            {/* Right column — Recent activity + Messages */}
-            <div style={{ background: '#F6F7F6', padding: 'var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
-              {/* Recent activity card */}
+            {/* Right column — combined Activity / Messages module with a toggle */}
+            <div style={{ background: '#F6F7F6', padding: '2px var(--ink-spacing-300) var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
               <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
-                <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600, display: 'block', marginBottom: 'var(--ink-spacing-200)' }}>Recent activity</Text>
-                <Stack gap="medium">
-                  {currentActivity.map((item) => (
-                    <Inline key={item.id} gap="medium" align="flex-start">
-                      <div style={{
-                        width: 32, height: 32, borderRadius: '50%',
-                        background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
-                        <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <Text size="sm"><strong>{item.user}</strong> {item.action}</Text>
-                        <Text size="xs" color="secondary">{item.time}</Text>
-                      </div>
-                    </Inline>
-                  ))}
-                </Stack>
-              </div>
-
-              {/* Messages widget */}
-              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-100)' }}>
-                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Messages ({spaceMessages.length})</Text>
-                  <IconButton icon="plus" variant="tertiary" size="small" aria-label="New message" onClick={() => showToast('New message')} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)' }}>
+                  <SegmentedControl
+                    accessibilityText="Switch between activity and messages"
+                    value={activityView}
+                    onChange={(v) => setActivityView(v as 'activity' | 'messages')}
+                    options={[
+                      { value: 'activity', label: 'Activity' },
+                      { value: 'messages', label: `Messages (${spaceMessages.length})` },
+                    ]}
+                  />
+                  {activityView === 'messages' && (
+                    <IconButton icon="plus" variant="tertiary" size="small" aria-label="New message" onClick={() => showToast('New message')} />
+                  )}
                 </div>
-                {spaceMessages.map((msg, idx) => (
-                  <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)' }}>
-                    <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <Text size="sm" weight="semibold">{msg.name}</Text>
-                      <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
-                    </div>
-                  </Inline>
-                ))}
+
+                {activityView === 'activity' ? (
+                  <Stack gap="medium">
+                    {currentActivity.map((item) => (
+                      <Inline key={item.id} gap="medium" align="flex-start">
+                        <div style={{
+                          width: 32, height: 32, borderRadius: '50%',
+                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <Text size="sm"><strong>{item.user}</strong> {item.action}</Text>
+                          <Text size="xs" color="secondary">{item.time}</Text>
+                        </div>
+                      </Inline>
+                    ))}
+                  </Stack>
+                ) : (
+                  <div>
+                    {spaceMessages.map((msg, idx) => (
+                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)' }}>
+                        <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Text size="sm" weight="semibold">{msg.name}</Text>
+                          <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
+                        </div>
+                      </Inline>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
