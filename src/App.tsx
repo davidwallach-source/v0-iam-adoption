@@ -8038,8 +8038,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     }}>
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(150deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
-        {/* 224px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 224, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
+        {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
           {/* Top actions row — back arrow on the left, actions stacked on the right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
@@ -8047,8 +8047,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
             </button>
             <div style={{ flex: 1 }} />
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
-              <Inline gap="small" align="center">
+            <Inline gap="small" align="center">
               <div
                 style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
                 {...(version === 'paywalls'
@@ -8063,12 +8062,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     }
                   : {})}
               >
-                <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: 'transparent', color: 'var(--ink-white-100)', marginRight: -8 }} />
-                <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: 'transparent', color: 'var(--ink-white-100)', marginRight: -8 }} />
-                <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: 'transparent', color: 'var(--ink-white-100)' }} />
+                <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
               </div>
               <IconButton icon="duplicate" variant="tertiary" size="small" aria-label="Related agreements" style={{ color: 'var(--ink-white-100)' }} />
-              </Inline>
+            </Inline>
+          </div>
+
+          {/* Add button — centered below the top actions row */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ink-spacing-400)' }}>
               <AddMenu
                 onUpload={() => setShowFilePicker(true)}
                 onUseTemplate={() => setShowFilePicker(true)}
@@ -8094,7 +8097,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               }}
               onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
             />
-            </div>
           </div>
 
           {/* Space name (H1) + status — on the dark gradient header */}
@@ -9891,7 +9893,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ──────────���─────────────────────────────��────��─────────��──────────────────
+/* ──────────���─────────────────────────────��────��─────────��────────────���─────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
