@@ -8365,7 +8365,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           <div style={{ width: 150, flexShrink: 0 }}>
                             <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                           </div>
-                          <div style={{ width: 110, flexShrink: 0 }}>
+                          <div style={{ width: 110, flexShrink: 0, marginLeft: 80 }}>
                             <Text size="sm" color="secondary">{doc.lastModified || doc.dateModified}</Text>
                           </div>
                           {/* Flexible empty space so hover CTAs appear to the right without shifting other columns */}
