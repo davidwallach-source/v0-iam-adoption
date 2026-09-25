@@ -7495,6 +7495,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const fadeIn = useFadeIn(0, 250);
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
+  const [hoveredOverviewDocId, setHoveredOverviewDocId] = useState<string | null>(null);
   const [showPrepare, setShowPrepare] = useState(false);
   const [showUploadRequest, setShowUploadRequest] = useState(false);
   const [showVendorOnboarding, setShowVendorOnboarding] = useState(false);
@@ -8265,6 +8266,142 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Documents preview — a few of this space's documents, styled as a card list */}
+              {currentDocuments.length > 0 && (
+                <div style={{
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 12,
+                  padding: 'var(--ink-spacing-300)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                    <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('documents'); }}>See all</Link>
+                  </div>
+
+                  {/* Bulk actions bar - shown when documents are selected */}
+                  {selectedDocs.size > 0 && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 16px',
+                      background: 'var(--ink-cobalt-10)',
+                      border: '1px solid var(--ink-cobalt-30)',
+                      borderRadius: 8,
+                      marginBottom: 'var(--ink-spacing-200)',
+                    }}>
+                      <Text size="sm" weight="semibold" style={{ color: 'var(--ink-cobalt-100)' }}>
+                        {selectedDocs.size} selected
+                      </Text>
+                      <div style={{ flex: 1 }} />
+                      <Button kind="secondary" size="small" onClick={() => setSelectedDocs(new Set())}>
+                        Clear
+                      </Button>
+                      <Button kind="secondary" size="small" onClick={() => {
+                        const selectedDocNames = currentDocuments
+                          .filter(doc => selectedDocs.has(doc.id))
+                          .map(doc => doc.name);
+                        if (selectedDocNames.length === 0) return;
+                        setApprovalModalDoc(selectedDocNames.join(', '));
+                        setSelectedDocs(new Set());
+                      }}>
+                        Send for Approval
+                      </Button>
+                      <Button kind="primary" size="small" onClick={() => {
+                        const selectedDocNames = currentDocuments
+                          .filter(doc => selectedDocs.has(doc.id))
+                          .map(doc => doc.name);
+                        setPreparePreselectedDocs(selectedDocNames);
+                        setShowPrepare(true);
+                      }}>
+                        Send for Signature
+                      </Button>
+                    </div>
+                  )}
+
+                  <div>
+                    {currentDocuments.slice(0, 5).map((doc, idx) => {
+                      const isSelected = selectedDocs.has(doc.id);
+                      const isHovered = hoveredOverviewDocId === doc.id;
+                      return (
+                        <div
+                          key={doc.id}
+                          onMouseEnter={() => setHoveredOverviewDocId(doc.id)}
+                          onMouseLeave={() => setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev))}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 'var(--ink-spacing-200)',
+                            padding: 'var(--ink-spacing-200) 0',
+                            borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
+                            background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const newSelected = new Set(selectedDocs);
+                              if (e.target.checked) {
+                                newSelected.add(doc.id);
+                              } else {
+                                newSelected.delete(doc.id);
+                              }
+                              setSelectedDocs(newSelected);
+                            }}
+                            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)', flexShrink: 0 }}
+                          />
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                            background: 'var(--ink-cobalt-10)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <Icon name="document" size={18} color="var(--ink-cobalt-100)" />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
+                            <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</Text>
+                            {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
+                          </div>
+                          <div style={{ width: 160, flexShrink: 0 }}>
+                            <StatusLight className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
+                          </div>
+                          <div style={{ width: 130, flexShrink: 0, display: 'flex', justifyContent: 'flex-end' }}>
+                            {isHovered ? (
+                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                <Button
+                                  kind="secondary"
+                                  size="small"
+                                  onClick={() => {
+                                    if (doc.id.startsWith('added-')) {
+                                      setPendingPreviewDoc(doc.name);
+                                    } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                      onEditNDA();
+                                    } else {
+                                      onPreviewDocument?.(doc.name);
+                                    }
+                                  }}
+                                >
+                                  {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                                </Button>
+                                <RowOverflowMenu
+                                  items={[
+                                    { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                    { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                  ]}
+                                />
+                              </Inline>
+                            ) : (
+                              <Text size="sm" color="secondary">{doc.lastModified || doc.dateModified}</Text>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
