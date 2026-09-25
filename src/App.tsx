@@ -8455,9 +8455,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             padding: 'var(--ink-spacing-100) 0',
                             border: 'none',
                             background: 'none',
-                            borderBottom: isActive ? '2px solid var(--ink-cobalt-100)' : '2px solid transparent',
+                            borderBottom: isActive ? '2px solid var(--ink-ink-100)' : '2px solid transparent',
                             marginBottom: -1,
-                            color: isActive ? 'var(--ink-cobalt-100)' : 'rgba(0,0,0,0.55)',
+                            color: isActive ? 'var(--ink-ink-100)' : 'rgba(0,0,0,0.55)',
                             cursor: 'pointer',
                             fontSize: 'var(--ink-font-size-sm)',
                             fontWeight: isActive ? 600 : 400,
@@ -8469,9 +8469,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       );
                     })}
                   </div>
-                  {activityView === 'messages' && (
-                    <IconButton icon="plus" variant="tertiary" size="small" aria-label="New message" onClick={() => showToast('New message')} />
-                  )}
                 </div>
 
                 {activityView === 'activity' ? (
@@ -8495,8 +8492,21 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   </Stack>
                 ) : (
                   <div>
+                    <button
+                      onClick={() => showToast('New message')}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-100)',
+                        padding: 'var(--ink-spacing-100) 0 var(--ink-spacing-200)',
+                        border: 'none', background: 'none', cursor: 'pointer',
+                        color: 'var(--ink-cobalt-100)', fontWeight: 600,
+                        fontSize: 'var(--ink-font-size-sm)', fontFamily: 'var(--ink-font-family-default)',
+                      }}
+                    >
+                      <Icon name="plus" size={16} color="var(--ink-cobalt-100)" />
+                      New Message
+                    </button>
                     {spaceMessages.map((msg, idx) => (
-                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)' }}>
+                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? '1px solid var(--ink-border-subtle)' : '1px solid var(--ink-border-subtle)' }}>
                         <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <Text size="sm" weight="semibold">{msg.name}</Text>
