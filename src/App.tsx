@@ -8249,7 +8249,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto', marginTop: -12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto', paddingTop: 16 }}>
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
