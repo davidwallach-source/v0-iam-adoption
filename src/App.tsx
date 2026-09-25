@@ -6421,7 +6421,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }}>Add New</Button>
+      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40 }}>Add New</Button>
 
       {open && (
         <div style={{
@@ -7128,7 +7128,7 @@ function PaywallAddSeatsModal({ onClose }: { onClose: () => void }) {
 // Click-to-edit Agreement Space title shown in the workspace header. Clicking
 // the name turns it into an inline text field (Google Docs style); Enter or
 // blur commits, Escape cancels.
-function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; onRename?: (name: string) => void; titleSize?: number }) {
+function EditableSpaceName({ name, onRename, titleSize = 20, color, onDark = false }: { name: string; onRename?: (name: string) => void; titleSize?: number; color?: string; onDark?: boolean }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -7142,11 +7142,11 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
     fontSize: titleSize,
     fontWeight: 600,
     fontFamily: 'var(--ink-font-family)',
-    color: 'var(--ink-font-color-default)',
+    color: color ?? 'var(--ink-font-color-default)',
     lineHeight: 1.2,
   };
 
-  if (!onRename) return <Heading level={1} style={{ margin: 0, fontSize: titleSize }}>{name}</Heading>;
+  if (!onRename) return <Heading level={1} style={{ margin: 0, fontSize: titleSize, color }}>{name}</Heading>;
 
   const commit = () => {
     const trimmed = draft.trim();
@@ -7197,7 +7197,7 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
         cursor: 'text',
         textAlign: 'left',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'; e.currentTarget.style.background = 'var(--ink-bg-color-secondary)'; }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = onDark ? 'rgba(255,255,255,0.3)' : 'var(--ink-border-subtle)'; e.currentTarget.style.background = onDark ? 'rgba(255,255,255,0.12)' : 'var(--ink-bg-color-secondary)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.background = 'none'; }}
     >
       {name}
@@ -7987,8 +7987,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
     border: 'none',
     background: 'none',
-    borderBottom: isActive ? '2px solid var(--ink-neutral-140)' : '2px solid transparent',
-    color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
+    borderBottom: isActive ? '2px solid var(--ink-white-100)' : '2px solid transparent',
+    color: isActive ? 'var(--ink-white-100)' : 'rgba(255,255,255,0.7)',
     cursor: 'pointer',
     fontSize: 'var(--ink-font-size-sm)',
     fontWeight: isActive ? 600 : 400,
@@ -8037,17 +8037,18 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       display: 'flex', flexDirection: 'column',
     }}>
       {/* Header + Tabs — single full-width block */}
-      <div style={{ background: 'var(--ink-bg-color-canvas-page)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+      <div style={{ background: 'linear-gradient(150deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 224px-tall header: actions row, H1, key extractions, then tabs */}
         <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 224, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
-          {/* Top actions row — back arrow on the left, actions on the right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Top actions row — back arrow on the left, actions stacked on the right */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
             <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0 }}>
-              <Icon name="arrow-left" size={20} />
+              <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
             </button>
             <div style={{ flex: 1 }} />
-            <Inline gap="small" align="center">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
+              <Inline gap="small" align="center">
               <div
                 style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
                 {...(version === 'paywalls'
@@ -8062,11 +8063,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     }
                   : {})}
               >
-                <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-                <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-                <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
+                <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: 'transparent', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: 'transparent', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: 'transparent', color: 'var(--ink-white-100)' }} />
               </div>
-              <IconButton icon="duplicate" variant="tertiary" size="small" aria-label="Related agreements" />
+              <IconButton icon="duplicate" variant="tertiary" size="small" aria-label="Related agreements" style={{ color: 'var(--ink-white-100)' }} />
+              </Inline>
               <AddMenu
                 onUpload={() => setShowFilePicker(true)}
                 onUseTemplate={() => setShowFilePicker(true)}
@@ -8092,16 +8094,35 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               }}
               onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
             />
-            </Inline>
+            </div>
           </div>
 
-          {/* Space name (H1) — moved below the actions row */}
-          <div style={{ marginTop: 'var(--ink-spacing-300)' }}>
-            <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} />
+          {/* Space name (H1) + status — on the dark gradient header */}
+          <div style={{ marginTop: 'var(--ink-spacing-300)', display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap' }}>
+            <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
+            <StatusLight
+              className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
+              kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+              text={agreement.status}
+            />
           </div>
 
-          {/* Key extractions — surfaced below the H1, tailored to the agreement's use case */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 'var(--ink-spacing-200)', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1 }} />
+
+          {/* Tabs — pinned to the bottom of the header */}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
+            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+            <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Key extractions — light strip below the header/tabs */}
+      <div style={{ background: '#F6F7F6', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+        <div style={{ ...innerStyle, padding: 'var(--ink-spacing-200) var(--ink-spacing-300)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
             {(() => {
               const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
               const secondary = 'var(--ink-font-color-secondary)';
@@ -8178,12 +8199,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
               return (
                 <>
-                  <StatusLight
-                    noFill
-                    className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
-                    kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-                    text={agreement.status}
-                  />
                   {partyName && (
                     <button
                       type="button"
@@ -8202,24 +8217,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             })()}
           </div>
 
-          <div style={{ flex: 1 }} />
-
-          {/* Tabs — pinned to the bottom of the header */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
-            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
-            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-            <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
-          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto', background: 'var(--ink-bg-color-secondary)' }}>
+      <div style={{ flex: 1, overflow: 'auto', background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
+            <div style={{ padding: 'var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
               {orderedTasks.length > 0 && (
@@ -8408,7 +8414,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </div>
 
             {/* Right column — Recent activity + Messages */}
-            <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-secondary)', padding: 'var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
+            <div style={{ background: '#F6F7F6', padding: 'var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
               {/* Recent activity card */}
               <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
                 <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600, display: 'block', marginBottom: 'var(--ink-spacing-200)' }}>Recent activity</Text>
