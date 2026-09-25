@@ -7780,6 +7780,23 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           ]
         : workspaceData.activity),
   ];
+
+  // Messages shown in the Overview right column widget.
+  const spaceMessages: { name: string; initials: string; colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; preview: string }[] = [
+    { name: 'Alex Preston', initials: 'AP', colorIndex: 1, preview: 'I left a few comments in the contract to review…' },
+    { name: 'Jerome Rill', initials: 'JR', colorIndex: 4, preview: 'Feel free to approve the agreement if I am not…' },
+    { name: 'Stacy Banks', initials: 'SB', colorIndex: 2, preview: 'I went ahead and submitted the contract agree…' },
+    { name: 'Adrien Richards', initials: 'AR', colorIndex: 7, preview: 'Thanks for sending it over! Can you also send a…' },
+  ];
+
+  // Creation metadata surfaced in the Details tab. Derived from the oldest
+  // recorded activity for this space, with a sensible fallback.
+  const spaceCreatedActivity = [...currentActivity].reverse().find((a) => a.user && a.user !== 'System');
+  const spaceCreatedBy = spaceCreatedActivity?.user || 'Jan Rogers';
+  const spaceCreatedByInitials = spaceCreatedBy === 'You'
+    ? 'YO'
+    : spaceCreatedBy.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+  const spaceCreatedDate = spaceCreatedActivity?.time || agreement.date || '—';
   const currentTasks = useMemo(() => {
     // Reverse so the most recently added approval task appears at the top,
     // matching the sentTasks ordering used in each branch below.
@@ -8188,7 +8205,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           {/* Tabs — pinned to the bottom of the header */}
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
             <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
             <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+            <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
           </div>
         </div>
       </div>
@@ -8200,65 +8219,105 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             {/* Main content */}
             <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
 
-              {/* Needs Attention section */}
-              {currentAttentionItems.length > 0 && !isNDADraft && !isUploadedDocAgreement && (
+              {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
+              {orderedTasks.length > 0 && (
                 <div style={{ marginBottom: 'var(--ink-spacing-400)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
-                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Needs Attention</Text>
-                    <Button kind="tertiary" size="small">View all</Button>
+                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Tasks</Text>
+                    {orderedTasks.length > 3 && (
+                      <Button kind="tertiary" size="small" onClick={() => setActiveTab('tasks')}>View all</Button>
+                    )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(currentAttentionItems.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
-                    {currentAttentionItems.slice(0, 3).map((item) => (
-                      <div key={item.id} style={{
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(orderedTasks.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
+                    {orderedTasks.slice(0, 3).map((task) => (
+                      <div key={task.id} style={{
                         background: 'var(--ink-white-100)',
                         border: '1px solid var(--ink-border-subtle)',
                         borderRadius: 8,
                         padding: '14px 16px',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 6,
+                        gap: 10,
                       }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {item.alertMessage ? (
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                                <path d="M8 2L9.5 6.5L14 8L9.5 9.5L8 14L6.5 9.5L2 8L6.5 6.5L8 2Z" fill="#7C3AED"/>
-                              </svg>
-                            ) : item.riskLevel === 'High' ? (
-                              <Icon name="alert" size={16} color="var(--ink-red-80)" />
-                            ) : (
-                              <Icon name="comment" size={16} color="var(--ink-neutral-80)" />
-                            )}
-                            {item.alertMessage && (
-                              <span style={{
-                                fontSize: 11,
-                                fontWeight: 600,
-                                color: 'var(--ink-orange-100)',
-                                background: 'var(--ink-orange-10)',
-                                border: '1px solid var(--ink-orange-30)',
-                                borderRadius: 4,
-                                padding: '2px 6px',
-                              }}>Due today</span>
-                            )}
-                          </div>
+                          <Inline gap="small" align="center">
+                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
+                            <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
+                          </Inline>
                           <RowOverflowMenu
                             items={[
-                              { label: 'View history', onClick: () => showToast('Opening history.') },
-                              { label: 'Download', onClick: () => showToast('Downloading.') },
+                              { label: 'View task', onClick: () => setActiveTab('tasks') },
+                              { label: 'Send a reminder', onClick: () => showToast('Reminder sent.') },
                             ]}
                           />
                         </div>
-                        <Text size="sm" weight="semibold">{item.item}</Text>
-                        <Text size="xs" color="secondary">{item.description}</Text>
-                        {item.alertMessage && (
-                          <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 'var(--ink-font-size-xs)', color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>Send a reminder</a>
-                        )}
+                        <Text size="sm" weight="semibold">{task.title}</Text>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          {task.assignee === '--' ? (
+                            <Text size="xs" color="secondary">Unassigned</Text>
+                          ) : (
+                            <Inline gap="xsmall" align="center">
+                              <Avatar initials={task.assigneeInitials} size="xsmall" />
+                              <Text size="xs" color="secondary">{task.assignee}</Text>
+                            </Inline>
+                          )}
+                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{task.dueDate}</Text>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
+            </div>
+
+            {/* Right column — Recent activity + Messages */}
+            <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-secondary)', padding: 'var(--ink-spacing-300)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
+              {/* Recent activity card */}
+              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+                <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600, display: 'block', marginBottom: 'var(--ink-spacing-200)' }}>Recent activity</Text>
+                <Stack gap="medium">
+                  {currentActivity.map((item) => (
+                    <Inline key={item.id} gap="medium" align="flex-start">
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <Text size="sm"><strong>{item.user}</strong> {item.action}</Text>
+                        <Text size="xs" color="secondary">{item.time}</Text>
+                      </div>
+                    </Inline>
+                  ))}
+                </Stack>
+              </div>
+
+              {/* Messages widget */}
+              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-100)' }}>
+                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Messages ({spaceMessages.length})</Text>
+                  <IconButton icon="plus" variant="tertiary" size="small" aria-label="New message" onClick={() => showToast('New message')} />
+                </div>
+                {spaceMessages.map((msg, idx) => (
+                  <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)' }}>
+                    <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Text size="sm" weight="semibold">{msg.name}</Text>
+                      <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
+                    </div>
+                  </Inline>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'documents' && (
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
@@ -8655,51 +8714,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               </div>
             </div>
 
-            {/* Right sidebar */}
-            <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
-              {/* Sidebar tabs — Segmented Control from the design system */}
-              <div style={{ display: 'flex', padding: 'var(--ink-spacing-300)' }}>
-                <SegmentedControl
-                  accessibilityText="Sidebar view"
-                  fullWidth
-                  value={sidebarTab}
-                  onChange={(v) => setSidebarTab(v as 'activity' | 'details')}
-                  options={[
-                    { value: 'activity', label: 'Activity' },
-                    { value: 'details', label: 'Details' },
-                  ]}
-                />
-              </div>
+        )}
 
-              {/* Activity tab content */}
-              {sidebarTab === 'activity' && (
-                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, overflowY: 'auto' }}>
-                  <Stack gap="medium">
-                    {currentActivity.map((item) => (
-                      <Inline key={item.id} gap="medium" align="flex-start">
-                        <div style={{
-                          width: 32, height: 32, borderRadius: '50%',
-                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0,
-                        }}>
-                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <Text size="sm">
-                            <strong>{item.user}</strong> {item.action}
-                          </Text>
-                          <Text size="xs" color="secondary">{item.time}</Text>
-                        </div>
-                      </Inline>
-                    ))}
-                  </Stack>
-                </div>
-              )}
-
-              {/* Details tab content */}
-              {sidebarTab === 'details' && (
-                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, overflowY: 'auto' }}>
+        {activeTab === 'details' && (
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 720, margin: '0 auto' }}>
+            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-300)' }}>Details</div>
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 12, background: 'var(--ink-white-100)', padding: 'var(--ink-spacing-400)' }}>
                   <Stack gap="medium">
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Party</Text>
@@ -9717,7 +9737,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ──────────���─────────────────────────────��──────────────��──────────────────
+/* ──────────���─────────────────────────────��────��─────────��──────────────────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
