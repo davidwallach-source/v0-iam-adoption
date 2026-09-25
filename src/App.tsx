@@ -8249,9 +8249,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto', background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto', paddingTop: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: 'var(--ink-spacing-300)', background: '#F6F7F6' }}>
+            <div style={{ padding: '18px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
               {orderedTasks.length > 0 && (
