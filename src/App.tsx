@@ -6421,7 +6421,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40 }}>Add New</Button>
+      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40, paddingLeft: 4, paddingRight: 4 }}>Add New</Button>
 
       {open && (
         <div style={{
@@ -8146,7 +8146,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       </div>
 
       {/* Key extractions — light strip below the header/tabs */}
-      <div style={{ background: '#F6F7F6', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+      <div style={{ background: '#F6F7F6' }}>
         <div style={{ ...innerStyle, padding: 'var(--ink-spacing-200) var(--ink-spacing-300)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
             {(() => {
