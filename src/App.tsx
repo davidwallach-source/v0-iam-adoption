@@ -8322,11 +8322,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                  <AddDocumentMenu
-                    variant="tertiary"
-                    onUpload={() => setShowFilePicker(true)}
-                    onUseTemplate={() => setShowFilePicker(true)}
-                  />
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8736,6 +8731,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <Text size="sm">{agreement.agreementType || '—'}</Text>
                     </div>
                     <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Created By</Text>
+                      <Inline gap="small" align="center">
+                        <Avatar initials={spaceCreatedByInitials} size="small" />
+                        <Text size="sm">{spaceCreatedBy}</Text>
+                      </Inline>
+                    </div>
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Date Created</Text>
+                      <Text size="sm">{spaceCreatedDate}</Text>
+                    </div>
+                    <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Deal Value</Text>
                       <Text size="sm">{agreement.dealValue || '—'}</Text>
                     </div>
@@ -8758,9 +8764,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     </div>
                   </Stack>
                 </div>
-              )}
             </div>
-          </div>
         )}
 
         {activeTab === 'tasks' && (
