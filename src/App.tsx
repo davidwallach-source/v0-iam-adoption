@@ -8362,7 +8362,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</Text>
                             {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
                           </div>
-                          <div style={{ width: 150, flexShrink: 0 }}>
+                          <div style={{ width: 150, flexShrink: 0, marginLeft: 88 }}>
                             <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                           </div>
                           <div style={{ width: 110, flexShrink: 0, marginLeft: 80 }}>
