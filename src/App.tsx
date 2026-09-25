@@ -8223,7 +8223,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
               {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
               {orderedTasks.length > 0 && (
-                <div style={{ marginBottom: 'var(--ink-spacing-400)' }}>
+                <div style={{
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 12,
+                  padding: 'var(--ink-spacing-300)',
+                  marginBottom: 'var(--ink-spacing-400)',
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                     <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Tasks</Text>
                     {orderedTasks.length > 3 && (
