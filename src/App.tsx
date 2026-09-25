@@ -8358,44 +8358,40 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             }}
                             style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)', flexShrink: 0 }}
                           />
-                          <div style={{ flex: '0 1 360px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
+                          <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
                             <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</Text>
                             {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
                           </div>
-                          <div style={{ width: 150, flexShrink: 0, marginLeft: 88 }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                           </div>
-                          <div style={{ width: 110, flexShrink: 0, marginLeft: 80 }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             <Text size="sm" color="secondary">{doc.lastModified || doc.dateModified}</Text>
                           </div>
-                          {/* Flexible empty space so hover CTAs appear to the right without shifting other columns */}
-                          <div style={{ flex: 1 }} />
-                          <div style={{ width: 130, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {isHovered && (
-                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                <Button
-                                  kind="secondary"
-                                  size="small"
-                                  onClick={() => {
-                                    if (doc.id.startsWith('added-')) {
-                                      setPendingPreviewDoc(doc.name);
-                                    } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                      onEditNDA();
-                                    } else {
-                                      onPreviewDocument?.(doc.name);
-                                    }
-                                  }}
-                                >
-                                  {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
-                                </Button>
-                                <RowOverflowMenu
-                                  items={[
-                                    { label: 'Download', onClick: () => showToast('Downloading document.') },
-                                    { label: 'View history', onClick: () => showToast('Opening document history.') },
-                                  ]}
-                                />
-                              </Inline>
-                            )}
+                          <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                              <Button
+                                kind="secondary"
+                                size="small"
+                                onClick={() => {
+                                  if (doc.id.startsWith('added-')) {
+                                    setPendingPreviewDoc(doc.name);
+                                  } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                    onEditNDA();
+                                  } else {
+                                    onPreviewDocument?.(doc.name);
+                                  }
+                                }}
+                              >
+                                {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                              </Button>
+                              <RowOverflowMenu
+                                items={[
+                                  { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                  { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                ]}
+                              />
+                            </Inline>
                           </div>
                         </div>
                       );
@@ -8523,19 +8519,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                             />
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '34%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '33%' }}>
                             <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '15%' }}>Status</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '18%' }}>Status</th>
                           {!isHandbookSpace && (
-                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '11%' }}>Value</th>
+                            <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '12%' }}>Value</th>
                           )}
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>
                             <Inline gap="xsmall" align="center">Last modified <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          {/* Empty spacer column reserves room on the right for hover CTAs */}
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', width: '5%' }}></th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '14%' }}></th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -8626,15 +8620,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
                                     {envelope.documents[0]?.dateModified}
                                   </td>
-                                  <td style={{ padding: 'var(--ink-spacing-150)' }} />
                                   <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                      {hoveredDocRowId === envelopeRowId && (
-                                        <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                          <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                                          <RowOverflowMenu items={envelopeOverflowItems()} />
-                                        </Inline>
-                                      )}
+                                      <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                        <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                        <RowOverflowMenu items={envelopeOverflowItems()} />
+                                      </Inline>
                                     </div>
                                   </td>
                                 </tr>
@@ -8661,7 +8652,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                       {/* Date inherited from envelope */}
                                     </td>
-                                    <td style={{ padding: 'var(--ink-spacing-150)' }} />
                                     <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                       {/* No actions for nested docs */}
                                     </td>
@@ -8761,41 +8751,38 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 </td>
                               )}
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }} />
                               <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                  {hoveredDocRowId === doc.id && (
-                                    <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                      {doc.signatureProgress ? (
-                                        <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                                      ) : (
-                                        <Button
-                                          kind="secondary"
-                                          size="small"
-                                          onClick={() => {
-                                            if (doc.id.startsWith('added-')) {
-                                              // Documents added via the Add → Document flow open in the local Doc Preview.
-                                              setPendingPreviewDoc(doc.name);
-                                            } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                              onEditNDA();
-                                            } else {
-                                              onPreviewDocument?.(doc.name);
-                                            }
-                                          }}
-                                        >
-                                          {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
-                                        </Button>
-                                      )}
-                                      <RowOverflowMenu
-                                        items={doc.signatureProgress
-                                          ? envelopeOverflowItems()
-                                          : [
-                                              { label: 'Download', onClick: () => showToast('Downloading document.') },
-                                              { label: 'View history', onClick: () => showToast('Opening document history.') },
-                                            ]}
-                                      />
-                                    </Inline>
-                                  )}
+                                  <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                    {doc.signatureProgress ? (
+                                      <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                    ) : (
+                                      <Button
+                                        kind="secondary"
+                                        size="small"
+                                        onClick={() => {
+                                          if (doc.id.startsWith('added-')) {
+                                            // Documents added via the Add → Document flow open in the local Doc Preview.
+                                            setPendingPreviewDoc(doc.name);
+                                          } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                            onEditNDA();
+                                          } else {
+                                            onPreviewDocument?.(doc.name);
+                                          }
+                                        }}
+                                      >
+                                        {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                                      </Button>
+                                    )}
+                                    <RowOverflowMenu
+                                      items={doc.signatureProgress
+                                        ? envelopeOverflowItems()
+                                        : [
+                                            { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                            { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                          ]}
+                                    />
+                                  </Inline>
                                 </div>
                               </td>
                             </tr>
