@@ -8066,7 +8066,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
                 <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
               </div>
-              <IconButton icon="duplicate" variant="tertiary" size="small" aria-label="Related agreements" style={{ color: 'var(--ink-white-100)' }} />
+              <button aria-label="Ask Iris" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 6 }}>
+                <IrisIcon />
+              </button>
             </Inline>
           </div>
 
@@ -9891,7 +9893,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ──────────���─────────────────────────────��────��───���─────��────────────���─────
+/* ──────────���─────────────────────────────��────��─��─���─────��────────────���─────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
