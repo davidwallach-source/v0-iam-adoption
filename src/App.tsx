@@ -8041,8 +8041,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
         <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
-          {/* Top actions row — back arrow on the left, actions stacked on the right */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+          {/* Top actions row — back arrow on the left, avatars/icons on the right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0 }}>
               <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
             </button>
@@ -8070,13 +8070,21 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </Inline>
           </div>
 
-          {/* Add button — centered below the top actions row */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--ink-spacing-400)' }}>
-              <AddMenu
-                onUpload={() => setShowFilePicker(true)}
-                onUseTemplate={() => setShowFilePicker(true)}
-                onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
-                onUploadRequest={() => setShowUploadRequest(true)}
+          {/* Space name (H1) + status on the left, Add button on the right — same row */}
+          <div style={{ marginTop: 'var(--ink-spacing-300)', display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+              <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
+              <StatusLight
+                className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
+                kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+                text={agreement.status}
+              />
+            </div>
+            <AddMenu
+              onUpload={() => setShowFilePicker(true)}
+              onUseTemplate={() => setShowFilePicker(true)}
+              onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
+              onUploadRequest={() => setShowUploadRequest(true)}
               onAddWireTransfer={() => {
                 const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
                 const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -8096,16 +8104,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 }]);
               }}
               onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
-            />
-          </div>
-
-          {/* Space name (H1) + status — on the dark gradient header */}
-          <div style={{ marginTop: 'var(--ink-spacing-300)', display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap' }}>
-            <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
-            <StatusLight
-              className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
-              kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-              text={agreement.status}
             />
           </div>
 
@@ -9893,7 +9891,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ──────────���─────────────────────────────��────��─────────��────────────���─────
+/* ──────────���─────────────────────────────��────��───���─────��────────────���─────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
