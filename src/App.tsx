@@ -8356,13 +8356,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             }}
                             style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)', flexShrink: 0 }}
                           />
-                          <div style={{
-                            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                            background: 'var(--ink-cobalt-10)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}>
-                            <Icon name="document" size={18} color="var(--ink-cobalt-100)" />
-                          </div>
                           <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
                             <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</Text>
                             {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
