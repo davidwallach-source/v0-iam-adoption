@@ -3644,7 +3644,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ════════�����════════════════��═══����════════��
+/* ════════�������════════════════��═══����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -10612,6 +10612,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     onToggleCollapse: () => {},
     createLabel: 'Create',
     onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
+    user: { name: 'Lisa Jones' },
+    onUserClick: () => setUserMenuOpen(o => !o),
     items: [
       { id: 'home', label: 'Home', icon: 'home' as const, active: activeTab === 'home', onClick: () => handleTabClick('home') },
       { id: 'iris', label: 'Iris', customIcon: <IrisIcon />, onClick: () => handleUnavailableTabClick('iris') },

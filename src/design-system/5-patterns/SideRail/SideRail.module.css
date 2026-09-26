@@ -320,6 +320,62 @@
   justify-content: center;
 }
 
+/* ── User footer (bottom-left) ── */
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: auto;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rail-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.userButton:hover {
+  background: var(--rail-hover);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userEmail {
+  font-size: 12px;
+  color: var(--rail-text-muted);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Collapsed: center the avatar, keep it pinned to the bottom */
+.railCollapsed .userButton {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ── Hover flyout (light surface, escapes the dark rail) ── */
 .flyout {
   position: fixed;

@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import styles from './SideRail.module.css';
 import { Icon } from '../../3-primitives/Icon';
 import type { IconName } from '../../3-primitives/Icon';
+import { Avatar } from '../../3-primitives/Avatar';
 
 export interface SideRailItem {
   /** Unique id (also exposed as data-item-id / data-nav-id for callouts) */
@@ -39,6 +40,10 @@ export interface SideRailProps {
   onCreateClick?: () => void;
   /** Primary navigation items */
   items: SideRailItem[];
+  /** Signed-in user shown in the rail footer (bottom-left) */
+  user?: { name: string; email?: string; avatar?: string };
+  /** Footer avatar click handler */
+  onUserClick?: () => void;
   /** Additional className */
   className?: string;
 }
@@ -174,8 +179,17 @@ export const SideRail: React.FC<SideRailProps> = ({
   createLabel = 'Create',
   onCreateClick,
   items,
+  user,
+  onUserClick,
   className,
 }) => {
+  const userInitials = user
+    ? user.name
+        .split(' ')
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join('')
+    : '';
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [flyout, setFlyout] = useState<FlyoutState | null>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -256,6 +270,24 @@ export const SideRail: React.FC<SideRailProps> = ({
           />
         ))}
       </ul>
+
+      {user && (
+        <button
+          type="button"
+          className={styles.userButton}
+          onClick={onUserClick}
+          aria-label={collapsed ? user.name : undefined}
+          title={collapsed ? user.name : undefined}
+        >
+          <Avatar initials={userInitials} src={user.avatar} size="small" colorIndex={4} />
+          {!collapsed && (
+            <span className={styles.userInfo}>
+              <span className={styles.userName}>{user.name}</span>
+              {user.email && <span className={styles.userEmail}>{user.email}</span>}
+            </span>
+          )}
+        </button>
+      )}
 
       {collapsed && flyout && (
         <div
