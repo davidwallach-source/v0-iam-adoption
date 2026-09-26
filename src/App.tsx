@@ -2065,6 +2065,31 @@ function relativeTime(dateStr: string | undefined | null): string {
   const yr = Math.round(n / 365); return phrase(`${yr} year${yr > 1 ? 's' : ''}`);
 }
 
+// Formats elapsed time since an epoch-ms instant into a short natural-language
+// stamp: "Just now" for the first minute, then minutes/hours/days ago.
+function elapsedLabel(createdAt: number, now: number): string {
+  const secs = Math.max(0, Math.floor((now - createdAt) / 1000));
+  if (secs < 60) return 'Just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hour${hrs > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+}
+
+// A live-updating "Just now" corner stamp for freshly created items. Ticks on
+// its own interval so the label advances ("Just now" -> "1 min ago" -> ...)
+// without the parent re-rendering.
+function JustNow({ createdAt }: { createdAt: number }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 15000);
+    return () => clearInterval(id);
+  }, []);
+  return <Text size="xs" color="tertiary">{elapsedLabel(createdAt, now)}</Text>;
+}
+
 // Shows the document names contained in an Agreement Space as compact subtext.
 // Only the first couple of names are shown (each individually truncated so a
 // single long name can't widen the column); any remainder collapses into a
@@ -2806,7 +2831,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ���═�����������������═���������������═���═�������������════��══════════════��═════════
+/* ���═�������������������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════������══════════ */
 
@@ -3613,9 +3638,12 @@ interface DealTask {
   status: 'In progress' | 'Not started' | 'Complete';
   dueDate: string;
   isDueSoon?: boolean;
-}
-
-interface DealDocument {
+  // Epoch ms when the task was created in-session. Present only on items the
+  // user just created, which drives the live "Just now" corner stamp.
+  createdAt?: number;
+  }
+  
+  interface DealDocument {
   id: string;
   name: string;
   commentCount?: number;
@@ -6404,9 +6432,16 @@ interface AddMenuProps {
   onDocument?: () => void;
   onUpload?: () => void;
   onUseTemplate?: () => void;
+  // Optional custom trigger (e.g. the "New document or task" card). When
+  // provided it replaces the default "Add New" button.
+  renderTrigger?: (opts: { toggle: () => void; open: boolean }) => React.ReactNode;
+  // Where the dropdown opens relative to the trigger. Defaults to opening
+  // below and right-aligned (the header CTA); 'top-left' opens the menu
+  // directly above the trigger, left-aligned (the empty task card).
+  placement?: 'bottom-right' | 'top-left';
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate, renderTrigger, placement = 'bottom-right' }: AddMenuProps) {
   const { version } = usePrototypeVersion();
   const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
@@ -6444,13 +6479,16 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40, paddingLeft: 12, paddingRight: 12 }}>Add New</Button>
+      {renderTrigger
+        ? renderTrigger({ toggle: () => { setOpen(o => !o); setDocSubOpen(false); }, open })
+        : <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40, paddingLeft: 12, paddingRight: 12 }}>Add New</Button>}
 
       {open && (
         <div style={{
           position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
+          ...(placement === 'top-left'
+            ? { bottom: 'calc(100% + 6px)', left: 0 }
+            : { top: 'calc(100% + 6px)', right: 0 }),
           background: 'white',
           border: '1px solid var(--ink-border-subtle)',
           borderRadius: 8,
@@ -7657,6 +7695,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       status: 'Not started',
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
       isDueSoon: false,
+      createdAt: Date.now(),
     };
     setSentTasks(prev => [...prev, newTask]);
     // Clear selection after sending
@@ -7899,6 +7938,35 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     return [currentTasks[idx], ...currentTasks.slice(0, idx), ...currentTasks.slice(idx + 1)];
   }, [currentTasks, pinnedTaskId]);
 
+  // Shared "Add New" menu actions, reused by the header CTA and the empty
+  // "New document or task" card so both open the identical menu.
+  const addMenuHandlers: AddMenuProps = {
+    onUpload: () => setShowFilePicker(true),
+    onUseTemplate: () => setShowFilePicker(true),
+    onSignatureRequest: () => { setPreparePreselectedDocs([]); setShowPrepare(true); },
+    onUploadRequest: () => setShowUploadRequest(true),
+    onAddWireTransfer: () => {
+      const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
+      const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 7);
+      const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
+      setSentTasks(prev => [...prev, {
+        id: `wire-transfer-${Date.now()}`,
+        title: 'Wire Transfer',
+        type: 'Upload' as const,
+        team: '',
+        assignee: recipientName,
+        assigneeInitials: recipientInitials,
+        status: 'In progress',
+        dueDate: formattedDueDate,
+        isDueSoon: false,
+        createdAt: Date.now(),
+      }]);
+    },
+    onNewVendorOnboarding: () => setShowVendorOnboarding(true),
+  };
+
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
   const processedDocuments = useMemo(() => {
@@ -8130,31 +8198,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 text={agreement.status}
               />
             </div>
-            <AddMenu
-              onUpload={() => setShowFilePicker(true)}
-              onUseTemplate={() => setShowFilePicker(true)}
-              onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
-              onUploadRequest={() => setShowUploadRequest(true)}
-              onAddWireTransfer={() => {
-                const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
-                const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
-                const dueDate = new Date();
-                dueDate.setDate(dueDate.getDate() + 7);
-                const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
-                setSentTasks(prev => [...prev, {
-                  id: `wire-transfer-${Date.now()}`,
-                  title: 'Wire Transfer',
-                  type: 'Upload' as const,
-                  team: '',
-                  assignee: recipientName,
-                  assigneeInitials: recipientInitials,
-                  status: 'In progress',
-                  dueDate: formattedDueDate,
-                  isDueSoon: false,
-                }]);
-              }}
-              onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
-            />
+              <AddMenu {...addMenuHandlers} />
           </div>
 
           <div style={{ flex: 1 }} />
@@ -8307,12 +8351,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           <Inline gap="small" align="center">
                             <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
                           </Inline>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {task.createdAt != null && <JustNow createdAt={task.createdAt} />}
                           <RowOverflowMenu
                             items={[
                               { label: 'View task', onClick: () => setActiveTab('tasks') },
                               { label: 'Send a reminder', onClick: () => showToast('Reminder sent.') },
                             ]}
                           />
+                          </div>
                         </div>
                         <Text size="sm" weight="semibold">{task.title}</Text>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -8329,26 +8376,34 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       </div>
                     ))}
                     {orderedTasks.length === 1 && (
-                      <button
-                        onClick={() => showToast('New document or task')}
-                        style={{
-                          background: 'none',
-                          border: '1px solid var(--ink-border-subtle)',
-                          borderRadius: 8,
-                          padding: '14px 16px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 6,
-                          cursor: 'pointer',
-                          minHeight: 96,
-                          fontFamily: 'var(--ink-font-family-default)',
-                        }}
-                      >
-                        <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
-                        <Text size="sm" color="secondary">New Document or Task</Text>
-                      </button>
+                      <AddMenu
+                        {...addMenuHandlers}
+                        placement="top-left"
+                        renderTrigger={({ toggle }) => (
+                          <button
+                            onClick={toggle}
+                            style={{
+                              width: '100%',
+                              background: 'none',
+                              border: '1px solid var(--ink-border-subtle)',
+                              borderRadius: 8,
+                              padding: '14px 16px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6,
+                              cursor: 'pointer',
+                              minHeight: 96,
+                              fontFamily: 'var(--ink-font-family-default)',
+                              color: 'var(--ink-font-color-secondary)',
+                            }}
+                          >
+                            <Icon name="plus" size={24} color="var(--ink-font-color-secondary)" />
+                            <Text size="sm" color="secondary">New document or task</Text>
+                          </button>
+                        )}
+                      />
                     )}
                   </div>
                 </div>
@@ -9216,6 +9271,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             status: 'Not started',
             dueDate: formattedDueDate,
             isDueSoon: false,
+            createdAt: Date.now(),
           }]);
           setSentActivity(prev => [
             { id: `activity-upload-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Sent an upload request${data.title ? ` "${data.title}"` : ''}${assignee ? ` to ${assignee}` : ''}`, time: 'Just now' },
@@ -9254,6 +9310,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             status: 'Not started',
             dueDate: formattedDueDate,
             isDueSoon: false,
+            createdAt: Date.now(),
           }]);
           setSentActivity(prev => [
             { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up onboarding for ${data.vendorName}`, time: 'Just now' },
