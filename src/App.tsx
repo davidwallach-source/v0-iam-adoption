@@ -1772,6 +1772,11 @@ interface Agreement {
   // resolved by kind rather than by a fixed id, so multiple can coexist in a
   // single session without overwriting one another.
   workspaceKind?: 'nda' | 'uploaded' | 'permission-slip';
+  // Epoch ms when this space was created via a "Start New" flow (Start Blank,
+  // Signature Request, or Instant NDA). Marks the space as freshly created so its
+  // activity feed shows only real events, its Messages start empty, and its
+  // timestamp reads "Just now".
+  createdAt?: number;
   // Set when the space contains a single sent signature envelope. Drives the
   // progress-bar Status treatment (progress track + "Waiting for [recipient]")
   // in the All Agreements table, matching how the space itself renders it.
@@ -2040,6 +2045,69 @@ function relativeDate(dateStr: string): string {
   const diffMonths = Math.floor(diffDays / 30);
   if (diffMonths === 1) return '1 month ago';
   return `${diffMonths} months ago`;
+}
+
+// US-format ("m/d/yy" or "m/d/yyyy") dates → natural-language relative time.
+// Anchored to a fixed demo "today" so the sample data always reads as current,
+// and handles both past ("3 days ago") and future ("in 3 days") deadlines.
+// Any value that isn't a plain numeric date (e.g. "Today, 9:41 AM") is passed through unchanged.
+  const DEMO_TODAY = new Date(2026, 3, 25); // Apr 25, 2026
+  // Date string for "just created" stamps. Anchored to DEMO_TODAY (not the real
+  // clock) so freshly created documents read as "Today" through relativeTime —
+  // using the real date would land months away from the demo's anchor.
+  const DEMO_TODAY_STR = DEMO_TODAY.toLocaleDateString('en-US');
+  function relativeTime(dateStr: string | undefined | null): string {
+  if (!dateStr || !/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s*$/.test(dateStr)) return dateStr ?? '';
+  const [m, d, yRaw] = dateStr.trim().split('/').map(Number);
+  const y = yRaw < 100 ? 2000 + yRaw : yRaw;
+  const then = new Date(y, m - 1, d);
+  const MS_DAY = 1000 * 60 * 60 * 24;
+  const diffDays = Math.round((then.getTime() - DEMO_TODAY.getTime()) / MS_DAY);
+  if (diffDays === 0) return 'Today';
+  const future = diffDays > 0;
+  const n = Math.abs(diffDays);
+  const phrase = (v: string) => (future ? `in ${v}` : `${v} ago`);
+  if (n === 1) return future ? 'Tomorrow' : 'Yesterday';
+  if (n < 7) return phrase(`${n} days`);
+  if (n < 30) { const w = Math.round(n / 7); return phrase(`${w} week${w > 1 ? 's' : ''}`); }
+  if (n < 365) { const mo = Math.round(n / 30); return phrase(`${mo} month${mo > 1 ? 's' : ''}`); }
+  const yr = Math.round(n / 365); return phrase(`${yr} year${yr > 1 ? 's' : ''}`);
+}
+
+// Past-tense variant of relativeTime for stamps that mark when something was
+// created or last acted on (documents, envelopes). These can never be in the
+// future, so any future phrasing is flipped to past ("in 3 days" -> "3 days
+// ago", "Tomorrow" -> "Today").
+function relativePast(dateStr: string | undefined | null): string {
+  const r = relativeTime(dateStr);
+  if (r === 'Tomorrow') return 'Today';
+  if (r.startsWith('in ')) return `${r.slice(3)} ago`;
+  return r;
+}
+
+// Formats elapsed time since an epoch-ms instant into a short natural-language
+// stamp: "Just now" for the first minute, then minutes/hours/days ago.
+function elapsedLabel(createdAt: number, now: number): string {
+  const secs = Math.max(0, Math.floor((now - createdAt) / 1000));
+  if (secs < 60) return 'Just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hour${hrs > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+}
+
+// A live-updating "Just now" corner stamp for freshly created items. Ticks on
+// its own interval so the label advances ("Just now" -> "1 min ago" -> ...)
+// without the parent re-rendering.
+function JustNow({ createdAt }: { createdAt: number }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 15000);
+    return () => clearInterval(id);
+  }, []);
+  return <Text size="xs" color="tertiary">{elapsedLabel(createdAt, now)}</Text>;
 }
 
 // Shows the document names contained in an Agreement Space as compact subtext.
@@ -2732,7 +2800,7 @@ const navigatorColumns: any[] = [
 
 /* ══════════════════════════════════���������������������════
    Parties Data (matches real DocuSign)
-   ═══════════════════════════════════════ */
+   ��══════════════════════════════════════ */
 
 interface Party {
   id: string;
@@ -2783,7 +2851,7 @@ const partyColumns: any[] = [
   },
 ];
 
-/* ���═�����������������═���������������═���═�������������════��══════════════��═════════
+/* ���═�������������������═���������������═���═�������������════��══════════════��═════════
    Requests Data (matches real DocuSign)
    ═══════════�����═══════════════������══════════ */
 
@@ -2836,7 +2904,7 @@ const requestColumns: any[] = [
     ),
   },
   { key: 'lastActivityAt', header: 'Last Activity At', sortable: true, width: '170px' },
-  { key: 'dueDate', header: 'Due Date', sortable: true, width: '120px', cell: (row: RequestItem) => row.dueDate || '—' },
+    { key: 'dueDate', header: 'Due Date', sortable: true, width: '120px', cell: (row: RequestItem) => relativeTime(row.dueDate) || '—' },
   {
     key: 'submitter',
     header: 'Submitter',
@@ -2866,7 +2934,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═���������═════��═����═══════════���═══════════════
+/* ═���������══��══��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -2932,7 +3000,7 @@ const templateColumns: any[] = [
 
 /* ═══════════════���═══════════════════════
    Insights Reports Data
-   ═══════════════════════════════════════ */
+   ═��═════════════════════════════════════ */
 
 interface ReportItem {
   id: string;
@@ -3576,7 +3644,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ═════════════════════════��═══����════════��
+/* ════════�����════════════════��═══����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -3590,9 +3658,12 @@ interface DealTask {
   status: 'In progress' | 'Not started' | 'Complete';
   dueDate: string;
   isDueSoon?: boolean;
-}
-
-interface DealDocument {
+  // Epoch ms when the task was created in-session. Present only on items the
+  // user just created, which drives the live "Just now" corner stamp.
+  createdAt?: number;
+  }
+  
+  interface DealDocument {
   id: string;
   name: string;
   commentCount?: number;
@@ -3655,7 +3726,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═══════════════════════════════════════
+/* ═════════════════════�����═════════════════
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -6381,9 +6452,20 @@ interface AddMenuProps {
   onDocument?: () => void;
   onUpload?: () => void;
   onUseTemplate?: () => void;
+  // Optional custom trigger (e.g. the "New document or task" card). When
+  // provided it replaces the default "Add New" button.
+  renderTrigger?: (opts: { toggle: () => void; open: boolean }) => React.ReactNode;
+  // Where the dropdown opens relative to the trigger. Defaults to opening
+  // below and right-aligned (the header CTA); 'top-left' opens the menu
+  // directly above the trigger, left-aligned; 'center' opens it centered
+  // directly over the trigger (the empty task card).
+  placement?: 'bottom-right' | 'top-left' | 'center';
+  // Extra styles for the relative wrapper — used so a card trigger can stretch
+  // to fill its grid cell (height: 100%).
+  wrapperStyle?: React.CSSProperties;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate, renderTrigger, placement = 'bottom-right', wrapperStyle }: AddMenuProps) {
   const { version } = usePrototypeVersion();
   const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
@@ -6391,6 +6473,19 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   const [paywallModal, setPaywallModal] = useState<'upload' | 'idv' | 'workflow' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const closeSubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // For 'center' placement the menu is rendered with viewport-fixed
+  // coordinates (measured from the trigger) so it can paint above the
+  // agreement-space header and escape the scroll container's overflow clip.
+  const [centerPos, setCenterPos] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (open && placement === 'center' && ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setCenterPos({ top: r.top + r.height / 2, left: r.left + r.width / 2 });
+    } else {
+      setCenterPos(null);
+    }
+  }, [open, placement]);
 
   // Open the Document submenu, cancelling any pending close so moving the
   // cursor diagonally across the gap toward the submenu doesn't dismiss it.
@@ -6420,19 +6515,22 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   useEffect(() => () => { if (closeSubTimer.current) clearTimeout(closeSubTimer.current); }, []);
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }}>Add New</Button>
+    <div ref={ref} style={{ position: 'relative', ...(open ? { zIndex: 1000 } : {}), ...wrapperStyle }}>
+      {renderTrigger
+        ? renderTrigger({ toggle: () => { setOpen(o => !o); setDocSubOpen(false); }, open })
+        : <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40, paddingLeft: 12, paddingRight: 12 }}>Add New</Button>}
 
       {open && (
         <div style={{
-          position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
+          ...(placement === 'center'
+            ? { position: 'fixed', top: centerPos?.top ?? 0, left: centerPos?.left ?? 0, transform: 'translate(-50%, -50%)', zIndex: 2600 }
+            : placement === 'top-left'
+            ? { position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, zIndex: 1001 }
+            : { position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 1001 }),
           background: 'white',
           border: '1px solid var(--ink-border-subtle)',
           borderRadius: 8,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-          zIndex: 200,
           minWidth: 264,
           padding: 4,
         }}>
@@ -7128,7 +7226,7 @@ function PaywallAddSeatsModal({ onClose }: { onClose: () => void }) {
 // Click-to-edit Agreement Space title shown in the workspace header. Clicking
 // the name turns it into an inline text field (Google Docs style); Enter or
 // blur commits, Escape cancels.
-function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; onRename?: (name: string) => void; titleSize?: number }) {
+function EditableSpaceName({ name, onRename, titleSize = 20, color, onDark = false }: { name: string; onRename?: (name: string) => void; titleSize?: number; color?: string; onDark?: boolean }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -7142,11 +7240,11 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
     fontSize: titleSize,
     fontWeight: 600,
     fontFamily: 'var(--ink-font-family)',
-    color: 'var(--ink-font-color-default)',
+    color: color ?? 'var(--ink-font-color-default)',
     lineHeight: 1.2,
   };
 
-  if (!onRename) return <Heading level={1} style={{ margin: 0, fontSize: titleSize }}>{name}</Heading>;
+  if (!onRename) return <Heading level={1} style={{ margin: 0, fontSize: titleSize, color }}>{name}</Heading>;
 
   const commit = () => {
     const trimmed = draft.trim();
@@ -7197,7 +7295,7 @@ function EditableSpaceName({ name, onRename, titleSize = 20 }: { name: string; o
         cursor: 'text',
         textAlign: 'left',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ink-border-subtle)'; e.currentTarget.style.background = 'var(--ink-bg-color-secondary)'; }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = onDark ? 'rgba(255,255,255,0.3)' : 'var(--ink-border-subtle)'; e.currentTarget.style.background = onDark ? 'rgba(255,255,255,0.12)' : 'var(--ink-bg-color-secondary)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.background = 'none'; }}
     >
       {name}
@@ -7222,6 +7320,7 @@ interface OpenEnvelope {
   name: string;              // envelope name shown at the top of the panel
   sentBy: string;            // "Sent by {sentBy} {sentAt}"
   sentAt: string;            // relative time, e.g. "yesterday"
+  sentAtLabel: string;       // full sent timestamp under the doc name, e.g. "Yesterday at 10:14 am"
   documentNames: string[];   // documents inside the envelope (drives the carousel)
   recipients: EnvelopeRecipient[];
 }
@@ -7261,10 +7360,9 @@ function buildEnvelopeRecipients(
   return recipients;
 }
 
-function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose: () => void }) {
+function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void }) {
   const [entered, setEntered] = useState(false);
   const [docIndex, setDocIndex] = useState(0);
-  const [showFooterMenu, setShowFooterMenu] = useState(false);
   useEffect(() => {
     const t = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(t);
@@ -7290,9 +7388,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
   const phraseFor = (r: EnvelopeRecipient) => {
     switch (r.status) {
       case 'signed': return `${r.name} signed`;
-      case 'needs-view': return `Waiting on ${r.name} to view`;
+      case 'needs-view': return `${r.name} needs to view`;
       case 'receives-copy': return 'You receive a finished copy';
-      default: return `Waiting on ${r.name} to sign`;
+      default: return `${r.name} needs to sign`;
     }
   };
 
@@ -7308,9 +7406,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         aria-label={`${docs[0]} envelope details`}
         style={{
           position: 'fixed',
+          top: 40,
           bottom: 0,
           right: 0,
-          height: '90vh',
           width: 360,
           background: 'white',
           borderTopLeftRadius: 20,
@@ -7325,7 +7423,7 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         }}
       >
         {/* Header — envelope name + close X pinned upper right — fixed 48px tall */}
-        <div style={{ height: 48, boxSizing: 'border-box', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
+        <div style={{ height: 48, boxSizing: 'border-box', flexShrink: 0, position: 'sticky', top: 0, background: 'white', borderTopLeftRadius: 20, zIndex: 3, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
           <h2 style={{ margin: 0, flex: 1, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink-font-color-default)' }}>
             {docs[0]}
           </h2>
@@ -7352,9 +7450,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
         </div>
 
-        {/* Page counter + carousel arrows if multi-doc — 20px top/bottom padding */}
+        {/* Page counter + carousel arrows if multi-doc */}
         {multi && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '16px 20px 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>
                 <strong style={{ fontWeight: 700 }}>{docIndex + 1}</strong> of {docs.length}
@@ -7379,31 +7477,25 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         </div>
         )}
 
-        {/* Recipients timeline — fills remaining space so the footer pins to the bottom; 8px above the first node */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '28px 20px 20px' }}>
+        {/* Document name + sent timestamp */}
+        <div style={{ padding: '20px 20px 0', flexShrink: 0 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>Sent by {envelope.sentBy}</div>
+          <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)', marginTop: 4 }}>{envelope.sentAtLabel}</div>
+        </div>
+
+        {/* Recipients timeline — flows with the rest of the panel so the whole thing scrolls together */}
+        <div style={{ padding: '24px 20px 20px' }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 24 }}>
+            Recipients ({completeCount} of {signable.length} complete)
+          </div>
           <div>
-            {/* First step — the envelope was sent; complete, solid black dot */}
-            <div style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: 36 }}>
-              <div style={{ position: 'absolute', left: 11, top: 22, bottom: 0, width: 2, background: navy }} />
-              <div style={{ width: 24, display: 'flex', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
-                <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--ink-font-color-default)' }} />
-                </span>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 400, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
-                  Sent by {envelope.sentBy} {envelope.sentAt}
-                </div>
-              </div>
-            </div>
             {envelope.recipients.map((r, i) => {
               const isLast = i === envelope.recipients.length - 1;
               const isActive = i === activeIndex;
               const isSigned = r.status === 'signed';
-              const muted = !isSigned && !isActive;
-              // Connector below a node is navy while the flow is still "completed"
-              // through this node, then turns subtle for the remaining recipients.
-              const connectorColor = isSigned ? navy : 'var(--ink-border-subtle)';
+              // Connector below a completed (signed) node is deep navy; connectors
+              // for not-yet-reached recipients are a subtle grey.
+              const connectorColor = isSigned ? '#130032' : 'var(--ink-border-subtle)';
               return (
                 <div key={r.id} style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: isLast ? 0 : 36 }}>
                   {!isLast && (
@@ -7428,9 +7520,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                   {/* Content */}
                   <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
                     {isSigned && r.at && (
-                      <div style={{ fontSize: 13, color: green, marginBottom: 4 }}>{r.at}</div>
+                      <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)', marginBottom: 4 }}>{r.at}</div>
                     )}
-                    <div style={{ fontSize: 15, fontWeight: isActive ? 600 : 400, color: muted ? 'var(--ink-font-color-secondary)' : 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
+                    <div style={{ fontSize: 15, fontWeight: (isSigned || isActive) ? 600 : 400, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
                       {phraseFor(r)}
                     </div>
                     {r.email && (
@@ -7443,42 +7535,11 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
         </div>
 
-        {/* Footer — pinned to the bottom with an overflow menu + primary CTA */}
-        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, position: 'relative' }}>
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowFooterMenu(v => !v)}
-              aria-label="More actions"
-              aria-haspopup="menu"
-              aria-expanded={showFooterMenu}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
-            >
-              <Icon name="more-vertical" size={18} />
-            </button>
-            {showFooterMenu && (
-              <>
-                <div onClick={() => setShowFooterMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 1 }} />
-                <div
-                  role="menu"
-                  style={{ position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, zIndex: 2, minWidth: 180, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
-                >
-                  {['Void envelope', 'Download', 'View history'].map(label => (
-                    <button
-                      key={label}
-                      role="menuitem"
-                      onClick={() => setShowFooterMenu(false)}
-                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+        {/* Footer — pinned to the bottom with the primary CTA */}
+        <div style={{ flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
           <button
-            onClick={() => setShowFooterMenu(false)}
-            style={{ background: 'var(--ink-cobalt-80)', color: 'white', border: 'none', borderRadius: 6, padding: '6px 16px', fontSize: 14, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
+            onClick={onRemind}
+            style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
           >
             Remind Signers
           </button>
@@ -7490,11 +7551,14 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
 
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
+  const [activityView, setActivityView] = useState<'activity' | 'messages'>('activity');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
+  const [hoveredOverviewDocId, setHoveredOverviewDocId] = useState<string | null>(null);
+  const [hoveredDocRowId, setHoveredDocRowId] = useState<string | null>(null);
   const [showPrepare, setShowPrepare] = useState(false);
   const [showUploadRequest, setShowUploadRequest] = useState(false);
   const [showVendorOnboarding, setShowVendorOnboarding] = useState(false);
@@ -7590,6 +7654,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       name: opts.envelopeName,
       sentBy: 'you',
       sentAt: 'yesterday',
+      sentAtLabel: 'Yesterday at 10:14 am',
       documentNames: opts.documentNames,
       recipients: buildEnvelopeRecipients(participantNames, opts.signatureProgress),
     });
@@ -7631,6 +7696,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       status: 'Not started',
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
       isDueSoon: false,
+      createdAt: Date.now(),
     };
     setSentTasks(prev => [...prev, newTask]);
     // Clear selection after sending
@@ -7677,6 +7743,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   
   // Check if this is an uploaded/blank document agreement.
   const isUploadedDocAgreement = agreement.workspaceKind === 'uploaded' || agreement.workspaceKind === 'permission-slip' || agreement.id === 'uploaded-doc';
+  // A space just created via a "Start New" flow (Start Blank, Signature Request,
+  // or Instant NDA). Such a space has no history yet, so its activity feed shows
+  // only the real events that just happened, its Messages start empty, and its
+  // timestamp reads "Just now".
+  const isNewlyCreated = typeof agreement.createdAt === 'number';
 
   // Update NDA document status if sent for signature
   const modifiedDocuments = useMemo(() => {
@@ -7685,7 +7756,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       id: `added-${idx}`,
       name: docName,
       status: 'Draft' as const,
-      dateModified: new Date().toLocaleDateString('en-US'),
+      dateModified: DEMO_TODAY_STR,
     }));
 
     let baseDocs;
@@ -7707,14 +7778,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           id: `uploaded-${idx}`,
           name: docName,
           status: 'Draft' as const,
-          dateModified: new Date().toLocaleDateString('en-US'),
+          dateModified: DEMO_TODAY_STR,
         }));
       } else {
         baseDocs = uploadedDocAgreement.documents.map((docName, idx) => ({
           id: `uploaded-${idx}`,
           name: docName,
           status: 'Pending Signature' as const,
-          lastModified: new Date().toLocaleDateString('en-US'),
+          lastModified: DEMO_TODAY_STR,
           signatureProgress: {
             signed: 0,
             total: 1,
@@ -7768,6 +7839,25 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     return events;
   })();
 
+  // Activity feed for a space just created via a "Start New" flow (Signature
+  // Request / Instant NDA). It reflects only what actually happened — the space
+  // was created, and (when applicable) the document was sent for signature —
+  // rather than the default rich sample feed. Newest-first.
+  const newSpaceActivity = (() => {
+    const docName = agreement.documentNames?.[0]
+      || uploadedDocAgreement?.documents?.[0]
+      || (isNDADraft ? 'the NDA' : 'the agreement');
+    const recipient = (ndaRecipientName || savedNDAData?.receivingParty || uploadedDocAgreement?.recipientName || '').trim();
+    const wasSent = (isNDADraft && ndaSentForSignature)
+      || (isUploadedDocAgreement && !!uploadedDocAgreement && !uploadedDocAgreement.isDraft);
+    const events: { id: string; icon: IconName; user: string; action: string; time: string }[] = [];
+    if (wasSent) {
+      events.push({ id: 'new-sent', icon: 'send', user: 'You', action: `Sent ${docName}${recipient ? ` to ${recipient}` : ''} for signature`, time: 'Just now' });
+    }
+    events.push({ id: 'new-created', icon: (isNDADraft ? 'edit' : 'document') as IconName, user: 'You', action: `Created ${docName}`, time: 'Just now' });
+    return events;
+  })();
+
   // A saved-blank draft has only just been created, so its activity feed should
   // reflect that single real event rather than the default rich sample feed.
   const currentActivity = [
@@ -7778,8 +7868,28 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         ? [
             { id: 'draft-create', icon: 'document' as IconName, user: 'You', action: `Created ${uploadedDocAgreement.documents[0] || 'draft document'}`, time: 'Just now' },
           ]
-        : workspaceData.activity),
+        : isNewlyCreated
+          ? newSpaceActivity
+          : workspaceData.activity),
   ];
+
+  // Messages shown in the Overview right column widget. A freshly created space
+  // has no conversation yet, so its Messages list starts empty.
+  const spaceMessages: { name: string; initials: string; colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; preview: string }[] = isNewlyCreated ? [] : [
+    { name: 'Alex Preston', initials: 'AP', colorIndex: 1, preview: 'I left a few comments in the contract to review…' },
+    { name: 'Jerome Rill', initials: 'JR', colorIndex: 4, preview: 'Feel free to approve the agreement if I am not…' },
+    { name: 'Stacy Banks', initials: 'SB', colorIndex: 2, preview: 'I went ahead and submitted the contract agree…' },
+    { name: 'Adrien Richards', initials: 'AR', colorIndex: 7, preview: 'Thanks for sending it over! Can you also send a…' },
+  ];
+
+  // Creation metadata surfaced in the Details tab. Derived from the oldest
+  // recorded activity for this space, with a sensible fallback.
+  const spaceCreatedActivity = [...currentActivity].reverse().find((a) => a.user && a.user !== 'System');
+  const spaceCreatedBy = spaceCreatedActivity?.user || 'Jan Rogers';
+  const spaceCreatedByInitials = spaceCreatedBy === 'You'
+    ? 'YO'
+    : spaceCreatedBy.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+  const spaceCreatedDate = isNewlyCreated ? 'Just now' : (spaceCreatedActivity?.time || agreement.date || '—');
   const currentTasks = useMemo(() => {
     // Reverse so the most recently added approval task appears at the top,
     // matching the sentTasks ordering used in each branch below.
@@ -7804,6 +7914,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         status: 'In progress',
         dueDate: '--',
         isDueSoon: false,
+        createdAt: Date.now(),
       };
       return [signNdaTask, ...[...sentTasks].reverse()];
     }
@@ -7829,6 +7940,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         status: 'In progress',
         dueDate: '--',
         isDueSoon: false,
+        createdAt: Date.now(),
       };
       // Include any additional tasks added via Add menu (like Wire Transfer)
       return [signTask, ...[...sentTasks].reverse()];
@@ -7855,6 +7967,35 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     if (idx < 0) return currentTasks;
     return [currentTasks[idx], ...currentTasks.slice(0, idx), ...currentTasks.slice(idx + 1)];
   }, [currentTasks, pinnedTaskId]);
+
+  // Shared "Add New" menu actions, reused by the header CTA and the empty
+  // "New document or task" card so both open the identical menu.
+  const addMenuHandlers: AddMenuProps = {
+    onUpload: () => setShowFilePicker(true),
+    onUseTemplate: () => setShowFilePicker(true),
+    onSignatureRequest: () => { setPreparePreselectedDocs([]); setShowPrepare(true); },
+    onUploadRequest: () => setShowUploadRequest(true),
+    onAddWireTransfer: () => {
+      const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
+      const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 7);
+      const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
+      setSentTasks(prev => [...prev, {
+        id: `wire-transfer-${Date.now()}`,
+        title: 'Wire Transfer',
+        type: 'Upload' as const,
+        team: '',
+        assignee: recipientName,
+        assigneeInitials: recipientInitials,
+        status: 'In progress',
+        dueDate: formattedDueDate,
+        isDueSoon: false,
+        createdAt: Date.now(),
+      }]);
+    },
+    onNewVendorOnboarding: () => setShowVendorOnboarding(true),
+  };
 
   // Group documents by envelope - documents with same envelopeId become a single envelope row
   // Also handle newly sent envelopes from user actions
@@ -7928,12 +8069,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const didAutoOpenEnvelope = useRef(false);
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
-    // Entering the space right after sending an envelope: never auto-open the
-    // panel — instead confirm the send with a success toast.
+    // Entering the space right after sending an envelope: confirm the send with
+    // a success toast and fall through to auto-open the envelope panel.
     if (justSentEnvelope) {
-      didAutoOpenEnvelope.current = true;
       showToast('Your documents were sent for signature.');
-      return;
     }
     const envelopeItems = processedDocuments.filter(
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
@@ -7968,8 +8107,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     padding: 'var(--ink-spacing-100) var(--ink-spacing-150)',
     border: 'none',
     background: 'none',
-    borderBottom: isActive ? '2px solid var(--ink-neutral-140)' : '2px solid transparent',
-    color: isActive ? 'var(--ink-text-primary)' : 'var(--ink-text-secondary)',
+    borderBottom: isActive ? '2px solid var(--ink-white-100)' : '2px solid transparent',
+    color: isActive ? 'var(--ink-white-100)' : 'rgba(255,255,255,0.7)',
     cursor: 'pointer',
     fontSize: 'var(--ink-font-size-sm)',
     fontWeight: isActive ? 600 : 400,
@@ -8016,16 +8155,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       ...fadeIn.style,
       background: 'var(--ink-bg-color-default)',
       display: 'flex', flexDirection: 'column',
+      overflowY: 'auto',
     }}>
       {/* Header + Tabs — single full-width block */}
-      <div style={{ background: 'var(--ink-bg-color-canvas-page)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-        {/* 224px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 224, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
+      <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
+        {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
-          {/* Top actions row — back arrow on the left, actions on the right */}
+          {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0 }}>
-              <Icon name="arrow-left" size={20} />
+            <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
+              <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
             </button>
             <div style={{ flex: 1 }} />
             <Inline gap="small" align="center">
@@ -8043,46 +8183,69 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     }
                   : {})}
               >
-                <Avatar initials="SS" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-                <Avatar initials="JL" size="small" style={{ border: '2px solid white', marginRight: -8 }} />
-                <Avatar initials="NK" size="small" style={{ border: '2px solid white' }} />
+                <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
               </div>
-              <IconButton icon="duplicate" variant="tertiary" size="small" aria-label="Related agreements" />
-              <AddMenu
-                onUpload={() => setShowFilePicker(true)}
-                onUseTemplate={() => setShowFilePicker(true)}
-                onSignatureRequest={() => { setPreparePreselectedDocs([]); setShowPrepare(true); }}
-                onUploadRequest={() => setShowUploadRequest(true)}
-              onAddWireTransfer={() => {
-                const recipientName = uploadedDocAgreement?.recipientName || 'Recipient';
-                const recipientInitials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase();
-                const dueDate = new Date();
-                dueDate.setDate(dueDate.getDate() + 7);
-                const formattedDueDate = `${dueDate.getMonth() + 1}/${dueDate.getDate()}/${dueDate.getFullYear().toString().slice(-2)}`;
-                setSentTasks(prev => [...prev, {
-                  id: `wire-transfer-${Date.now()}`,
-                  title: 'Wire Transfer',
-                  type: 'Upload' as const,
-                  team: '',
-                  assignee: recipientName,
-                  assigneeInitials: recipientInitials,
-                  status: 'In progress',
-                  dueDate: formattedDueDate,
-                  isDueSoon: false,
-                }]);
-              }}
-              onNewVendorOnboarding={() => setShowVendorOnboarding(true)}
-            />
+  <button aria-label="Ask Iris" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 6 }}>
+                <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M13.858 10.9523C12.891 9.76234 11.434 9.16434 8.98799 8.66934C8.9402 8.65968 8.89067 8.66333 8.84482 8.67991C8.79897 8.69649 8.75855 8.72535 8.72799 8.76334C8.7028 8.79348 8.68477 8.82893 8.67524 8.86703C8.66572 8.90513 8.66495 8.9449 8.67299 8.98334C9.16799 11.4293 9.76599 12.8873 10.956 13.8543C12.1309 13.1196 13.1233 12.1273 13.858 10.9523Z" fill="url(#hdr_iris_p0)"/>
+  <path d="M21.0441 13.8552C22.2341 12.8882 22.8311 11.4302 23.3261 8.98516C23.3347 8.94208 23.3325 8.89756 23.3197 8.85553C23.307 8.81351 23.2841 8.77527 23.253 8.74422C23.222 8.71316 23.1837 8.69025 23.1417 8.6775C23.0997 8.66476 23.0552 8.66258 23.0121 8.67116C20.5661 9.16616 19.1081 9.76316 18.1421 10.9532C18.8767 12.1282 19.8691 13.1206 21.0441 13.8552Z" fill="url(#hdr_iris_p1)"/>
+  <path d="M10.9569 18.1367C9.76689 19.1037 9.16889 20.5617 8.67389 23.0067C8.66569 23.0453 8.66638 23.0853 8.67591 23.1236C8.68544 23.1619 8.70356 23.1975 8.72889 23.2277C8.79189 23.3047 8.88889 23.3417 8.98889 23.3217C11.4349 22.8267 12.8929 22.2287 13.8589 21.0397C13.1243 19.8644 12.1319 18.8717 10.9569 18.1367Z" fill="url(#hdr_iris_p2)"/>
+  <path d="M18.1411 21.0407C19.1081 22.2307 20.5661 22.8277 23.0111 23.3227C23.0543 23.3317 23.099 23.3299 23.1413 23.3173C23.1836 23.3047 23.2221 23.2818 23.2534 23.2507C23.2846 23.2196 23.3076 23.1811 23.3203 23.1389C23.333 23.0966 23.335 23.0519 23.3261 23.0087C22.8311 20.5627 22.2331 19.1047 21.0441 18.1387C19.8687 18.8731 18.8759 19.8655 18.1411 21.0407Z" fill="url(#hdr_iris_p3)"/>
+  <path d="M24.5108 15.2999C23.0248 14.7499 21.9228 14.2399 21.0398 13.6679C19.9433 12.9871 19.0187 12.0624 18.3378 10.9659C17.7768 10.0829 17.2568 8.97091 16.7058 7.49591C16.656 7.35146 16.562 7.22636 16.437 7.1384C16.3121 7.05044 16.1626 7.00408 16.0098 7.00591C15.8571 7.00408 15.7076 7.05044 15.5826 7.1384C15.4577 7.22636 15.3636 7.35146 15.3138 7.49591C14.7628 8.98091 14.2538 10.0829 13.6818 10.9659C12.9538 12.1089 12.1118 12.9409 10.9688 13.6679C10.0858 14.2299 8.97384 14.7489 7.49884 15.2999C7.35439 15.3497 7.22929 15.4438 7.14133 15.5687C7.05337 15.6936 7.00701 15.8431 7.00884 15.9959C7.00884 16.3079 7.19684 16.5889 7.49884 16.6929C8.98384 17.2329 10.0858 17.7529 10.9688 18.3239C12.1128 19.0519 12.9438 19.8839 13.6818 21.0259C14.2428 21.9199 14.7618 23.0219 15.3138 24.4969C15.3658 24.6399 15.4605 24.7635 15.5851 24.8508C15.7097 24.9381 15.8582 24.985 16.0103 24.985C16.1625 24.985 16.311 24.9381 16.4356 24.8508C16.5602 24.7635 16.6549 24.6399 16.7068 24.4969C17.2568 23.0109 17.7668 21.9099 18.3368 21.0269C19.0178 19.9299 19.9429 19.0049 21.0398 18.3239C21.9338 17.7629 23.0348 17.2439 24.5108 16.6929C24.6539 16.641 24.7774 16.5463 24.8648 16.4217C24.9521 16.297 24.9989 16.1486 24.9989 15.9964C24.9989 15.8442 24.9521 15.6958 24.8648 15.5712C24.7774 15.4466 24.6539 15.3518 24.5108 15.2999ZM20.0008 16.1099C17.6928 16.9319 16.9348 17.6899 16.1138 19.9969C16.0718 20.1009 15.9158 20.1009 15.8848 19.9969C15.0648 17.6899 14.3048 16.9319 11.9978 16.1109C11.8938 16.0689 11.8938 15.9129 11.9978 15.8809C14.3058 15.0609 15.0638 14.3019 15.8848 11.9949C15.9268 11.8809 16.0828 11.8809 16.1138 11.9949C16.9338 14.3019 17.6938 15.0609 20.0008 15.8819C20.1048 15.9239 20.1048 16.0789 20.0008 16.1109V16.1099Z" fill="white"/>
+  <defs>
+  <linearGradient id="hdr_iris_p0" x1="8.66799" y1="8.66434" x2="14.553" y2="14.3543" gradientUnits="userSpaceOnUse">
+  <stop stopColor="#FF5252"/>
+  <stop offset="1" stopColor="#4C00FF"/>
+  </linearGradient>
+  <linearGradient id="hdr_iris_p1" x1="23.3311" y1="8.66516" x2="17.4981" y2="14.5292" gradientUnits="userSpaceOnUse">
+  <stop stopColor="#FF5252"/>
+  <stop offset="1" stopColor="#4C00FF"/>
+  </linearGradient>
+  <linearGradient id="hdr_iris_p2" x1="8.66889" y1="23.3277" x2="14.3219" y2="17.5307" gradientUnits="userSpaceOnUse">
+  <stop stopColor="#FF5252"/>
+  <stop offset="1" stopColor="#4C00FF"/>
+  </linearGradient>
+  <linearGradient id="hdr_iris_p3" x1="23.3311" y1="23.3287" x2="17.4981" y2="17.4737" gradientUnits="userSpaceOnUse">
+  <stop stopColor="#FF5252"/>
+  <stop offset="1" stopColor="#4C00FF"/>
+  </linearGradient>
+  </defs>
+  </svg>
+  </button>
             </Inline>
           </div>
 
-          {/* Space name (H1) — moved below the actions row */}
-          <div style={{ marginTop: 'var(--ink-spacing-300)' }}>
-            <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} />
+          {/* Space name (H1) + status on the left, Add button on the right — same row */}
+          <div style={{ marginTop: 'var(--ink-spacing-300)', display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+              <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
+              <StatusLight
+                className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
+                kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
+                text={agreement.status}
+              />
+            </div>
+              <AddMenu {...addMenuHandlers} />
           </div>
 
-          {/* Key extractions — surfaced below the H1, tailored to the agreement's use case */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 'var(--ink-spacing-200)', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1 }} />
+
+          {/* Tabs — pinned to the bottom of the header */}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16 }}>
+            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
+            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
+            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+            <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Key extractions — light strip below the header/tabs */}
+      <div style={{ background: '#F6F7F6' }}>
+        <div style={{ ...innerStyle, padding: 'var(--ink-spacing-200) var(--ink-spacing-300)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', marginTop: 4 }}>
             {(() => {
               const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
               const secondary = 'var(--ink-font-color-secondary)';
@@ -8127,7 +8290,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   {label}
                 </span>
               );
-              const valueItem = dealValue ? text('value', 'currency-dollar', <><strong style={{ fontWeight: 600 }}>{dealValue}</strong>&nbsp;{valueNoun}</>, 'var(--ink-font-color-default)') : null;
+              const valueItem = dealValue ? text('value', 'currency-dollar', <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}><strong style={{ fontWeight: 600 }}>{dealValue}</strong>{valueNoun}</span>, 'var(--ink-font-color-default)') : null;
               const docItem = text('docs', 'document', `${docCount} Document${docCount === 1 ? '' : 's'}`);
               const termItem = termMonths ? text('term', 'calendar', `${termMonths} month term`) : (isOneTime ? text('term', 'calendar', 'One-time') : null);
               const horizonItem = horizonLabel ? text('horizon', 'refresh', horizonLabel) : null;
@@ -8159,12 +8322,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
               return (
                 <>
-                  <StatusLight
-                    noFill
-                    className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
-                    kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-                    text={agreement.status}
-                  />
                   {partyName && (
                     <button
                       type="button"
@@ -8183,91 +8340,419 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             })()}
           </div>
 
-          <div style={{ flex: 1 }} />
-
-          {/* Tabs — pinned to the bottom of the header */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
-            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto', background: 'var(--ink-bg-color-secondary)' }}>
+      <div style={{ flex: 1, background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)' }}>
+            <div style={{ padding: '2px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
-              {/* Needs Attention section */}
-              {currentAttentionItems.length > 0 && !isNDADraft && !isUploadedDocAgreement && (
-                <div style={{ marginBottom: 'var(--ink-spacing-400)' }}>
+              {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
+              {orderedTasks.length > 0 && (
+                <div style={{
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 12,
+                  padding: 'var(--ink-spacing-300)',
+                  marginBottom: 'var(--ink-spacing-400)',
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
-                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Needs Attention</Text>
-                    <Button kind="tertiary" size="small">View all</Button>
+                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Tasks</Text>
+                    {orderedTasks.length > 3 && (
+                      <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('tasks'); }}>See all</Link>
+                    )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(currentAttentionItems.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
-                    {currentAttentionItems.slice(0, 3).map((item) => (
-                      <div key={item.id} style={{
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--ink-spacing-200)' }}>
+                    {orderedTasks.slice(0, 3).map((task) => (
+                      <div key={task.id} style={{
                         background: 'var(--ink-white-100)',
                         border: '1px solid var(--ink-border-subtle)',
                         borderRadius: 8,
                         padding: '14px 16px',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 6,
+                        gap: 10,
                       }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {item.alertMessage ? (
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                                <path d="M8 2L9.5 6.5L14 8L9.5 9.5L8 14L6.5 9.5L2 8L6.5 6.5L8 2Z" fill="#7C3AED"/>
-                              </svg>
-                            ) : item.riskLevel === 'High' ? (
-                              <Icon name="alert" size={16} color="var(--ink-red-80)" />
-                            ) : (
-                              <Icon name="comment" size={16} color="var(--ink-neutral-80)" />
-                            )}
-                            {item.alertMessage && (
-                              <span style={{
-                                fontSize: 11,
-                                fontWeight: 600,
-                                color: 'var(--ink-orange-100)',
-                                background: 'var(--ink-orange-10)',
-                                border: '1px solid var(--ink-orange-30)',
-                                borderRadius: 4,
-                                padding: '2px 6px',
-                              }}>Due today</span>
-                            )}
-                          </div>
+                          <Inline gap="small" align="center">
+                            <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
+                          </Inline>
                           <RowOverflowMenu
                             items={[
-                              { label: 'View history', onClick: () => showToast('Opening history.') },
-                              { label: 'Download', onClick: () => showToast('Downloading.') },
+                              { label: 'View task', onClick: () => setActiveTab('tasks') },
+                              { label: 'Send a reminder', onClick: () => showToast('Reminder sent.') },
                             ]}
                           />
                         </div>
-                        <Text size="sm" weight="semibold">{item.item}</Text>
-                        <Text size="xs" color="secondary">{item.description}</Text>
-                        {item.alertMessage && (
-                          <a href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 'var(--ink-font-size-xs)', color: 'var(--ink-cobalt-80)', textDecoration: 'none', fontWeight: 500 }}>Send a reminder</a>
-                        )}
+                        <Text size="sm" weight="semibold">{task.title}</Text>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          {task.assignee === '--' ? (
+                            <Text size="xs" color="secondary">Unassigned</Text>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <Avatar initials={task.assigneeInitials} size="xsmall" />
+                              <Text size="xs" color="secondary">{task.assignee}</Text>
+                            </div>
+                          )}
+                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{relativePast(task.dueDate)}</Text>
+                        </div>
                       </div>
                     ))}
+                    {orderedTasks.length === 1 && (
+                      <AddMenu
+                        {...addMenuHandlers}
+                        placement="center"
+                        wrapperStyle={{ height: '100%' }}
+                        renderTrigger={({ toggle }) => (
+                          <button
+                            onClick={toggle}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              background: 'none',
+                              border: '1px solid var(--ink-border-subtle)',
+                              borderRadius: 8,
+                              padding: '14px 16px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6,
+                              cursor: 'pointer',
+                              minHeight: 96,
+                              fontFamily: 'var(--ink-font-family-default)',
+                              color: 'var(--ink-font-color-secondary)',
+                            }}
+                          >
+                            <Icon name="plus" size={24} color="var(--ink-font-color-secondary)" />
+                            <Text size="sm" color="secondary">New document or task</Text>
+                          </button>
+                        )}
+                      />
+                    )}
                   </div>
                 </div>
               )}
 
+              {/* Documents preview — a few of this space's documents, styled as a card list */}
+              {currentDocuments.length > 0 && (
+                <div style={{
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderRadius: 12,
+                  padding: 'var(--ink-spacing-300)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                    <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('documents'); }}>See all</Link>
+                  </div>
+
+                  {/* Bulk actions bar - shown when documents are selected */}
+                  {selectedDocs.size > 0 && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 16px',
+                      background: 'var(--ink-cobalt-10)',
+                      border: '1px solid var(--ink-cobalt-30)',
+                      borderRadius: 8,
+                      marginBottom: 'var(--ink-spacing-200)',
+                    }}>
+                      <Text size="sm" weight="semibold" style={{ color: 'var(--ink-cobalt-100)' }}>
+                        {selectedDocs.size} selected
+                      </Text>
+                      <div style={{ flex: 1 }} />
+                      <Button kind="secondary" size="small" onClick={() => setSelectedDocs(new Set())}>
+                        Clear
+                      </Button>
+                      <Button kind="secondary" size="small" onClick={() => {
+                        const selectedDocNames = currentDocuments
+                          .filter(doc => selectedDocs.has(doc.id))
+                          .map(doc => doc.name);
+                        if (selectedDocNames.length === 0) return;
+                        setApprovalModalDoc(selectedDocNames.join(', '));
+                        setSelectedDocs(new Set());
+                      }}>
+                        Send for Approval
+                      </Button>
+                      <Button kind="primary" size="small" onClick={() => {
+                        const selectedDocNames = currentDocuments
+                          .filter(doc => selectedDocs.has(doc.id))
+                          .map(doc => doc.name);
+                        setPreparePreselectedDocs(selectedDocNames);
+                        setShowPrepare(true);
+                      }}>
+                        Send for Signature
+                      </Button>
+                    </div>
+                  )}
+
+                  <div>
+                    {processedDocuments.slice(0, 5).map((item, idx) => {
+                      // Envelope rows — a packet that has been sent for signature.
+                      // Rendered identically in spirit to the Documents tab: a
+                      // signature-progress bar with a "Waiting for X" caption.
+                      if ('isEnvelope' in item && item.isEnvelope) {
+                        const envDocNames = item.documentNames && item.documentNames.length
+                          ? item.documentNames
+                          : item.documents.map(d => d.name);
+                        const envName = envDocNames.join(', ') || 'Envelope';
+                        const sp = item.signatureProgress;
+                        const envDate = item.documents[0]?.lastModified || item.documents[0]?.dateModified;
+                        return (
+                          <div
+                            key={`overview-env-${item.envelopeId}`}
+                            onClick={() => openEnvelopePanel({
+                              envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${envDocNames[0] || ''}`.trim() : (envDocNames[0] || envName),
+                              documentNames: envDocNames,
+                              signatureProgress: sp,
+                              dateModified: envDate,
+                              rowId: `overview-env-${item.envelopeId}`,
+                            })}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 'var(--ink-spacing-200)',
+                              minHeight: 60,
+                              padding: '0',
+                              borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <div style={{ width: 16, flexShrink: 0 }} />
+                            <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
+                              <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{envName}</Text>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              {sp ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
+                                    <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
+                                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(sp.signed / sp.total) * 100}%`, background: 'var(--ink-cobalt-80)' }} />
+                                    </div>
+                                  </div>
+                                  <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    Waiting for {sp.waitingFor}
+                                  </Text>
+                                </div>
+                              ) : (
+                                <StatusLight noFill kind={getStatusLightKind('Pending Signature')} text="Pending Signature" />
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <Text size="sm" color="secondary">{envDate ? relativePast(envDate) : ''}</Text>
+                            </div>
+                            <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
+                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                <RowOverflowMenu items={envelopeOverflowItems()} />
+                              </Inline>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const doc = item as DealDocument;
+                      const isSelected = selectedDocs.has(doc.id);
+                      // An envelope-document (one sent for signature) opens the
+                      // detail panel on click — identical behavior to the Documents tab.
+                      const isEnvelopeDoc = !!doc.signatureProgress;
+                      const isOpen = openEnvelopeRowId === doc.id;
+                      const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
+                      return (
+                        <div
+                          key={doc.id}
+                          onClick={isEnvelopeDoc ? () => openEnvelopePanel({
+                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            documentNames: [doc.name],
+                            signatureProgress: doc.signatureProgress,
+                            dateModified: doc.lastModified || doc.dateModified,
+                            rowId: doc.id,
+                          }) : undefined}
+                          onMouseEnter={(e) => { setHoveredOverviewDocId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
+                          onMouseLeave={(e) => { setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 'var(--ink-spacing-200)',
+                            minHeight: 60,
+                            padding: '0',
+                            borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
+                            background: restingBg,
+                            cursor: isEnvelopeDoc ? 'pointer' : 'default',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const newSelected = new Set(selectedDocs);
+                              if (e.target.checked) {
+                                newSelected.add(doc.id);
+                              } else {
+                                newSelected.delete(doc.id);
+                              }
+                              setSelectedDocs(newSelected);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)', flexShrink: 0 }}
+                          />
+                          <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
+                            <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</Text>
+                            {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {doc.signatureProgress ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
+                                  <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(doc.signatureProgress.signed / doc.signatureProgress.total) * 100}%`, background: 'var(--ink-cobalt-80)' }} />
+                                  </div>
+                                </div>
+                                <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  Waiting for {doc.signatureProgress.waitingFor}
+                                </Text>
+                              </div>
+                            ) : (
+                              <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
+                            )}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <Text size="sm" color="secondary">{relativePast(doc.lastModified || doc.dateModified)}</Text>
+                          </div>
+                          <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
+                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                              {doc.signatureProgress ? (
+                                <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                              ) : (
+                                <Button
+                                  kind="secondary"
+                                  size="small"
+                                  onClick={() => {
+                                    if (doc.id.startsWith('added-')) {
+                                      setPendingPreviewDoc(doc.name);
+                                    } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                      onEditNDA();
+                                    } else {
+                                      onPreviewDocument?.(doc.name);
+                                    }
+                                  }}
+                                >
+                                  {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                                </Button>
+                              )}
+                              <RowOverflowMenu
+                                items={doc.signatureProgress
+                                  ? envelopeOverflowItems()
+                                  : [
+                                      { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                      { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                    ]}
+                              />
+                            </Inline>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Right column — combined Activity / Messages module with tabs */}
+            <div style={{ background: '#F6F7F6', padding: '2px var(--ink-spacing-300) var(--ink-spacing-300) var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
+              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+                  <div style={{ display: 'flex', alignItems: 'stretch', gap: 'var(--ink-spacing-300)' }}>
+                    {(['activity', 'messages'] as const).map((v) => {
+                      const isActive = activityView === v;
+                      return (
+                        <button
+                          key={v}
+                          onClick={() => setActivityView(v)}
+                          style={{
+                            padding: 'var(--ink-spacing-100) 0',
+                            border: 'none',
+                            background: 'none',
+                            borderBottom: isActive ? '2px solid var(--ink-ink-100)' : '2px solid transparent',
+                            marginBottom: -1,
+                            color: isActive ? 'var(--ink-ink-100)' : 'rgba(0,0,0,0.55)',
+                            cursor: 'pointer',
+                            fontSize: 'var(--ink-font-size-sm)',
+                            fontWeight: isActive ? 600 : 400,
+                            fontFamily: 'var(--ink-font-family-default)',
+                          }}
+                        >
+                          {v === 'activity' ? 'Activity' : `Messages (${spaceMessages.length})`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {activityView === 'activity' ? (
+                  <Stack gap="medium">
+                    {currentActivity.map((item) => (
+                      <Inline key={item.id} gap="medium" align="flex-start">
+                        <div style={{
+                          width: 32, height: 32, borderRadius: '50%',
+                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <Text size="sm"><strong>{item.user}</strong> {item.action}</Text>
+                          <Text size="xs" color="secondary">{item.time}</Text>
+                        </div>
+                      </Inline>
+                    ))}
+                  </Stack>
+                ) : (
+                  <div>
+                    <button
+                      onClick={() => showToast('New message')}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-100)',
+                        padding: 'var(--ink-spacing-100) 0 var(--ink-spacing-200)',
+                        border: 'none', background: 'none', cursor: 'pointer',
+                        color: 'var(--ink-cobalt-100)', fontWeight: 600,
+                        fontSize: 'var(--ink-font-size-sm)', fontFamily: 'var(--ink-font-family-default)',
+                      }}
+                    >
+                      <Icon name="plus" size={16} color="var(--ink-cobalt-100)" />
+                      New Message
+                    </button>
+                    {spaceMessages.map((msg, idx) => (
+                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? '1px solid var(--ink-border-subtle)' : '1px solid var(--ink-border-subtle)' }}>
+                        <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Text size="sm" weight="semibold">{msg.name}</Text>
+                          <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
+                        </div>
+                      </Inline>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'documents' && (
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                  <AddDocumentMenu
-                    variant="tertiary"
-                    onUpload={() => setShowFilePicker(true)}
-                    onUseTemplate={() => setShowFilePicker(true)}
-                  />
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8316,7 +8801,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
                 {/* Primary documents table */}
                 {docSubTab === 'negotiating' && (
-                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                  <div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
                         <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
@@ -8334,17 +8819,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                             />
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '38%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '33%' }}>
                             <Inline gap="xsmall" align="center">Title <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>Status</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '18%' }}>Status</th>
                           {!isHandbookSpace && (
                             <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '12%' }}>Value</th>
                           )}
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '20%' }}>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}>
                             <Inline gap="xsmall" align="center">Last modified <Icon name="sort" size={12} color="var(--ink-text-secondary)" /></Inline>
                           </th>
-                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '14%' }}>Actions</th>
+                          <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '16%' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -8358,7 +8843,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             return (
                               <React.Fragment key={`env-${envelope.envelopeId}`}>
                                 {/* Envelope parent row */}
-                                <tr style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}>
+                                <tr
+                                  onMouseEnter={() => setHoveredDocRowId(envelopeRowId)}
+                                  onMouseLeave={() => setHoveredDocRowId(prev => (prev === envelopeRowId ? null : prev))}
+                                  style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}
+                                >
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                     <input
                                       type="checkbox"
@@ -8429,13 +8918,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     </td>
                                   )}
                                   <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
-                                    {envelope.documents[0]?.dateModified}
+                                    {relativeTime(envelope.documents[0]?.dateModified)}
                                   </td>
-                                  <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
-                                    <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                    <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                                      <RowOverflowMenu items={envelopeOverflowItems()} />
-                                    </Inline>
+                                  <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
+                                    <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                      <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                        <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                        <RowOverflowMenu items={envelopeOverflowItems()} />
+                                      </Inline>
+                                    </div>
                                   </td>
                                 </tr>
                                 {/* Nested document rows */}
@@ -8489,8 +8980,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 dateModified: doc.lastModified || doc.dateModified,
                                 rowId: doc.id,
                               }) : undefined}
-                              onMouseEnter={(e) => { if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.background = restingBg; }}
+                              onMouseEnter={(e) => { setHoveredDocRowId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
+                              onMouseLeave={(e) => { setHoveredDocRowId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
                               style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: isEnvelopeDoc ? 'pointer' : 'default' }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
@@ -8559,38 +9050,40 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{doc.value || 'NA'}</Text>
                                 </td>
                               )}
-                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
-                                <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                                  {doc.signatureProgress ? (
-                                    <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                                  ) : (
-                                    <Button
-                                      kind="secondary"
-                                      size="small"
-                                      onClick={() => {
-                                        if (doc.id.startsWith('added-')) {
-                                          // Documents added via the Add → Document flow open in the local Doc Preview.
-                                          setPendingPreviewDoc(doc.name);
-                                        } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                          onEditNDA();
-                                        } else {
-                                          onPreviewDocument?.(doc.name);
-                                        }
-                                      }}
-                                    >
-                                      {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
-                                    </Button>
-                                  )}
-                                  <RowOverflowMenu
-                                    items={doc.signatureProgress
-                                      ? envelopeOverflowItems()
-                                      : [
-                                          { label: 'Download', onClick: () => showToast('Downloading document.') },
-                                          { label: 'View history', onClick: () => showToast('Opening document history.') },
-                                        ]}
-                                  />
-                                </Inline>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{relativePast(doc.lastModified || doc.dateModified)}</td>
+                              <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
+                                <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                  <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                    {doc.signatureProgress ? (
+                                      <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                    ) : (
+                                      <Button
+                                        kind="secondary"
+                                        size="small"
+                                        onClick={() => {
+                                          if (doc.id.startsWith('added-')) {
+                                            // Documents added via the Add → Document flow open in the local Doc Preview.
+                                            setPendingPreviewDoc(doc.name);
+                                          } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                            onEditNDA();
+                                          } else {
+                                            onPreviewDocument?.(doc.name);
+                                          }
+                                        }}
+                                      >
+                                        {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                                      </Button>
+                                    )}
+                                    <RowOverflowMenu
+                                      items={doc.signatureProgress
+                                        ? envelopeOverflowItems()
+                                        : [
+                                            { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                            { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                          ]}
+                                    />
+                                  </Inline>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -8602,7 +9095,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
                 {/* Supplemental documents table */}
                 {docSubTab === 'supplemental' && (
-                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+                  <div>
                     {currentSupplementalDocs.length === 0 ? (
                       <div style={{ padding: 'var(--ink-spacing-400)', textAlign: 'center' }}>
                         <Text size="sm" color="secondary">No supplemental documents</Text>
@@ -8627,7 +9120,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <Text size="sm">{doc.owner}</Text>
                                 </Inline>
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{relativePast(doc.dateModified)}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   <Button kind="secondary" size="small" onClick={() => {
@@ -8655,51 +9148,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               </div>
             </div>
 
-            {/* Right sidebar */}
-            <div style={{ borderLeft: '1px solid var(--ink-border-subtle)', background: 'var(--ink-bg-color-default)', display: 'flex', flexDirection: 'column' }}>
-              {/* Sidebar tabs — Segmented Control from the design system */}
-              <div style={{ display: 'flex', padding: 'var(--ink-spacing-300)' }}>
-                <SegmentedControl
-                  accessibilityText="Sidebar view"
-                  fullWidth
-                  value={sidebarTab}
-                  onChange={(v) => setSidebarTab(v as 'activity' | 'details')}
-                  options={[
-                    { value: 'activity', label: 'Activity' },
-                    { value: 'details', label: 'Details' },
-                  ]}
-                />
-              </div>
+        )}
 
-              {/* Activity tab content */}
-              {sidebarTab === 'activity' && (
-                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, overflowY: 'auto' }}>
-                  <Stack gap="medium">
-                    {currentActivity.map((item) => (
-                      <Inline key={item.id} gap="medium" align="flex-start">
-                        <div style={{
-                          width: 32, height: 32, borderRadius: '50%',
-                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0,
-                        }}>
-                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <Text size="sm">
-                            <strong>{item.user}</strong> {item.action}
-                          </Text>
-                          <Text size="xs" color="secondary">{item.time}</Text>
-                        </div>
-                      </Inline>
-                    ))}
-                  </Stack>
-                </div>
-              )}
-
-              {/* Details tab content */}
-              {sidebarTab === 'details' && (
-                <div style={{ padding: 'var(--ink-spacing-300)', flex: 1, overflowY: 'auto' }}>
+        {activeTab === 'details' && (
+          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 720, margin: '0 auto' }}>
+            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-300)' }}>Details</div>
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 12, background: 'var(--ink-white-100)', padding: 'var(--ink-spacing-400)' }}>
                   <Stack gap="medium">
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Party</Text>
@@ -8716,6 +9170,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <Text size="sm">{agreement.agreementType || '—'}</Text>
                     </div>
                     <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Created By</Text>
+                      <Inline gap="small" align="center">
+                        <Avatar initials={spaceCreatedByInitials} size="small" />
+                        <Text size="sm">{spaceCreatedBy}</Text>
+                      </Inline>
+                    </div>
+                    <div>
+                      <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Date Created</Text>
+                      <Text size="sm">{spaceCreatedDate}</Text>
+                    </div>
+                    <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Deal Value</Text>
                       <Text size="sm">{agreement.dealValue || '—'}</Text>
                     </div>
@@ -8725,7 +9190,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     </div>
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Anticipated Close</Text>
-                      <Text size="sm">{agreement.closeDate || '��'}</Text>
+                      <Text size="sm">{agreement.closeDate || '—'}</Text>
                     </div>
                     <div>
                       <Text size="xs" weight="semibold" color="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Status</Text>
@@ -8738,9 +9203,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     </div>
                   </Stack>
                 </div>
-              )}
             </div>
-          </div>
         )}
 
         {activeTab === 'tasks' && (
@@ -8812,7 +9275,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
+                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Button kind="secondary" size="small">
@@ -8934,6 +9397,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             status: 'Not started',
             dueDate: formattedDueDate,
             isDueSoon: false,
+            createdAt: Date.now(),
           }]);
           setSentActivity(prev => [
             { id: `activity-upload-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Sent an upload request${data.title ? ` "${data.title}"` : ''}${assignee ? ` to ${assignee}` : ''}`, time: 'Just now' },
@@ -8972,6 +9436,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             status: 'Not started',
             dueDate: formattedDueDate,
             isDueSoon: false,
+            createdAt: Date.now(),
           }]);
           setSentActivity(prev => [
             { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up onboarding for ${data.vendorName}`, time: 'Just now' },
@@ -9006,7 +9471,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
       {/* Envelope detail panel */}
       {openEnvelope && (
-        <EnvelopePanel envelope={openEnvelope} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
+        <EnvelopePanel envelope={openEnvelope} onRemind={() => showToast('Reminder sent to signers.')} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
       )}
 
       {/* Party History Panel */}
@@ -9717,7 +10182,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ──────────���─────────────────────────────��──────────────��──────────────────
+/* ──────────���──────────────────────────���──��────��─��─���─────��────────────���─────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
@@ -10123,7 +10588,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     };
   }, [unavailableCallout]);
 
-  /* ── GlobalNav — matches production DocuSign comp ─��� */
+  /* ── GlobalNav — matches production DocuSign comp ─���� */
   const globalNavConfig = {
     logo: <img src="/docusign-logo.svg" alt="DocuSign" />,
     showAppSwitcher: false,
@@ -10425,7 +10890,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const isRequestsView = sidebarView === 'requests';
   const isFoldersView = sidebarView === 'folders';
 
-  /* ─�� Folders view: navigation + inline expansion ���─ */
+  /* ─�� Folders view: navigation + inline expansion ����� */
   const toggleFolderExpand = useCallback((id: string) => {
     setExpandedFolders((prev) => {
       const next = new Set(prev);
@@ -11014,16 +11479,17 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             statusIcon: 'clock',
             statusKind: 'neutral',
             statusSub: 'Draft',
-            dealValue: '—',
+            dealValue: '$2.4M',
             agreementType: 'Master Services Agreement',
-            termLength: '���',
-            closeDate: '���',
-            date: new Date().toLocaleDateString('en-GB'),
+            termLength: '36 months',
+            closeDate: 'Jun 30, 2026',
+            date: new Date().toLocaleDateString('en-US'),
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
             action: 'View',
             documentsCount: 1,
             tasksCount: 0,
             tasksPending: 0,
+            createdAt: Date.now(),
           };
           addNewAgreement(newAgreement);
           setSelectedAgreement(newAgreement);
@@ -11080,11 +11546,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           statusIcon: 'clock',
           statusKind: 'info',
           statusSub: 'In Progress',
-          dealValue: '—',
+          dealValue: '$185,000',
           agreementType: 'Purchase Agreement',
-          termLength: '—',
-          closeDate: '—',
-          date: new Date().toLocaleDateString('en-GB'),
+          termLength: '12 month',
+          closeDate: 'Jul 31, 2026',
+          date: new Date().toLocaleDateString('en-US'),
           time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           action: 'Edit',
           documentsCount: data.documentSource === '3rd-party' ? 0 : 1,
@@ -11140,6 +11606,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           documentsCount: 1,
           tasksCount: 1,
           tasksPending: 1,
+          createdAt: Date.now(),
         };
         
         // Close the NDA modal and open the workspace
@@ -11254,6 +11721,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             status: 'Not started',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
             isDueSoon: false,
+            createdAt: Date.now(),
           }]);
           setPendingSignatureDoc(null);
           setShowRootPrepare(false);
@@ -11306,6 +11774,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
               total: recipientNames.length || 1,
               waitingFor: recipientName || savedNDAData?.receivingParty || 'Recipient',
             },
+            createdAt: Date.now(),
           };
           addNewAgreement(sentNdaAgreement);
           setSelectedAgreement(sentNdaAgreement);
@@ -11358,6 +11827,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
               total: recipientNames.length || 1,
               waitingFor: recipientName || 'Recipient',
             },
+            createdAt: Date.now(),
           };
           
           setSelectedAgreement(uploadedAgreement);
