@@ -3644,7 +3644,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ════════���════════════════��═══����════════��
+/* ════════�����════════════════��═══����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -8290,7 +8290,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   {label}
                 </span>
               );
-              const valueItem = dealValue ? text('value', 'currency-dollar', <><strong style={{ fontWeight: 600 }}>{dealValue}</strong>&nbsp;{valueNoun}</>, 'var(--ink-font-color-default)') : null;
+              const valueItem = dealValue ? text('value', 'currency-dollar', <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}><strong style={{ fontWeight: 600 }}>{dealValue}</strong>{valueNoun}</span>, 'var(--ink-font-color-default)') : null;
               const docItem = text('docs', 'document', `${docCount} Document${docCount === 1 ? '' : 's'}`);
               const termItem = termMonths ? text('term', 'calendar', `${termMonths} month term`) : (isOneTime ? text('term', 'calendar', 'One-time') : null);
               const horizonItem = horizonLabel ? text('horizon', 'refresh', horizonLabel) : null;
