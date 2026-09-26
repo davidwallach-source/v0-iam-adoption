@@ -1772,6 +1772,11 @@ interface Agreement {
   // resolved by kind rather than by a fixed id, so multiple can coexist in a
   // single session without overwriting one another.
   workspaceKind?: 'nda' | 'uploaded' | 'permission-slip';
+  // Epoch ms when this space was created via a "Start New" flow (Start Blank,
+  // Signature Request, or Instant NDA). Marks the space as freshly created so its
+  // activity feed shows only real events, its Messages start empty, and its
+  // timestamp reads "Just now".
+  createdAt?: number;
   // Set when the space contains a single sent signature envelope. Drives the
   // progress-bar Status treatment (progress track + "Waiting for [recipient]")
   // in the All Agreements table, matching how the space itself renders it.
@@ -3717,7 +3722,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════����═════════════════
+/* ═════════════════════�����═════════════════
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -7770,6 +7775,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   
   // Check if this is an uploaded/blank document agreement.
   const isUploadedDocAgreement = agreement.workspaceKind === 'uploaded' || agreement.workspaceKind === 'permission-slip' || agreement.id === 'uploaded-doc';
+  // A space just created via a "Start New" flow (Start Blank, Signature Request,
+  // or Instant NDA). Such a space has no history yet, so its activity feed shows
+  // only the real events that just happened, its Messages start empty, and its
+  // timestamp reads "Just now".
+  const isNewlyCreated = typeof agreement.createdAt === 'number';
 
   // Update NDA document status if sent for signature
   const modifiedDocuments = useMemo(() => {
@@ -7861,6 +7871,25 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     return events;
   })();
 
+  // Activity feed for a space just created via a "Start New" flow (Signature
+  // Request / Instant NDA). It reflects only what actually happened — the space
+  // was created, and (when applicable) the document was sent for signature —
+  // rather than the default rich sample feed. Newest-first.
+  const newSpaceActivity = (() => {
+    const docName = agreement.documentNames?.[0]
+      || uploadedDocAgreement?.documents?.[0]
+      || (isNDADraft ? 'the NDA' : 'the agreement');
+    const recipient = (ndaRecipientName || savedNDAData?.receivingParty || uploadedDocAgreement?.recipientName || '').trim();
+    const wasSent = (isNDADraft && ndaSentForSignature)
+      || (isUploadedDocAgreement && !!uploadedDocAgreement && !uploadedDocAgreement.isDraft);
+    const events: { id: string; icon: IconName; user: string; action: string; time: string }[] = [];
+    if (wasSent) {
+      events.push({ id: 'new-sent', icon: 'send', user: 'You', action: `Sent ${docName}${recipient ? ` to ${recipient}` : ''} for signature`, time: 'Just now' });
+    }
+    events.push({ id: 'new-created', icon: (isNDADraft ? 'edit' : 'document') as IconName, user: 'You', action: `Created ${docName}`, time: 'Just now' });
+    return events;
+  })();
+
   // A saved-blank draft has only just been created, so its activity feed should
   // reflect that single real event rather than the default rich sample feed.
   const currentActivity = [
@@ -7871,11 +7900,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         ? [
             { id: 'draft-create', icon: 'document' as IconName, user: 'You', action: `Created ${uploadedDocAgreement.documents[0] || 'draft document'}`, time: 'Just now' },
           ]
-        : workspaceData.activity),
+        : isNewlyCreated
+          ? newSpaceActivity
+          : workspaceData.activity),
   ];
 
-  // Messages shown in the Overview right column widget.
-  const spaceMessages: { name: string; initials: string; colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; preview: string }[] = [
+  // Messages shown in the Overview right column widget. A freshly created space
+  // has no conversation yet, so its Messages list starts empty.
+  const spaceMessages: { name: string; initials: string; colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; preview: string }[] = isNewlyCreated ? [] : [
     { name: 'Alex Preston', initials: 'AP', colorIndex: 1, preview: 'I left a few comments in the contract to review…' },
     { name: 'Jerome Rill', initials: 'JR', colorIndex: 4, preview: 'Feel free to approve the agreement if I am not…' },
     { name: 'Stacy Banks', initials: 'SB', colorIndex: 2, preview: 'I went ahead and submitted the contract agree…' },
@@ -7889,7 +7921,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const spaceCreatedByInitials = spaceCreatedBy === 'You'
     ? 'YO'
     : spaceCreatedBy.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
-  const spaceCreatedDate = spaceCreatedActivity?.time || agreement.date || '—';
+  const spaceCreatedDate = isNewlyCreated ? 'Just now' : (spaceCreatedActivity?.time || agreement.date || '—');
   const currentTasks = useMemo(() => {
     // Reverse so the most recently added approval task appears at the top,
     // matching the sentTasks ordering used in each branch below.
@@ -11529,6 +11561,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             documentsCount: 1,
             tasksCount: 0,
             tasksPending: 0,
+            createdAt: Date.now(),
           };
           addNewAgreement(newAgreement);
           setSelectedAgreement(newAgreement);
@@ -11645,6 +11678,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           documentsCount: 1,
           tasksCount: 1,
           tasksPending: 1,
+          createdAt: Date.now(),
         };
         
         // Close the NDA modal and open the workspace
@@ -11812,6 +11846,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
               total: recipientNames.length || 1,
               waitingFor: recipientName || savedNDAData?.receivingParty || 'Recipient',
             },
+            createdAt: Date.now(),
           };
           addNewAgreement(sentNdaAgreement);
           setSelectedAgreement(sentNdaAgreement);
@@ -11864,6 +11899,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
               total: recipientNames.length || 1,
               waitingFor: recipientName || 'Recipient',
             },
+            createdAt: Date.now(),
           };
           
           setSelectedAgreement(uploadedAgreement);
