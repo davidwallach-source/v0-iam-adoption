@@ -2065,6 +2065,17 @@ function relativeTime(dateStr: string | undefined | null): string {
   const yr = Math.round(n / 365); return phrase(`${yr} year${yr > 1 ? 's' : ''}`);
 }
 
+// Past-tense variant of relativeTime for stamps that mark when something was
+// created or last acted on (documents, envelopes). These can never be in the
+// future, so any future phrasing is flipped to past ("in 3 days" -> "3 days
+// ago", "Tomorrow" -> "Today").
+function relativePast(dateStr: string | undefined | null): string {
+  const r = relativeTime(dateStr);
+  if (r === 'Tomorrow') return 'Today';
+  if (r.startsWith('in ')) return `${r.slice(3)} ago`;
+  return r;
+}
+
 // Formats elapsed time since an epoch-ms instant into a short natural-language
 // stamp: "Just now" for the first minute, then minutes/hours/days ago.
 function elapsedLabel(createdAt: number, now: number): string {
@@ -2780,7 +2791,7 @@ const navigatorColumns: any[] = [
 
 /* ══════════════════════════════════���������������������════
    Parties Data (matches real DocuSign)
-   ═══════════════════════════════════════ */
+   ��══════════════════════════════════════ */
 
 interface Party {
   id: string;
@@ -2914,7 +2925,7 @@ const requestColumns: any[] = [
   },
 ];
 
-/* ═���������═════��═����═══════════���═══════════════
+/* ═���������══��══��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
    ���������������������══════════════════════════════════════ */
 
@@ -2980,7 +2991,7 @@ const templateColumns: any[] = [
 
 /* ═══════════════���═══════════════════════
    Insights Reports Data
-   ═══════════════════════════════════════ */
+   ═��═════════════════════════════════════ */
 
 interface ReportItem {
   id: string;
@@ -6437,11 +6448,15 @@ interface AddMenuProps {
   renderTrigger?: (opts: { toggle: () => void; open: boolean }) => React.ReactNode;
   // Where the dropdown opens relative to the trigger. Defaults to opening
   // below and right-aligned (the header CTA); 'top-left' opens the menu
-  // directly above the trigger, left-aligned (the empty task card).
-  placement?: 'bottom-right' | 'top-left';
+  // directly above the trigger, left-aligned; 'center' opens it centered
+  // directly over the trigger (the empty task card).
+  placement?: 'bottom-right' | 'top-left' | 'center';
+  // Extra styles for the relative wrapper — used so a card trigger can stretch
+  // to fill its grid cell (height: 100%).
+  wrapperStyle?: React.CSSProperties;
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate, renderTrigger, placement = 'bottom-right' }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate, renderTrigger, placement = 'bottom-right', wrapperStyle }: AddMenuProps) {
   const { version } = usePrototypeVersion();
   const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
@@ -6478,7 +6493,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   useEffect(() => () => { if (closeSubTimer.current) clearTimeout(closeSubTimer.current); }, []);
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} style={{ position: 'relative', ...wrapperStyle }}>
       {renderTrigger
         ? renderTrigger({ toggle: () => { setOpen(o => !o); setDocSubOpen(false); }, open })
         : <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40, paddingLeft: 12, paddingRight: 12 }}>Add New</Button>}
@@ -6486,7 +6501,9 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
       {open && (
         <div style={{
           position: 'absolute',
-          ...(placement === 'top-left'
+          ...(placement === 'center'
+            ? { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+            : placement === 'top-left'
             ? { bottom: 'calc(100% + 6px)', left: 0 }
             : { top: 'calc(100% + 6px)', right: 0 }),
           background: 'white',
@@ -7886,6 +7903,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         status: 'In progress',
         dueDate: '--',
         isDueSoon: false,
+        createdAt: Date.now(),
       };
       return [signNdaTask, ...[...sentTasks].reverse()];
     }
@@ -7911,6 +7929,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         status: 'In progress',
         dueDate: '--',
         isDueSoon: false,
+        createdAt: Date.now(),
       };
       // Include any additional tasks added via Add menu (like Wire Transfer)
       return [signTask, ...[...sentTasks].reverse()];
@@ -8378,12 +8397,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     {orderedTasks.length === 1 && (
                       <AddMenu
                         {...addMenuHandlers}
-                        placement="top-left"
+                        placement="center"
+                        wrapperStyle={{ height: '100%' }}
                         renderTrigger={({ toggle }) => (
                           <button
                             onClick={toggle}
                             style={{
                               width: '100%',
+                              height: '100%',
                               background: 'none',
                               border: '1px solid var(--ink-border-subtle)',
                               borderRadius: 8,
@@ -8924,7 +8945,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{doc.value || 'NA'}</Text>
                                 </td>
                               )}
-                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{relativeTime(doc.lastModified || doc.dateModified)}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{relativePast(doc.lastModified || doc.dateModified)}</td>
                               <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                                   <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
@@ -8994,7 +9015,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <Text size="sm">{doc.owner}</Text>
                                 </Inline>
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{relativeTime(doc.dateModified)}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{relativePast(doc.dateModified)}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   <Button kind="secondary" size="small" onClick={() => {
@@ -11645,6 +11666,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             status: 'Not started',
             dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
             isDueSoon: false,
+            createdAt: Date.now(),
           }]);
           setPendingSignatureDoc(null);
           setShowRootPrepare(false);
