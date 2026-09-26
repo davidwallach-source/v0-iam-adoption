@@ -10606,6 +10606,58 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     onUserMenuClick: () => setUserMenuOpen(o => !o),
   };
 
+  /* ── SideRail — left navigation (Northstar duotone) ── */
+  const sideRailConfig = {
+    logo: <img src="/docusign-logo-white.svg" alt="Docusign" />,
+    onToggleCollapse: () => {},
+    createLabel: 'Create',
+    onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
+    items: [
+      { id: 'home', label: 'Home', icon: 'home' as const, active: activeTab === 'home', onClick: () => handleTabClick('home') },
+      { id: 'iris', label: 'Iris', customIcon: <IrisIcon />, onClick: () => handleUnavailableTabClick('iris') },
+      {
+        id: 'agreements',
+        label: 'Agreements',
+        icon: 'envelope' as const,
+        active: activeTab === 'agreements',
+        onClick: () => handleTabClick('agreements'),
+        children: [
+          { id: 'all-agreements-rail', label: 'All Agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
+          { id: 'drafts-rail', label: 'Drafts', onClick: () => handleUnavailableTabClick('drafts') },
+          { id: 'in-progress-rail', label: 'In Progress', onClick: () => { handleTabClick('agreements'); setSidebarView('in-progress'); } },
+          { id: 'agreement-manager-rail', label: 'Agreement Manager', onClick: () => handleUnavailableTabClick('agreement-manager') },
+          { id: 'deleted-rail', label: 'Deleted', onClick: () => handleUnavailableTabClick('deleted') },
+          { id: 'folders-rail', label: 'Folders', icon: 'folder' as const, hasDividerBefore: true, onClick: () => { handleTabClick('agreements'); setSidebarView('folders'); setFolderPath([]); setSearch(''); } },
+        ],
+      },
+      { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => handleUnavailableTabClick('parties') },
+      { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => handleUnavailableTabClick('requests') },
+      {
+        id: 'insights',
+        label: 'Insights',
+        icon: 'chart-bar' as const,
+        active: activeTab === 'insights',
+        onClick: () => handleTabClick('insights'),
+        children: [
+          { id: 'overview-rail', label: 'Overview', onClick: () => handleTabClick('insights') },
+          { id: 'dashboards-rail', label: 'Dashboards', onClick: () => handleUnavailableTabClick('dashboards') },
+          { id: 'reports-rail', label: 'Reports', onClick: () => handleUnavailableTabClick('reports') },
+          { id: 'renewals-rail', label: 'Renewals', onClick: () => handleUnavailableTabClick('renewals') },
+          { id: 'obligations-rail', label: 'Obligations', onClick: () => handleUnavailableTabClick('obligations') },
+        ],
+      },
+      { id: 'more', label: '6 more', muted: true, onClick: () => handleUnavailableTabClick('more'), children: [
+        { id: 'templates-more', label: 'Templates', icon: 'layout-grid' as const, onClick: () => handleTabClick('templates') },
+        { id: 'automation-more', label: 'Automation', icon: 'workflow' as const, onClick: () => handleUnavailableTabClick('automation') },
+        { id: 'signatories-more', label: 'Signatories', icon: 'person' as const, onClick: () => handleUnavailableTabClick('signatories') },
+        { id: 'workspaces-more', label: 'Workspaces', icon: 'people' as const, onClick: () => handleUnavailableTabClick('workspaces') },
+        { id: 'powerforms-more', label: 'Powerforms', icon: 'bolt' as const, onClick: () => handleUnavailableTabClick('powerforms') },
+        { id: 'admin-more', label: 'Admin', icon: 'gear' as const, onClick: () => handleTabClick('admin') },
+        { id: 'edit-sidebar-more', label: 'Edit sidebar', icon: 'pencil' as const, hasDividerBefore: true, onClick: () => handleUnavailableTabClick('edit-sidebar') },
+      ] },
+    ],
+  };
+
   /* ── LocalNav — Agreements tab ── */
   const agreementsSidebar = {
     headerLabel: 'Start',
@@ -11283,9 +11335,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   /* ── Resolve content + sidebar ── */
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
-    agreements: agreementsSidebar,
-    templates: templatesSidebar,
-    insights: insightsSidebar,
+    agreements: undefined,
+    templates: undefined,
+    insights: undefined,
     admin: undefined,
   };
 
@@ -11318,7 +11370,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       }}
     />
     <DocuSignShell
-      globalNav={globalNavConfig}
+      sideRail={sideRailConfig}
       localNav={sidebarMap[activeTab]}
     >
       {/* In the Simple Use Case version, fill the content column so the footer
