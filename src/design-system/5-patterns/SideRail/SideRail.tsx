@@ -274,6 +274,7 @@ export const SideRail: React.FC<SideRailProps> = ({
       {user && (
         <button
           type="button"
+          data-user-menu-trigger
           className={styles.userButton}
           onClick={onUserClick}
           aria-label={collapsed ? user.name : undefined}

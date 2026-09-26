@@ -10241,7 +10241,7 @@ function UserMenu({
     function handlePointer(e: MouseEvent) {
       // Ignore clicks on the avatar button itself (it toggles the menu).
       const target = e.target as HTMLElement;
-      if (target.closest('[data-ink-component="GlobalNav"] [aria-label="User menu"]')) return;
+      if (target.closest('[data-user-menu-trigger]')) return;
       if (ref.current && !ref.current.contains(target)) onClose();
     }
     function handleKey(e: KeyboardEvent) {
@@ -10264,8 +10264,8 @@ function UserMenu({
       aria-label="Account and prototype version"
       style={{
         position: 'fixed',
-        top: 56,
-        right: 16,
+        bottom: 64,
+        left: 16,
         zIndex: 2500,
         minWidth: 268,
         background: 'var(--ink-white-100)',
