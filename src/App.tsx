@@ -7532,7 +7532,7 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
         </div>
 
         {/* Footer — pinned to the bottom with the primary CTA */}
-        <div style={{ flexShrink: 0, position: 'sticky', bottom: 0, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
+        <div style={{ flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
           <button
             onClick={onRemind}
             style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
@@ -8065,12 +8065,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const didAutoOpenEnvelope = useRef(false);
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
-    // Entering the space right after sending an envelope: never auto-open the
-    // panel — instead confirm the send with a success toast.
+    // Entering the space right after sending an envelope: confirm the send with
+    // a success toast and fall through to auto-open the envelope panel.
     if (justSentEnvelope) {
-      didAutoOpenEnvelope.current = true;
       showToast('Your documents were sent for signature.');
-      return;
     }
     const envelopeItems = processedDocuments.filter(
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
@@ -10940,7 +10938,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const isRequestsView = sidebarView === 'requests';
   const isFoldersView = sidebarView === 'folders';
 
-  /* ─�� Folders view: navigation + inline expansion ���─ */
+  /* ─�� Folders view: navigation + inline expansion ����� */
   const toggleFolderExpand = useCallback((id: string) => {
     setExpandedFolders((prev) => {
       const next = new Set(prev);
