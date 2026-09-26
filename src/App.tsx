@@ -3717,7 +3717,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════��═════════════════
+/* ═════════════════════���═════════════════
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8390,7 +8390,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <Text size="xs" color="secondary">{task.assignee}</Text>
                             </div>
                           )}
-                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{relativeTime(task.dueDate)}</Text>
+                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{relativePast(task.dueDate)}</Text>
                         </div>
                       </div>
                     ))}
