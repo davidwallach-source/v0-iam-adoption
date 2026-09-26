@@ -2051,8 +2051,12 @@ function relativeDate(dateStr: string): string {
 // Anchored to a fixed demo "today" so the sample data always reads as current,
 // and handles both past ("3 days ago") and future ("in 3 days") deadlines.
 // Any value that isn't a plain numeric date (e.g. "Today, 9:41 AM") is passed through unchanged.
-const DEMO_TODAY = new Date(2026, 3, 25); // Apr 25, 2026
-function relativeTime(dateStr: string | undefined | null): string {
+  const DEMO_TODAY = new Date(2026, 3, 25); // Apr 25, 2026
+  // Date string for "just created" stamps. Anchored to DEMO_TODAY (not the real
+  // clock) so freshly created documents read as "Today" through relativeTime —
+  // using the real date would land months away from the demo's anchor.
+  const DEMO_TODAY_STR = DEMO_TODAY.toLocaleDateString('en-US');
+  function relativeTime(dateStr: string | undefined | null): string {
   if (!dateStr || !/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s*$/.test(dateStr)) return dateStr ?? '';
   const [m, d, yRaw] = dateStr.trim().split('/').map(Number);
   const y = yRaw < 100 ? 2000 + yRaw : yRaw;
@@ -7752,7 +7756,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       id: `added-${idx}`,
       name: docName,
       status: 'Draft' as const,
-      dateModified: new Date().toLocaleDateString('en-US'),
+      dateModified: DEMO_TODAY_STR,
     }));
 
     let baseDocs;
@@ -7774,14 +7778,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           id: `uploaded-${idx}`,
           name: docName,
           status: 'Draft' as const,
-          dateModified: new Date().toLocaleDateString('en-US'),
+          dateModified: DEMO_TODAY_STR,
         }));
       } else {
         baseDocs = uploadedDocAgreement.documents.map((docName, idx) => ({
           id: `uploaded-${idx}`,
           name: docName,
           status: 'Pending Signature' as const,
-          lastModified: new Date().toLocaleDateString('en-US'),
+          lastModified: DEMO_TODAY_STR,
           signatureProgress: {
             signed: 0,
             total: 1,
@@ -8154,7 +8158,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       overflowY: 'auto',
     }}>
       {/* Header + Tabs — single full-width block */}
-      <div style={{ background: 'linear-gradient(150deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
+      <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
         <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
