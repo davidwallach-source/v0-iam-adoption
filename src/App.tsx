@@ -3717,7 +3717,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════���═════════════════
+/* ═════════════════════����═════════════════
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -6464,6 +6464,19 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   const [paywallModal, setPaywallModal] = useState<'upload' | 'idv' | 'workflow' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const closeSubTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // For 'center' placement the menu is rendered with viewport-fixed
+  // coordinates (measured from the trigger) so it can paint above the
+  // agreement-space header and escape the scroll container's overflow clip.
+  const [centerPos, setCenterPos] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (open && placement === 'center' && ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setCenterPos({ top: r.top + r.height / 2, left: r.left + r.width / 2 });
+    } else {
+      setCenterPos(null);
+    }
+  }, [open, placement]);
 
   // Open the Document submenu, cancelling any pending close so moving the
   // cursor diagonally across the gap toward the submenu doesn't dismiss it.
@@ -6500,17 +6513,15 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
 
       {open && (
         <div style={{
-          position: 'absolute',
           ...(placement === 'center'
-            ? { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+            ? { position: 'fixed', top: centerPos?.top ?? 0, left: centerPos?.left ?? 0, transform: 'translate(-50%, -50%)', zIndex: 2600 }
             : placement === 'top-left'
-            ? { bottom: 'calc(100% + 6px)', left: 0 }
-            : { top: 'calc(100% + 6px)', right: 0 }),
+            ? { position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, zIndex: 1001 }
+            : { position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 1001 }),
           background: 'white',
           border: '1px solid var(--ink-border-subtle)',
           borderRadius: 8,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-          zIndex: 1001,
           minWidth: 264,
           padding: 4,
         }}>
@@ -8146,13 +8157,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       ...fadeIn.style,
       background: 'var(--ink-bg-color-default)',
       display: 'flex', flexDirection: 'column',
+      overflowY: 'auto',
     }}>
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(150deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
         <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
-          {/* Top actions row — back arrow on the left, avatars/icons on the right */}
+          {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
               <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
@@ -8334,7 +8346,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto', background: '#F6F7F6' }}>
+      <div style={{ flex: 1, background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
@@ -8370,15 +8382,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           <Inline gap="small" align="center">
                             <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
                           </Inline>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          {task.createdAt != null && <JustNow createdAt={task.createdAt} />}
                           <RowOverflowMenu
                             items={[
                               { label: 'View task', onClick: () => setActiveTab('tasks') },
                               { label: 'Send a reminder', onClick: () => showToast('Reminder sent.') },
                             ]}
                           />
-                          </div>
                         </div>
                         <Text size="sm" weight="semibold">{task.title}</Text>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
