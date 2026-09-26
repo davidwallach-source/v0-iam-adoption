@@ -7402,9 +7402,9 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
         aria-label={`${docs[0]} envelope details`}
         style={{
           position: 'fixed',
+          top: 40,
           bottom: 0,
           right: 0,
-          height: '90vh',
           width: 360,
           background: 'white',
           borderTopLeftRadius: 20,
@@ -7419,7 +7419,7 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
         }}
       >
         {/* Header — envelope name + close X pinned upper right — fixed 48px tall */}
-        <div style={{ height: 48, boxSizing: 'border-box', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
+        <div style={{ height: 48, boxSizing: 'border-box', flexShrink: 0, position: 'sticky', top: 0, background: 'white', borderTopLeftRadius: 20, zIndex: 3, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px' }}>
           <h2 style={{ margin: 0, flex: 1, fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--ink-font-color-default)' }}>
             {docs[0]}
           </h2>
@@ -7475,12 +7475,12 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
 
         {/* Document name + sent timestamp */}
         <div style={{ padding: '20px 20px 0', flexShrink: 0 }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>{currentDoc}</div>
-          <div style={{ fontSize: 15, color: 'var(--ink-font-color-secondary)', marginTop: 4 }}>{envelope.sentAtLabel}</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>Sent by {envelope.sentBy}</div>
+          <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)', marginTop: 4 }}>{envelope.sentAtLabel}</div>
         </div>
 
-        {/* Recipients timeline — fills remaining space so the footer pins to the bottom */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '24px 20px 20px' }}>
+        {/* Recipients timeline — flows with the rest of the panel so the whole thing scrolls together */}
+        <div style={{ padding: '24px 20px 20px' }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 24 }}>
             Recipients ({completeCount} of {signable.length} complete)
           </div>
@@ -7532,7 +7532,7 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
         </div>
 
         {/* Footer — pinned to the bottom with the primary CTA */}
-        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
+        <div style={{ flexShrink: 0, position: 'sticky', bottom: 0, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
           <button
             onClick={onRemind}
             style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
