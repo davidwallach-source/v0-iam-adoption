@@ -3717,7 +3717,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═══════════════════════════════════════
+/* ═════════════════════��═════════════════
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -6493,7 +6493,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   useEffect(() => () => { if (closeSubTimer.current) clearTimeout(closeSubTimer.current); }, []);
 
   return (
-    <div ref={ref} style={{ position: 'relative', ...wrapperStyle }}>
+    <div ref={ref} style={{ position: 'relative', ...(open ? { zIndex: 1000 } : {}), ...wrapperStyle }}>
       {renderTrigger
         ? renderTrigger({ toggle: () => { setOpen(o => !o); setDocSubOpen(false); }, open })
         : <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); setDocSubOpen(false); }} style={{ background: '#CAC2FF', color: '#130032', border: 'none', borderRadius: 40, height: 40, paddingLeft: 12, paddingRight: 12 }}>Add New</Button>}
@@ -6510,7 +6510,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           border: '1px solid var(--ink-border-subtle)',
           borderRadius: 8,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-          zIndex: 200,
+          zIndex: 1001,
           minWidth: 264,
           padding: 4,
         }}>
@@ -8485,9 +8485,73 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   )}
 
                   <div>
-                    {currentDocuments.slice(0, 5).map((doc, idx) => {
+                    {processedDocuments.slice(0, 5).map((item, idx) => {
+                      // Envelope rows — a packet that has been sent for signature.
+                      // Rendered identically in spirit to the Documents tab: a
+                      // signature-progress bar with a "Waiting for X" caption.
+                      if ('isEnvelope' in item && item.isEnvelope) {
+                        const envDocNames = item.documentNames && item.documentNames.length
+                          ? item.documentNames
+                          : item.documents.map(d => d.name);
+                        const envName = envDocNames.join(', ') || 'Envelope';
+                        const sp = item.signatureProgress;
+                        const envDate = item.documents[0]?.lastModified || item.documents[0]?.dateModified;
+                        return (
+                          <div
+                            key={`overview-env-${item.envelopeId}`}
+                            onClick={() => openEnvelopePanel({
+                              envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${envDocNames[0] || ''}`.trim() : (envDocNames[0] || envName),
+                              documentNames: envDocNames,
+                              signatureProgress: sp,
+                              dateModified: envDate,
+                              rowId: `overview-env-${item.envelopeId}`,
+                            })}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 'var(--ink-spacing-200)',
+                              minHeight: 60,
+                              padding: '0',
+                              borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <div style={{ width: 16, flexShrink: 0 }} />
+                            <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
+                              <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{envName}</Text>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              {sp ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
+                                    <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
+                                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(sp.signed / sp.total) * 100}%`, background: 'var(--ink-cobalt-80)' }} />
+                                    </div>
+                                  </div>
+                                  <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    Waiting for {sp.waitingFor}
+                                  </Text>
+                                </div>
+                              ) : (
+                                <StatusLight noFill kind={getStatusLightKind('Pending Signature')} text="Pending Signature" />
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <Text size="sm" color="secondary">{envDate ? relativePast(envDate) : ''}</Text>
+                            </div>
+                            <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
+                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                                <RowOverflowMenu items={envelopeOverflowItems()} />
+                              </Inline>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const doc = item as DealDocument;
                       const isSelected = selectedDocs.has(doc.id);
-                      const isHovered = hoveredOverviewDocId === doc.id;
                       return (
                         <div
                           key={doc.id}
@@ -8522,33 +8586,53 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
+                            {doc.signatureProgress ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
+                                  <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
+                                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(doc.signatureProgress.signed / doc.signatureProgress.total) * 100}%`, background: 'var(--ink-cobalt-80)' }} />
+                                  </div>
+                                </div>
+                                <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  Waiting for {doc.signatureProgress.waitingFor}
+                                </Text>
+                              </div>
+                            ) : (
+                              <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
+                            )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <Text size="sm" color="secondary">{relativeTime(doc.lastModified || doc.dateModified)}</Text>
+                            <Text size="sm" color="secondary">{relativePast(doc.lastModified || doc.dateModified)}</Text>
                           </div>
                           <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
-                              <Button
-                                kind="secondary"
-                                size="small"
-                                onClick={() => {
-                                  if (doc.id.startsWith('added-')) {
-                                    setPendingPreviewDoc(doc.name);
-                                  } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                    onEditNDA();
-                                  } else {
-                                    onPreviewDocument?.(doc.name);
-                                  }
-                                }}
-                              >
-                                {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
-                              </Button>
+                              {doc.signatureProgress ? (
+                                <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
+                              ) : (
+                                <Button
+                                  kind="secondary"
+                                  size="small"
+                                  onClick={() => {
+                                    if (doc.id.startsWith('added-')) {
+                                      setPendingPreviewDoc(doc.name);
+                                    } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                      onEditNDA();
+                                    } else {
+                                      onPreviewDocument?.(doc.name);
+                                    }
+                                  }}
+                                >
+                                  {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
+                                </Button>
+                              )}
                               <RowOverflowMenu
-                                items={[
-                                  { label: 'Download', onClick: () => showToast('Downloading document.') },
-                                  { label: 'View history', onClick: () => showToast('Opening document history.') },
-                                ]}
+                                items={doc.signatureProgress
+                                  ? envelopeOverflowItems()
+                                  : [
+                                      { label: 'Download', onClick: () => showToast('Downloading document.') },
+                                      { label: 'View history', onClick: () => showToast('Opening document history.') },
+                                    ]}
                               />
                             </Inline>
                           </div>
@@ -10077,7 +10161,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
   return 'Untitled Agreement Space';
 }
 
-/* ──────────���─────────────────────────────��────��─��─���─────��────────────���─────
+/* ──────────���──────────────────────────���──��────��─��─���─────��────────────���─────
    Prototype version switcher
    ---------------------------------------------------------------------------
    All versions render the SAME component tree from this single codebase, so
