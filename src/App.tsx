@@ -8269,7 +8269,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('tasks'); }}>See all</Link>
                     )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(orderedTasks.length, 3)}, 1fr)`, gap: 'var(--ink-spacing-200)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--ink-spacing-200)' }}>
                     {orderedTasks.slice(0, 3).map((task) => (
                       <div key={task.id} style={{
                         background: 'var(--ink-white-100)',
