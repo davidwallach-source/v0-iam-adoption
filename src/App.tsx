@@ -2042,6 +2042,29 @@ function relativeDate(dateStr: string): string {
   return `${diffMonths} months ago`;
 }
 
+// US-format ("m/d/yy" or "m/d/yyyy") dates → natural-language relative time.
+// Anchored to a fixed demo "today" so the sample data always reads as current,
+// and handles both past ("3 days ago") and future ("in 3 days") deadlines.
+// Any value that isn't a plain numeric date (e.g. "Today, 9:41 AM") is passed through unchanged.
+const DEMO_TODAY = new Date(2026, 3, 25); // Apr 25, 2026
+function relativeTime(dateStr: string | undefined | null): string {
+  if (!dateStr || !/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s*$/.test(dateStr)) return dateStr ?? '';
+  const [m, d, yRaw] = dateStr.trim().split('/').map(Number);
+  const y = yRaw < 100 ? 2000 + yRaw : yRaw;
+  const then = new Date(y, m - 1, d);
+  const MS_DAY = 1000 * 60 * 60 * 24;
+  const diffDays = Math.round((then.getTime() - DEMO_TODAY.getTime()) / MS_DAY);
+  if (diffDays === 0) return 'Today';
+  const future = diffDays > 0;
+  const n = Math.abs(diffDays);
+  const phrase = (v: string) => (future ? `in ${v}` : `${v} ago`);
+  if (n === 1) return future ? 'Tomorrow' : 'Yesterday';
+  if (n < 7) return phrase(`${n} days`);
+  if (n < 30) { const w = Math.round(n / 7); return phrase(`${w} week${w > 1 ? 's' : ''}`); }
+  if (n < 365) { const mo = Math.round(n / 30); return phrase(`${mo} month${mo > 1 ? 's' : ''}`); }
+  const yr = Math.round(n / 365); return phrase(`${yr} year${yr > 1 ? 's' : ''}`);
+}
+
 // Shows the document names contained in an Agreement Space as compact subtext.
 // Only the first couple of names are shown (each individually truncated so a
 // single long name can't widen the column); any remainder collapses into a
@@ -2836,7 +2859,7 @@ const requestColumns: any[] = [
     ),
   },
   { key: 'lastActivityAt', header: 'Last Activity At', sortable: true, width: '170px' },
-  { key: 'dueDate', header: 'Due Date', sortable: true, width: '120px', cell: (row: RequestItem) => row.dueDate || '—' },
+    { key: 'dueDate', header: 'Due Date', sortable: true, width: '120px', cell: (row: RequestItem) => relativeTime(row.dueDate) || '—' },
   {
     key: 'submitter',
     header: 'Submitter',
@@ -8301,10 +8324,32 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <Text size="xs" color="secondary">{task.assignee}</Text>
                             </div>
                           )}
-                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{task.dueDate}</Text>
+                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{relativeTime(task.dueDate)}</Text>
                         </div>
                       </div>
                     ))}
+                    {orderedTasks.length === 1 && (
+                      <button
+                        onClick={() => showToast('New document or task')}
+                        style={{
+                          background: 'none',
+                          border: '1px solid var(--ink-border-subtle)',
+                          borderRadius: 8,
+                          padding: '14px 16px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          cursor: 'pointer',
+                          minHeight: 96,
+                          fontFamily: 'var(--ink-font-family-default)',
+                        }}
+                      >
+                        <Icon name="plus" size={24} color="var(--ink-text-secondary)" />
+                        <Text size="sm" color="secondary">New Document or Task</Text>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -8404,7 +8449,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <Text size="sm" color="secondary">{doc.lastModified || doc.dateModified}</Text>
+                            <Text size="sm" color="secondary">{relativeTime(doc.lastModified || doc.dateModified)}</Text>
                           </div>
                           <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
@@ -8692,7 +8737,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     </td>
                                   )}
                                   <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>
-                                    {envelope.documents[0]?.dateModified}
+                                    {relativeTime(envelope.documents[0]?.dateModified)}
                                   </td>
                                   <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -8824,7 +8869,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <Text size="sm" style={{ fontSize: 14, color: '#3d3a4e' }}>{doc.value || 'NA'}</Text>
                                 </td>
                               )}
-                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{doc.lastModified || doc.dateModified}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{relativeTime(doc.lastModified || doc.dateModified)}</td>
                               <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                                   <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
@@ -8894,7 +8939,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <Text size="sm">{doc.owner}</Text>
                                 </Inline>
                               </td>
-                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.dateModified}</td>
+                              <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{relativeTime(doc.dateModified)}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
                                   <Button kind="secondary" size="small" onClick={() => {
@@ -9049,7 +9094,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{task.dueDate}</Text>
+                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
                       </td>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Button kind="secondary" size="small">
