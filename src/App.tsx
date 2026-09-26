@@ -3644,7 +3644,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ═════════════════════════��═══����════════��
+/* ════════���════════════════��═══����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -11598,11 +11598,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           statusIcon: 'clock',
           statusKind: 'info',
           statusSub: 'In Progress',
-          dealValue: '—',
+          dealValue: '$185,000',
           agreementType: 'Purchase Agreement',
-          termLength: '—',
-          closeDate: '—',
-          date: new Date().toLocaleDateString('en-GB'),
+          termLength: '12 month',
+          closeDate: 'Jul 31, 2026',
+          date: new Date().toLocaleDateString('en-US'),
           time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           action: 'Edit',
           documentsCount: data.documentSource === '3rd-party' ? 0 : 1,
