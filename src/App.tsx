@@ -7316,6 +7316,7 @@ interface OpenEnvelope {
   name: string;              // envelope name shown at the top of the panel
   sentBy: string;            // "Sent by {sentBy} {sentAt}"
   sentAt: string;            // relative time, e.g. "yesterday"
+  sentAtLabel: string;       // full sent timestamp under the doc name, e.g. "Yesterday at 10:14 am"
   documentNames: string[];   // documents inside the envelope (drives the carousel)
   recipients: EnvelopeRecipient[];
 }
@@ -7355,10 +7356,9 @@ function buildEnvelopeRecipients(
   return recipients;
 }
 
-function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose: () => void }) {
+function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void }) {
   const [entered, setEntered] = useState(false);
   const [docIndex, setDocIndex] = useState(0);
-  const [showFooterMenu, setShowFooterMenu] = useState(false);
   useEffect(() => {
     const t = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(t);
@@ -7384,9 +7384,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
   const phraseFor = (r: EnvelopeRecipient) => {
     switch (r.status) {
       case 'signed': return `${r.name} signed`;
-      case 'needs-view': return `Waiting on ${r.name} to view`;
+      case 'needs-view': return `${r.name} needs to view`;
       case 'receives-copy': return 'You receive a finished copy';
-      default: return `Waiting on ${r.name} to sign`;
+      default: return `${r.name} needs to sign`;
     }
   };
 
@@ -7446,9 +7446,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
         </div>
 
-        {/* Page counter + carousel arrows if multi-doc — 20px top/bottom padding */}
+        {/* Page counter + carousel arrows if multi-doc */}
         {multi && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '20px', borderBottom: '1px solid var(--ink-border-subtle)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '16px 20px 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)' }}>
                 <strong style={{ fontWeight: 700 }}>{docIndex + 1}</strong> of {docs.length}
@@ -7473,31 +7473,25 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
         </div>
         )}
 
-        {/* Recipients timeline — fills remaining space so the footer pins to the bottom; 8px above the first node */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '28px 20px 20px' }}>
+        {/* Document name + sent timestamp */}
+        <div style={{ padding: '20px 20px 0', flexShrink: 0 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>{currentDoc}</div>
+          <div style={{ fontSize: 15, color: 'var(--ink-font-color-secondary)', marginTop: 4 }}>{envelope.sentAtLabel}</div>
+        </div>
+
+        {/* Recipients timeline — fills remaining space so the footer pins to the bottom */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '24px 20px 20px' }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 24 }}>
+            Recipients ({completeCount} of {signable.length} complete)
+          </div>
           <div>
-            {/* First step — the envelope was sent; complete, solid black dot */}
-            <div style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: 36 }}>
-              <div style={{ position: 'absolute', left: 11, top: 22, bottom: 0, width: 2, background: navy }} />
-              <div style={{ width: 24, display: 'flex', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
-                <span style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--ink-font-color-default)' }} />
-                </span>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 400, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
-                  Sent by {envelope.sentBy} {envelope.sentAt}
-                </div>
-              </div>
-            </div>
             {envelope.recipients.map((r, i) => {
               const isLast = i === envelope.recipients.length - 1;
               const isActive = i === activeIndex;
               const isSigned = r.status === 'signed';
-              const muted = !isSigned && !isActive;
-              // Connector below a node is navy while the flow is still "completed"
-              // through this node, then turns subtle for the remaining recipients.
-              const connectorColor = isSigned ? navy : 'var(--ink-border-subtle)';
+              // Connector below a completed (signed) node is deep navy; connectors
+              // for not-yet-reached recipients are a subtle grey.
+              const connectorColor = isSigned ? '#130032' : 'var(--ink-border-subtle)';
               return (
                 <div key={r.id} style={{ display: 'flex', gap: 14, position: 'relative', paddingBottom: isLast ? 0 : 36 }}>
                   {!isLast && (
@@ -7522,9 +7516,9 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
                   {/* Content */}
                   <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
                     {isSigned && r.at && (
-                      <div style={{ fontSize: 13, color: green, marginBottom: 4 }}>{r.at}</div>
+                      <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)', marginBottom: 4 }}>{r.at}</div>
                     )}
-                    <div style={{ fontSize: 15, fontWeight: isActive ? 600 : 400, color: muted ? 'var(--ink-font-color-secondary)' : 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
+                    <div style={{ fontSize: 15, fontWeight: (isSigned || isActive) ? 600 : 400, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>
                       {phraseFor(r)}
                     </div>
                     {r.email && (
@@ -7537,42 +7531,11 @@ function EnvelopePanel({ envelope, onClose }: { envelope: OpenEnvelope; onClose:
           </div>
         </div>
 
-        {/* Footer — pinned to the bottom with an overflow menu + primary CTA */}
-        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, position: 'relative' }}>
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowFooterMenu(v => !v)}
-              aria-label="More actions"
-              aria-haspopup="menu"
-              aria-expanded={showFooterMenu}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
-            >
-              <Icon name="more-vertical" size={18} />
-            </button>
-            {showFooterMenu && (
-              <>
-                <div onClick={() => setShowFooterMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 1 }} />
-                <div
-                  role="menu"
-                  style={{ position: 'absolute', bottom: 'calc(100% + 6px)', left: 0, zIndex: 2, minWidth: 180, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
-                >
-                  {['Void envelope', 'Download', 'View history'].map(label => (
-                    <button
-                      key={label}
-                      role="menuitem"
-                      onClick={() => setShowFooterMenu(false)}
-                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+        {/* Footer — pinned to the bottom with the primary CTA */}
+        <div style={{ flexShrink: 0, borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
           <button
-            onClick={() => setShowFooterMenu(false)}
-            style={{ background: 'var(--ink-cobalt-80)', color: 'white', border: 'none', borderRadius: 6, padding: '6px 16px', fontSize: 14, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
+            onClick={onRemind}
+            style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
           >
             Remind Signers
           </button>
@@ -7687,6 +7650,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       name: opts.envelopeName,
       sentBy: 'you',
       sentAt: 'yesterday',
+      sentAtLabel: 'Yesterday at 10:14 am',
       documentNames: opts.documentNames,
       recipients: buildEnvelopeRecipients(participantNames, opts.signatureProgress),
     });
@@ -8593,11 +8557,23 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
                       const doc = item as DealDocument;
                       const isSelected = selectedDocs.has(doc.id);
+                      // An envelope-document (one sent for signature) opens the
+                      // detail panel on click — identical behavior to the Documents tab.
+                      const isEnvelopeDoc = !!doc.signatureProgress;
+                      const isOpen = openEnvelopeRowId === doc.id;
+                      const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
                       return (
                         <div
                           key={doc.id}
-                          onMouseEnter={() => setHoveredOverviewDocId(doc.id)}
-                          onMouseLeave={() => setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev))}
+                          onClick={isEnvelopeDoc ? () => openEnvelopePanel({
+                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            documentNames: [doc.name],
+                            signatureProgress: doc.signatureProgress,
+                            dateModified: doc.lastModified || doc.dateModified,
+                            rowId: doc.id,
+                          }) : undefined}
+                          onMouseEnter={(e) => { setHoveredOverviewDocId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
+                          onMouseLeave={(e) => { setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -8605,7 +8581,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             minHeight: 60,
                             padding: '0',
                             borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
-                            background: isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent',
+                            background: restingBg,
+                            cursor: isEnvelopeDoc ? 'pointer' : 'default',
                           }}
                         >
                           <input
@@ -8620,6 +8597,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               }
                               setSelectedDocs(newSelected);
                             }}
+                            onClick={(e) => e.stopPropagation()}
                             style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)', flexShrink: 0 }}
                           />
                           <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
@@ -8646,7 +8624,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <Text size="sm" color="secondary">{relativePast(doc.lastModified || doc.dateModified)}</Text>
                           </div>
-                          <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                          <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
                             <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                               {doc.signatureProgress ? (
                                 <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
@@ -9491,7 +9469,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
       {/* Envelope detail panel */}
       {openEnvelope && (
-        <EnvelopePanel envelope={openEnvelope} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
+        <EnvelopePanel envelope={openEnvelope} onRemind={() => showToast('Reminder sent to signers.')} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
       )}
 
       {/* Party History Panel */}
