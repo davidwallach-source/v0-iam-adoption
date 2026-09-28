@@ -10612,6 +10612,12 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     onToggleCollapse: () => {},
     createLabel: 'Create',
     onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
+    createMenuItems: [
+      { id: 'send-envelope', label: 'Send an Envelope', onClick: () => showToast('Starting a new envelope.'), dividerAfter: true },
+      { id: 'new-agreement', label: 'New Agreement', onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
+      { id: 'new-request', label: 'New Request', onClick: () => showToast('Starting a new request.') },
+      { id: 'new-purchase-request', label: 'New Purchase Request', onClick: () => showToast('Starting a new purchase request.') },
+    ],
     user: { name: 'Lisa Jones' },
     onUserClick: () => setUserMenuOpen(o => !o),
     items: [

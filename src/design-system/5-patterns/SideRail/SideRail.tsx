@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './SideRail.module.css';
 import { Icon } from '../../3-primitives/Icon';
 import type { IconName } from '../../3-primitives/Icon';
@@ -27,6 +27,14 @@ export interface SideRailItem {
   defaultExpanded?: boolean;
 }
 
+export interface SideRailCreateMenuItem {
+  id: string;
+  label: string;
+  onClick: () => void;
+  /** Draw a horizontal rule below this item */
+  dividerAfter?: boolean;
+}
+
 export interface SideRailProps {
   /** Brand logo node, rendered top-left */
   logo: React.ReactNode;
@@ -36,8 +44,10 @@ export interface SideRailProps {
   defaultCollapsed?: boolean;
   /** Label for the primary Create CTA */
   createLabel?: string;
-  /** Create CTA click handler */
+  /** Create CTA click handler (used when `createMenuItems` is not provided) */
   onCreateClick?: () => void;
+  /** When provided, the Create CTA opens a menu with these options */
+  createMenuItems?: SideRailCreateMenuItem[];
   /** Primary navigation items */
   items: SideRailItem[];
   /** Signed-in user shown in the rail footer (bottom-left) */
@@ -178,11 +188,50 @@ export const SideRail: React.FC<SideRailProps> = ({
   defaultCollapsed = false,
   createLabel = 'Create',
   onCreateClick,
+  createMenuItems,
   items,
   user,
   onUserClick,
   className,
 }) => {
+  const [createMenu, setCreateMenu] = useState<{ top: number; left: number; width: number } | null>(null);
+  const createButtonRef = useRef<HTMLButtonElement>(null);
+  const createMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!createMenu) return;
+    const handlePointer = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (createMenuRef.current?.contains(target) || createButtonRef.current?.contains(target)) return;
+      setCreateMenu(null);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setCreateMenu(null);
+        createButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [createMenu]);
+
+  const handleCreateClick = () => {
+    if (!createMenuItems || createMenuItems.length === 0) {
+      onCreateClick?.();
+      return;
+    }
+    if (createMenu) {
+      setCreateMenu(null);
+      return;
+    }
+    const rect = createButtonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setCreateMenu({ top: rect.bottom + 6, left: rect.left, width: Math.max(rect.width, 228) });
+  };
   const userInitials = user
     ? user.name
         .split(' ')
@@ -249,15 +298,45 @@ export const SideRail: React.FC<SideRailProps> = ({
       </div>
 
       <button
+        ref={createButtonRef}
         type="button"
         className={styles.createButton}
-        onClick={onCreateClick}
+        onClick={handleCreateClick}
         aria-label={collapsed ? createLabel : undefined}
         title={collapsed ? createLabel : undefined}
+        aria-haspopup={createMenuItems ? 'menu' : undefined}
+        aria-expanded={createMenuItems ? !!createMenu : undefined}
       >
         <Icon name="plus" size={20} className={styles.createIcon} />
         {!collapsed && <span className={styles.createLabel}>{createLabel}</span>}
       </button>
+
+      {createMenu && createMenuItems && (
+        <div
+          ref={createMenuRef}
+          className={styles.createMenu}
+          style={{ top: createMenu.top, left: createMenu.left, width: createMenu.width }}
+          role="menu"
+          aria-label={createLabel}
+        >
+          {createMenuItems.map((menuItem) => (
+            <React.Fragment key={menuItem.id}>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.createMenuItem}
+                onClick={() => {
+                  setCreateMenu(null);
+                  menuItem.onClick();
+                }}
+              >
+                {menuItem.label}
+              </button>
+              {menuItem.dividerAfter && <hr className={styles.createMenuDivider} />}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
 
       <ul className={styles.list}>
         {items.map((item) => (
