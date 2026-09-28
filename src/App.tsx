@@ -3644,7 +3644,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ════════�������════════════════��═══����════════��
+/* ════════���������════════════════��═══����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -10336,6 +10336,13 @@ export default function App() {
   // the same tree; `protoVersion` is a shared flag for future per-version tweaks.
   const [protoVersion, setProtoVersion] = useState<PrototypeVersion>('standard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = (msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  };
   const [sidebarView, setSidebarView] = useState<SidebarView>('all-agreements');
   // Folders view: breadcrumb path of folders the user has navigated into, and the
   // set of folders currently expanded inline within the table.
@@ -11362,8 +11369,24 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   return (
     <PrototypeVersionContext.Provider value={{ version: protoVersion, setVersion: setProtoVersion }}>
-    <style>{tableRowStaggerStyles}</style>
-    <UserMenu
+  <style>{tableRowStaggerStyles}</style>
+  {toast && (
+    <div role="status" style={{ position: 'fixed', bottom: 32, left: 32, zIndex: 1300, display: 'flex', alignItems: 'center', gap: 16, minWidth: 360, maxWidth: 520, padding: '18px 20px', borderRadius: 12, background: '#2A1A45', boxShadow: '0 12px 32px rgba(19,0,50,0.28)', fontFamily: 'var(--ink-font-family)' }}>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }} aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#3DBE8B" strokeWidth="2" />
+        <path d="M8 12l2.5 2.5L16 9" stroke="#3DBE8B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span style={{ flex: 1, fontSize: 16, color: 'white' }}>{toast}</span>
+      <button
+        onClick={() => setToast(null)}
+        aria-label="Dismiss notification"
+        style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, border: 'none', background: 'transparent', cursor: 'pointer', color: 'white', borderRadius: 4 }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+      </button>
+    </div>
+  )}
+  <UserMenu
       open={userMenuOpen}
       onClose={() => setUserMenuOpen(false)}
       userName={globalNavConfig.user.name}
