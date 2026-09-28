@@ -339,7 +339,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
         { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
         { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
         { id: 'purchase', title: 'Purchase Agreement', description: 'Initiate a purchase with a new or existing vendor.' },
-        { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
+        { id: 'legal', title: 'Use other template', description: 'Submit a request for help on agreements.' },
       ];
 
   return (
@@ -516,7 +516,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                           onStartRequest();
                         }
                       }}
-                    >Start</Button>
+                    >{item.id === 'legal' ? 'Pick' : 'Start'}</Button>
                   )}
                 </div>
               </div>
@@ -524,96 +524,6 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
           </div>
         </div>
 
-        {/* Other Tasks section */}
-        <div>
-          <p style={{
-            margin: '0 0 12px 0',
-            fontSize: 14,
-            fontWeight: 600,
-            fontFamily: 'var(--ink-font-family)',
-            color: '#130032',
-          }}>Other</p>
-
-          <div style={{ display: 'flex', gap: 12 }}>
-            {[
-              {
-                label: 'Signature Request',
-                onClick: () => { onClose(); onSignatureRequest(); },
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4.41 17.9989L5.41 16.9983H8.24L18.11 7.12285C18.7 6.53252 19 5.76209 19 4.99166C19 4.22123 18.7 3.46081 18.11 2.88049C17.52 2.29016 16.76 2 15.99 2C15.22 2 14.45 2.29016 13.87 2.88049L4 12.756V15.5875L2 17.5887V20H22V17.9989H4.41ZM5.9 13.5364L15.21 4.22123C15.42 4.01112 15.69 3.90106 15.99 3.90106C16.29 3.90106 16.56 4.01112 16.77 4.22123C16.98 4.43135 17.09 4.7015 17.09 5.00167C17.09 5.30183 16.98 5.57198 16.77 5.7821L7.46 15.0973H5.9V13.5364Z" fill="#6B6B80"/>
-                  </svg>
-                ),
-              },
-              {
-                label: 'Sign a Document',
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2.5" y="1.5" width="11" height="15" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M10.5 1.5V5.5H14.5" stroke="#130032" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 11.5L13.5 10L15.5 12L14 13.5L12 11.5Z" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.5 10L15 8.5L16.5 10L15 11.5" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 13.5L11 16L13.5 15.5" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ),
-              },
-              {
-                label: 'Use a Template',
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="1.5" width="15" height="15" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M1.5 6.5H16.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M7 6.5V16.5" stroke="#130032" strokeWidth="1.25"/>
-                  </svg>
-                ),
-              },
-              {
-                label: 'Create a Form',
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="4.5" width="15" height="9" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M5 9H13" stroke="#130032" strokeWidth="1.25" strokeLinecap="round"/>
-                    <path d="M5 12H9" stroke="#130032" strokeWidth="1.25" strokeLinecap="round"/>
-                  </svg>
-                ),
-              },
-            ].map((task) => (
-              <button
-                key={task.label}
-                onClick={'onClick' in task ? task.onClick : undefined}
-                style={{
-                  flex: '1 1 0',
-                  minWidth: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '14px 16px',
-                  border: '1px solid var(--ink-neutral-fade-10)',
-                  borderRadius: 8,
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontFamily: 'var(--ink-font-family)',
-                  fontSize: 14,
-                  fontWeight: 400,
-                  color: '#130032',
-                  textAlign: 'left',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--ink-neutral-fade-30)';
-                  e.currentTarget.style.background = 'var(--ink-neutral-fade-3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--ink-neutral-fade-10)';
-                  e.currentTarget.style.background = 'white';
-                }}
-              >
-                <span style={{ flexShrink: 0 }}>{task.icon}</span>
-                {task.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
       </div>
 
@@ -10464,6 +10374,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // Tracks where the preview was opened from: 'agreement' = existing Agreement Space
   // (Save returns there), 'new' = a brand-new document (Save creates a new space).
   const [previewOrigin, setPreviewOrigin] = useState<'agreement' | 'new'>('agreement');
+  const [showCreateFilePicker, setShowCreateFilePicker] = useState(false);
   // Approval flow triggered from a document preview's "Send for Approval" action.
   const [pendingApprovalDoc, setPendingApprovalDoc] = useState<string | null>(null);
   const [workspaceApprovalTasks, setWorkspaceApprovalTasks] = useState<DealTask[]>([]);
@@ -10620,9 +10531,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     createLabel: 'Create',
     onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
     createMenuItems: [
-      { id: 'send-envelope', label: 'Send an Envelope', onClick: () => showToast('Starting a new envelope.'), dividerAfter: true },
-      { id: 'new-agreement', label: 'New Agreement', onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
-      { id: 'new-request', label: 'New Request', onClick: () => showToast('Starting a new request.') },
+      { id: 'send-envelope', label: 'Send an Envelope', onClick: () => { setShowStartModal(false); setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }, dividerAfter: true },
+      { id: 'new-agreement', label: 'New Agreement', onClick: () => { setShowStartModal(false); setShowCreateFilePicker(true); } },
+      { id: 'new-request', label: 'New Request', onClick: () => { setShowStartModal(false); setShowAgreementRequestModal(true); } },
       { id: 'new-purchase-request', label: 'New Purchase Request', onClick: () => showToast('Starting a new purchase request.') },
     ],
     user: { name: 'Lisa Jones' },
@@ -11537,6 +11448,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => { setNdaAgreementId(null); setSavedNDAData(null); setShowNDAModal(true); }} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
+
+    <FilePickerDialog
+      open={showCreateFilePicker}
+      onCancel={() => setShowCreateFilePicker(false)}
+      onOpen={(name) => { setShowCreateFilePicker(false); setPreviewOrigin('new'); setPreviewDocName(name); }}
+    />
+  
 
     <DocumentPreview
       open={previewDocName !== null}
