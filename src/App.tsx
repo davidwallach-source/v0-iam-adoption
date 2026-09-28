@@ -339,7 +339,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
         { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
         { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
         { id: 'purchase', title: 'Purchase Agreement', description: 'Initiate a purchase with a new or existing vendor.' },
-        { id: 'legal', title: 'Use other template', description: 'Submit a request for help on agreements.' },
+        { id: 'legal', title: 'Use Other Template', description: 'Pick another template from your library.' },
       ];
 
   return (
@@ -511,12 +511,9 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                         } else if (item.id === 'purchase') {
                           onClose();
                           onStartPurchase();
-                        } else if (item.id === 'legal') {
-                          onClose();
-                          onStartRequest();
-                        }
-                      }}
-                    >{item.id === 'legal' ? 'Pick' : 'Start'}</Button>
+  }
+  }}
+  >{item.id === 'legal' ? 'Pick Template' : 'Start'}</Button>
                   )}
                 </div>
               </div>
