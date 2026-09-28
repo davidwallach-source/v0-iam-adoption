@@ -10532,7 +10532,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
     createMenuItems: [
       { id: 'send-envelope', label: 'Send an Envelope', onClick: () => { setShowStartModal(false); setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }, dividerAfter: true },
-      { id: 'new-agreement', label: 'New Agreement', onClick: () => { setShowStartModal(false); setShowCreateFilePicker(true); } },
+      { id: 'new-agreement', label: 'New Agreement', onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
       { id: 'new-request', label: 'New Request', onClick: () => { setShowStartModal(false); setShowAgreementRequestModal(true); } },
       { id: 'new-purchase-request', label: 'New Purchase Request', onClick: () => showToast('Starting a new purchase request.') },
     ],
