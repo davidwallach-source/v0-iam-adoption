@@ -8,7 +8,9 @@ html, body, #root { height: 100%; overflow: hidden; }
    default cobalt/purple emphasis color. Targets StatusLight's internal dot and
    text structurally since those use hashed CSS-module class names. */
 [data-ink-component="StatusLight"].status-black > div > div { background-color: #000000 !important; }
-[data-ink-component="StatusLight"].status-black > span { color: #000000 !important; }
+  [data-ink-component="StatusLight"].status-black > span { color: #000000 !important; }
+  [data-ink-component="StatusLight"].status-on-dark > div > div { background-color: #f3ff25 !important; }
+  [data-ink-component="StatusLight"].status-on-dark > span { color: #f3ff25 !important; }
 
 html {
   -webkit-text-size-adjust: 100%;

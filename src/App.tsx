@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════�������════
+/* ═══════════════���══════════════════���������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8067,7 +8067,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 198, boxSizing: 'border-box' }}>
 
           {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8125,12 +8125,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           </div>
 
           {/* Space name (H1) + status on the left, Add button on the right — same row */}
-          <div style={{ marginTop: 'var(--ink-spacing-300)', display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+          <div style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
               <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
               <StatusLight
                 noFill
-                className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
+                className="status-on-dark"
                 kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
                 text={agreement.status}
               />
@@ -8180,11 +8180,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           })()}
 
           {/* Tabs — pinned to the bottom of the header */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'var(--ink-spacing-300)' }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'auto' }}>
             <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
             <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
             <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-            <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
           </div>
         </div>
       </div>
