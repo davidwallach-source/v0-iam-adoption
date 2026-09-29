@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════�����════
+/* ═══════════════���══════════════════�������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8129,6 +8129,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
               <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
               <StatusLight
+                noFill
                 className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
                 kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
                 text={agreement.status}
@@ -10193,8 +10194,8 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
 
   if (!partyName && !primary && details.length === 0) return null;
 
-  const labelStyle: CSSProperties = { color: PILL_LABEL_COLOR, fontSize: 16, fontWeight: 400 };
-  const valueStyle: CSSProperties = { color: 'var(--ink-white-100)', fontSize: 16, fontWeight: 500 };
+  const labelStyle: CSSProperties = { color: PILL_LABEL_COLOR, fontSize: 14, fontWeight: 400 };
+  const valueStyle: CSSProperties = { color: 'var(--ink-white-100)', fontSize: 14, fontWeight: 500 };
   const groupStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 12, whiteSpace: 'nowrap' };
 
   return (
@@ -10235,9 +10236,13 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
                 aria-label="More details"
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer', background: open ? 'rgba(255, 255, 255, 0.16)' : 'transparent', color: 'var(--ink-white-100)', fontSize: 20, letterSpacing: 1, lineHeight: 1, padding: 0 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer', background: open ? 'rgba(255, 255, 255, 0.16)' : 'transparent', color: 'var(--ink-white-100)', padding: 0 }}
               >
-                <span aria-hidden="true" style={{ transform: 'translateY(-4px)' }}>•••</span>
+                <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  {[0, 1, 2].map((i) => (
+                    <span key={i} style={{ width: 4, height: 4, borderRadius: 999, background: 'currentColor' }} />
+                  ))}
+                </span>
               </button>
               {open && (
                 <div
