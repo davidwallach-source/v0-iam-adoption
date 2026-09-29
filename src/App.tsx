@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════�������������════
+/* ═══════════════���══════════════════���������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -2963,7 +2963,7 @@ const reportColumns: any[] = [
 
 /* ═��══════���������═����═══════�����������������������������������════════════════════
    Home Page
-   ═══════════════════════���═══���═��═════════ */
+   ═══════════════════════���═══���═��═════��═══ */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -7458,7 +7458,7 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
 
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
-  const [activityView, setActivityView] = useState<'activity' | 'messages'>('activity');
+  const [messagesExpanded, setMessagesExpanded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
@@ -8521,38 +8521,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             </div>
 
-            {/* Right column — combined Activity / Messages module with tabs */}
-            <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) var(--ink-spacing-300) var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
+            {/* Right column — Activity module, with the Messages module docked beneath it */}
+            <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) 0 var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', position: 'relative' }}>
               <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-                  <div style={{ display: 'flex', alignItems: 'stretch', gap: 'var(--ink-spacing-300)' }}>
-                    {(['activity', 'messages'] as const).map((v) => {
-                      const isActive = activityView === v;
-                      return (
-                        <button
-                          key={v}
-                          onClick={() => setActivityView(v)}
-                          style={{
-                            padding: 'var(--ink-spacing-100) 0',
-                            border: 'none',
-                            background: 'none',
-                            borderBottom: isActive ? '2px solid var(--ink-ink-100)' : '2px solid transparent',
-                            marginBottom: -1,
-                            color: isActive ? 'var(--ink-ink-100)' : 'rgba(0,0,0,0.55)',
-                            cursor: 'pointer',
-                            fontSize: 'var(--ink-font-size-sm)',
-                            fontWeight: isActive ? 600 : 400,
-                            fontFamily: 'var(--ink-font-family-default)',
-                          }}
-                        >
-                          {v === 'activity' ? 'Activity' : `Messages (${spaceMessages.length})`}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Activity</Text>
                 </div>
 
-                {activityView === 'activity' ? (
                   <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                     {currentActivity.map((item, idx) => (
                       <li
@@ -8575,32 +8550,60 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <div>
-                    <button
-                      onClick={() => showToast('New message')}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-100)',
-                        padding: 'var(--ink-spacing-100) 0 var(--ink-spacing-200)',
-                        border: 'none', background: 'none', cursor: 'pointer',
-                        color: 'var(--ink-cobalt-100)', fontWeight: 600,
-                        fontSize: 'var(--ink-font-size-sm)', fontFamily: 'var(--ink-font-family-default)',
-                      }}
-                    >
-                      <Icon name="plus" size={16} color="var(--ink-cobalt-100)" />
-                      New Message
-                    </button>
-                    {spaceMessages.map((msg, idx) => (
-                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? '1px solid var(--ink-border-subtle)' : '1px solid var(--ink-border-subtle)' }}>
+              </div>
+
+              {/* Messages module — docked to the bottom of the viewport, peeking the top
+                  message when collapsed and growing upward over the Activity feed when expanded. */}
+              <div style={{ position: 'sticky', bottom: 0, marginTop: 'auto', height: 112, zIndex: 50, flexShrink: 0 }}>
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: 0,
+                  height: messagesExpanded ? 460 : 112,
+                  transition: 'height 240ms ease',
+                  display: 'flex', flexDirection: 'column',
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderBottom: 'none',
+                  borderRadius: '12px 12px 0 0',
+                  boxShadow: '0 -4px 16px rgba(19, 0, 50, 0.08)',
+                  overflow: 'hidden',
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setMessagesExpanded((v) => !v)}
+                    aria-expanded={messagesExpanded}
+                    aria-controls="space-messages-list"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150, 12px)',
+                      height: 64, flexShrink: 0,
+                      padding: '0 var(--ink-spacing-300)',
+                      background: '#84EFC3',
+                      border: 'none', cursor: 'pointer', textAlign: 'left',
+                      color: 'var(--ink-font-color-default)',
+                      fontFamily: 'var(--ink-font-family-default)',
+                    }}
+                  >
+                    <Icon name="comment" size={20} color="var(--ink-font-color-default)" />
+                    <span style={{ flex: 1, fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>
+                      Messages ({spaceMessages.length})
+                    </span>
+                    <span style={{ display: 'inline-flex', transform: messagesExpanded ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 240ms ease' }}>
+                      <Icon name="chevron-down" size={16} color="var(--ink-font-color-default)" />
+                    </span>
+                  </button>
+                  <div id="space-messages-list" style={{ flex: 1, overflowY: messagesExpanded ? 'auto' : 'hidden', padding: '0 var(--ink-spacing-300)' }}>
+                    {spaceMessages.length === 0 ? (
+                      <Text size="sm" color="secondary" style={{ display: 'block', padding: 'var(--ink-spacing-200) 0' }}>No messages yet</Text>
+                    ) : spaceMessages.map((msg, idx) => (
+                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))' }}>
                         <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <Text size="sm" weight="semibold">{msg.name}</Text>
+                          <Text size="sm" weight="semibold" style={{ display: 'block' }}>{msg.name}</Text>
                           <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
                         </div>
                       </Inline>
                     ))}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
