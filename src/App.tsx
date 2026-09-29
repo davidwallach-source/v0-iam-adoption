@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════���������������������════
+/* ═══════════════���══════════════���═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3633,7 +3633,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════�����══════��═��══════��═
+/* ═════════════════════������══════��═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8585,10 +8585,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
               {/* Messages module — docked to the bottom of the viewport, peeking the top
                   message when collapsed and growing upward over the Activity feed when expanded. */}
-              <div style={{ position: 'sticky', bottom: 0, marginTop: 'auto', height: 112, zIndex: 50, flexShrink: 0 }}>
+              <div style={{ position: 'sticky', bottom: 0, marginTop: 'auto', height: 76, zIndex: 50, flexShrink: 0 }}>
                 <div style={{
                   position: 'absolute', left: 0, right: 0, bottom: 0,
-                  height: messagesExpanded ? 460 : 112,
+                  height: messagesExpanded ? 460 : 76,
                   transition: 'height 240ms ease',
                   display: 'flex', flexDirection: 'column',
                   background: 'var(--ink-white-100)',
