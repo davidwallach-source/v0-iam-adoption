@@ -2319,7 +2319,7 @@ function createAgreementColumns(rename: AgreementRenameControls, hideParties = f
 
 /* ═══════════════════════════════════════
    Documents Data — individual documents (Type = Documents view)
-   ═════════════════════════���═════════════ */
+   ═════════════════════════���════���════════ */
 
 interface ProcurementDocument {
   id: string;
@@ -2843,7 +2843,7 @@ const requestColumns: any[] = [
 
 /* ═���������══��══��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
-   ���������������������══════════════════════════════════════ */
+   ���������������������══════════════════���═══════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════�������������������════
+/* ═══════════════���══════════════════���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8605,9 +8605,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                     aria-controls="space-messages-list"
                     style={{
                       display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150, 12px)',
-                      height: 64, flexShrink: 0,
-                      padding: '0 var(--ink-spacing-300)',
-                      background: '#84EFC3',
+  height: 44, flexShrink: 0,
+  padding: '0 var(--ink-spacing-300)',
+  background: '#84EFC3',
                       border: 'none', cursor: 'pointer', textAlign: 'left',
                       color: 'var(--ink-font-color-default)',
                       fontFamily: 'var(--ink-font-family-default)',
@@ -8631,10 +8631,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           background: 'none', border: 'none', cursor: 'pointer',
                           color: 'var(--ink-cobalt-140)',
                           fontFamily: 'var(--ink-font-family-default)',
-                          fontSize: 16, fontWeight: 600,
-                        }}
-                      >
-                        <Icon name="plus" size={20} color="var(--ink-cobalt-140)" />
+  fontSize: 14, fontWeight: 600,
+  }}
+  >
+  <Icon name="plus" size={20} color="var(--ink-cobalt-140)" />
                         New Message
                       </button>
                     ) : spaceMessages.map((msg, idx) => (
