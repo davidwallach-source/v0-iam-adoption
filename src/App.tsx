@@ -339,7 +339,7 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
         { id: 'blank', title: 'Start Blank', description: 'Create a new agreement from scratch.' },
         { id: 'nda', title: 'Instant NDA', description: 'Instantly generate an NDA and automatically send out for e-signature.' },
         { id: 'purchase', title: 'Purchase Agreement', description: 'Initiate a purchase with a new or existing vendor.' },
-        { id: 'legal', title: 'New Request', description: 'Submit a request for help on agreements.' },
+        { id: 'legal', title: 'Use Other Template', description: 'Pick another template from your library.' },
       ];
 
   return (
@@ -511,12 +511,9 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
                         } else if (item.id === 'purchase') {
                           onClose();
                           onStartPurchase();
-                        } else if (item.id === 'legal') {
-                          onClose();
-                          onStartRequest();
-                        }
-                      }}
-                    >Start</Button>
+  }
+  }}
+  >{item.id === 'legal' ? 'Pick Template' : 'Start'}</Button>
                   )}
                 </div>
               </div>
@@ -524,96 +521,6 @@ function StartNewModal({ open, onClose, onStartBlank, onStartNDA, onStartPurchas
           </div>
         </div>
 
-        {/* Other Tasks section */}
-        <div>
-          <p style={{
-            margin: '0 0 12px 0',
-            fontSize: 14,
-            fontWeight: 600,
-            fontFamily: 'var(--ink-font-family)',
-            color: '#130032',
-          }}>Other</p>
-
-          <div style={{ display: 'flex', gap: 12 }}>
-            {[
-              {
-                label: 'Signature Request',
-                onClick: () => { onClose(); onSignatureRequest(); },
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4.41 17.9989L5.41 16.9983H8.24L18.11 7.12285C18.7 6.53252 19 5.76209 19 4.99166C19 4.22123 18.7 3.46081 18.11 2.88049C17.52 2.29016 16.76 2 15.99 2C15.22 2 14.45 2.29016 13.87 2.88049L4 12.756V15.5875L2 17.5887V20H22V17.9989H4.41ZM5.9 13.5364L15.21 4.22123C15.42 4.01112 15.69 3.90106 15.99 3.90106C16.29 3.90106 16.56 4.01112 16.77 4.22123C16.98 4.43135 17.09 4.7015 17.09 5.00167C17.09 5.30183 16.98 5.57198 16.77 5.7821L7.46 15.0973H5.9V13.5364Z" fill="#6B6B80"/>
-                  </svg>
-                ),
-              },
-              {
-                label: 'Sign a Document',
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2.5" y="1.5" width="11" height="15" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M10.5 1.5V5.5H14.5" stroke="#130032" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 11.5L13.5 10L15.5 12L14 13.5L12 11.5Z" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.5 10L15 8.5L16.5 10L15 11.5" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 13.5L11 16L13.5 15.5" stroke="#130032" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ),
-              },
-              {
-                label: 'Use a Template',
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="1.5" width="15" height="15" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M1.5 6.5H16.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M7 6.5V16.5" stroke="#130032" strokeWidth="1.25"/>
-                  </svg>
-                ),
-              },
-              {
-                label: 'Create a Form',
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="4.5" width="15" height="9" rx="1.5" stroke="#130032" strokeWidth="1.25"/>
-                    <path d="M5 9H13" stroke="#130032" strokeWidth="1.25" strokeLinecap="round"/>
-                    <path d="M5 12H9" stroke="#130032" strokeWidth="1.25" strokeLinecap="round"/>
-                  </svg>
-                ),
-              },
-            ].map((task) => (
-              <button
-                key={task.label}
-                onClick={'onClick' in task ? task.onClick : undefined}
-                style={{
-                  flex: '1 1 0',
-                  minWidth: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '14px 16px',
-                  border: '1px solid var(--ink-neutral-fade-10)',
-                  borderRadius: 8,
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontFamily: 'var(--ink-font-family)',
-                  fontSize: 14,
-                  fontWeight: 400,
-                  color: '#130032',
-                  textAlign: 'left',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--ink-neutral-fade-30)';
-                  e.currentTarget.style.background = 'var(--ink-neutral-fade-3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--ink-neutral-fade-10)';
-                  e.currentTarget.style.background = 'white';
-                }}
-              >
-                <span style={{ flexShrink: 0 }}>{task.icon}</span>
-                {task.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
       </div>
 
@@ -2412,7 +2319,7 @@ function createAgreementColumns(rename: AgreementRenameControls, hideParties = f
 
 /* ═══════════════════════════════════════
    Documents Data — individual documents (Type = Documents view)
-   ═════════════════════════���═════════════ */
+   ═════════════════════════���════���════════ */
 
 interface ProcurementDocument {
   id: string;
@@ -2936,7 +2843,7 @@ const requestColumns: any[] = [
 
 /* ═���������══��══��═����═══════════���═══════════════
    Templates Data (matches real DocuSign)
-   ���������������������══════════════════════════════════════ */
+   ���������������������══════════════════���═══════════════════ */
 
 interface TemplateItem {
   id: string;
@@ -2998,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���═══════════════════════
+/* ═══════════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3056,7 +2963,7 @@ const reportColumns: any[] = [
 
 /* ═��══════���������═����═══════�����������������������������������════════════════════
    Home Page
-   ═══════════════════════���═══���═��═════════ */
+   ═══════════════════════���═══���═��═════��═══ */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -3644,7 +3551,7 @@ const DETAIL_TABS = [
   { id: 'chat', icon: 'comment' as const, label: 'Chat' },
 ];
 
-/* ════════�������════════════════��═══����════════��
+/* ════════���������════════════════��═══����════════��
    Deal Workspace View (Draft / In Progress)
    ══════════════════════════════����═══════�� */
 
@@ -3726,7 +3633,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════�����═════════════════
+/* ═════════════════════��������══════��═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -5417,6 +5324,8 @@ function RowOverflowMenu({ items }: { items: { label: string; onClick: () => voi
   );
 }
 
+type SpaceActivityEvent = { id: string; icon: IconName; user: string; action: string; time: string };
+
 interface WorkspaceViewProps {
   agreement: Agreement;
   onClose: () => void;
@@ -5458,6 +5367,11 @@ interface WorkspaceViewProps {
   // top of the Tasks list.
   persistedPinnedTaskId?: string | null;
   onPinTaskId?: (id: string) => void;
+  // Live activity events recorded in this space (documents added, upload
+  // requests, workflows, signature/approval sends), persisted in the parent so
+  // the feed survives leaving and re-entering the space. Newest-first.
+  persistedActivity?: SpaceActivityEvent[];
+  onAddActivity?: (event: SpaceActivityEvent) => void;
 }
 
 /* ���══════════════════════════════════════
@@ -7360,7 +7274,34 @@ function buildEnvelopeRecipients(
   return recipients;
 }
 
-function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void }) {
+// Miniature first page of the actual document (resolved from DOC_LIBRARY by
+// name), anchored to the top so it bleeds off the bottom of the thumbnail area.
+function EnvelopeDocThumbnail({ docName }: { docName: string }) {
+  const doc = resolveDoc(docName);
+  const ink = '#1F1B2B';
+  return (
+    <div
+      aria-label={`${docName} preview`}
+      style={{ width: '100%', maxWidth: 288, background: 'white', padding: '26px 24px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)', color: ink, overflow: 'hidden', boxSizing: 'border-box' }}
+    >
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textAlign: 'center', lineHeight: 1.3 }}>{doc.title}</div>
+      <div style={{ fontSize: 6.5, textAlign: 'center', marginTop: 4, color: '#5A5566' }}>
+        {doc.parties} · Effective {doc.effectiveDate}
+      </div>
+      <div style={{ height: 1, background: '#E3E0E8', margin: '10px 0' }} />
+      {doc.clauses.slice(0, 4).map(c => (
+        <div key={c.num} style={{ marginBottom: 7 }}>
+          <div style={{ fontSize: 7, fontWeight: 700, marginBottom: 2 }}>{c.num}. {c.heading}</div>
+          <p style={{ margin: 0, fontSize: 6, lineHeight: 1.5, color: '#3D3849', textAlign: 'justify' }}>
+            {c.runs.map(r => r.text).join('')}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void; onViewDetails?: () => void }) {
   const [entered, setEntered] = useState(false);
   const [docIndex, setDocIndex] = useState(0);
   useEffect(() => {
@@ -7441,12 +7382,7 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
           {/* Navy background spans the full panel width; doc preview sits 16px from the top */}
           <div style={{ height: 238, background: '#130032', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16 }}>
             {/* No bottom padding: the page is anchored to the top so it's cut off at the bottom */}
-            <div style={{ width: '100%', maxWidth: 288, background: 'white', padding: '32px 26px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-font-color-default)', marginBottom: 12 }}>{currentDoc}</div>
-              {[100, 96, 92, 98, 88, 94, 70, 90, 84, 96, 78].map((w, i) => (
-                <div key={i} style={{ height: 5, width: `${w}%`, background: 'var(--ink-border-subtle)', borderRadius: 2, marginBottom: 8 }} />
-              ))}
-            </div>
+            <EnvelopeDocThumbnail docName={currentDoc} />
           </div>
         </div>
 
@@ -7536,7 +7472,14 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
         </div>
 
         {/* Footer — pinned to the bottom with the primary CTA */}
-        <div style={{ flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
+        {/* marginTop: auto keeps the footer at the panel bottom even when content is short */}
+        <div style={{ flexShrink: 0, marginTop: 'auto', position: 'sticky', bottom: 0, zIndex: 2, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12 }}>
+          <button
+            onClick={onViewDetails}
+            style={{ background: 'white', color: '#130032', border: '1px solid #130032', borderRadius: 6, padding: '9px 19px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
+          >
+            View Details
+          </button>
           <button
             onClick={onRemind}
             style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
@@ -7549,9 +7492,9 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
   );
 }
 
-function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
-  const [activityView, setActivityView] = useState<'activity' | 'messages'>('activity');
+  const [messagesExpanded, setMessagesExpanded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
@@ -7567,7 +7510,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // Deep-link entry point: open the requested overlay (prefilled) whenever the
   // scenario URL sets initialOverlay. Keyed on initialOverlay (not just mount)
   // so it fires reliably regardless of the order in which the workspace mounts
-  // and the prop settles �� this avoids a race where the overlay silently
+  // and the prop settles ���� this avoids a race where the overlay silently
   // never opens.
   useEffect(() => {
     if (initialOverlay === 'upload-request') setShowUploadRequest(true);
@@ -7605,7 +7548,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     }
   }, [injectedSignatureDocs]);
   const [approvalModalDoc, setApprovalModalDoc] = useState<string | null>(null);
-  const [sentActivity, setSentActivity] = useState<{ id: string; icon: IconName; user: string; action: string; time: string }[]>([]);
+  const [sentActivity, setSentActivity] = useState<SpaceActivityEvent[]>(persistedActivity ?? []);
+  const logActivity = (icon: IconName, action: string) => {
+    const event: SpaceActivityEvent = { id: `activity-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, icon, user: 'You', action, time: 'Just now' };
+    setSentActivity(prev => [event, ...prev]);
+    onAddActivity?.(event);
+  };
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = (msg: string) => {
@@ -7699,6 +7647,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       createdAt: Date.now(),
     };
     setSentTasks(prev => [...prev, newTask]);
+    logActivity('send', `sent ${documentNames.join(', ')} for signature${recipientNames.length ? ` to ${recipientNames.join(', ')}` : ''}`);
     // Clear selection after sending
     setSelectedDocs(new Set());
     // Land on the Overview tab with the just-sent document(s) pinned first.
@@ -8070,9 +8019,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
     // Entering the space right after sending an envelope: confirm the send with
-    // a success toast and fall through to auto-open the envelope panel.
+    // a success toast only — the panel stays closed after a fresh send.
     if (justSentEnvelope) {
+      didAutoOpenEnvelope.current = true;
       showToast('Your documents were sent for signature.');
+      return;
     }
     const envelopeItems = processedDocuments.filter(
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
@@ -8160,7 +8111,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 198, boxSizing: 'border-box' }}>
 
           {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8218,128 +8169,70 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           </div>
 
           {/* Space name (H1) + status on the left, Add button on the right — same row */}
-          <div style={{ marginTop: 'var(--ink-spacing-300)', display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+          <div style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
               <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
               <StatusLight
-                className={/^in (progress|review)$/i.test(agreement.status) ? 'status-black' : undefined}
+                noFill
+                className="status-on-dark"
                 kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
                 text={agreement.status}
               />
             </div>
-              <AddMenu {...addMenuHandlers} />
           </div>
 
-          <div style={{ flex: 1 }} />
+          {/* Key extractions pill + Add button — same row, vertically centered */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+          {(() => {
+            const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
+            const docCount = agreement.documentsCount ?? 1;
+            const termMonths = (() => { const m = /(\d+)\s*month/i.exec(agreement.termLength ?? ''); return m ? parseInt(m[1], 10) : null; })();
+            const isOneTime = /one-?time/i.test(agreement.termLength ?? '');
+            const dealValue = agreement.dealValue && agreement.dealValue !== '—' ? agreement.dealValue : null;
+            const closeDate = agreement.closeDate && agreement.closeDate !== '—' ? agreement.closeDate : null;
+            const rawType = (agreement.agreementType ?? '').toLowerCase();
+            const isRenewal = /renewal/.test(rawType);
+            const valueLabel =
+              /statement of work|\bsow\b|consulting/.test(rawType) ? 'Project value' :
+              isRenewal ? 'Renewal value' :
+              /purchase order/.test(rawType) ? 'Order value' :
+              'Contract value';
+            const horizon = termMonths
+              ? (termMonths % 12 === 0
+                  ? (termMonths / 12 === 1 ? 'In 1 year' : `In ${termMonths / 12} years`)
+                  : `In ${termMonths} months`)
+              : null;
+
+            const all: ExtractionDetail[] = [];
+            if (dealValue) all.push({ label: valueLabel, value: dealValue });
+            if (horizon) all.push({ label: isRenewal ? 'Renews' : 'Expires', value: horizon });
+            if (closeDate) all.push({ label: 'Close date', value: closeDate });
+            if (termMonths) all.push({ label: 'Term', value: `${termMonths} months` });
+            else if (isOneTime) all.push({ label: 'Term', value: 'One-time' });
+            if (agreement.agreementType && agreement.agreementType !== '—') all.push({ label: 'Type', value: agreement.agreementType });
+            all.push({ label: 'Documents', value: String(docCount) });
+
+            const [primary, ...rest] = all;
+            return (
+              <ExtractionsPill
+                partyName={partyName}
+                onPartyClick={() => setShowPartyHistory(true)}
+                primary={primary}
+                details={rest}
+              />
+            );
+          })()}
+          </div>
+            <AddMenu {...addMenuHandlers} />
+          </div>
 
           {/* Tabs — pinned to the bottom of the header */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'auto' }}>
             <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
             <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
             <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-            <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
           </div>
-        </div>
-      </div>
-
-      {/* Key extractions — light strip below the header/tabs */}
-      <div style={{ background: '#F6F7F6' }}>
-        <div style={{ ...innerStyle, padding: 'var(--ink-spacing-200) var(--ink-spacing-300)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', marginTop: 4 }}>
-            {(() => {
-              const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
-              const secondary = 'var(--ink-font-color-secondary)';
-
-              // --- Facts extracted from the agreement ---
-              const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
-              const docCount = agreement.documentsCount ?? 1;
-              const termMonths = (() => { const m = /(\d+)\s*month/i.exec(agreement.termLength ?? ''); return m ? parseInt(m[1], 10) : null; })();
-              const isOneTime = /one-?time/i.test(agreement.termLength ?? '');
-              const dealValue = agreement.dealValue && agreement.dealValue !== '—' ? agreement.dealValue : null;
-              const closeDate = agreement.closeDate && agreement.closeDate !== '—' ? agreement.closeDate : null;
-
-              // --- Classify the use case from the agreement type ---
-              const rawType = (agreement.agreementType ?? '').toLowerCase();
-              const useCase: 'nda' | 'renewal' | 'services' | 'procurement' | 'sales' | 'generic' =
-                /nda|non-?disclosure|confidential/.test(rawType) ? 'nda' :
-                /renewal/.test(rawType) ? 'renewal' :
-                /statement of work|\bsow\b|consulting/.test(rawType) ? 'services' :
-                /supply|purchase order|\brfp\b|procurement|vendor/.test(rawType) ? 'procurement' :
-                /license|saas|subscription|partnership|enterprise|master|msa/.test(rawType) ? 'sales' :
-                'generic';
-
-              // Contextual noun for the monetary figure.
-              const valueNoun =
-                useCase === 'services' ? 'project value' :
-                useCase === 'renewal' ? 'renewal value' :
-                useCase === 'procurement' ? (/purchase order/.test(rawType) ? 'order value' : 'contract value') :
-                'total value';
-
-              // "Expires"/"Renews" phrasing for the term horizon.
-              const horizonVerb = useCase === 'renewal' ? 'Renews' : 'Expires';
-              const horizonLabel = termMonths
-                ? (termMonths % 12 === 0
-                    ? (termMonths / 12 === 1 ? `${horizonVerb} in a year` : `${horizonVerb} in ${termMonths / 12} years`)
-                    : `${horizonVerb} in ${termMonths} months`)
-                : null;
-
-              // --- Reusable item builders ---
-              const text = (key: string, icon: IconName, label: React.ReactNode, color = secondary): React.ReactNode => (
-                <span key={key} style={itemStyle}>
-                  <Icon name={icon} size={18} color={color} />
-                  {label}
-                </span>
-              );
-              const valueItem = dealValue ? text('value', 'currency-dollar', <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}><strong style={{ fontWeight: 600 }}>{dealValue}</strong>{valueNoun}</span>, 'var(--ink-font-color-default)') : null;
-              const docItem = text('docs', 'document', `${docCount} Document${docCount === 1 ? '' : 's'}`);
-              const termItem = termMonths ? text('term', 'calendar', `${termMonths} month term`) : (isOneTime ? text('term', 'calendar', 'One-time') : null);
-              const horizonItem = horizonLabel ? text('horizon', 'refresh', horizonLabel) : null;
-              const closeItem = closeDate ? text('close', 'clock', `Closes ${closeDate}`) : null;
-
-              // --- Compose the most relevant items per use case (max 4 after party) ---
-              let extras: (React.ReactNode | null)[];
-              switch (useCase) {
-                case 'nda':
-                  // Confidentiality-focused: no monetary value on an NDA.
-                  extras = [text('confidential', 'shield', 'Confidential'), docItem, termItem, horizonItem];
-                  break;
-                case 'sales':
-                  extras = [valueItem, termItem, horizonItem, docItem];
-                  break;
-                case 'procurement':
-                  extras = [valueItem, termItem, horizonItem, docItem];
-                  break;
-                case 'services':
-                  extras = [valueItem, termItem, closeItem, docItem];
-                  break;
-                case 'renewal':
-                  extras = [valueItem, horizonItem, termItem, docItem];
-                  break;
-                default:
-                  extras = [valueItem, docItem, horizonItem, termItem];
-              }
-              const visibleExtras = extras.filter(Boolean).slice(0, 4);
-
-              return (
-                <>
-                  {partyName && (
-                    <button
-                      type="button"
-                      onClick={() => setShowPartyHistory(true)}
-                      aria-label={`View history for ${partyName}`}
-                      title={`View history for ${partyName}`}
-                      style={{ ...itemStyle, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--ink-cobalt-80)', fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
-                    >
-                      <Icon name="building-person" size={18} color="var(--ink-cobalt-80)" />
-                      {partyName}
-                    </button>
-                  )}
-                  {visibleExtras}
-                </>
-              );
-            })()}
-          </div>
-
         </div>
       </div>
 
@@ -8348,7 +8241,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         {activeTab === 'overview' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: '2px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
+            <div style={{ padding: '24px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
               {orderedTasks.length > 0 && (
@@ -8513,6 +8406,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               dateModified: envDate,
                               rowId: `overview-env-${item.envelopeId}`,
                             })}
+                            onMouseEnter={() => setHoveredOverviewDocId(`overview-env-${item.envelopeId}`)}
+                            onMouseLeave={() => setHoveredOverviewDocId(prev => (prev === `overview-env-${item.envelopeId}` ? null : prev))}
+                            onFocus={() => setHoveredOverviewDocId(`overview-env-${item.envelopeId}`)}
+                            onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHoveredOverviewDocId(prev => (prev === `overview-env-${item.envelopeId}` ? null : prev)); }}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -8548,7 +8445,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <Text size="sm" color="secondary">{envDate ? relativePast(envDate) : ''}</Text>
                             </div>
                             <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
-                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end', opacity: hoveredOverviewDocId === `overview-env-${item.envelopeId}` ? 1 : 0, transition: 'opacity 120ms ease' }}>
                                 <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                                 <RowOverflowMenu items={envelopeOverflowItems()} />
                               </Inline>
@@ -8576,6 +8473,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           }) : undefined}
                           onMouseEnter={(e) => { setHoveredOverviewDocId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
                           onMouseLeave={(e) => { setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
+                          onFocus={() => setHoveredOverviewDocId(doc.id)}
+                          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -8627,7 +8526,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <Text size="sm" color="secondary">{relativePast(doc.lastModified || doc.dateModified)}</Text>
                           </div>
                           <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
-                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end', opacity: hoveredOverviewDocId === doc.id || isOpen ? 1 : 0, transition: 'opacity 120ms ease' }}>
                               {doc.signatureProgress ? (
                                 <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                               ) : (
@@ -8666,82 +8565,105 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             </div>
 
-            {/* Right column — combined Activity / Messages module with tabs */}
-            <div style={{ background: '#F6F7F6', padding: '2px var(--ink-spacing-300) var(--ink-spacing-300) var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
-              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
-                  <div style={{ display: 'flex', alignItems: 'stretch', gap: 'var(--ink-spacing-300)' }}>
-                    {(['activity', 'messages'] as const).map((v) => {
-                      const isActive = activityView === v;
-                      return (
-                        <button
-                          key={v}
-                          onClick={() => setActivityView(v)}
-                          style={{
-                            padding: 'var(--ink-spacing-100) 0',
-                            border: 'none',
-                            background: 'none',
-                            borderBottom: isActive ? '2px solid var(--ink-ink-100)' : '2px solid transparent',
-                            marginBottom: -1,
-                            color: isActive ? 'var(--ink-ink-100)' : 'rgba(0,0,0,0.55)',
-                            cursor: 'pointer',
-                            fontSize: 'var(--ink-font-size-sm)',
-                            fontWeight: isActive ? 600 : 400,
-                            fontFamily: 'var(--ink-font-family-default)',
-                          }}
-                        >
-                          {v === 'activity' ? 'Activity' : `Messages (${spaceMessages.length})`}
-                        </button>
-                      );
-                    })}
-                  </div>
+            {/* Right column — Activity module, with the Messages module docked beneath it */}
+            <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) 0 var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', position: 'relative' }}>
+              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300) var(--ink-spacing-300) 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Activity</Text>
                 </div>
 
-                {activityView === 'activity' ? (
-                  <Stack gap="medium">
-                    {currentActivity.map((item) => (
-                      <Inline key={item.id} gap="medium" align="flex-start">
-                        <div style={{
-                          width: 32, height: 32, borderRadius: '50%',
-                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0,
-                        }}>
-                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <Text size="sm"><strong>{item.user}</strong> {item.action}</Text>
-                          <Text size="xs" color="secondary">{item.time}</Text>
-                        </div>
-                      </Inline>
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                    {currentActivity.map((item, idx) => (
+                      <li
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          gap: 4,
+                          height: 80,
+                          boxSizing: 'border-box',
+                          padding: 0,
+                          borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))',
+                          fontSize: 14,
+                          lineHeight: 1.45,
+                          fontFamily: 'var(--ink-font-family-default)',
+                        }}
+                      >
+                        <span style={{ color: 'var(--ink-font-color-default)', fontSize: 14 }}>
+                          <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
+                        </span>
+                        <span style={{ color: 'var(--ink-font-color-secondary)', fontSize: 14 }}>{item.time}</span>
+                      </li>
                     ))}
-                  </Stack>
-                ) : (
-                  <div>
-                    <button
-                      onClick={() => showToast('New message')}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-100)',
-                        padding: 'var(--ink-spacing-100) 0 var(--ink-spacing-200)',
-                        border: 'none', background: 'none', cursor: 'pointer',
-                        color: 'var(--ink-cobalt-100)', fontWeight: 600,
-                        fontSize: 'var(--ink-font-size-sm)', fontFamily: 'var(--ink-font-family-default)',
-                      }}
-                    >
-                      <Icon name="plus" size={16} color="var(--ink-cobalt-100)" />
-                      New Message
-                    </button>
-                    {spaceMessages.map((msg, idx) => (
-                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? '1px solid var(--ink-border-subtle)' : '1px solid var(--ink-border-subtle)' }}>
+                  </ul>
+              </div>
+
+              {/* Messages module — docked to the bottom of the viewport, peeking the top
+                  message when collapsed and growing upward over the Activity feed when expanded. */}
+              <div style={{ position: 'sticky', bottom: 0, marginTop: 'auto', height: 76, zIndex: 50, flexShrink: 0 }}>
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: 0,
+                  height: messagesExpanded ? 460 : 76,
+                  transition: 'height 240ms ease',
+                  display: 'flex', flexDirection: 'column',
+                  background: 'var(--ink-white-100)',
+                  border: '1px solid var(--ink-border-subtle)',
+                  borderBottom: 'none',
+                  borderRadius: '12px 12px 0 0',
+                  boxShadow: '0 -4px 16px rgba(19, 0, 50, 0.08)',
+                  overflow: 'hidden',
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setMessagesExpanded((v) => !v)}
+                    aria-expanded={messagesExpanded}
+                    aria-controls="space-messages-list"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150, 12px)',
+  height: 44, flexShrink: 0,
+  padding: '0 var(--ink-spacing-300)',
+  background: '#84EFC3',
+                      border: 'none', cursor: 'pointer', textAlign: 'left',
+                      color: 'var(--ink-font-color-default)',
+                      fontFamily: 'var(--ink-font-family-default)',
+                    }}
+                  >
+                    <Icon name="comment" size={20} color="var(--ink-font-color-default)" />
+                    <span style={{ flex: 1, fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>
+                      Messages ({spaceMessages.length})
+                    </span>
+                    <span style={{ display: 'inline-flex', transform: messagesExpanded ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 240ms ease' }}>
+                      <Icon name="chevron-down" size={16} color="var(--ink-font-color-default)" />
+                    </span>
+                  </button>
+                  <div id="space-messages-list" style={{ flex: 1, overflowY: messagesExpanded ? 'auto' : 'hidden', padding: '0 var(--ink-spacing-300)' }}>
+                    {spaceMessages.length === 0 ? (
+                      <button
+                        type="button"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 12,
+                          margin: 'var(--ink-spacing-200) 0', padding: 0,
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          color: 'var(--ink-cobalt-140)',
+                          fontFamily: 'var(--ink-font-family-default)',
+  fontSize: 14, fontWeight: 600,
+  }}
+  >
+  <Icon name="plus" size={20} color="var(--ink-cobalt-140)" />
+                        New Message
+                      </button>
+                    ) : spaceMessages.map((msg, idx) => (
+                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))' }}>
                         <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <Text size="sm" weight="semibold">{msg.name}</Text>
+                          <Text size="sm" weight="semibold" style={{ display: 'block' }}>{msg.name}</Text>
                           <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
                         </div>
                       </Inline>
                     ))}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -9323,15 +9245,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           if (pendingPreviewDoc) {
             setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
             onAddDocument?.(pendingPreviewDoc);
-            // Reflect the newly added document in the Permission Slip space's
-            // activity feed as a live event.
-            if (isPermissionSlipSpace) {
-              const added = pendingPreviewDoc;
-              setSentActivity(prev => [
-                { id: `activity-doc-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Added ${added} to the space`, time: 'Just now' },
-                ...prev,
-              ]);
-            }
+            logActivity('upload', `added ${pendingPreviewDoc}`);
             showToast('Your document was added');
           }
           setPendingPreviewDoc(null);
@@ -9339,17 +9253,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onSendForApproval={(name) => {
           // Also add the document to this space's Documents table (in addition
           // to the approval task) so it persists after the preview closes.
-          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); }
+          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); logActivity('upload', `added ${pendingPreviewDoc}`); }
           setPendingPreviewDoc(null);
           setApprovalModalDoc(name);
         }}
         onSendForSignature={(name) => {
-          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); }
+          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); logActivity('upload', `added ${pendingPreviewDoc}`); }
           setPendingPreviewDoc(null);
           setPreparePreselectedDocs([name]);
           setShowPrepare(true);
         }}
-        onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); showToast('Approval added to tasks'); }}
+        onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); logActivity('check', `requested approval${task.title ? `: ${task.title}` : ''}`); showToast('Approval added to tasks'); }}
       />
 
       <SendForApprovalModal
@@ -9358,6 +9272,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onClose={() => setApprovalModalDoc(null)}
         onComplete={(task) => {
           setSentTasks(prev => [...prev, task]);
+          logActivity('check', `sent ${approvalModalDoc ?? 'a document'} for approval`);
           setApprovalModalDoc(null);
           showToast('Sent for approval');
         }}
@@ -9399,10 +9314,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             isDueSoon: false,
             createdAt: Date.now(),
           }]);
-          setSentActivity(prev => [
-            { id: `activity-upload-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Sent an upload request${data.title ? ` "${data.title}"` : ''}${assignee ? ` to ${assignee}` : ''}`, time: 'Just now' },
-            ...prev,
-          ]);
+          logActivity('upload', `sent an upload request${data.title ? ` for ${data.title}` : ''}${assignee ? ` to ${assignee}` : ''}`);
           // Land on the Tasks tab with the just-sent upload task pinned first.
           // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(uploadTaskId);
@@ -9438,10 +9350,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             isDueSoon: false,
             createdAt: Date.now(),
           }]);
-          setSentActivity(prev => [
-            { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up onboarding for ${data.vendorName}`, time: 'Just now' },
-            ...prev,
-          ]);
+          logActivity('workflow', `started the New Vendor Onboarding workflow for ${data.vendorName}`);
           // Land on the Tasks tab with the just-created onboarding task pinned first.
           // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(vendorOnboardingTaskId);
@@ -9471,7 +9380,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
       {/* Envelope detail panel */}
       {openEnvelope && (
-        <EnvelopePanel envelope={openEnvelope} onRemind={() => showToast('Reminder sent to signers.')} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
+        <EnvelopePanel envelope={openEnvelope} onRemind={() => showToast('Reminder sent to signers.')} onViewDetails={() => showToast('Opening envelope details.')} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
       )}
 
       {/* Party History Panel */}
@@ -10330,12 +10239,120 @@ function UserMenu({
   );
 }
 
+type ExtractionDetail = { label: string; value: string };
+
+const PILL_LABEL_COLOR = 'rgba(255, 255, 255, 0.64)';
+const PILL_DIVIDER = <span aria-hidden="true" style={{ width: 1, height: 20, background: 'rgba(255, 255, 255, 0.24)', flexShrink: 0 }} />;
+
+function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
+  partyName: string | null;
+  onPartyClick: () => void;
+  primary?: ExtractionDetail;
+  details: ExtractionDetail[];
+}) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const show = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setOpen(true); };
+  const hide = () => { closeTimer.current = setTimeout(() => setOpen(false), 120); };
+
+  if (!partyName && !primary && details.length === 0) return null;
+
+  const labelStyle: CSSProperties = { color: PILL_LABEL_COLOR, fontSize: 12, fontWeight: 400 };
+  const valueStyle: CSSProperties = { color: 'var(--ink-white-100)', fontSize: 12, fontWeight: 500 };
+  const groupStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' };
+
+  return (
+    <div style={{ marginTop: 'var(--ink-spacing-200)', display: 'flex' }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 12,
+        height: 32, padding: '0 16px', borderRadius: 999,
+        background: 'rgba(255, 255, 255, 0.12)',
+        fontFamily: 'var(--ink-font-family)',
+      }}>
+        {partyName && (
+          <span style={groupStyle}>
+            <span style={labelStyle}>Party</span>
+            <button
+              type="button"
+              onClick={onPartyClick}
+              aria-label={`View history for ${partyName}`}
+              style={{ ...valueStyle, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              <Icon name="building-person" size={16} color="var(--ink-white-100)" />
+              {partyName}
+            </button>
+          </span>
+        )}
+        {partyName && primary && PILL_DIVIDER}
+        {primary && (
+          <span style={groupStyle}>
+            <span style={labelStyle}>{primary.label}</span>
+            <span style={valueStyle}>{primary.value}</span>
+          </span>
+        )}
+        {details.length > 0 && (
+          <>
+            {PILL_DIVIDER}
+            <div style={{ position: 'relative', display: 'flex' }} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide}>
+              <button
+                type="button"
+                aria-label="More details"
+                aria-expanded={open}
+                onClick={() => setOpen((v) => !v)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 999, border: 'none', cursor: 'pointer', background: open ? 'rgba(255, 255, 255, 0.16)' : 'transparent', color: 'var(--ink-white-100)', padding: 0 }}
+              >
+                <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  {[0, 1, 2].map((i) => (
+                    <span key={i} style={{ width: 4, height: 4, borderRadius: 999, background: 'currentColor' }} />
+                  ))}
+                </span>
+              </button>
+              {open && (
+                <div
+                  role="dialog"
+                  aria-label="Agreement details"
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 12px)', left: -16, zIndex: 20,
+                    minWidth: 260, padding: '8px 0',
+                    background: 'var(--ink-white-100)', borderRadius: 12,
+                    border: '1px solid var(--ink-border-subtle)',
+                    boxShadow: '0 12px 32px rgba(19, 0, 50, 0.18)',
+                  }}
+                >
+                  <div style={{ padding: '8px 16px 6px', fontSize: 12, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: 'var(--ink-font-color-secondary)' }}>
+                    Details
+                  </div>
+                  <dl style={{ margin: 0 }}>
+                    {details.map((d) => (
+                      <div key={d.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 24, padding: '8px 16px', fontSize: 14, lineHeight: 1.5 }}>
+                        <dt style={{ color: 'var(--ink-font-color-secondary)' }}>{d.label}</dt>
+                        <dd style={{ margin: 0, color: 'var(--ink-font-color-default)', fontWeight: 500, textAlign: 'right' }}>{d.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(getTabFromHash);
   // Active prototype version + avatar menu open state. Both versions render
   // the same tree; `protoVersion` is a shared flag for future per-version tweaks.
   const [protoVersion, setProtoVersion] = useState<PrototypeVersion>('standard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = (msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  };
   const [sidebarView, setSidebarView] = useState<SidebarView>('all-agreements');
   // Folders view: breadcrumb path of folders the user has navigated into, and the
   // set of folders currently expanded inline within the table.
@@ -10437,6 +10454,7 @@ export default function App() {
   // Documents added to a space via Add Document → Upload, persisted per agreement
   // id so they survive navigating away from the workspace and back.
   const [addedDocsById, setAddedDocsById] = useState<Record<string, string[]>>({});
+  const [activityById, setActivityById] = useState<Record<string, SpaceActivityEvent[]>>({});
   // Documents sent for signature from within a space, persisted per agreement id
   // so their Pending Signature status survives leaving and re-entering the space.
   const [signedDocsById, setSignedDocsById] = useState<Record<string, { name: string; recipient: string }[]>>({});
@@ -10457,6 +10475,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   // Tracks where the preview was opened from: 'agreement' = existing Agreement Space
   // (Save returns there), 'new' = a brand-new document (Save creates a new space).
   const [previewOrigin, setPreviewOrigin] = useState<'agreement' | 'new'>('agreement');
+  const [showCreateFilePicker, setShowCreateFilePicker] = useState(false);
   // Approval flow triggered from a document preview's "Send for Approval" action.
   const [pendingApprovalDoc, setPendingApprovalDoc] = useState<string | null>(null);
   const [workspaceApprovalTasks, setWorkspaceApprovalTasks] = useState<DealTask[]>([]);
@@ -10612,6 +10631,12 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     onToggleCollapse: () => {},
     createLabel: 'Create',
     onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
+    createMenuItems: [
+      { id: 'send-envelope', label: 'Send an Envelope', onClick: () => { setShowStartModal(false); setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }, dividerAfter: true },
+      { id: 'new-agreement', label: 'New Agreement', onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
+      { id: 'new-request', label: 'New Request', onClick: () => { setShowStartModal(false); setShowAgreementRequestModal(true); } },
+      { id: 'new-purchase-request', label: 'New Purchase Request', onClick: () => showToast('Starting a new purchase request.') },
+    ],
     user: { name: 'Lisa Jones' },
     onUserClick: () => setUserMenuOpen(o => !o),
     items: [
@@ -11356,8 +11381,24 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   return (
     <PrototypeVersionContext.Provider value={{ version: protoVersion, setVersion: setProtoVersion }}>
-    <style>{tableRowStaggerStyles}</style>
-    <UserMenu
+  <style>{tableRowStaggerStyles}</style>
+  {toast && (
+    <div role="status" style={{ position: 'fixed', bottom: 32, left: 32, zIndex: 1300, display: 'flex', alignItems: 'center', gap: 16, minWidth: 360, maxWidth: 520, padding: '18px 20px', borderRadius: 12, background: '#2A1A45', boxShadow: '0 12px 32px rgba(19,0,50,0.28)', fontFamily: 'var(--ink-font-family)' }}>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }} aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#3DBE8B" strokeWidth="2" />
+        <path d="M8 12l2.5 2.5L16 9" stroke="#3DBE8B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span style={{ flex: 1, fontSize: 16, color: 'white' }}>{toast}</span>
+      <button
+        onClick={() => setToast(null)}
+        aria-label="Dismiss notification"
+        style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, border: 'none', background: 'transparent', cursor: 'pointer', color: 'white', borderRadius: 4 }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+      </button>
+    </div>
+  )}
+  <UserMenu
       open={userMenuOpen}
       onClose={() => setUserMenuOpen(false)}
       userName={globalNavConfig.user.name}
@@ -11488,6 +11529,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           const id = selectedAgreement.id;
           setPinnedDocNamesById(prev => ({ ...prev, [id]: names }));
         }}
+        persistedActivity={activityById[selectedAgreement.id] ?? []}
+        onAddActivity={(event) => {
+          const id = selectedAgreement.id;
+          setActivityById(prev => ({ ...prev, [id]: [event, ...(prev[id] ?? [])] }));
+        }}
         persistedPinnedTaskId={pinnedTaskIdById[selectedAgreement.id] ?? null}
         onPinTaskId={(taskId) => {
           const id = selectedAgreement.id;
@@ -11508,6 +11554,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       />
     )}
     <StartNewModal open={showStartModal} onClose={() => setShowStartModal(false)} onStartBlank={() => setShowDocumentUpload(true)} onStartNDA={() => { setNdaAgreementId(null); setSavedNDAData(null); setShowNDAModal(true); }} onStartPurchase={() => setShowPurchaseModal(true)} onStartRequest={() => setShowAgreementRequestModal(true)} onSignatureRequest={() => { setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }} onPreviewDocument={(name) => { setPreviewOrigin('new'); setPreviewDocName(name); }} />
+
+    <FilePickerDialog
+      open={showCreateFilePicker}
+      onCancel={() => setShowCreateFilePicker(false)}
+      onOpen={(name) => { setShowCreateFilePicker(false); setPreviewOrigin('new'); setPreviewDocName(name); }}
+    />
+  
 
     <DocumentPreview
       open={previewDocName !== null}
@@ -11729,10 +11782,10 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           statusIcon: 'clock',
           statusKind: 'info',
           statusSub: 'In Progress',
-          dealValue: '—',
+          dealValue: '���',
           agreementType: data.requestType || 'Request',
           termLength: '—',
-          closeDate: '—',
+          closeDate: '��',
           date: new Date().toLocaleDateString('en-GB'),
           time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           action: 'Edit',
