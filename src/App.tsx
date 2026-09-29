@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���═══════════════════════
+/* ═══════════════���══════════════════�����════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8067,7 +8067,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', height: 174, padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-200) var(--ink-spacing-300) 0' }}>
 
           {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8137,116 +8137,54 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <AddMenu {...addMenuHandlers} />
           </div>
 
-          <div style={{ flex: 1 }} />
+          {/* Key extractions — pill under the title */}
+          {(() => {
+            const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
+            const docCount = agreement.documentsCount ?? 1;
+            const termMonths = (() => { const m = /(\d+)\s*month/i.exec(agreement.termLength ?? ''); return m ? parseInt(m[1], 10) : null; })();
+            const isOneTime = /one-?time/i.test(agreement.termLength ?? '');
+            const dealValue = agreement.dealValue && agreement.dealValue !== '—' ? agreement.dealValue : null;
+            const closeDate = agreement.closeDate && agreement.closeDate !== '—' ? agreement.closeDate : null;
+            const rawType = (agreement.agreementType ?? '').toLowerCase();
+            const isRenewal = /renewal/.test(rawType);
+            const valueLabel =
+              /statement of work|\bsow\b|consulting/.test(rawType) ? 'Project value' :
+              isRenewal ? 'Renewal value' :
+              /purchase order/.test(rawType) ? 'Order value' :
+              'Contract value';
+            const horizon = termMonths
+              ? (termMonths % 12 === 0
+                  ? (termMonths / 12 === 1 ? 'In 1 year' : `In ${termMonths / 12} years`)
+                  : `In ${termMonths} months`)
+              : null;
+
+            const all: ExtractionDetail[] = [];
+            if (dealValue) all.push({ label: valueLabel, value: dealValue });
+            if (horizon) all.push({ label: isRenewal ? 'Renews' : 'Expires', value: horizon });
+            if (closeDate) all.push({ label: 'Close date', value: closeDate });
+            if (termMonths) all.push({ label: 'Term', value: `${termMonths} months` });
+            else if (isOneTime) all.push({ label: 'Term', value: 'One-time' });
+            if (agreement.agreementType && agreement.agreementType !== '—') all.push({ label: 'Type', value: agreement.agreementType });
+            all.push({ label: 'Documents', value: String(docCount) });
+
+            const [primary, ...rest] = all;
+            return (
+              <ExtractionsPill
+                partyName={partyName}
+                onPartyClick={() => setShowPartyHistory(true)}
+                primary={primary}
+                details={rest}
+              />
+            );
+          })()}
 
           {/* Tabs — pinned to the bottom of the header */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'var(--ink-spacing-300)' }}>
             <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
             <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
             <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
             <button onClick={() => setActiveTab('details')} style={tabStyle(activeTab === 'details')}>Details</button>
           </div>
-        </div>
-      </div>
-
-      {/* Key extractions — light strip below the header/tabs */}
-      <div style={{ background: '#F6F7F6' }}>
-        <div style={{ ...innerStyle, padding: 'var(--ink-spacing-200) var(--ink-spacing-300)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', marginTop: 4 }}>
-            {(() => {
-              const itemStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-font-color-default)', whiteSpace: 'nowrap' };
-              const secondary = 'var(--ink-font-color-secondary)';
-
-              // --- Facts extracted from the agreement ---
-              const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
-              const docCount = agreement.documentsCount ?? 1;
-              const termMonths = (() => { const m = /(\d+)\s*month/i.exec(agreement.termLength ?? ''); return m ? parseInt(m[1], 10) : null; })();
-              const isOneTime = /one-?time/i.test(agreement.termLength ?? '');
-              const dealValue = agreement.dealValue && agreement.dealValue !== '—' ? agreement.dealValue : null;
-              const closeDate = agreement.closeDate && agreement.closeDate !== '—' ? agreement.closeDate : null;
-
-              // --- Classify the use case from the agreement type ---
-              const rawType = (agreement.agreementType ?? '').toLowerCase();
-              const useCase: 'nda' | 'renewal' | 'services' | 'procurement' | 'sales' | 'generic' =
-                /nda|non-?disclosure|confidential/.test(rawType) ? 'nda' :
-                /renewal/.test(rawType) ? 'renewal' :
-                /statement of work|\bsow\b|consulting/.test(rawType) ? 'services' :
-                /supply|purchase order|\brfp\b|procurement|vendor/.test(rawType) ? 'procurement' :
-                /license|saas|subscription|partnership|enterprise|master|msa/.test(rawType) ? 'sales' :
-                'generic';
-
-              // Contextual noun for the monetary figure.
-              const valueNoun =
-                useCase === 'services' ? 'project value' :
-                useCase === 'renewal' ? 'renewal value' :
-                useCase === 'procurement' ? (/purchase order/.test(rawType) ? 'order value' : 'contract value') :
-                'total value';
-
-              // "Expires"/"Renews" phrasing for the term horizon.
-              const horizonVerb = useCase === 'renewal' ? 'Renews' : 'Expires';
-              const horizonLabel = termMonths
-                ? (termMonths % 12 === 0
-                    ? (termMonths / 12 === 1 ? `${horizonVerb} in a year` : `${horizonVerb} in ${termMonths / 12} years`)
-                    : `${horizonVerb} in ${termMonths} months`)
-                : null;
-
-              // --- Reusable item builders ---
-              const text = (key: string, icon: IconName, label: React.ReactNode, color = secondary): React.ReactNode => (
-                <span key={key} style={itemStyle}>
-                  <Icon name={icon} size={18} color={color} />
-                  {label}
-                </span>
-              );
-              const valueItem = dealValue ? text('value', 'currency-dollar', <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}><strong style={{ fontWeight: 600 }}>{dealValue}</strong>{valueNoun}</span>, 'var(--ink-font-color-default)') : null;
-              const docItem = text('docs', 'document', `${docCount} Document${docCount === 1 ? '' : 's'}`);
-              const termItem = termMonths ? text('term', 'calendar', `${termMonths} month term`) : (isOneTime ? text('term', 'calendar', 'One-time') : null);
-              const horizonItem = horizonLabel ? text('horizon', 'refresh', horizonLabel) : null;
-              const closeItem = closeDate ? text('close', 'clock', `Closes ${closeDate}`) : null;
-
-              // --- Compose the most relevant items per use case (max 4 after party) ---
-              let extras: (React.ReactNode | null)[];
-              switch (useCase) {
-                case 'nda':
-                  // Confidentiality-focused: no monetary value on an NDA.
-                  extras = [text('confidential', 'shield', 'Confidential'), docItem, termItem, horizonItem];
-                  break;
-                case 'sales':
-                  extras = [valueItem, termItem, horizonItem, docItem];
-                  break;
-                case 'procurement':
-                  extras = [valueItem, termItem, horizonItem, docItem];
-                  break;
-                case 'services':
-                  extras = [valueItem, termItem, closeItem, docItem];
-                  break;
-                case 'renewal':
-                  extras = [valueItem, horizonItem, termItem, docItem];
-                  break;
-                default:
-                  extras = [valueItem, docItem, horizonItem, termItem];
-              }
-              const visibleExtras = extras.filter(Boolean).slice(0, 4);
-
-              return (
-                <>
-                  {partyName && (
-                    <button
-                      type="button"
-                      onClick={() => setShowPartyHistory(true)}
-                      aria-label={`View history for ${partyName}`}
-                      title={`View history for ${partyName}`}
-                      style={{ ...itemStyle, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--ink-cobalt-80)', fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
-                    >
-                      <Icon name="building-person" size={18} color="var(--ink-cobalt-80)" />
-                      {partyName}
-                    </button>
-                  )}
-                  {visibleExtras}
-                </>
-              );
-            })()}
-          </div>
-
         </div>
       </div>
 
@@ -10237,6 +10175,103 @@ function UserMenu({
   );
 }
 
+type ExtractionDetail = { label: string; value: string };
+
+const PILL_LABEL_COLOR = 'rgba(255, 255, 255, 0.64)';
+const PILL_DIVIDER = <span aria-hidden="true" style={{ width: 1, height: 20, background: 'rgba(255, 255, 255, 0.24)', flexShrink: 0 }} />;
+
+function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
+  partyName: string | null;
+  onPartyClick: () => void;
+  primary?: ExtractionDetail;
+  details: ExtractionDetail[];
+}) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const show = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setOpen(true); };
+  const hide = () => { closeTimer.current = setTimeout(() => setOpen(false), 120); };
+
+  if (!partyName && !primary && details.length === 0) return null;
+
+  const labelStyle: CSSProperties = { color: PILL_LABEL_COLOR, fontSize: 16, fontWeight: 400 };
+  const valueStyle: CSSProperties = { color: 'var(--ink-white-100)', fontSize: 16, fontWeight: 500 };
+  const groupStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 12, whiteSpace: 'nowrap' };
+
+  return (
+    <div style={{ marginTop: 'var(--ink-spacing-200)', display: 'flex' }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 16,
+        height: 40, padding: '0 20px', borderRadius: 999,
+        background: 'rgba(255, 255, 255, 0.12)',
+        fontFamily: 'var(--ink-font-family)',
+      }}>
+        {partyName && (
+          <span style={groupStyle}>
+            <span style={labelStyle}>Party</span>
+            <button
+              type="button"
+              onClick={onPartyClick}
+              aria-label={`View history for ${partyName}`}
+              style={{ ...valueStyle, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              <Icon name="building-person" size={20} color="var(--ink-white-100)" />
+              {partyName}
+            </button>
+          </span>
+        )}
+        {partyName && primary && PILL_DIVIDER}
+        {primary && (
+          <span style={groupStyle}>
+            <span style={labelStyle}>{primary.label}</span>
+            <span style={valueStyle}>{primary.value}</span>
+          </span>
+        )}
+        {details.length > 0 && (
+          <>
+            {PILL_DIVIDER}
+            <div style={{ position: 'relative', display: 'flex' }} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide}>
+              <button
+                type="button"
+                aria-label="More details"
+                aria-expanded={open}
+                onClick={() => setOpen((v) => !v)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer', background: open ? 'rgba(255, 255, 255, 0.16)' : 'transparent', color: 'var(--ink-white-100)', fontSize: 20, letterSpacing: 1, lineHeight: 1, padding: 0 }}
+              >
+                <span aria-hidden="true" style={{ transform: 'translateY(-4px)' }}>•••</span>
+              </button>
+              {open && (
+                <div
+                  role="dialog"
+                  aria-label="Agreement details"
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 12px)', left: -16, zIndex: 20,
+                    minWidth: 260, padding: '8px 0',
+                    background: 'var(--ink-white-100)', borderRadius: 12,
+                    border: '1px solid var(--ink-border-subtle)',
+                    boxShadow: '0 12px 32px rgba(19, 0, 50, 0.18)',
+                  }}
+                >
+                  <div style={{ padding: '8px 16px 6px', fontSize: 12, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: 'var(--ink-font-color-secondary)' }}>
+                    Details
+                  </div>
+                  <dl style={{ margin: 0 }}>
+                    {details.map((d) => (
+                      <div key={d.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 24, padding: '8px 16px', fontSize: 14, lineHeight: 1.5 }}>
+                        <dt style={{ color: 'var(--ink-font-color-secondary)' }}>{d.label}</dt>
+                        <dd style={{ margin: 0, color: 'var(--ink-font-color-default)', fontWeight: 500, textAlign: 'right' }}>{d.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(getTabFromHash);
   // Active prototype version + avatar menu open state. Both versions render
@@ -11676,7 +11711,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           dealValue: '—',
           agreementType: data.requestType || 'Request',
           termLength: '—',
-          closeDate: '—',
+          closeDate: '��',
           date: new Date().toLocaleDateString('en-GB'),
           time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           action: 'Edit',
