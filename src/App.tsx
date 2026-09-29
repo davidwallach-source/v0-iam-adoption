@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════�����������════
+/* ═══════════════���══════════════════�������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8362,6 +8362,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               dateModified: envDate,
                               rowId: `overview-env-${item.envelopeId}`,
                             })}
+                            onMouseEnter={() => setHoveredOverviewDocId(`overview-env-${item.envelopeId}`)}
+                            onMouseLeave={() => setHoveredOverviewDocId(prev => (prev === `overview-env-${item.envelopeId}` ? null : prev))}
+                            onFocus={() => setHoveredOverviewDocId(`overview-env-${item.envelopeId}`)}
+                            onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHoveredOverviewDocId(prev => (prev === `overview-env-${item.envelopeId}` ? null : prev)); }}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -8397,7 +8401,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <Text size="sm" color="secondary">{envDate ? relativePast(envDate) : ''}</Text>
                             </div>
                             <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
-                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end', opacity: hoveredOverviewDocId === `overview-env-${item.envelopeId}` ? 1 : 0, transition: 'opacity 120ms ease' }}>
                                 <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                                 <RowOverflowMenu items={envelopeOverflowItems()} />
                               </Inline>
@@ -8425,6 +8429,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           }) : undefined}
                           onMouseEnter={(e) => { setHoveredOverviewDocId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
                           onMouseLeave={(e) => { setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
+                          onFocus={() => setHoveredOverviewDocId(doc.id)}
+                          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -8476,7 +8482,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <Text size="sm" color="secondary">{relativePast(doc.lastModified || doc.dateModified)}</Text>
                           </div>
                           <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
-                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end', opacity: hoveredOverviewDocId === doc.id || isOpen ? 1 : 0, transition: 'opacity 120ms ease' }}>
                               {doc.signatureProgress ? (
                                 <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                               ) : (
@@ -8516,7 +8522,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </div>
 
             {/* Right column — combined Activity / Messages module with tabs */}
-            <div style={{ background: '#F6F7F6', padding: '2px var(--ink-spacing-300) var(--ink-spacing-300) var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
+            <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) var(--ink-spacing-300) var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', overflowY: 'auto' }}>
               <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-300)', borderBottom: '1px solid var(--ink-border-subtle)' }}>
                   <div style={{ display: 'flex', alignItems: 'stretch', gap: 'var(--ink-spacing-300)' }}>
@@ -8547,24 +8553,28 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 </div>
 
                 {activityView === 'activity' ? (
-                  <Stack gap="medium">
-                    {currentActivity.map((item) => (
-                      <Inline key={item.id} gap="medium" align="flex-start">
-                        <div style={{
-                          width: 32, height: 32, borderRadius: '50%',
-                          background: item.isAI ? 'var(--ink-cobalt-20)' : 'var(--ink-bg-color-secondary)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0,
-                        }}>
-                          <Icon name={item.icon} size={16} color={item.isAI ? 'var(--ink-cobalt-100)' : undefined} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <Text size="sm"><strong>{item.user}</strong> {item.action}</Text>
-                          <Text size="xs" color="secondary">{item.time}</Text>
-                        </div>
-                      </Inline>
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                    {currentActivity.map((item, idx) => (
+                      <li
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 4,
+                          padding: idx === 0 ? '0 0 var(--ink-spacing-200)' : 'var(--ink-spacing-200) 0',
+                          borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))',
+                          fontSize: 14,
+                          lineHeight: 1.45,
+                          fontFamily: 'var(--ink-font-family-default)',
+                        }}
+                      >
+                        <span style={{ color: 'var(--ink-font-color-default)', fontSize: 14 }}>
+                          <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
+                        </span>
+                        <span style={{ color: 'var(--ink-font-color-secondary)', fontSize: 14 }}>{item.time}</span>
+                      </li>
                     ))}
-                  </Stack>
+                  </ul>
                 ) : (
                   <div>
                     <button
