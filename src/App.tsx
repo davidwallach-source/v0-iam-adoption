@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════�����═══���������������������════
+/* ═══════════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -5324,6 +5324,8 @@ function RowOverflowMenu({ items }: { items: { label: string; onClick: () => voi
   );
 }
 
+type SpaceActivityEvent = { id: string; icon: IconName; user: string; action: string; time: string };
+
 interface WorkspaceViewProps {
   agreement: Agreement;
   onClose: () => void;
@@ -5365,6 +5367,11 @@ interface WorkspaceViewProps {
   // top of the Tasks list.
   persistedPinnedTaskId?: string | null;
   onPinTaskId?: (id: string) => void;
+  // Live activity events recorded in this space (documents added, upload
+  // requests, workflows, signature/approval sends), persisted in the parent so
+  // the feed survives leaving and re-entering the space. Newest-first.
+  persistedActivity?: SpaceActivityEvent[];
+  onAddActivity?: (event: SpaceActivityEvent) => void;
 }
 
 /* ���══════════════════════════════════════
@@ -7485,7 +7492,7 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
   );
 }
 
-function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId }: WorkspaceViewProps) {
+function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [messagesExpanded, setMessagesExpanded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
@@ -7541,7 +7548,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     }
   }, [injectedSignatureDocs]);
   const [approvalModalDoc, setApprovalModalDoc] = useState<string | null>(null);
-  const [sentActivity, setSentActivity] = useState<{ id: string; icon: IconName; user: string; action: string; time: string }[]>([]);
+  const [sentActivity, setSentActivity] = useState<SpaceActivityEvent[]>(persistedActivity ?? []);
+  const logActivity = (icon: IconName, action: string) => {
+    const event: SpaceActivityEvent = { id: `activity-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, icon, user: 'You', action, time: 'Just now' };
+    setSentActivity(prev => [event, ...prev]);
+    onAddActivity?.(event);
+  };
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = (msg: string) => {
@@ -7635,6 +7647,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       createdAt: Date.now(),
     };
     setSentTasks(prev => [...prev, newTask]);
+    logActivity('send', `sent ${documentNames.join(', ')} for signature${recipientNames.length ? ` to ${recipientNames.join(', ')}` : ''}`);
     // Clear selection after sending
     setSelectedDocs(new Set());
     // Land on the Overview tab with the just-sent document(s) pinned first.
@@ -9232,15 +9245,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           if (pendingPreviewDoc) {
             setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]);
             onAddDocument?.(pendingPreviewDoc);
-            // Reflect the newly added document in the Permission Slip space's
-            // activity feed as a live event.
-            if (isPermissionSlipSpace) {
-              const added = pendingPreviewDoc;
-              setSentActivity(prev => [
-                { id: `activity-doc-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Added ${added} to the space`, time: 'Just now' },
-                ...prev,
-              ]);
-            }
+            logActivity('upload', `added ${pendingPreviewDoc}`);
             showToast('Your document was added');
           }
           setPendingPreviewDoc(null);
@@ -9248,17 +9253,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onSendForApproval={(name) => {
           // Also add the document to this space's Documents table (in addition
           // to the approval task) so it persists after the preview closes.
-          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); }
+          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); logActivity('upload', `added ${pendingPreviewDoc}`); }
           setPendingPreviewDoc(null);
           setApprovalModalDoc(name);
         }}
         onSendForSignature={(name) => {
-          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); }
+          if (pendingPreviewDoc) { setAddedDocuments(prev => prev.includes(pendingPreviewDoc) ? prev : [...prev, pendingPreviewDoc]); onAddDocument?.(pendingPreviewDoc); logActivity('upload', `added ${pendingPreviewDoc}`); }
           setPendingPreviewDoc(null);
           setPreparePreselectedDocs([name]);
           setShowPrepare(true);
         }}
-        onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); showToast('Approval added to tasks'); }}
+        onApprovalCreated={(task) => { setSentTasks(prev => [...prev, task]); logActivity('check', `requested approval${task.title ? `: ${task.title}` : ''}`); showToast('Approval added to tasks'); }}
       />
 
       <SendForApprovalModal
@@ -9267,6 +9272,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onClose={() => setApprovalModalDoc(null)}
         onComplete={(task) => {
           setSentTasks(prev => [...prev, task]);
+          logActivity('check', `sent ${approvalModalDoc ?? 'a document'} for approval`);
           setApprovalModalDoc(null);
           showToast('Sent for approval');
         }}
@@ -9308,10 +9314,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             isDueSoon: false,
             createdAt: Date.now(),
           }]);
-          setSentActivity(prev => [
-            { id: `activity-upload-${Date.now()}`, icon: 'upload' as IconName, user: 'You', action: `Sent an upload request${data.title ? ` "${data.title}"` : ''}${assignee ? ` to ${assignee}` : ''}`, time: 'Just now' },
-            ...prev,
-          ]);
+          logActivity('upload', `sent an upload request${data.title ? ` for ${data.title}` : ''}${assignee ? ` to ${assignee}` : ''}`);
           // Land on the Tasks tab with the just-sent upload task pinned first.
           // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(uploadTaskId);
@@ -9347,10 +9350,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             isDueSoon: false,
             createdAt: Date.now(),
           }]);
-          setSentActivity(prev => [
-            { id: `activity-onboarding-${Date.now()}`, icon: 'workflow' as IconName, user: 'You', action: `set up onboarding for ${data.vendorName}`, time: 'Just now' },
-            ...prev,
-          ]);
+          logActivity('workflow', `started the New Vendor Onboarding workflow for ${data.vendorName}`);
           // Land on the Tasks tab with the just-created onboarding task pinned first.
           // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(vendorOnboardingTaskId);
@@ -10454,6 +10454,7 @@ export default function App() {
   // Documents added to a space via Add Document → Upload, persisted per agreement
   // id so they survive navigating away from the workspace and back.
   const [addedDocsById, setAddedDocsById] = useState<Record<string, string[]>>({});
+  const [activityById, setActivityById] = useState<Record<string, SpaceActivityEvent[]>>({});
   // Documents sent for signature from within a space, persisted per agreement id
   // so their Pending Signature status survives leaving and re-entering the space.
   const [signedDocsById, setSignedDocsById] = useState<Record<string, { name: string; recipient: string }[]>>({});
@@ -11527,6 +11528,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         onPinDocNames={(names) => {
           const id = selectedAgreement.id;
           setPinnedDocNamesById(prev => ({ ...prev, [id]: names }));
+        }}
+        persistedActivity={activityById[selectedAgreement.id] ?? []}
+        onAddActivity={(event) => {
+          const id = selectedAgreement.id;
+          setActivityById(prev => ({ ...prev, [id]: [event, ...(prev[id] ?? [])] }));
         }}
         persistedPinnedTaskId={pinnedTaskIdById[selectedAgreement.id] ?? null}
         onPinTaskId={(taskId) => {
