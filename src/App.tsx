@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════���������������════
+/* ═══════════════���══════════════════�����������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3633,7 +3633,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════�����═══════════════��═
+/* ═════════════════════�����════════��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8592,7 +8592,20 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   </button>
                   <div id="space-messages-list" style={{ flex: 1, overflowY: messagesExpanded ? 'auto' : 'hidden', padding: '0 var(--ink-spacing-300)' }}>
                     {spaceMessages.length === 0 ? (
-                      <Text size="sm" color="secondary" style={{ display: 'block', padding: 'var(--ink-spacing-200) 0' }}>No messages yet</Text>
+                      <button
+                        type="button"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 12,
+                          margin: 'var(--ink-spacing-200) 0', padding: 0,
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          color: 'var(--ink-cobalt-140)',
+                          fontFamily: 'var(--ink-font-family-default)',
+                          fontSize: 16, fontWeight: 600,
+                        }}
+                      >
+                        <Icon name="plus" size={20} color="var(--ink-cobalt-140)" />
+                        New Message
+                      </button>
                     ) : spaceMessages.map((msg, idx) => (
                       <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))' }}>
                         <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
@@ -10210,15 +10223,15 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
 
   if (!partyName && !primary && details.length === 0) return null;
 
-  const labelStyle: CSSProperties = { color: PILL_LABEL_COLOR, fontSize: 14, fontWeight: 400 };
-  const valueStyle: CSSProperties = { color: 'var(--ink-white-100)', fontSize: 14, fontWeight: 500 };
-  const groupStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 12, whiteSpace: 'nowrap' };
+  const labelStyle: CSSProperties = { color: PILL_LABEL_COLOR, fontSize: 12, fontWeight: 400 };
+  const valueStyle: CSSProperties = { color: 'var(--ink-white-100)', fontSize: 12, fontWeight: 500 };
+  const groupStyle: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' };
 
   return (
     <div style={{ marginTop: 'var(--ink-spacing-200)', display: 'flex' }}>
       <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 16,
-        height: 40, padding: '0 20px', borderRadius: 999,
+        display: 'inline-flex', alignItems: 'center', gap: 12,
+        height: 32, padding: '0 16px', borderRadius: 999,
         background: 'rgba(255, 255, 255, 0.12)',
         fontFamily: 'var(--ink-font-family)',
       }}>
@@ -10231,7 +10244,7 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
               aria-label={`View history for ${partyName}`}
               style={{ ...valueStyle, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit' }}
             >
-              <Icon name="building-person" size={20} color="var(--ink-white-100)" />
+              <Icon name="building-person" size={16} color="var(--ink-white-100)" />
               {partyName}
             </button>
           </span>
@@ -10252,7 +10265,7 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
                 aria-label="More details"
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer', background: open ? 'rgba(255, 255, 255, 0.16)' : 'transparent', color: 'var(--ink-white-100)', padding: 0 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 999, border: 'none', cursor: 'pointer', background: open ? 'rgba(255, 255, 255, 0.16)' : 'transparent', color: 'var(--ink-white-100)', padding: 0 }}
               >
                 <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                   {[0, 1, 2].map((i) => (
