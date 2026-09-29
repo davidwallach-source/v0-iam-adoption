@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════�����������������════
+/* ═══════════════���══════════════════�������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3633,7 +3633,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════�����════════��══════��═
+/* ═════════════════════�����══════��═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -7267,7 +7267,34 @@ function buildEnvelopeRecipients(
   return recipients;
 }
 
-function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void }) {
+// Miniature first page of the actual document (resolved from DOC_LIBRARY by
+// name), anchored to the top so it bleeds off the bottom of the thumbnail area.
+function EnvelopeDocThumbnail({ docName }: { docName: string }) {
+  const doc = resolveDoc(docName);
+  const ink = '#1F1B2B';
+  return (
+    <div
+      aria-label={`${docName} preview`}
+      style={{ width: '100%', maxWidth: 288, background: 'white', padding: '26px 24px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)', color: ink, overflow: 'hidden', boxSizing: 'border-box' }}
+    >
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.6, textAlign: 'center', lineHeight: 1.3 }}>{doc.title}</div>
+      <div style={{ fontSize: 6.5, textAlign: 'center', marginTop: 4, color: '#5A5566' }}>
+        {doc.parties} · Effective {doc.effectiveDate}
+      </div>
+      <div style={{ height: 1, background: '#E3E0E8', margin: '10px 0' }} />
+      {doc.clauses.slice(0, 4).map(c => (
+        <div key={c.num} style={{ marginBottom: 7 }}>
+          <div style={{ fontSize: 7, fontWeight: 700, marginBottom: 2 }}>{c.num}. {c.heading}</div>
+          <p style={{ margin: 0, fontSize: 6, lineHeight: 1.5, color: '#3D3849', textAlign: 'justify' }}>
+            {c.runs.map(r => r.text).join('')}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void; onViewDetails?: () => void }) {
   const [entered, setEntered] = useState(false);
   const [docIndex, setDocIndex] = useState(0);
   useEffect(() => {
@@ -7348,12 +7375,7 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
           {/* Navy background spans the full panel width; doc preview sits 16px from the top */}
           <div style={{ height: 238, background: '#130032', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16 }}>
             {/* No bottom padding: the page is anchored to the top so it's cut off at the bottom */}
-            <div style={{ width: '100%', maxWidth: 288, background: 'white', padding: '32px 26px 0', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-font-color-default)', marginBottom: 12 }}>{currentDoc}</div>
-              {[100, 96, 92, 98, 88, 94, 70, 90, 84, 96, 78].map((w, i) => (
-                <div key={i} style={{ height: 5, width: `${w}%`, background: 'var(--ink-border-subtle)', borderRadius: 2, marginBottom: 8 }} />
-              ))}
-            </div>
+            <EnvelopeDocThumbnail docName={currentDoc} />
           </div>
         </div>
 
@@ -7443,7 +7465,14 @@ function EnvelopePanel({ envelope, onClose, onRemind }: { envelope: OpenEnvelope
         </div>
 
         {/* Footer — pinned to the bottom with the primary CTA */}
-        <div style={{ flexShrink: 0, position: 'sticky', bottom: 0, zIndex: 2, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16 }}>
+        {/* marginTop: auto keeps the footer at the panel bottom even when content is short */}
+        <div style={{ flexShrink: 0, marginTop: 'auto', position: 'sticky', bottom: 0, zIndex: 2, background: 'white', borderTop: '1px solid var(--ink-border-subtle)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12 }}>
+          <button
+            onClick={onViewDetails}
+            style={{ background: 'white', color: '#130032', border: '1px solid #130032', borderRadius: 6, padding: '9px 19px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
+          >
+            View Details
+          </button>
           <button
             onClick={onRemind}
             style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
@@ -7474,7 +7503,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   // Deep-link entry point: open the requested overlay (prefilled) whenever the
   // scenario URL sets initialOverlay. Keyed on initialOverlay (not just mount)
   // so it fires reliably regardless of the order in which the workspace mounts
-  // and the prop settles �� this avoids a race where the overlay silently
+  // and the prop settles ���� this avoids a race where the overlay silently
   // never opens.
   useEffect(() => {
     if (initialOverlay === 'upload-request') setShowUploadRequest(true);
@@ -7977,9 +8006,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
     // Entering the space right after sending an envelope: confirm the send with
-    // a success toast and fall through to auto-open the envelope panel.
+    // a success toast only — the panel stays closed after a fresh send.
     if (justSentEnvelope) {
+      didAutoOpenEnvelope.current = true;
       showToast('Your documents were sent for signature.');
+      return;
     }
     const envelopeItems = processedDocuments.filter(
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
@@ -9346,7 +9377,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
       {/* Envelope detail panel */}
       {openEnvelope && (
-        <EnvelopePanel envelope={openEnvelope} onRemind={() => showToast('Reminder sent to signers.')} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
+        <EnvelopePanel envelope={openEnvelope} onRemind={() => showToast('Reminder sent to signers.')} onViewDetails={() => showToast('Opening envelope details.')} onClose={() => { setOpenEnvelope(null); setOpenEnvelopeRowId(null); }} />
       )}
 
       {/* Party History Panel */}
