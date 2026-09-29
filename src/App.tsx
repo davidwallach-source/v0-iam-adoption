@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════════���������════
+/* ═══════════════���══════════════════�����������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3633,7 +3633,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════�����═════════════════
+/* ═════════════════════�����═══════════════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8135,10 +8135,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 text={agreement.status}
               />
             </div>
-              <AddMenu {...addMenuHandlers} />
           </div>
 
-          {/* Key extractions — pill under the title */}
+          {/* Key extractions pill + Add button — same row, vertically centered */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
           {(() => {
             const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
             const docCount = agreement.documentsCount ?? 1;
@@ -8178,6 +8179,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               />
             );
           })()}
+          </div>
+            <AddMenu {...addMenuHandlers} />
+          </div>
 
           {/* Tabs — pinned to the bottom of the header */}
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'auto' }}>
@@ -8193,7 +8197,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         {activeTab === 'overview' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: '2px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
+            <div style={{ padding: '24px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
               {orderedTasks.length > 0 && (
@@ -11712,7 +11716,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
           statusIcon: 'clock',
           statusKind: 'info',
           statusSub: 'In Progress',
-          dealValue: '—',
+          dealValue: '���',
           agreementType: data.requestType || 'Request',
           termLength: '—',
           closeDate: '��',
