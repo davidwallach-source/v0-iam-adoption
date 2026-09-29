@@ -2905,7 +2905,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════���═══���������������������════
+/* ═══════════════���══════════════�����═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3633,7 +3633,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════������══════��═��══════��═
+/* ═════════════════════��������══════��═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8554,8 +8554,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             {/* Right column — Activity module, with the Messages module docked beneath it */}
             <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) 0 var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', position: 'relative' }}>
-              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300) var(--ink-spacing-300) 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Activity</Text>
                 </div>
 
@@ -8566,8 +8566,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
+                          justifyContent: 'center',
                           gap: 4,
-                          padding: idx === 0 ? '0 0 var(--ink-spacing-200)' : 'var(--ink-spacing-200) 0',
+                          height: 80,
+                          boxSizing: 'border-box',
+                          padding: 0,
                           borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))',
                           fontSize: 14,
                           lineHeight: 1.45,
