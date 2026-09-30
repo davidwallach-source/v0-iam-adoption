@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect, useMemo, type CSSProperties, type KeyboardEvent } from 'react';
 import { Avatar, Icon } from '@/design-system';
 import type { IconName } from '@/design-system/3-primitives/Icon/Icon';
 
-export type SidePanelTab = 'activity' | 'messages' | 'iris';
+type PanelView = 'all' | 'activity' | 'messages' | 'iris';
+type ColorIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export interface SidePanelActivityItem {
   id: string;
@@ -19,7 +20,7 @@ const isMessageEvent = (item: SidePanelActivityItem) => !!item.conversation || M
 export interface SidePanelConversation {
   name: string;
   initials: string;
-  colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+  colorIndex: ColorIndex;
   preview: string;
   date: string;
   receivedAt: string;
@@ -32,6 +33,35 @@ interface ThreadMessage {
   time: string;
 }
 
+interface QuotedEvent {
+  id: string;
+  icon: IconName;
+  title: string;
+  time: string;
+}
+
+type FeedEntry =
+  | { kind: 'event'; id: string; icon: IconName; user: string; action: string; time: string }
+  | {
+      kind: 'message';
+      id: string;
+      name: string;
+      initials: string;
+      colorIndex: ColorIndex;
+      text: string;
+      time: string;
+      conversation?: string;
+      quote?: QuotedEvent;
+      isIris?: boolean;
+    };
+
+interface Mentionable {
+  name: string;
+  initials: string;
+  colorIndex: ColorIndex;
+  isIris?: boolean;
+}
+
 interface SpaceSidePanelProps {
   activity: SidePanelActivityItem[];
   conversations: SidePanelConversation[];
@@ -39,8 +69,9 @@ interface SpaceSidePanelProps {
   fitToViewport?: boolean;
 }
 
-const TITLES: Record<SidePanelTab, string> = {
-  activity: 'Activity Feed',
+const TITLES: Record<PanelView, string> = {
+  all: 'Activity Feed',
+  activity: 'Activity',
   messages: 'Messages',
   iris: 'Iris Chat',
 };
@@ -50,8 +81,20 @@ const TEXT_DEFAULT = 'var(--ink-font-color-default)';
 const TEXT_SECONDARY = 'var(--ink-font-color-secondary)';
 const BORDER_SUBTLE = 'var(--ink-border-color-subtle, var(--ink-border-subtle))';
 const CIRCLE_BG = 'var(--ink-neutral-20)';
+const MENTION_COLOR = 'var(--ink-cobalt-100)';
 
 const isComposing = (e: KeyboardEvent) => e.nativeEvent.isComposing || e.keyCode === 229;
+
+const initialsOf = (name: string) =>
+  name === 'You' ? 'YO' : name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+
+const colorFor = (name: string): ColorIndex => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return (hash % 10) as ColorIndex;
+};
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 function ActivityGlyph() {
   return (
@@ -69,9 +112,17 @@ function MessagesGlyph() {
   );
 }
 
-function IrisGlyph() {
+function ReplyGlyph() {
   return (
-    <svg width="24" height="24" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M8.99 4H3.4L5.99 1.39L4.6 0L0.29 4.29C0.09 4.49 0 4.74 0 5C0 5.26 0.1 5.51 0.29 5.71L4.59 10L6 8.59L3.41 6H9.12C11.88 6 14 8.12 14 10.88V16H16V11C16 7.14 12.86 4 9 4H8.99Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IrisGlyph({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 22 22" fill="none" aria-hidden="true">
       <path d="M9.10854 6.20697C8.14168 5.01705 6.68378 4.41935 4.23801 3.92444C4.10515 3.91895 3.92703 4.08122 3.92348 4.23865C4.41871 6.68442 5.01609 8.14232 6.20601 9.10918C7.4221 8.33336 8.3324 7.42307 9.10822 6.20697H9.10854Z" fill="#CBC2FF" />
       <path d="M16.2928 9.10918C17.4828 8.14232 18.0805 6.68442 18.5754 4.23865C18.5915 4.15945 18.5718 4.0809 18.5204 4.01786C18.469 3.95515 18.3937 3.91895 18.3145 3.91895C15.8154 4.41967 14.3572 5.01705 13.3906 6.20697C14.1664 7.42339 15.0767 8.33369 16.2928 9.10918Z" fill="#CBC2FF" />
       <path d="M6.20605 13.3906C5.01613 14.3575 4.41843 15.8154 3.92352 18.2612C3.90735 18.3407 3.92675 18.4189 3.97847 18.4819C4.04151 18.5589 4.13816 18.5961 4.23805 18.5757C6.68382 18.0805 8.14172 17.4831 9.10858 16.2932C8.33276 15.0771 7.42247 14.1668 6.20637 13.3909L6.20605 13.3906Z" fill="#CBC2FF" />
@@ -88,26 +139,25 @@ function IrisGlyph() {
   );
 }
 
-const TAB_ICONS: Record<SidePanelTab, () => React.JSX.Element> = {
-  activity: ActivityGlyph,
-  messages: MessagesGlyph,
-  iris: IrisGlyph,
-};
+const VIEW_BUTTONS: { view: Exclude<PanelView, 'all'>; label: string; Glyph: () => React.JSX.Element }[] = [
+  { view: 'activity', label: 'Show only activity', Glyph: ActivityGlyph },
+  { view: 'messages', label: 'Show only messages', Glyph: MessagesGlyph },
+  { view: 'iris', label: 'Iris Chat', Glyph: () => <IrisGlyph /> },
+];
 
-function PanelTabs({ active, onChange }: { active: SidePanelTab; onChange: (tab: SidePanelTab) => void }) {
+function ViewToggles({ active, onChange }: { active: PanelView; onChange: (view: PanelView) => void }) {
   return (
-    <div role="tablist" aria-label="Side panel" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      {(Object.keys(TAB_ICONS) as SidePanelTab[]).map((tab) => {
-        const Glyph = TAB_ICONS[tab];
-        const selected = tab === active;
+    <div role="group" aria-label="Filter side panel" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {VIEW_BUTTONS.map(({ view, label, Glyph }) => {
+        const selected = view === active;
         return (
           <button
-            key={tab}
+            key={view}
             type="button"
-            role="tab"
-            aria-selected={selected}
-            aria-label={TITLES[tab]}
-            onClick={() => onChange(tab)}
+            aria-pressed={selected}
+            aria-label={label}
+            title={label}
+            onClick={() => onChange(selected ? 'all' : view)}
             style={{
               width: 40, height: 40, borderRadius: 8, border: 'none', cursor: 'pointer',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -132,46 +182,124 @@ function IconCircle({ children, size = 40 }: { children: React.ReactNode; size?:
   );
 }
 
-function ActivityFeed({ items, onOpenMessage }: { items: SidePanelActivityItem[]; onOpenMessage?: (item: SidePanelActivityItem) => void }) {
-  if (items.length === 0) {
-    return <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: TEXT_SECONDARY }}>No activity yet.</p>;
+function MentionText({ text, names }: { text: string; names: string[] }) {
+  if (names.length === 0 || !text.includes('@')) return <>{text}</>;
+  const pattern = new RegExp(`(@(?:${names.map(escapeRegExp).join('|')}))`, 'g');
+  return (
+    <>
+      {text.split(pattern).map((part, i) =>
+        i % 2 === 1
+          ? <span key={i} style={{ color: MENTION_COLOR, fontWeight: 500 }}>{part}</span>
+          : <React.Fragment key={i}>{part}</React.Fragment>,
+      )}
+    </>
+  );
+}
+
+function QuoteCard({ quote }: { quote: QuotedEvent }) {
+  return (
+    <span style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 8, padding: '8px 12px', borderRadius: 8, background: 'var(--ink-neutral-10, #F7F7F9)', border: `1px solid ${BORDER_SUBTLE}` }}>
+      <span style={{ display: 'inline-flex', paddingTop: 2, flexShrink: 0 }}>
+        <Icon name={quote.icon} size={16} color={TEXT_SECONDARY} />
+      </span>
+      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <span style={{ fontSize: 14, lineHeight: 1.4, color: TEXT_DEFAULT }}>{quote.title}</span>
+        <span style={{ fontSize: 12, lineHeight: 1.4, color: TEXT_SECONDARY }}>{quote.time}</span>
+      </span>
+    </span>
+  );
+}
+
+const eventTitle = (e: { user: string; action: string }) => `${e.user} ${e.action}`;
+
+function Feed({
+  entries,
+  view,
+  mentionNames,
+  onOpenMessage,
+  onReply,
+}: {
+  entries: FeedEntry[];
+  view: PanelView;
+  mentionNames: string[];
+  onOpenMessage: (entry: Extract<FeedEntry, { kind: 'message' }>) => void;
+  onReply: (entry: FeedEntry) => void;
+}) {
+  if (entries.length === 0) {
+    return (
+      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: TEXT_SECONDARY }}>
+        {view === 'messages' ? 'No messages yet. Start the conversation below.' : 'No activity yet.'}
+      </p>
+    );
   }
   return (
     <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      {items.map((item, idx) => {
-        const isLast = idx === items.length - 1;
+      {entries.map((entry, idx) => {
+        const isLast = idx === entries.length - 1;
+        const isMessage = entry.kind === 'message';
+        const clickable = isMessage && !!entry.conversation;
+        const titleStyle: CSSProperties = { margin: 0, fontSize: 'var(--ink-font-element-label-emphasis-size)', lineHeight: 'var(--ink-font-element-label-emphasis-line-height)', fontWeight: 500, color: TEXT_DEFAULT };
+        const metaStyle: CSSProperties = { margin: '2px 0 0', fontSize: 'var(--ink-font-detail-s-size)', lineHeight: 'var(--ink-font-detail-s-line-height)', color: TEXT_SECONDARY };
+
+        const content = isMessage ? (
+          <>
+            <span style={{ ...titleStyle, display: 'block' }}>
+              <strong style={{ fontWeight: 600 }}>{entry.name}</strong> {entry.isIris ? 'replied' : 'sent a message'}
+            </span>
+            <span style={{ display: 'block', marginTop: 2, fontSize: 14, lineHeight: 1.5, color: TEXT_DEFAULT, ...(entry.conversation ? { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } : {}) }}>
+              <MentionText text={entry.text} names={mentionNames} />
+            </span>
+            {entry.quote && <QuoteCard quote={entry.quote} />}
+            <span style={{ ...metaStyle, display: 'block' }}>{entry.time}</span>
+          </>
+        ) : (
+          <>
+            <span style={{ ...titleStyle, display: 'block' }}>
+              <strong style={{ fontWeight: 600 }}>{entry.user}</strong> {entry.action}
+            </span>
+            <span style={{ ...metaStyle, display: 'block' }}>{entry.time}</span>
+          </>
+        );
+
+        const boxStyle: CSSProperties = { flex: 1, minWidth: 0, padding: 0, paddingBottom: isLast ? 0 : 16, fontFamily: FONT };
+        const replyLabel = isMessage ? `Reply to ${entry.name}` : `Reply to: ${eventTitle(entry)}`;
+
         return (
-          <li key={item.id} style={{ display: 'flex', gap: 16 }}>
+          <li key={entry.id} className="feed-item" style={{ display: 'flex', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-              <IconCircle>
-                <Icon name={item.icon} size={16} color={TEXT_SECONDARY} />
-              </IconCircle>
+              {isMessage ? (
+                entry.isIris
+                  ? <IconCircle><IrisGlyph size={20} /></IconCircle>
+                  : <Avatar initials={entry.initials} size="medium" colorIndex={entry.colorIndex} />
+              ) : (
+                <IconCircle>
+                  <Icon name={entry.icon} size={16} color={TEXT_SECONDARY} />
+                </IconCircle>
+              )}
               {!isLast && <span aria-hidden="true" style={{ flex: 1, width: 1, minHeight: 16, background: BORDER_SUBTLE }} />}
             </div>
-            {(() => {
-              const clickable = !!onOpenMessage && isMessageEvent(item);
-              const content = (
-                <>
-                  <p style={{ margin: 0, fontSize: 'var(--ink-font-element-label-emphasis-size)', lineHeight: 'var(--ink-font-element-label-emphasis-line-height)', fontWeight: 500, color: TEXT_DEFAULT }}>
-                    <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
-                  </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--ink-font-detail-s-size)', lineHeight: 'var(--ink-font-detail-s-line-height)', color: TEXT_SECONDARY }}>{item.time}</p>
-                </>
-              );
-              const boxStyle: CSSProperties = { flex: 1, minWidth: 0, paddingTop: 0, paddingBottom: isLast ? 0 : 16, fontFamily: FONT };
-              return clickable ? (
-                <button
-                  type="button"
-                  onClick={() => onOpenMessage!(item)}
-                  aria-label={`${item.user} ${item.action}. Open message`}
-                  style={{ ...boxStyle, display: 'block', textAlign: 'left', background: 'none', border: 'none', paddingLeft: 0, paddingRight: 0, cursor: 'pointer' }}
-                >
-                  {content}
-                </button>
-              ) : (
-                <div style={boxStyle}>{content}</div>
-              );
-            })()}
+            {clickable ? (
+              <button
+                type="button"
+                onClick={() => onOpenMessage(entry)}
+                aria-label={`${entry.name} sent a message: ${entry.text}. Open conversation`}
+                style={{ ...boxStyle, display: 'block', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {content}
+              </button>
+            ) : (
+              <div style={boxStyle}>{content}</div>
+            )}
+            <button
+              type="button"
+              className="feed-reply"
+              onClick={() => onReply(entry)}
+              aria-label={replyLabel}
+              title="Reply"
+              style={{ width: 32, height: 32, flexShrink: 0, border: 'none', borderRadius: 6, background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(19, 0, 50, 0.9)' }}
+            >
+              <ReplyGlyph />
+            </button>
           </li>
         );
       })}
@@ -179,96 +307,145 @@ function ActivityFeed({ items, onOpenMessage }: { items: SidePanelActivityItem[]
   );
 }
 
-function NewMessageButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 0, background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontSize: 16, color: TEXT_DEFAULT, textAlign: 'left' }}
-    >
-      <IconCircle>
-        <Icon name="plus" size={20} color={TEXT_DEFAULT} />
-      </IconCircle>
-      New message
-    </button>
-  );
-}
-
-function MessageList({
-  conversations,
-  onOpen,
-  onNewMessage,
+function FeedComposer({
+  mentionables,
+  replyTo,
+  onCancelReply,
+  onSend,
 }: {
-  conversations: SidePanelConversation[];
-  onOpen: (name: string) => void;
-  onNewMessage: () => void;
+  mentionables: Mentionable[];
+  replyTo: QuotedEvent | null;
+  onCancelReply: () => void;
+  onSend: (text: string) => void;
 }) {
-  const [query, setQuery] = useState('');
+  const [draft, setDraft] = useState('');
+  const [mention, setMention] = useState<{ start: number; query: string } | null>(null);
+  const [highlight, setHighlight] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  if (conversations.length === 0) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-        <p style={{ margin: 0, fontSize: 16, lineHeight: 1.5, color: TEXT_DEFAULT, fontFamily: FONT }}>
-          Send messages to anyone in this agreement space. You have no messages yet.
-        </p>
-        <NewMessageButton onClick={onNewMessage} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (replyTo) textareaRef.current?.focus();
+  }, [replyTo]);
 
-  const q = query.trim().toLowerCase();
-  const filtered = q
-    ? conversations.filter((c) => c.name.toLowerCase().includes(q) || c.preview.toLowerCase().includes(q))
-    : conversations;
+  const matches = mention
+    ? mentionables
+        .filter((m) => m.name.toLowerCase().split(/\s+/).some((w) => w.startsWith(mention.query.toLowerCase())) || m.name.toLowerCase().startsWith(mention.query.toLowerCase()))
+        .slice(0, 6)
+    : [];
+  const showMentions = mention !== null && matches.length > 0;
+
+  const detectMention = (value: string, caret: number) => {
+    const match = /(?:^|\s)@([^\s@]*)$/.exec(value.slice(0, caret));
+    if (match) {
+      setMention({ start: caret - match[1].length - 1, query: match[1] });
+      setHighlight(0);
+    } else {
+      setMention(null);
+    }
+  };
+
+  const insertMention = (m: Mentionable) => {
+    const el = textareaRef.current;
+    if (!mention || !el) return;
+    const caret = el.selectionStart;
+    const token = `@${m.name} `;
+    const next = draft.slice(0, mention.start) + token + draft.slice(caret);
+    setDraft(next);
+    setMention(null);
+    const pos = mention.start + token.length;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(pos, pos);
+    });
+  };
+
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    onSend(text);
+    setDraft('');
+    setMention(null);
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 12, height: 40, padding: '0 16px', border: `1px solid ${BORDER_SUBTLE}`, borderRadius: 999 }}>
-        <Icon name="search" size={20} color={TEXT_SECONDARY} />
-        <span className="sr-only" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>Search messages</span>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search messages"
-          style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', fontFamily: FONT, fontSize: 16, color: TEXT_DEFAULT }}
-        />
-      </label>
+    <form
+      onSubmit={(e) => { e.preventDefault(); submit(); }}
+      style={{ position: 'relative', border: `1px solid ${BORDER_SUBTLE}`, borderRadius: 12, padding: '14px 14px 12px 20px', display: 'flex', flexDirection: 'column', gap: 10, background: 'var(--ink-white-100)' }}
+    >
+      {showMentions && (
+        <ul
+          role="listbox"
+          aria-label="Mention someone"
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 'calc(100% + 8px)', margin: 0, padding: 6, listStyle: 'none', background: 'var(--ink-white-100)', border: `1px solid ${BORDER_SUBTLE}`, borderRadius: 12, boxShadow: '0 8px 24px rgba(19, 0, 50, 0.12)', zIndex: 5 }}
+        >
+          {matches.map((m, i) => (
+            <li key={m.name} role="option" aria-selected={i === highlight}>
+              <button
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); insertMention(m); }}
+                onMouseEnter={() => setHighlight(i)}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '8px 10px', border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left', fontFamily: FONT, fontSize: 14, color: TEXT_DEFAULT, background: i === highlight ? 'var(--ink-cobalt-10)' : 'transparent' }}
+              >
+                {m.isIris
+                  ? <IconCircle size={28}><IrisGlyph size={16} /></IconCircle>
+                  : <Avatar initials={m.initials} size="small" colorIndex={m.colorIndex} />}
+                <span style={{ flex: 1, minWidth: 0 }}>{m.name}</span>
+                {m.isIris && <span style={{ fontSize: 12, color: TEXT_SECONDARY }}>AI assistant</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <NewMessageButton onClick={onNewMessage} />
+      {replyTo && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', marginRight: 6, borderRadius: 8, background: 'var(--ink-neutral-10, #F7F7F9)' }}>
+          <span style={{ display: 'inline-flex', paddingTop: 2, color: TEXT_SECONDARY }}><ReplyGlyph /></span>
+          <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: 12, color: TEXT_SECONDARY }}>Replying to</span>
+            <span style={{ fontSize: 14, lineHeight: 1.4, color: TEXT_DEFAULT, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{replyTo.title}</span>
+          </span>
+          <button type="button" onClick={onCancelReply} aria-label="Cancel reply" style={{ width: 24, height: 24, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+            <Icon name="close" size={16} color={TEXT_SECONDARY} />
+          </button>
+        </div>
+      )}
 
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {filtered.map((c) => (
-          <li key={c.name}>
-            <button
-              type="button"
-              onClick={() => onOpen(c.name)}
-              style={{ display: 'flex', alignItems: 'flex-start', gap: 16, width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: FONT }}
-            >
-              <Avatar initials={c.initials} size="medium" colorIndex={c.colorIndex} />
-              <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                  <span style={{ fontSize: 16, lineHeight: 1.5, color: TEXT_DEFAULT }}>{c.name}</span>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: TEXT_SECONDARY, flexShrink: 0 }}>{c.date}</span>
-                </span>
-                <span
-                  style={{
-                    fontSize: 16, lineHeight: 1.5, color: TEXT_SECONDARY,
-                    fontStyle: c.preview ? 'normal' : 'italic',
-                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                  }}
-                >
-                  {c.preview || 'No messages'}
-                </span>
-              </span>
-            </button>
-          </li>
-        ))}
-        {filtered.length === 0 && (
-          <li style={{ fontSize: 14, color: TEXT_SECONDARY }}>No conversations match your search.</li>
-        )}
-      </ul>
-    </div>
+      <textarea
+        ref={textareaRef}
+        value={draft}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          detectMention(e.target.value, e.target.selectionStart);
+        }}
+        onClick={(e) => detectMention(e.currentTarget.value, e.currentTarget.selectionStart)}
+        onBlur={() => setMention(null)}
+        onKeyDown={(e) => {
+          if (showMentions) {
+            if (e.key === 'ArrowDown') { e.preventDefault(); setHighlight((h) => (h + 1) % matches.length); return; }
+            if (e.key === 'ArrowUp') { e.preventDefault(); setHighlight((h) => (h - 1 + matches.length) % matches.length); return; }
+            if ((e.key === 'Enter' || e.key === 'Tab') && !isComposing(e)) { e.preventDefault(); insertMention(matches[highlight]); return; }
+            if (e.key === 'Escape') { e.preventDefault(); setMention(null); return; }
+          }
+          if (e.key === 'Escape' && replyTo) { onCancelReply(); return; }
+          if (e.key === 'Enter' && !e.shiftKey && !isComposing(e)) {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        rows={1}
+        placeholder="Ask, @mention, or / for actions"
+        aria-label="Write a message. Type @ to mention someone or Iris"
+        style={{ resize: 'none', border: 'none', outline: 'none', background: 'transparent', fontFamily: FONT, fontSize: 16, lineHeight: 1.5, color: TEXT_DEFAULT }}
+      />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <button type="button" aria-label="Add attachment" style={{ width: 32, height: 32, marginLeft: -8, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="plus" size={20} color={TEXT_DEFAULT} />
+        </button>
+        <button type="submit" aria-label="Send message" style={{ width: 36, height: 36, borderRadius: 6, border: 'none', background: 'var(--ink-cobalt-140)', color: 'var(--ink-white-100)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="arrow-up" size={20} color="currentColor" />
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -318,7 +495,7 @@ function MessageThread({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 0' }}>
-        <button type="button" onClick={onBack} aria-label="Back to messages" style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0, marginLeft: -4 }}>
+        <button type="button" onClick={onBack} aria-label="Back to feed" style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0, marginLeft: -4 }}>
           <Icon name="arrow-left" size={20} color={TEXT_DEFAULT} />
         </button>
         <span style={{ flex: 1, fontSize: 16, fontWeight: 500, color: TEXT_DEFAULT, fontFamily: FONT }}>{conversation.name}</span>
@@ -336,11 +513,9 @@ function MessageThread({
                 <span style={{ fontSize: 16, fontWeight: 500, color: TEXT_DEFAULT }}>{conversation.name}</span>
                 <span style={{ fontSize: 13, color: TEXT_SECONDARY }}>{conversation.receivedAt}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ flex: 1, background: 'var(--ink-cobalt-10)', borderRadius: 16, padding: '12px 20px', fontSize: 15, lineHeight: 1.5, color: TEXT_DEFAULT }}>
-                  {conversation.preview.replace(/…$/, '')}
-  </div>
-  </div>
+              <div style={{ background: 'var(--ink-cobalt-10)', borderRadius: 16, padding: '12px 20px', fontSize: 15, lineHeight: 1.5, color: TEXT_DEFAULT }}>
+                {conversation.preview.replace(/…$/, '')}
+              </div>
             </div>
           )}
           {replies.map((m) => (
@@ -460,21 +635,76 @@ function nowStamp() {
   return `${time}, ${date}`;
 }
 
+// Interleave people's messages with system events so the default feed reads as one mixed timeline.
+function buildBaseFeed(activity: SidePanelActivityItem[], conversations: SidePanelConversation[]): FeedEntry[] {
+  const messages: FeedEntry[] = [
+    ...conversations.map((c): FeedEntry => ({
+      kind: 'message', id: `conv-${c.name}`, name: c.name, initials: c.initials, colorIndex: c.colorIndex,
+      text: c.preview, time: c.date, conversation: c.name,
+    })),
+    ...activity.filter(isMessageEvent).map((a): FeedEntry => ({
+      kind: 'message', id: `act-${a.id}`, name: a.user, initials: initialsOf(a.user), colorIndex: colorFor(a.user),
+      text: a.action.charAt(0).toUpperCase() + a.action.slice(1), time: a.time,
+      conversation: conversations.find((c) => c.name === a.conversation || c.name === a.user)?.name,
+    })),
+  ];
+  const events: FeedEntry[] = activity
+    .filter((a) => !isMessageEvent(a))
+    .map((a) => ({ kind: 'event', id: a.id, icon: a.icon, user: a.user, action: a.action, time: a.time }));
+
+  const mixed: FeedEntry[] = [];
+  const longest = Math.max(messages.length, events.length);
+  for (let i = 0; i < longest; i++) {
+    if (messages[i]) mixed.push(messages[i]);
+    if (events[i]) mixed.push(events[i]);
+  }
+  return mixed;
+}
+
+const IRIS: Mentionable = { name: 'Iris', initials: 'IR', colorIndex: 0, isIris: true };
+
 export function SpaceSidePanel({ activity, conversations, style, fitToViewport }: SpaceSidePanelProps) {
-  const [tab, setTab] = useState<SidePanelTab>('activity');
+  const [view, setView] = useState<PanelView>('all');
   const [openThread, setOpenThread] = useState<string | null>(null);
-  const [draftThread, setDraftThread] = useState(false);
   const [replies, setReplies] = useState<Record<string, ThreadMessage[]>>({});
+  const [posted, setPosted] = useState<FeedEntry[]>([]);
+  const [replyTo, setReplyTo] = useState<QuotedEvent | null>(null);
+  const feedScrollRef = useRef<HTMLDivElement>(null);
+  const irisTimers = useRef<number[]>([]);
+
+  useEffect(() => () => irisTimers.current.forEach((t) => window.clearTimeout(t)), []);
 
   const activeConversation = conversations.find((c) => c.name === openThread) ?? null;
-  const inThread = tab === 'messages' && activeConversation !== null;
+  const inThread = view !== 'iris' && activeConversation !== null;
 
-  const changeTab = (next: SidePanelTab) => {
-    setTab(next);
-    if (next !== 'messages') setOpenThread(null);
+  const mentionables = useMemo<Mentionable[]>(() => {
+    const seen = new Set<string>();
+    const people: Mentionable[] = [];
+    const add = (name: string, initials?: string, colorIndex?: ColorIndex) => {
+      if (!name || seen.has(name) || name === 'You' || name === 'System' || /agent/i.test(name)) return;
+      seen.add(name);
+      people.push({ name, initials: initials ?? initialsOf(name), colorIndex: colorIndex ?? colorFor(name) });
+    };
+    conversations.forEach((c) => add(c.name, c.initials, c.colorIndex));
+    activity.forEach((a) => add(a.user));
+    return [IRIS, ...people];
+  }, [activity, conversations]);
+  const mentionNames = useMemo(() => mentionables.map((m) => m.name), [mentionables]);
+
+  const baseFeed = useMemo(() => buildBaseFeed(activity, conversations), [activity, conversations]);
+  const feed = useMemo(() => {
+    const all = [...posted, ...baseFeed];
+    if (view === 'activity') return all.filter((e) => e.kind === 'event');
+    if (view === 'messages') return all.filter((e) => e.kind === 'message');
+    return all;
+  }, [posted, baseFeed, view]);
+
+  const changeView = (next: PanelView) => {
+    setView(next);
+    setOpenThread(null);
   };
 
-  const sendReply = (text: string) => {
+  const sendThreadReply = (text: string) => {
     if (!openThread) return;
     setReplies((prev) => ({
       ...prev,
@@ -482,20 +712,39 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
     }));
   };
 
-  const openFromActivity = (item: SidePanelActivityItem) => {
-    const match = conversations.find((c) => c.name === item.conversation || c.name === item.user) ?? conversations[0];
-    if (!match) return;
-    setDraftThread(false);
-    setTab('messages');
-    setOpenThread(match.name);
+  const postMessage = (text: string) => {
+    const stamp = Date.now();
+    const quote = replyTo ?? undefined;
+    setPosted((prev) => [
+      { kind: 'message', id: `me-${stamp}`, name: 'You', initials: 'YO', colorIndex: 5, text, time: 'Just now', quote },
+      ...prev,
+    ]);
+    setReplyTo(null);
+    if (view === 'activity') setView('all');
+    feedScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (/(^|\s)@Iris\b/.test(text)) {
+      const timer = window.setTimeout(() => {
+        setPosted((prev) => [
+          {
+            kind: 'message', id: `iris-${stamp}`, name: 'Iris', initials: 'IR', colorIndex: 0, isIris: true, time: 'Just now',
+            text: quote
+              ? `I’m looking into “${quote.title}” now and will summarize what changed and what’s still outstanding.`
+              : 'I’m reviewing the documents in this agreement space and will pull together an answer.',
+          },
+          ...prev,
+        ]);
+      }, 900);
+      irisTimers.current.push(timer);
+    }
   };
 
-  const startNewMessage = () => {
-    if (conversations.length > 0) {
-      setOpenThread(conversations[0].name);
-    } else {
-      setDraftThread(true);
-    }
+  const startReply = (entry: FeedEntry) => {
+    setReplyTo(
+      entry.kind === 'event'
+        ? { id: entry.id, icon: entry.icon, title: eventTitle(entry), time: entry.time }
+        : { id: entry.id, icon: 'comment' as IconName, title: `${entry.name}: ${entry.text}`, time: entry.time },
+    );
   };
 
   const asideRef = useRef<HTMLElement>(null);
@@ -522,10 +771,12 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
     };
   }, [fitToViewport]);
 
+  const title = inThread ? TITLES.messages : TITLES[view];
+
   return (
     <aside
       ref={asideRef}
-      aria-label={TITLES[tab]}
+      aria-label={title}
       style={{
         display: 'flex', flexDirection: 'column',
         background: 'var(--ink-white-100)',
@@ -545,48 +796,45 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
           flexShrink: 0,
         }}
       >
-        <h2 style={{ margin: 0, fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 'var(--ink-font-weight-medium)' as CSSProperties['fontWeight'], color: 'var(--ink-cobalt-140)' }}>{TITLES[tab]}</h2>
-        <PanelTabs active={tab} onChange={changeTab} />
+        <h2 style={{ margin: 0, fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 'var(--ink-font-weight-medium)' as CSSProperties['fontWeight'], color: 'var(--ink-cobalt-140)' }}>{title}</h2>
+        <ViewToggles active={view} onChange={changeView} />
       </header>
 
       <div
-        role="tabpanel"
         style={{
           flex: 1, minHeight: 0,
-          padding: inThread ? '0 24px 24px' : tab === 'iris' ? '0 24px 24px' : '8px 24px 24px',
-          overflowY: inThread || tab === 'iris' ? 'hidden' : 'auto',
-          ...(tab === 'activity'
-            ? { maskImage: 'linear-gradient(to bottom, #000 85%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, #000 85%, transparent)' }
-            : {}),
+          padding: inThread || view === 'iris' ? '0 24px 24px' : '8px 24px 24px',
+          display: 'flex', flexDirection: 'column',
         }}
       >
-        {tab === 'activity' && (
-          <ActivityFeed items={activity} onOpenMessage={conversations.length > 0 ? openFromActivity : undefined} />
-        )}
-
-        {tab === 'messages' && (activeConversation ? (
+        {view === 'iris' ? (
+          <IrisChat />
+        ) : activeConversation ? (
           <MessageThread
             conversation={activeConversation}
             replies={replies[activeConversation.name] ?? []}
             onBack={() => setOpenThread(null)}
-            onSend={sendReply}
+            onSend={sendThreadReply}
           />
-        ) : draftThread ? (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <button type="button" onClick={() => setDraftThread(false)} aria-label="Back to messages" style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0, marginLeft: -4 }}>
-                <Icon name="arrow-left" size={20} color={TEXT_DEFAULT} />
-              </button>
-              <span style={{ fontSize: 16, fontWeight: 500, color: TEXT_DEFAULT }}>New message</span>
-            </div>
-            <div style={{ flex: 1 }} />
-            <PillComposer placeholder="Send message..." onSend={() => setDraftThread(false)} />
-          </div>
         ) : (
-          <MessageList conversations={conversations} onOpen={setOpenThread} onNewMessage={startNewMessage} />
-        ))}
-
-        {tab === 'iris' && <IrisChat />}
+          <>
+            <div ref={feedScrollRef} style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingBottom: 16 }}>
+              <Feed
+                entries={feed}
+                view={view}
+                mentionNames={mentionNames}
+                onOpenMessage={(entry) => entry.conversation && setOpenThread(entry.conversation)}
+                onReply={startReply}
+              />
+            </div>
+            <FeedComposer
+              mentionables={mentionables}
+              replyTo={replyTo}
+              onCancelReply={() => setReplyTo(null)}
+              onSend={postMessage}
+            />
+          </>
+        )}
       </div>
     </aside>
   );

@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════����������═════════���══════════════�������═══���������������������════
+/* ═════�����������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8120,7 +8120,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 198, boxSizing: 'border-box' }}>
+        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 170, boxSizing: 'border-box' }}>
 
           {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8728,7 +8728,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 activity={currentActivity}
                 conversations={spaceMessages}
                 fitToViewport
-  style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', paddingTop: 14, borderLeft: 'none' }}
+  style={{ position: 'sticky', top: 0, height: 'calc(100vh - 170px)', paddingTop: 14, borderLeft: 'none' }}
               />
             </div>
           </div>
