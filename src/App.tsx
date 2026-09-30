@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════����═════════���══════════════�������═══���������������������════
+/* ═════�����═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8692,11 +8692,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </div>
 
             {/* Right column — combined Activity / Messages / Iris side panel, pinned to the viewport height under the header */}
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', background: 'var(--ink-white-100)', borderLeft: '1px solid var(--ink-border-subtle)' }}>
               <SpaceSidePanel
                 activity={currentActivity}
                 conversations={spaceMessages}
-                style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', minHeight: 480, paddingTop: 14 }}
+                style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', minHeight: 480, paddingTop: 14, borderLeft: 'none' }}
               />
             </div>
           </div>
