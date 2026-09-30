@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════��������═════════���══════════════�������═══���������������������════
+/* ═════���������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -6378,9 +6378,12 @@ interface AddMenuProps {
   // Extra styles for the relative wrapper — used so a card trigger can stretch
   // to fill its grid cell (height: 100%).
   wrapperStyle?: React.CSSProperties;
+  // 'tasks' omits the Document and Form rows (used by the Tasks table's Add task CTA).
+  mode?: 'all' | 'tasks';
 }
 
-function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate, renderTrigger, placement = 'bottom-right', wrapperStyle }: AddMenuProps) {
+function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNewVendorOnboarding, onDocument, onUpload, onUseTemplate, renderTrigger, placement = 'bottom-right', wrapperStyle, mode = 'all' }: AddMenuProps) {
+  const tasksOnly = mode === 'tasks';
   const { version } = usePrototypeVersion();
   const isPaywalls = version === 'paywalls';
   const [open, setOpen] = useState(false);
@@ -6450,7 +6453,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
           padding: 4,
         }}>
           {/* Document — with an overflow caret leading to Upload / Use a Template */}
-          <div
+          {!tasksOnly && <div
             style={{ position: 'relative' }}
             onMouseEnter={openDocSub}
             onMouseLeave={scheduleCloseDocSub}
@@ -6504,7 +6507,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                 />
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Signature Request */}
           <MenuRow
@@ -6517,19 +6520,23 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
             onClick={() => { setOpen(false); onSignatureRequest?.(); }}
           />
 
-          {/* Form */}
-          <MenuRow
-            icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 9V15H6V9H18ZM20 7H4V17H20V7ZM19 3H5V5H19V3ZM14 19H5V21H14V19ZM10 11H8V13H10V11ZM13 11H11V13H13V11ZM16 11H14V13H16V11Z" fill="#130032" fillOpacity="0.9"/>
-              </svg>
-            }
-            label="Form"
-            onClick={() => { setOpen(false); }}
-          />
+          {!tasksOnly && (
+            <>
+              {/* Form */}
+              <MenuRow
+                icon={
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 9V15H6V9H18ZM20 7H4V17H20V7ZM19 3H5V5H19V3ZM14 19H5V21H14V19ZM10 11H8V13H10V11ZM13 11H11V13H13V11ZM16 11H14V13H16V11Z" fill="#130032" fillOpacity="0.9"/>
+                  </svg>
+                }
+                label="Form"
+                onClick={() => { setOpen(false); }}
+              />
 
-          {/* Divider */}
-          <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+              {/* Divider */}
+              <div style={{ height: 1, background: 'var(--ink-border-subtle)', margin: '4px 8px' }} />
+            </>
+          )}
 
           {isPaywalls ? (
             <>
@@ -6617,7 +6624,7 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
   );
 }
 
-function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onUpload?: () => void; onUseTemplate?: () => void; variant?: 'primary' | 'tertiary' }) {
+function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onUpload?: () => void; onUseTemplate?: () => void; variant?: 'primary' | 'secondary' | 'tertiary' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -6653,6 +6660,8 @@ function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onU
         >
           Add
         </Button>
+      ) : variant === 'secondary' ? (
+        <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(o => !o); }}>Add document</Button>
       ) : (
         <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add Document</Button>
       )}
@@ -8197,14 +8206,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             );
           })()}
           </div>
-            <AddMenu {...addMenuHandlers} />
-          </div>
-
-          {/* Tabs — pinned to the bottom of the header */}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'auto' }}>
-            <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-            <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
-            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
           </div>
         </div>
       </div>
@@ -8216,83 +8217,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             {/* Main content */}
             <div style={{ padding: '28px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
-              {(activeTab === 'tasks' || (activeTab === 'overview' && orderedTasks.length > 0)) && (
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: activeTab === 'overview' ? 'var(--ink-spacing-300)' : 0 }}>
-            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
-
-            {/* Tasks table */}
-            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
-                    {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
-                    )}
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orderedTasks.map((task) => (
-                    <tr key={task.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          {task.type === 'Sign' ? (
-                            <img src="/icon-sign.svg" alt="Sign" style={{ width: 16, height: 16, opacity: 1, filter: 'brightness(0.17) sepia(0.5) hue-rotate(275deg) saturate(1.5)' }} />
-                          ) : (task.type === 'Upload' && task.title === 'Wire Transfer') || task.title.startsWith('New Vendor Onboarding') ? (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-                            </svg>
-                          ) : (
-                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
-                          )}
-                          <div>
-                            <Text size="sm">{task.title}</Text>
-                          </div>
-                        </Inline>
-                      </td>
-                      {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
-                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
-                      )}
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        {task.assignee === '--' ? (
-                          <Text size="sm">--</Text>
-                        ) : (
-                          <Inline gap="small" align="center">
-                            <Avatar initials={task.assigneeInitials} size="small" />
-                            <Text size="sm">{task.assignee}</Text>
-                          </Inline>
-                        )}
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
-                      </td>
-                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Button kind="secondary" size="small">
-                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-                </div>
-              )}
-
-              {(activeTab === 'documents' || (activeTab === 'overview' && currentDocuments.length > 0)) && (
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+              {(
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'var(--ink-spacing-300)' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                  <Button kind="secondary" size="small" onClick={() => setShowFilePicker(true)}>Add Documents</Button>
+                  <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8693,6 +8624,85 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 </div>
               )}
 
+              {(
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
+              <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Tasks</div>
+              <AddMenu
+                {...addMenuHandlers}
+                mode="tasks"
+                renderTrigger={({ toggle, open }) => (
+                  <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} aria-haspopup="menu" aria-expanded={open} onClick={toggle}>Add task</Button>
+                )}
+              />
+            </div>
+
+            {/* Tasks table */}
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
+                    {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
+                    )}
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderedTasks.map((task) => (
+                    <tr key={task.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          {task.type === 'Sign' ? (
+                            <img src="/icon-sign.svg" alt="Sign" style={{ width: 16, height: 16, opacity: 1, filter: 'brightness(0.17) sepia(0.5) hue-rotate(275deg) saturate(1.5)' }} />
+                          ) : (task.type === 'Upload' && task.title === 'Wire Transfer') || task.title.startsWith('New Vendor Onboarding') ? (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                            </svg>
+                          ) : (
+                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
+                          )}
+                          <div>
+                            <Text size="sm">{task.title}</Text>
+                          </div>
+                        </Inline>
+                      </td>
+                      {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
+                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
+                      )}
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        {task.assignee === '--' ? (
+                          <Text size="sm">--</Text>
+                        ) : (
+                          <Inline gap="small" align="center">
+                            <Avatar initials={task.assigneeInitials} size="small" />
+                            <Text size="sm">{task.assignee}</Text>
+                          </Inline>
+                        )}
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
+                      </td>
+                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Button kind="secondary" size="small">
+                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+                </div>
+              )}
+
             </div>
 
             {/* Right column — combined Activity / Messages / Iris side panel, pinned to the viewport height under the header */}
@@ -8871,7 +8881,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(uploadTaskId);
           onPinTaskId?.(uploadTaskId);
-          setActiveTab('tasks');
           showToast('Upload request sent out');
         }}
       />
@@ -8907,7 +8916,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           // Persisted in the parent so the pin survives leaving and re-entering.
           setPinnedTaskId(vendorOnboardingTaskId);
           onPinTaskId?.(vendorOnboardingTaskId);
-          setActiveTab('tasks');
           showToast('Vendor onboarding workflow created');
         }}
       />
