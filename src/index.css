@@ -9,7 +9,7 @@ html, body, #root { height: 100%; overflow: hidden; }
    text structurally since those use hashed CSS-module class names. */
 [data-ink-component="StatusLight"].status-black > div > div { background-color: #000000 !important; }
   [data-ink-component="StatusLight"].status-black > span { color: #000000 !important; }
-.ink-table-row { transition: background-color 120ms ease; }
+.ink-table-row { transition: background-color 120ms ease; cursor: pointer; }
 /* !important beats the inline resting background; active/selected rows keep their state color. */
 .ink-table-row:not([data-active="true"]):hover { background-color: var(--ink-neutral-10) !important; }
 .row-hover-actions { opacity: 0; transition: opacity 120ms ease; }

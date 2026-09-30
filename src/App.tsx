@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════�������═════════���══════════════�������═══���������������������════
+/* ═════��������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8526,7 +8526,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               data-active={isOpen || isSelected}
                               onMouseEnter={() => setHoveredDocRowId(doc.id)}
                               onMouseLeave={() => setHoveredDocRowId(prev => (prev === doc.id ? null : prev))}
-                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: isEnvelopeDoc ? 'pointer' : 'default' }}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
