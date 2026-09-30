@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════���������═════════���══════════════�������═══���������������������════
+/* ═════����������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8127,27 +8127,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
               <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
             </button>
-            <div style={{ flex: 1 }} />
-            <Inline gap="small" align="center">
-              <div
-                style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
-                {...(version === 'paywalls'
-                  ? {
-                      role: 'button',
-                      tabIndex: 0,
-                      'aria-label': 'Manage collaborators',
-                      onClick: () => setShowAddSeatsModal(true),
-                      onKeyDown: (e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAddSeatsModal(true); }
-                      },
-                    }
-                  : {})}
-              >
-                <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
-                <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
-                <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
-              </div>
-            </Inline>
           </div>
 
           {/* Space name (H1) + status on the left, Add button on the right — same row */}
@@ -8162,8 +8141,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               />
             </div>
           </div>
-
-          {/* Key extractions pill + Add button — same row, vertically centered */}
+          {/* Key extractions pill on the left, collaborators + Add Agents on the right — same row, vertically centered */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
           {(() => {
@@ -8205,6 +8183,45 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               />
             );
           })()}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexShrink: 0, marginTop: 16 }}>
+            <div
+              style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
+              {...(version === 'paywalls'
+                ? {
+                    role: 'button',
+                    tabIndex: 0,
+                    'aria-label': 'Manage collaborators',
+                    onClick: () => setShowAddSeatsModal(true),
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAddSeatsModal(true); }
+                    },
+                  }
+                : {})}
+            >
+              <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+              <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+              <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
+            </div>
+            <button
+              type="button"
+              className="space-header-add-agents"
+              style={{
+                height: 36,
+                padding: '0 var(--ink-spacing-200)',
+                borderRadius: 999,
+                border: '1px solid var(--ink-white-100)',
+                background: 'transparent',
+                color: 'var(--ink-white-100)',
+                fontFamily: 'inherit',
+                fontSize: 'var(--ink-font-size-sm, 14px)',
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Add Agents
+            </button>
           </div>
           </div>
         </div>
