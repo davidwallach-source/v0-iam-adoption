@@ -338,11 +338,8 @@ function MessageThread({
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{ flex: 1, background: 'var(--ink-cobalt-10)', borderRadius: 16, padding: '12px 20px', fontSize: 15, lineHeight: 1.5, color: TEXT_DEFAULT }}>
                   {conversation.preview.replace(/…$/, '')}
-                </div>
-                <button type="button" aria-label="Reply" style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0, flexShrink: 0 }}>
-                  <Icon name="reply" size={18} color={TEXT_DEFAULT} />
-                </button>
-              </div>
+  </div>
+  </div>
             </div>
           )}
           {replies.map((m) => (
