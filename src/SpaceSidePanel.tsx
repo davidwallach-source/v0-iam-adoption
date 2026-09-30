@@ -375,7 +375,7 @@ function FeedComposer({
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); submit(); }}
-      style={{ position: 'relative', border: `1px solid ${BORDER_SUBTLE}`, borderRadius: 12, padding: '14px 14px 12px 20px', display: 'flex', flexDirection: 'column', gap: 10, background: 'var(--ink-white-100)' }}
+      style={{ position: 'relative', border: `1px solid ${BORDER_SUBTLE}`, borderRadius: 12, padding: '8px 8px 8px 20px', display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--ink-white-100)' }}
     >
       {showMentions && (
         <ul
@@ -415,6 +415,7 @@ function FeedComposer({
         </div>
       )}
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <textarea
         ref={textareaRef}
         value={draft}
@@ -440,13 +441,9 @@ function FeedComposer({
         rows={1}
         placeholder="Ask, @mention, or / for actions"
         aria-label="Write a message. Type @ to mention someone or Iris"
-        style={{ resize: 'none', border: 'none', outline: 'none', background: 'transparent', fontFamily: FONT, fontSize: 16, lineHeight: 1.5, color: TEXT_DEFAULT }}
+        style={{ flex: 1, minWidth: 0, padding: 0, resize: 'none', border: 'none', outline: 'none', background: 'transparent', fontFamily: FONT, fontSize: 16, lineHeight: 1.5, color: TEXT_DEFAULT }}
       />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <button type="button" aria-label="Add attachment" style={{ width: 32, height: 32, marginLeft: -8, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="plus" size={20} color={TEXT_DEFAULT} />
-        </button>
-        <button type="submit" aria-label="Send message" style={{ width: 36, height: 36, borderRadius: 6, border: 'none', background: 'var(--ink-cobalt-140)', color: 'var(--ink-white-100)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button type="submit" aria-label="Send message" style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 6, border: 'none', background: 'var(--ink-cobalt-140)', color: 'var(--ink-white-100)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="arrow-up" size={20} color="currentColor" />
         </button>
       </div>
@@ -820,7 +817,7 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
       <div
         style={{
           flex: 1, minHeight: 0,
-          padding: inThread || view === 'iris' ? '0 24px 24px' : '8px 24px 24px',
+          padding: inThread || view === 'iris' ? '0 24px 24px' : '8px 24px 16px',
           display: 'flex', flexDirection: 'column',
         }}
       >
@@ -844,12 +841,14 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
                 onReply={startReply}
               />
             </div>
-            <FeedComposer
-              mentionables={mentionables}
-              replyTo={replyTo}
-              onCancelReply={() => setReplyTo(null)}
-              onSend={postMessage}
-            />
+            <div style={{ position: 'relative', zIndex: 1, marginTop: -4, paddingTop: 4, background: 'var(--ink-white-100)' }}>
+              <FeedComposer
+                mentionables={mentionables}
+                replyTo={replyTo}
+                onCancelReply={() => setReplyTo(null)}
+                onSend={postMessage}
+              />
+            </div>
           </>
         )}
       </div>
