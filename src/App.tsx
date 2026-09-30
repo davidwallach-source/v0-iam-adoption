@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════�����������═════════���══════════════�������═══���������������������════
+/* ═════������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -7192,6 +7192,8 @@ function EditableSpaceName({ name, onRename, titleSize = 20, color, onDark = fal
         aria-label="Agreement Space name"
         style={{
           ...titleFontStyle,
+          color: 'var(--ink-font-color-default, #333333)',
+          caretColor: 'var(--ink-font-color-default, #333333)',
           border: '2px solid var(--ink-cobalt-80)',
           borderRadius: 6,
           padding: '2px 8px',
