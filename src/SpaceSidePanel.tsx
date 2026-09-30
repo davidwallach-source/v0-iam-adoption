@@ -36,6 +36,7 @@ interface SpaceSidePanelProps {
   activity: SidePanelActivityItem[];
   conversations: SidePanelConversation[];
   style?: CSSProperties;
+  fitToViewport?: boolean;
 }
 
 const TITLES: Record<SidePanelTab, string> = {
@@ -459,7 +460,7 @@ function nowStamp() {
   return `${time}, ${date}`;
 }
 
-export function SpaceSidePanel({ activity, conversations, style }: SpaceSidePanelProps) {
+export function SpaceSidePanel({ activity, conversations, style, fitToViewport }: SpaceSidePanelProps) {
   const [tab, setTab] = useState<SidePanelTab>('activity');
   const [openThread, setOpenThread] = useState<string | null>(null);
   const [draftThread, setDraftThread] = useState(false);
@@ -497,8 +498,33 @@ export function SpaceSidePanel({ activity, conversations, style }: SpaceSidePane
     }
   };
 
+  const asideRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!fitToViewport) return;
+    const el = asideRef.current;
+    if (!el) return;
+    let frame = 0;
+    // Sticky top:0 means the panel's top is max(0, distance to viewport top); fill the rest of the viewport below it.
+    const fit = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const parentTop = el.parentElement?.getBoundingClientRect().top ?? 0;
+        el.style.height = `${Math.max(320, window.innerHeight - Math.max(0, parentTop))}px`;
+      });
+    };
+    fit();
+    window.addEventListener('scroll', fit, { capture: true, passive: true });
+    window.addEventListener('resize', fit);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', fit, { capture: true });
+      window.removeEventListener('resize', fit);
+    };
+  }, [fitToViewport]);
+
   return (
     <aside
+      ref={asideRef}
       aria-label={TITLES[tab]}
       style={{
         display: 'flex', flexDirection: 'column',

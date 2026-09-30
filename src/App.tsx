@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════�����═════════���══════════════�������═══���������������������════
+/* ═════������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8696,7 +8696,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <SpaceSidePanel
                 activity={currentActivity}
                 conversations={spaceMessages}
-                style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', minHeight: 480, paddingTop: 14, borderLeft: 'none' }}
+                fitToViewport
+  style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', paddingTop: 14, borderLeft: 'none' }}
               />
             </div>
           </div>
