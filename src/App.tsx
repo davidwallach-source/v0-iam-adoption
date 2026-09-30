@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════��═════════���══════════════�������═══���������������������════
+/* ═════���═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -7348,7 +7348,7 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
         aria-label={`${docs[0]} envelope details`}
         style={{
           position: 'fixed',
-          top: 40,
+          top: 20,
           bottom: 0,
           right: 0,
           width: 360,

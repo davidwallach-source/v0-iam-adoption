@@ -157,7 +157,7 @@ function ActivityFeed({ items, onOpenMessage }: { items: SidePanelActivityItem[]
                   <p style={{ margin: '2px 0 0', fontSize: 'var(--ink-font-detail-s-size)', lineHeight: 'var(--ink-font-detail-s-line-height)', color: TEXT_SECONDARY }}>{item.time}</p>
                 </>
               );
-              const boxStyle: CSSProperties = { flex: 1, minWidth: 0, paddingTop: 10, paddingBottom: isLast ? 0 : 16, fontFamily: FONT };
+              const boxStyle: CSSProperties = { flex: 1, minWidth: 0, paddingTop: 0, paddingBottom: isLast ? 0 : 16, fontFamily: FONT };
               return clickable ? (
                 <button
                   type="button"
