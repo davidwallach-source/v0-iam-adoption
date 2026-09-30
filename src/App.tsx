@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════������═════════���══════════════�������═══���������������������════
+/* ═════�������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8237,7 +8237,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 </thead>
                 <tbody>
                   {orderedTasks.map((task) => (
-                    <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                    <tr key={task.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
                           {task.type === 'Sign' ? (
@@ -8384,6 +8384,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <React.Fragment key={`env-${envelope.envelopeId}`}>
                                 {/* Envelope parent row */}
                                 <tr
+                                  className="ink-table-row"
+                                  data-active={isEnvelopeOpen}
                                   onMouseEnter={() => setHoveredDocRowId(envelopeRowId)}
                                   onMouseLeave={() => setHoveredDocRowId(prev => (prev === envelopeRowId ? null : prev))}
                                   style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}
@@ -8520,8 +8522,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 dateModified: doc.lastModified || doc.dateModified,
                                 rowId: doc.id,
                               }) : undefined}
-                              onMouseEnter={(e) => { setHoveredDocRowId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
-                              onMouseLeave={(e) => { setHoveredDocRowId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
+                              className="ink-table-row"
+                              data-active={isOpen || isSelected}
+                              onMouseEnter={() => setHoveredDocRowId(doc.id)}
+                              onMouseLeave={() => setHoveredDocRowId(prev => (prev === doc.id ? null : prev))}
                               style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: isEnvelopeDoc ? 'pointer' : 'default' }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
@@ -8652,7 +8656,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         </thead>
                         <tbody>
                           {currentSupplementalDocs.map((doc) => (
-                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                            <tr key={doc.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
@@ -9006,7 +9010,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         { term: 'Indemnification', count: 2, prev: 'Mutual', agreed: 'Enhanced vendor indemnification', outcome: 'Accepted' },
                         { term: 'Payment Terms', count: 1, prev: 'Net 30', agreed: 'Net 60', outcome: 'Accepted' },
                       ].map((row, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid var(--ink-border-subtle)' }}>
+                        <tr key={i} className="ink-table-row" style={{ borderBottom: '1px solid var(--ink-border-subtle)' }}>
                           <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)' }}>
                             <Inline gap="xsmall" align="center">
                               {row.term}
