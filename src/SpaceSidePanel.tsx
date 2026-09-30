@@ -261,11 +261,15 @@ function Feed({
           </>
         );
 
-        const boxStyle: CSSProperties = { flex: 1, minWidth: 0, padding: 0, paddingBottom: isLast ? 0 : 16, fontFamily: FONT };
+        const divided = view === 'messages';
+        const boxStyle: CSSProperties = { flex: 1, minWidth: 0, padding: 0, paddingBottom: divided || isLast ? 0 : 16, fontFamily: FONT };
         const replyLabel = isMessage ? `Reply to ${entry.name}` : `Reply to: ${eventTitle(entry)}`;
+        const itemStyle: CSSProperties = divided
+          ? { display: 'flex', gap: 16, padding: '16px 0', borderBottom: isLast ? 'none' : `1px solid ${BORDER_SUBTLE}` }
+          : { display: 'flex', gap: 16 };
 
         return (
-          <li key={entry.id} className="feed-item" style={{ display: 'flex', gap: 16 }}>
+          <li key={entry.id} className="feed-item" style={itemStyle}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
               {isMessage ? (
                 entry.isIris
@@ -276,7 +280,7 @@ function Feed({
                   <Icon name={entry.icon} size={16} color={TEXT_SECONDARY} />
                 </IconCircle>
               )}
-              {!isLast && <span aria-hidden="true" style={{ flex: 1, width: 1, minHeight: 16, background: BORDER_SUBTLE }} />}
+              {!isLast && !divided && <span aria-hidden="true" style={{ flex: 1, width: 1, minHeight: 16, background: BORDER_SUBTLE }} />}
             </div>
             {clickable ? (
               <button
