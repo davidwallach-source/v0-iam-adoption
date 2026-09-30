@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════���═════════���══════════════�������═══���������������������════
+/* ═════����═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8273,7 +8273,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
                       </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Button kind="secondary" size="small">
                           {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
                         </Button>
@@ -8292,6 +8292,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                  <Button kind="secondary" size="small" onClick={() => setShowFilePicker(true)}>Add Documents</Button>
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8461,7 +8462,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   </td>
                                   <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                      <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                      <Inline className="row-hover-actions" data-pinned={isEnvelopeOpen} gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                         <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                                         <RowOverflowMenu items={envelopeOverflowItems()} />
                                       </Inline>
@@ -8592,7 +8593,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{relativePast(doc.lastModified || doc.dateModified)}</td>
                               <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                  <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                  <Inline className="row-hover-actions" data-pinned={isOpen} gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                     {doc.signatureProgress ? (
                                       <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                                     ) : (

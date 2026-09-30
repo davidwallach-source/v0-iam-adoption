@@ -9,6 +9,10 @@ html, body, #root { height: 100%; overflow: hidden; }
    text structurally since those use hashed CSS-module class names. */
 [data-ink-component="StatusLight"].status-black > div > div { background-color: #000000 !important; }
   [data-ink-component="StatusLight"].status-black > span { color: #000000 !important; }
+.row-hover-actions { opacity: 0; transition: opacity 120ms ease; }
+tr:hover .row-hover-actions,
+tr:focus-within .row-hover-actions,
+.row-hover-actions[data-pinned="true"] { opacity: 1; }
   [data-ink-component="StatusLight"].status-on-dark > div > div { background-color: #F3F2F5 !important; }
   [data-ink-component="StatusLight"].status-on-dark > span { color: #F3F2F5 !important; }
 
