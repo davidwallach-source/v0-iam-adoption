@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './SideRail.module.css';
 import { Icon } from '../../3-primitives/Icon';
 import type { IconName } from '../../3-primitives/Icon';
@@ -9,16 +9,14 @@ export interface SideRailItem {
   id: string;
   /** Visible label */
   label: string;
-  /** Named Ink icon shown on the left */
+  /** Named Ink icon shown on the left (top-level rows only) */
   icon?: IconName;
-  /** Custom icon node (e.g. the colorful Iris mark) — takes precedence over `icon` */
+  /** Custom icon node — takes precedence over `icon` */
   customIcon?: React.ReactNode;
   /** Whether this item is the current selection */
   active?: boolean;
-  /** Render the label in a de-emphasized color (e.g. the "6 more" row) */
-  muted?: boolean;
-  /** Draw a divider line above this item (used inside expanded submenus) */
-  hasDividerBefore?: boolean;
+  /** Show a trailing overflow (…) affordance */
+  onMoreClick?: () => void;
   /** Click handler for the row itself */
   onClick?: () => void;
   /** Nested items. When present, a chevron is shown and the row expands/collapses. */
@@ -27,30 +25,14 @@ export interface SideRailItem {
   defaultExpanded?: boolean;
 }
 
-export interface SideRailCreateMenuItem {
-  id: string;
-  label: string;
-  onClick: () => void;
-  /** Draw a horizontal rule below this item */
-  dividerAfter?: boolean;
-}
-
 export interface SideRailProps {
-  /** Brand logo node, rendered top-left */
-  logo: React.ReactNode;
   /** Called whenever the rail is collapsed/expanded, with the new collapsed state */
   onToggleCollapse?: (collapsed: boolean) => void;
-  /** Start in the collapsed (icon-only) state */
+  /** Start in the collapsed state */
   defaultCollapsed?: boolean;
-  /** Label for the primary Create CTA */
-  createLabel?: string;
-  /** Create CTA click handler (used when `createMenuItems` is not provided) */
-  onCreateClick?: () => void;
-  /** When provided, the Create CTA opens a menu with these options */
-  createMenuItems?: SideRailCreateMenuItem[];
   /** Primary navigation items */
   items: SideRailItem[];
-  /** Signed-in user shown in the rail footer (bottom-left) */
+  /** Signed-in user shown in the rail footer */
   user?: { name: string; email?: string; avatar?: string };
   /** Footer avatar click handler */
   onUserClick?: () => void;
@@ -58,221 +40,117 @@ export interface SideRailProps {
   className?: string;
 }
 
-/** Panel / collapse-rail glyph shown in the top-right of the rail header. */
-const PanelIcon: React.FC = () => (
+const PanelToggleIcon: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <rect x="2.25" y="3.25" width="15.5" height="13.5" rx="2.25" stroke="currentColor" strokeWidth="1.5" />
-    <line x1="7.5" y1="3.75" x2="7.5" y2="16.25" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="2.75" y="2.75" width="14.5" height="14.5" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    <line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" strokeWidth="1.5" />
+    <path
+      d={collapsed ? 'M10.75 7.5L13.25 10l-2.5 2.5' : 'M13.25 7.5L10.75 10l2.5 2.5'}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
-interface FlyoutState {
-  item: SideRailItem;
-  top: number;
-  left: number;
-}
+const containsActive = (item: SideRailItem): boolean =>
+  !!item.children?.some((c) => c.active || containsActive(c));
 
 interface RailRowProps {
   item: SideRailItem;
-  nested?: boolean;
-  collapsed: boolean;
-  onRowEnter: (item: SideRailItem, el: HTMLElement | null) => void;
-  onRowLeave: () => void;
+  depth: number;
 }
 
-const RailRow: React.FC<RailRowProps> = ({ item, nested, collapsed, onRowEnter, onRowLeave }) => {
+const RailRow: React.FC<RailRowProps> = ({ item, depth }) => {
   const hasChildren = !!item.children && item.children.length > 0;
-  const [expanded, setExpanded] = useState(!!item.defaultExpanded);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [expanded, setExpanded] = useState(!!item.defaultExpanded || containsActive(item));
 
-  // Chevron / expand affordance only shows in the expanded (non-collapsed) rail.
-  const showChevron = !collapsed && hasChildren;
+  const handleClick = () => {
+    if (hasChildren) setExpanded((v) => !v);
+    item.onClick?.();
+  };
 
-  const mainClasses = [
-    styles.rowMain,
-    nested ? styles.rowNested : '',
+  const rowClasses = [
+    styles.row,
+    depth > 0 ? styles.rowNested : '',
+    depth > 1 ? styles.rowDeep : '',
     item.active ? styles.rowActive : '',
-    item.muted ? styles.rowMuted : '',
   ]
     .filter(Boolean)
     .join(' ');
 
-  const renderIcon = () =>
-    item.customIcon ? (
-      <span className={styles.customIcon}>{item.customIcon}</span>
-    ) : item.icon ? (
-      <Icon name={item.icon} size={20} className={styles.icon} />
-    ) : (
-      <span className={styles.iconPlaceholder} aria-hidden="true" />
-    );
-
   return (
-    <>
-      {item.hasDividerBefore && <li className={styles.dividerItem} aria-hidden="true" />}
-      <li
-        className={styles.rowWrapper}
-        onMouseEnter={collapsed ? () => onRowEnter(item, buttonRef.current) : undefined}
-        onMouseLeave={collapsed ? onRowLeave : undefined}
-      >
-        {/* Split button: the row navigates, the chevron (if any) expands/collapses. */}
-        <div className={styles.row}>
-          <button
-            ref={buttonRef}
-            type="button"
-            className={mainClasses}
-            onClick={() => item.onClick?.()}
-            data-item-id={item.id}
-            data-nav-id={item.id}
-            aria-current={item.active ? 'page' : undefined}
-            aria-label={collapsed ? item.label : undefined}
-            title={collapsed ? item.label : undefined}
-          >
-            <span className={styles.rowLeading}>
-              {renderIcon()}
-              {!collapsed && <span className={styles.label}>{item.label}</span>}
+    <li className={styles.rowWrapper}>
+      <div className={rowClasses}>
+        <button
+          type="button"
+          className={styles.rowMain}
+          onClick={handleClick}
+          data-item-id={item.id}
+          data-nav-id={item.id}
+          aria-current={item.active ? 'page' : undefined}
+          aria-expanded={hasChildren ? expanded : undefined}
+        >
+          {depth === 0 && (
+            <span className={styles.iconSlot}>
+              {item.customIcon ?? (item.icon ? <Icon name={item.icon} size={24} className={styles.icon} /> : null)}
             </span>
-          </button>
-
-          {showChevron && (
-            <button
-              type="button"
-              className={`${styles.chevronButton} ${expanded ? styles.chevronButtonOpen : ''}`}
-              onClick={() => setExpanded((v) => !v)}
-              aria-expanded={expanded}
-              aria-label={`${expanded ? 'Collapse' : 'Expand'} ${item.label}`}
-            >
-              <Icon
-                name="chevron-right"
-                size={20}
-                className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`}
-              />
-            </button>
           )}
-        </div>
-
-        {showChevron && expanded && (
-          <ul className={styles.subList}>
-            {item.children!.map((child) => (
-              <RailRow
-                key={child.id}
-                item={child}
-                nested
-                collapsed={collapsed}
-                onRowEnter={onRowEnter}
-                onRowLeave={onRowLeave}
-              />
-            ))}
-          </ul>
+          <span className={styles.label}>{item.label}</span>
+        </button>
+        {item.onMoreClick && (
+          <button
+            type="button"
+            className={styles.trailingButton}
+            onClick={item.onMoreClick}
+            aria-label={`${item.label} options`}
+          >
+            <Icon name="overflow-horizontal" size={20} />
+          </button>
         )}
-      </li>
-    </>
+        {hasChildren && (
+          <button
+            type="button"
+            className={styles.trailingButton}
+            onClick={() => setExpanded((v) => !v)}
+            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${item.label}`}
+            aria-expanded={expanded}
+          >
+            <Icon name={expanded ? 'chevron-up' : 'chevron-down'} size={20} />
+          </button>
+        )}
+      </div>
+
+      {hasChildren && expanded && (
+        <ul className={styles.subList}>
+          {item.children!.map((child) => (
+            <RailRow key={child.id} item={child} depth={depth + 1} />
+          ))}
+        </ul>
+      )}
+    </li>
   );
 };
 
 /**
- * SideRail — DocuSign duotone left navigation rail.
+ * SideRail — Docusign dark left navigation rail.
  *
- * A full-height dark rail containing the brand logo with a collapse toggle,
- * a prominent Create CTA, and the primary navigation. Items can nest one level
- * deep. Nested parents render as split buttons: clicking the row navigates to
- * the section's main page, while the trailing chevron expands/collapses the
- * submenu in place.
- *
- * The panel toggle collapses the rail to an icon-only strip. While collapsed,
- * hovering an item reveals a light flyout with the item's label and any nested
- * items.
+ * Top-level rows show an icon + label; rows with children expand in place with
+ * a chevron. A floating toggle on the rail's right edge collapses the rail to a
+ * thin strip.
  */
 export const SideRail: React.FC<SideRailProps> = ({
-  logo,
   onToggleCollapse,
   defaultCollapsed = false,
-  createLabel = 'Create',
-  onCreateClick,
-  createMenuItems,
   items,
   user,
   onUserClick,
   className,
 }) => {
-  const [createMenu, setCreateMenu] = useState<{ top: number; left: number; width: number } | null>(null);
-  const createButtonRef = useRef<HTMLButtonElement>(null);
-  const createMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!createMenu) return;
-    const handlePointer = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (createMenuRef.current?.contains(target) || createButtonRef.current?.contains(target)) return;
-      setCreateMenu(null);
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setCreateMenu(null);
-        createButtonRef.current?.focus();
-      }
-    };
-    document.addEventListener('mousedown', handlePointer);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handlePointer);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [createMenu]);
-
-  const handleCreateClick = () => {
-    if (!createMenuItems || createMenuItems.length === 0) {
-      onCreateClick?.();
-      return;
-    }
-    if (createMenu) {
-      setCreateMenu(null);
-      return;
-    }
-    const rect = createButtonRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setCreateMenu({ top: rect.bottom + 6, left: rect.left, width: Math.max(rect.width, 228) });
-  };
-  const userInitials = user
-    ? user.name
-        .split(' ')
-        .map((w) => w[0])
-        .slice(0, 2)
-        .join('')
-    : '';
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
-  const [flyout, setFlyout] = useState<FlyoutState | null>(null);
-  const navRef = useRef<HTMLElement>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const railClasses = [styles.rail, collapsed ? styles.railCollapsed : '', className]
-    .filter(Boolean)
-    .join(' ');
-
-  const cancelClose = useCallback(() => {
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current);
-      closeTimer.current = null;
-    }
-  }, []);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimer.current = setTimeout(() => setFlyout(null), 120);
-  }, [cancelClose]);
-
-  const handleRowEnter = useCallback(
-    (item: SideRailItem, el: HTMLElement | null) => {
-      cancelClose();
-      if (!el || !navRef.current) return;
-      const rowRect = el.getBoundingClientRect();
-      const navRect = navRef.current.getBoundingClientRect();
-      setFlyout({ item, top: rowRect.top, left: navRect.right });
-    },
-    [cancelClose],
-  );
 
   const toggleCollapsed = () => {
-    setFlyout(null);
     setCollapsed((prev) => {
       const next = !prev;
       onToggleCollapse?.(next);
@@ -280,149 +158,51 @@ export const SideRail: React.FC<SideRailProps> = ({
     });
   };
 
-  const flyoutHasChildren = !!flyout?.item.children && flyout.item.children.length > 0;
+  const userInitials = user
+    ? user.name
+        .split(' ')
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join('')
+    : '';
 
   return (
-    <nav ref={navRef} data-ink-component="SideRail" className={railClasses} aria-label="Primary">
-      <div className={styles.header}>
-        {!collapsed && <span className={styles.logo}>{logo}</span>}
-        <button
-          type="button"
-          className={styles.toggle}
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
-          aria-pressed={collapsed}
-        >
-          <PanelIcon />
-        </button>
-      </div>
+    <div
+      data-ink-component="SideRail"
+      className={[styles.root, collapsed ? styles.rootCollapsed : '', className].filter(Boolean).join(' ')}
+    >
+      {!collapsed && (
+        <nav className={styles.rail} aria-label="Primary">
+          <ul className={styles.list}>
+            {items.map((item) => (
+              <RailRow key={item.id} item={item} depth={0} />
+            ))}
+          </ul>
+
+          {user && (
+            <div className={styles.footer}>
+              <button type="button" data-user-menu-trigger className={styles.userButton} onClick={onUserClick}>
+                <Avatar initials={userInitials} src={user.avatar} size="small" colorIndex={4} />
+                <span className={styles.userInfo}>
+                  <span className={styles.userName}>{user.name}</span>
+                  {user.email && <span className={styles.userEmail}>{user.email}</span>}
+                </span>
+              </button>
+            </div>
+          )}
+        </nav>
+      )}
 
       <button
-        ref={createButtonRef}
         type="button"
-        className={styles.createButton}
-        onClick={handleCreateClick}
-        aria-label={collapsed ? createLabel : undefined}
-        title={collapsed ? createLabel : undefined}
-        aria-haspopup={createMenuItems ? 'menu' : undefined}
-        aria-expanded={createMenuItems ? !!createMenu : undefined}
+        className={styles.toggle}
+        onClick={toggleCollapsed}
+        aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+        aria-expanded={!collapsed}
       >
-        <Icon name="plus" size={20} className={styles.createIcon} />
-        {!collapsed && <span className={styles.createLabel}>{createLabel}</span>}
+        <PanelToggleIcon collapsed={collapsed} />
       </button>
-
-      {createMenu && createMenuItems && (
-        <div
-          ref={createMenuRef}
-          className={styles.createMenu}
-          style={{ top: createMenu.top, left: createMenu.left, width: createMenu.width }}
-          role="menu"
-          aria-label={createLabel}
-        >
-          {createMenuItems.map((menuItem) => (
-            <React.Fragment key={menuItem.id}>
-              <button
-                type="button"
-                role="menuitem"
-                className={styles.createMenuItem}
-                onClick={() => {
-                  setCreateMenu(null);
-                  menuItem.onClick();
-                }}
-              >
-                {menuItem.label}
-              </button>
-              {menuItem.dividerAfter && <hr className={styles.createMenuDivider} />}
-            </React.Fragment>
-          ))}
-        </div>
-      )}
-
-      <ul className={styles.list}>
-        {items.map((item) => (
-          <RailRow
-            key={item.id}
-            item={item}
-            collapsed={collapsed}
-            onRowEnter={handleRowEnter}
-            onRowLeave={scheduleClose}
-          />
-        ))}
-      </ul>
-
-      {user && (
-        <button
-          type="button"
-          data-user-menu-trigger
-          className={styles.userButton}
-          onClick={onUserClick}
-          aria-label={collapsed ? user.name : undefined}
-          title={collapsed ? user.name : undefined}
-        >
-          <Avatar initials={userInitials} src={user.avatar} size="small" colorIndex={4} />
-          {!collapsed && (
-            <span className={styles.userInfo}>
-              <span className={styles.userName}>{user.name}</span>
-              {user.email && <span className={styles.userEmail}>{user.email}</span>}
-            </span>
-          )}
-        </button>
-      )}
-
-      {collapsed && flyout && (
-        <div
-          className={styles.flyout}
-          style={{ top: flyout.top, left: flyout.left }}
-          onMouseEnter={cancelClose}
-          onMouseLeave={scheduleClose}
-          role="menu"
-        >
-          {flyoutHasChildren ? (
-            <>
-              <button
-                type="button"
-                role="menuitem"
-                className={styles.flyoutTitleButton}
-                onClick={() => {
-                  flyout.item.onClick?.();
-                  setFlyout(null);
-                }}
-              >
-                {flyout.item.label}
-              </button>
-              {flyout.item.children!.map((child) => (
-                <React.Fragment key={child.id}>
-                  {child.hasDividerBefore && <div className={styles.flyoutDivider} aria-hidden="true" />}
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={`${styles.flyoutLink} ${child.muted ? styles.flyoutLinkMuted : ''}`}
-                    onClick={() => {
-                      child.onClick?.();
-                      setFlyout(null);
-                    }}
-                  >
-                    {child.label}
-                  </button>
-                </React.Fragment>
-              ))}
-            </>
-          ) : (
-            <button
-              type="button"
-              role="menuitem"
-              className={styles.flyoutTitleButton}
-              onClick={() => {
-                flyout.item.onClick?.();
-                setFlyout(null);
-              }}
-            >
-              {flyout.item.label}
-            </button>
-          )}
-        </div>
-      )}
-    </nav>
+    </div>
   );
 };
 

@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════������������═════════���══════════════�������═══���������������������════
+/* ═════�������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -10205,62 +10205,79 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   };
 
   /* ── SideRail — left navigation (Northstar duotone) ── */
-  const sideRailConfig = {
+  const topNavConfig = {
     logo: <img src="/docusign-logo-white.svg" alt="Docusign" />,
-    onToggleCollapse: () => {},
-    createLabel: 'Create',
-    onCreateClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); },
-    createMenuItems: [
+    onLogoMenuClick: () => handleUnavailableTabClick('app-switcher'),
+    startLabel: 'Start',
+    hasNotifications: true,
+    onNotificationsClick: () => handleUnavailableTabClick('notifications'),
+    irisIcon: <IrisIcon />,
+    onIrisClick: () => handleUnavailableTabClick('iris'),
+    startMenuItems: [
       { id: 'send-envelope', label: 'Send an Envelope', onClick: () => { setShowStartModal(false); setRootPreparePreselectedDocs([]); setShowRootPrepare(true); }, dividerAfter: true },
       { id: 'new-agreement', label: 'New Agreement', onClick: () => { setRootPreparePreselectedDocs([]); setShowRootPrepare(false); setShowStartModal(true); } },
       { id: 'new-request', label: 'New Request', onClick: () => { setShowStartModal(false); setShowAgreementRequestModal(true); } },
       { id: 'new-purchase-request', label: 'New Purchase Request', onClick: () => showToast('Starting a new purchase request.') },
     ],
+  };
+
+  const sideRailConfig = {
     user: { name: 'Lisa Jones' },
     onUserClick: () => setUserMenuOpen(o => !o),
     items: [
       { id: 'home', label: 'Home', icon: 'home' as const, active: activeTab === 'home', onClick: () => handleTabClick('home') },
-      { id: 'iris', label: 'Iris', customIcon: <IrisIcon />, onClick: () => handleUnavailableTabClick('iris') },
       {
         id: 'agreements',
         label: 'Agreements',
         icon: 'envelope' as const,
         active: activeTab === 'agreements',
-        onClick: () => handleTabClick('agreements'),
+        onMoreClick: () => handleUnavailableTabClick('agreements-options'),
         children: [
-          { id: 'all-agreements-rail', label: 'All Agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
-          { id: 'drafts-rail', label: 'Drafts', onClick: () => handleUnavailableTabClick('drafts') },
-          { id: 'in-progress-rail', label: 'In Progress', onClick: () => { handleTabClick('agreements'); setSidebarView('in-progress'); } },
+          { id: 'spaces-rail', label: 'Spaces', active: activeTab === 'agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
+          { id: 'envelopes-rail', label: 'Envelopes', onClick: () => handleUnavailableTabClick('envelopes') },
           { id: 'agreement-manager-rail', label: 'Agreement Manager', onClick: () => handleUnavailableTabClick('agreement-manager') },
-          { id: 'deleted-rail', label: 'Deleted', onClick: () => handleUnavailableTabClick('deleted') },
-          { id: 'folders-rail', label: 'Folders', icon: 'folder' as const, hasDividerBefore: true, onClick: () => { handleTabClick('agreements'); setSidebarView('folders'); setFolderPath([]); setSearch(''); } },
         ],
       },
-      { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => handleUnavailableTabClick('parties') },
       { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => handleUnavailableTabClick('requests') },
+      { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => handleUnavailableTabClick('parties') },
       {
         id: 'insights',
         label: 'Insights',
         icon: 'chart-bar' as const,
         active: activeTab === 'insights',
-        onClick: () => handleTabClick('insights'),
         children: [
-          { id: 'overview-rail', label: 'Overview', onClick: () => handleTabClick('insights') },
-          { id: 'dashboards-rail', label: 'Dashboards', onClick: () => handleUnavailableTabClick('dashboards') },
-          { id: 'reports-rail', label: 'Reports', onClick: () => handleUnavailableTabClick('reports') },
-          { id: 'renewals-rail', label: 'Renewals', onClick: () => handleUnavailableTabClick('renewals') },
-          { id: 'obligations-rail', label: 'Obligations', onClick: () => handleUnavailableTabClick('obligations') },
+          { id: 'overview-rail', label: 'Overview', active: activeTab === 'insights' && insightsSidebarView === 'overview', onClick: () => { handleTabClick('insights'); setInsightsSidebarView('overview'); } },
+          { id: 'dashboards-rail', label: 'Dashboards', active: activeTab === 'insights' && insightsSidebarView === 'dashboards', onClick: () => { handleTabClick('insights'); setInsightsSidebarView('dashboards'); } },
+          { id: 'reports-rail', label: 'Reports', active: activeTab === 'insights' && insightsSidebarView === 'reports', onClick: () => { handleTabClick('insights'); setInsightsSidebarView('reports'); } },
         ],
       },
-      { id: 'more', label: '6 more', muted: true, onClick: () => handleUnavailableTabClick('more'), children: [
-        { id: 'templates-more', label: 'Templates', icon: 'layout-grid' as const, onClick: () => handleTabClick('templates') },
-        { id: 'automation-more', label: 'Automation', icon: 'workflow' as const, onClick: () => handleUnavailableTabClick('automation') },
-        { id: 'signatories-more', label: 'Signatories', icon: 'person' as const, onClick: () => handleUnavailableTabClick('signatories') },
-        { id: 'workspaces-more', label: 'Workspaces', icon: 'people' as const, onClick: () => handleUnavailableTabClick('workspaces') },
-        { id: 'powerforms-more', label: 'Powerforms', icon: 'bolt' as const, onClick: () => handleUnavailableTabClick('powerforms') },
-        { id: 'admin-more', label: 'Admin', icon: 'gear' as const, onClick: () => handleTabClick('admin') },
-        { id: 'edit-sidebar-more', label: 'Edit sidebar', icon: 'pencil' as const, hasDividerBefore: true, onClick: () => handleUnavailableTabClick('edit-sidebar') },
-      ] },
+      {
+        id: 'more',
+        label: 'More',
+        icon: 'layout-grid' as const,
+        active: activeTab === 'templates' || activeTab === 'admin',
+        children: [
+          {
+            id: 'templates-more',
+            label: 'Templates',
+            children: [
+              { id: 'my-templates-more', label: 'My Templates', active: activeTab === 'templates', onClick: () => handleTabClick('templates') },
+              { id: 'shared-templates-more', label: 'Shared with Me', onClick: () => handleUnavailableTabClick('shared-with-me') },
+            ],
+          },
+          {
+            id: 'automations-more',
+            label: 'Automations',
+            children: [
+              { id: 'workflows-more', label: 'Workflows', onClick: () => handleUnavailableTabClick('workflows') },
+              { id: 'web-forms-more', label: 'Web Forms', onClick: () => handleUnavailableTabClick('web-forms') },
+            ],
+          },
+          { id: 'powerforms-more', label: 'Power Forms', onClick: () => handleUnavailableTabClick('powerforms') },
+          { id: 'bulk-send-more', label: 'Bulk Send', onClick: () => handleUnavailableTabClick('bulk-send') },
+          { id: 'admin-more', label: 'Admin', active: activeTab === 'admin', onClick: () => handleTabClick('admin') },
+        ],
+      },
     ],
   };
 
@@ -10993,6 +11010,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     />
     <DocuSignShell
       sideRail={sideRailConfig}
+      topNav={topNavConfig}
       localNav={sidebarMap[activeTab]}
     >
       {/* In the Simple Use Case version, fill the content column so the footer

@@ -1,278 +1,114 @@
 @import '../../1-tokens/tokens.css';
 
 /*
- * SideRail — DocuSign "duotone" dark navigation rail.
- * These color values are intentionally literal: the rail is a distinct dark
- * surface that sits outside the light app theme, matching the Northstar
- * prototype's duotone treatment.
+ * SideRail — Docusign dark navigation rail. Literal colors: the rail is a
+ * distinct dark surface outside the light app theme.
  */
-.rail {
-  --rail-bg: #1a1147;
-  --rail-active: #3a2f86;
-  --rail-active-border: rgba(255, 255, 255, 0.14);
-  --rail-hover: rgba(255, 255, 255, 0.07);
-  --rail-border-subtle: rgba(255, 255, 255, 0.16);
+.root {
+  --rail-bg: #12131b;
+  --rail-active: #262733;
+  --rail-hover: rgba(255, 255, 255, 0.05);
+  --rail-divider: rgba(255, 255, 255, 0.1);
   --rail-text: #ffffff;
-  --rail-text-muted: #9a92bd;
-  --rail-icon: #ece9f8;
+  --rail-text-muted: #a8a8b8;
+  --rail-icon: #a8a8b8;
+  --rail-icon-active: #4c2cff;
 
+  position: relative;
   flex-shrink: 0;
-  width: 260px;
+  width: 256px;
   height: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  padding: 20px 16px 16px;
   background: var(--rail-bg);
-  color: var(--rail-text);
   font-family: var(--ink-font-family-sans, 'DS Indigo', system-ui, sans-serif);
-  overflow-y: auto;
   transition: width 160ms ease;
 }
 
-/* ── Collapsed (icon-only) rail ── */
-.railCollapsed {
-  width: 76px;
-  padding-left: 12px;
-  padding-right: 12px;
+.rootCollapsed {
+  width: 20px;
 }
 
-/* ── Header: logo + collapse toggle ── */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 40px;
-  padding: 0 8px;
-}
-
-.logo {
-  display: inline-flex;
-  align-items: center;
-}
-
-.logo :global(img),
-.logo :global(svg) {
-  height: 24px;
-  width: auto;
-  display: block;
-}
-
-.toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--rail-text-muted);
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
-}
-
-.toggle:hover {
-  background: var(--rail-hover);
-  color: var(--rail-text);
-}
-
-/* ── Create CTA ── */
-.createButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  margin-top: 24px;
-  padding: 11px 16px;
-  border: 1px solid var(--rail-border-subtle);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--rail-text);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.2;
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
-}
-
-.createButton:hover {
-  background: var(--rail-hover);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-  .createIcon {
-  color: var(--rail-text);
-  }
-
-  .createMenu {
-  position: fixed;
-  z-index: 1000;
+.rail {
   display: flex;
   flex-direction: column;
+  height: 100%;
   box-sizing: border-box;
-  padding: 8px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(20, 12, 55, 0.22), 0 2px 6px rgba(20, 12, 55, 0.12);
-  color: #1a1147;
-  }
+  padding-top: 20px;
+  overflow-y: auto;
+  color: var(--rail-text);
+}
 
-  .createMenuItem {
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #1a1147;
-  font: inherit;
-  font-size: 15px;
-  line-height: 1.4;
-  text-align: left;
-  cursor: pointer;
-  }
-
-  .createMenuItem:hover,
-  .createMenuItem:focus-visible {
-  background: #f1eefb;
-  outline: none;
-  }
-
-  .createMenuDivider {
-  margin: 6px 0;
-  border: none;
-  border-top: 1px solid #e3e0ec;
-  }
-
-/* ── Navigation list ── */
 .list {
   list-style: none;
-  margin: 20px 0 0;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .rowWrapper {
   list-style: none;
 }
 
-/* Split-button container: main navigation button + optional chevron toggle */
 .row {
   display: flex;
-  align-items: stretch;
-  gap: 4px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.rowMain {
-  display: flex;
-  flex: 1 1 auto;
   align-items: center;
-  gap: 12px;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--rail-text);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.25;
-  text-align: left;
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  gap: 4px;
+  min-height: 40px;
+  padding-right: 20px;
+  transition: background 120ms ease;
 }
 
-.rowMain:hover {
+.row:hover {
   background: var(--rail-hover);
 }
 
 .rowActive,
 .rowActive:hover {
   background: var(--rail-active);
-  border-color: var(--rail-active-border);
-  font-weight: 600;
 }
 
-.rowMuted .label {
-  color: var(--rail-text-muted);
+.rowMain {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  align-self: stretch;
+  padding: 0 0 0 20px;
+  border: none;
+  background: transparent;
+  color: var(--rail-text);
+  font: inherit;
+  font-size: 15px;
   font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
 }
 
-/* Chevron toggle — separate hit target from the row (split button) */
-.chevronButton {
+.rowMain:focus-visible,
+.trailingButton:focus-visible,
+.toggle:focus-visible,
+.userButton:focus-visible {
+  outline: 2px solid #8b7bff;
+  outline-offset: -2px;
+}
+
+.iconSlot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
-  width: 44px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--rail-text-muted);
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
-}
-
-.chevronButton:hover {
-  background: var(--rail-hover);
-  color: var(--rail-text);
-}
-
-.chevronButtonOpen,
-.chevronButtonOpen:hover {
-  background: var(--rail-active);
-  border-color: var(--rail-active-border);
-  color: var(--rail-text);
-}
-
-/* Divider between groups of items inside an expanded submenu */
-.dividerItem {
-  list-style: none;
-  height: 1px;
-  margin: 8px 16px;
-  background: var(--rail-border-subtle);
-}
-
-.rowLeading {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
 }
 
 .icon {
-  flex-shrink: 0;
   color: var(--rail-icon);
 }
 
-.customIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.customIcon :global(svg) {
-  width: 24px;
-  height: 24px;
-}
-
-.iconPlaceholder {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+.rowActive .icon {
+  color: var(--rail-icon-active);
 }
 
 .label {
@@ -281,100 +117,74 @@
   white-space: nowrap;
 }
 
-.chevron {
+.trailingButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
   color: var(--rail-text-muted);
-  transition: transform 150ms ease;
+  cursor: pointer;
 }
 
-.chevronOpen {
-  transform: rotate(90deg);
+.trailingButton:hover {
+  color: var(--rail-text);
+  background: var(--rail-hover);
 }
 
-/* ── Nested items ── */
+/* ── Nested items: labels align with the parent label column ── */
 .subList {
   list-style: none;
-  margin: 2px 0 4px;
-  padding: 0 0 0 44px;
+  margin: 0 0 4px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .rowNested {
-  padding: 8px 12px;
-  font-size: 14px;
+  min-height: 36px;
+}
+
+.rowNested .rowMain {
+  padding-left: 60px;
+  color: var(--rail-text-muted);
   font-weight: 400;
 }
 
-.rowNested .label {
-  color: var(--rail-text-muted);
+.rowDeep .rowMain {
+  padding-left: 76px;
 }
 
-.rowNested.rowActive .label,
-.rowNested:hover .label {
+.rowNested:hover .rowMain,
+.rowNested.rowActive .rowMain {
   color: var(--rail-text);
 }
 
-/* ══ Collapsed-state overrides ══ */
-
-/* Header: center the toggle (logo is hidden) */
-.railCollapsed .header {
-  justify-content: center;
-  padding: 0;
+/* ── Footer ── */
+.footer {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--rail-divider);
 }
 
-/* Create CTA becomes a square icon button */
-.railCollapsed .createButton {
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Rows become square, icon-only, centered */
-.railCollapsed .list {
-  align-items: center;
-}
-
-.railCollapsed .rowWrapper {
-  width: 48px;
-}
-
-.railCollapsed .row {
-  width: 48px;
-  justify-content: center;
-}
-
-.railCollapsed .rowMain {
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  justify-content: center;
-}
-
-.railCollapsed .rowLeading {
-  gap: 0;
-  justify-content: center;
-}
-
-/* ── User footer (bottom-left) ── */
 .userButton {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
   box-sizing: border-box;
-  margin-top: auto;
-  padding: 10px 12px;
+  padding: 8px;
   border: none;
   border-radius: 8px;
   background: transparent;
   color: var(--rail-text);
   text-align: left;
   cursor: pointer;
-  transition: background 120ms ease;
 }
 
 .userButton:hover {
@@ -389,7 +199,7 @@
 
 .userName {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -400,83 +210,30 @@
   font-size: 12px;
   color: var(--rail-text-muted);
   line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/* Collapsed: center the avatar, keep it pinned to the bottom */
-.railCollapsed .userButton {
-  width: 48px;
-  height: 48px;
-  padding: 0;
+/* ── Floating collapse toggle, straddling the rail/content edge ── */
+.toggle {
+  position: absolute;
+  top: 12px;
+  right: -16px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ── Hover flyout (light surface, escapes the dark rail) ── */
-.flyout {
-  position: fixed;
-  z-index: 1000;
-  min-width: 224px;
-  margin-left: 6px;
-  padding: 8px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(20, 12, 55, 0.22), 0 2px 6px rgba(20, 12, 55, 0.12);
-  color: #1a1147;
-}
-
-.flyoutTitle,
-.flyoutTitleButton {
-  display: block;
-  padding: 8px 14px 10px;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: #1a1147;
-}
-
-.flyoutTitleButton {
-  width: 100%;
-  border: none;
-  background: transparent;
-  text-align: left;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: #1e1f2a;
+  color: #c4c4d2;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: color 120ms ease, background 120ms ease;
 }
 
-.flyoutTitleButton:hover {
-  background: rgba(26, 17, 71, 0.06);
-}
-
-.flyoutLink {
-  display: block;
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #1a1147;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.2;
-  text-align: left;
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-
-.flyoutLink:hover {
-  background: rgba(26, 17, 71, 0.06);
-}
-
-.flyoutLinkMuted {
-  color: #6b6493;
-}
-
-.flyoutDivider {
-  height: 1px;
-  margin: 8px 14px;
-  background: rgba(26, 17, 71, 0.12);
+.toggle:hover {
+  color: #ffffff;
+  background: #2a2b38;
 }

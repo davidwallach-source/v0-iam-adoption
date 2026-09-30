@@ -6,4 +6,6 @@ export { GlobalNav } from './GlobalNav';
 export { LocalNav } from './LocalNav';
 export { PageHeader } from './PageHeader';
 export { SideRail } from './SideRail';
+export { TopNav } from './TopNav';
+export type { TopNavProps, TopNavMenuItem } from './TopNav';
 export type { SideRailProps, SideRailItem } from './SideRail';
