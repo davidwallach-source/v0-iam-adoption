@@ -237,7 +237,7 @@ function Feed({
       {entries.map((entry, idx) => {
         const isLast = idx === entries.length - 1;
         const isMessage = entry.kind === 'message';
-        const clickable = isMessage && !!entry.conversation;
+        const clickable = isMessage;
         const titleStyle: CSSProperties = { margin: 0, fontSize: 'var(--ink-font-element-label-emphasis-size)', lineHeight: 'var(--ink-font-element-label-emphasis-line-height)', fontWeight: 500, color: TEXT_DEFAULT };
         const metaStyle: CSSProperties = { margin: '2px 0 0', fontSize: 'var(--ink-font-detail-s-size)', lineHeight: 'var(--ink-font-detail-s-line-height)', color: TEXT_SECONDARY };
 
@@ -287,7 +287,8 @@ function Feed({
                 type="button"
                 onClick={() => onOpenMessage(entry)}
                 aria-label={`${entry.name} sent a message: ${entry.text}. Open conversation`}
-                style={{ ...boxStyle, display: 'block', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+                className="feed-select"
+                style={{ ...boxStyle, display: 'block', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
               >
                 {content}
               </button>
@@ -669,7 +670,7 @@ const IRIS: Mentionable = { name: 'Iris', initials: 'IR', colorIndex: 0, isIris:
 
 export function SpaceSidePanel({ activity, conversations, style, fitToViewport }: SpaceSidePanelProps) {
   const [view, setView] = useState<PanelView>('all');
-  const [openThread, setOpenThread] = useState<string | null>(null);
+  const [openThread, setOpenThread] = useState<{ key: string; conversation: SidePanelConversation } | null>(null);
   const [replies, setReplies] = useState<Record<string, ThreadMessage[]>>({});
   const [posted, setPosted] = useState<FeedEntry[]>([]);
   const [replyTo, setReplyTo] = useState<QuotedEvent | null>(null);
@@ -678,7 +679,18 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
 
   useEffect(() => () => irisTimers.current.forEach((t) => window.clearTimeout(t)), []);
 
-  const activeConversation = conversations.find((c) => c.name === openThread) ?? null;
+  const activeConversation = openThread?.conversation ?? null;
+
+  const openMessage = (entry: Extract<FeedEntry, { kind: 'message' }>) => {
+    const existing = entry.conversation ? conversations.find((c) => c.name === entry.conversation) : undefined;
+    setOpenThread({
+      key: existing?.name ?? entry.id,
+      conversation: existing ?? {
+        name: entry.name, initials: entry.initials, colorIndex: entry.colorIndex,
+        preview: entry.text, date: entry.time, receivedAt: entry.time,
+      },
+    });
+  };
   const inThread = view !== 'iris' && activeConversation !== null;
 
   const mentionables = useMemo<Mentionable[]>(() => {
@@ -710,9 +722,10 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
 
   const sendThreadReply = (text: string) => {
     if (!openThread) return;
+    const { key } = openThread;
     setReplies((prev) => ({
       ...prev,
-      [openThread]: [...(prev[openThread] ?? []), { id: `${Date.now()}`, fromMe: true, text, time: nowStamp() }],
+      [key]: [...(prev[key] ?? []), { id: `${Date.now()}`, fromMe: true, text, time: nowStamp() }],
     }));
   };
 
@@ -813,10 +826,10 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
       >
         {view === 'iris' ? (
           <IrisChat />
-        ) : activeConversation ? (
+        ) : openThread ? (
           <MessageThread
-            conversation={activeConversation}
-            replies={replies[activeConversation.name] ?? []}
+            conversation={openThread.conversation}
+            replies={replies[openThread.key] ?? []}
             onBack={() => setOpenThread(null)}
             onSend={sendThreadReply}
           />
@@ -827,7 +840,7 @@ export function SpaceSidePanel({ activity, conversations, style, fitToViewport }
                 entries={feed}
                 view={view}
                 mentionNames={mentionNames}
-                onOpenMessage={(entry) => entry.conversation && setOpenThread(entry.conversation)}
+                onOpenMessage={openMessage}
                 onReply={startReply}
               />
             </div>
