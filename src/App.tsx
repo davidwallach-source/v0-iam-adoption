@@ -46,6 +46,7 @@ import {
   Radio,
   dataTableStyles,
 } from '@/design-system';
+import { SpaceSidePanel, type SidePanelConversation } from './SpaceSidePanel';
 
 /* ═══════════════════════════════════════
    FilePickerDialog Component
@@ -2905,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═══════════════���══════════════�������═══���������������������════
+/* ═════��������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -7347,7 +7348,7 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
         aria-label={`${docs[0]} envelope details`}
         style={{
           position: 'fixed',
-          top: 40,
+          top: 20,
           bottom: 0,
           right: 0,
           width: 360,
@@ -7494,7 +7495,6 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
 
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
-  const [messagesExpanded, setMessagesExpanded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
@@ -7824,11 +7824,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
   // Messages shown in the Overview right column widget. A freshly created space
   // has no conversation yet, so its Messages list starts empty.
-  const spaceMessages: { name: string; initials: string; colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; preview: string }[] = isNewlyCreated ? [] : [
-    { name: 'Alex Preston', initials: 'AP', colorIndex: 1, preview: 'I left a few comments in the contract to review…' },
-    { name: 'Jerome Rill', initials: 'JR', colorIndex: 4, preview: 'Feel free to approve the agreement if I am not…' },
-    { name: 'Stacy Banks', initials: 'SB', colorIndex: 2, preview: 'I went ahead and submitted the contract agree…' },
-    { name: 'Adrien Richards', initials: 'AR', colorIndex: 7, preview: 'Thanks for sending it over! Can you also send a…' },
+  const spaceMessages: SidePanelConversation[] = isNewlyCreated ? [] : [
+    { name: 'Amy Peters', initials: 'AP', colorIndex: 1, preview: 'Thank you! I really appreciate it', date: 'June 2', receivedAt: '9:42 AM, June 2, 2026' },
+    { name: 'Jerry Helfer', initials: 'JH', colorIndex: 4, preview: 'Hi Jerry, we are onboarding a new client this week. Could you review their application?', date: 'May 25', receivedAt: '2:15 PM, May 25, 2026' },
+    { name: 'Kurt Bates', initials: 'KB', colorIndex: 2, preview: 'Hello Kurt, we have a prospective client coming in this week. Do you think you can take a first pass at the redlines?', date: 'May 14', receivedAt: '11:08 AM, May 14, 2026' },
+    { name: 'Emad Elwany', initials: 'EE', colorIndex: 7, preview: 'Made a few redlines and uploaded a new draft. Let’s check with the counter party to see what they think.', date: 'May 14', receivedAt: '1:14 PM, May 14, 2026' },
   ];
 
   // Creation metadata surfaced in the Details tab. Derived from the oldest
@@ -8138,33 +8138,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
                 <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
               </div>
-  <button aria-label="Ask Iris" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 6 }}>
-                <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M13.858 10.9523C12.891 9.76234 11.434 9.16434 8.98799 8.66934C8.9402 8.65968 8.89067 8.66333 8.84482 8.67991C8.79897 8.69649 8.75855 8.72535 8.72799 8.76334C8.7028 8.79348 8.68477 8.82893 8.67524 8.86703C8.66572 8.90513 8.66495 8.9449 8.67299 8.98334C9.16799 11.4293 9.76599 12.8873 10.956 13.8543C12.1309 13.1196 13.1233 12.1273 13.858 10.9523Z" fill="url(#hdr_iris_p0)"/>
-  <path d="M21.0441 13.8552C22.2341 12.8882 22.8311 11.4302 23.3261 8.98516C23.3347 8.94208 23.3325 8.89756 23.3197 8.85553C23.307 8.81351 23.2841 8.77527 23.253 8.74422C23.222 8.71316 23.1837 8.69025 23.1417 8.6775C23.0997 8.66476 23.0552 8.66258 23.0121 8.67116C20.5661 9.16616 19.1081 9.76316 18.1421 10.9532C18.8767 12.1282 19.8691 13.1206 21.0441 13.8552Z" fill="url(#hdr_iris_p1)"/>
-  <path d="M10.9569 18.1367C9.76689 19.1037 9.16889 20.5617 8.67389 23.0067C8.66569 23.0453 8.66638 23.0853 8.67591 23.1236C8.68544 23.1619 8.70356 23.1975 8.72889 23.2277C8.79189 23.3047 8.88889 23.3417 8.98889 23.3217C11.4349 22.8267 12.8929 22.2287 13.8589 21.0397C13.1243 19.8644 12.1319 18.8717 10.9569 18.1367Z" fill="url(#hdr_iris_p2)"/>
-  <path d="M18.1411 21.0407C19.1081 22.2307 20.5661 22.8277 23.0111 23.3227C23.0543 23.3317 23.099 23.3299 23.1413 23.3173C23.1836 23.3047 23.2221 23.2818 23.2534 23.2507C23.2846 23.2196 23.3076 23.1811 23.3203 23.1389C23.333 23.0966 23.335 23.0519 23.3261 23.0087C22.8311 20.5627 22.2331 19.1047 21.0441 18.1387C19.8687 18.8731 18.8759 19.8655 18.1411 21.0407Z" fill="url(#hdr_iris_p3)"/>
-  <path d="M24.5108 15.2999C23.0248 14.7499 21.9228 14.2399 21.0398 13.6679C19.9433 12.9871 19.0187 12.0624 18.3378 10.9659C17.7768 10.0829 17.2568 8.97091 16.7058 7.49591C16.656 7.35146 16.562 7.22636 16.437 7.1384C16.3121 7.05044 16.1626 7.00408 16.0098 7.00591C15.8571 7.00408 15.7076 7.05044 15.5826 7.1384C15.4577 7.22636 15.3636 7.35146 15.3138 7.49591C14.7628 8.98091 14.2538 10.0829 13.6818 10.9659C12.9538 12.1089 12.1118 12.9409 10.9688 13.6679C10.0858 14.2299 8.97384 14.7489 7.49884 15.2999C7.35439 15.3497 7.22929 15.4438 7.14133 15.5687C7.05337 15.6936 7.00701 15.8431 7.00884 15.9959C7.00884 16.3079 7.19684 16.5889 7.49884 16.6929C8.98384 17.2329 10.0858 17.7529 10.9688 18.3239C12.1128 19.0519 12.9438 19.8839 13.6818 21.0259C14.2428 21.9199 14.7618 23.0219 15.3138 24.4969C15.3658 24.6399 15.4605 24.7635 15.5851 24.8508C15.7097 24.9381 15.8582 24.985 16.0103 24.985C16.1625 24.985 16.311 24.9381 16.4356 24.8508C16.5602 24.7635 16.6549 24.6399 16.7068 24.4969C17.2568 23.0109 17.7668 21.9099 18.3368 21.0269C19.0178 19.9299 19.9429 19.0049 21.0398 18.3239C21.9338 17.7629 23.0348 17.2439 24.5108 16.6929C24.6539 16.641 24.7774 16.5463 24.8648 16.4217C24.9521 16.297 24.9989 16.1486 24.9989 15.9964C24.9989 15.8442 24.9521 15.6958 24.8648 15.5712C24.7774 15.4466 24.6539 15.3518 24.5108 15.2999ZM20.0008 16.1099C17.6928 16.9319 16.9348 17.6899 16.1138 19.9969C16.0718 20.1009 15.9158 20.1009 15.8848 19.9969C15.0648 17.6899 14.3048 16.9319 11.9978 16.1109C11.8938 16.0689 11.8938 15.9129 11.9978 15.8809C14.3058 15.0609 15.0638 14.3019 15.8848 11.9949C15.9268 11.8809 16.0828 11.8809 16.1138 11.9949C16.9338 14.3019 17.6938 15.0609 20.0008 15.8819C20.1048 15.9239 20.1048 16.0789 20.0008 16.1109V16.1099Z" fill="white"/>
-  <defs>
-  <linearGradient id="hdr_iris_p0" x1="8.66799" y1="8.66434" x2="14.553" y2="14.3543" gradientUnits="userSpaceOnUse">
-  <stop stopColor="#FF5252"/>
-  <stop offset="1" stopColor="#4C00FF"/>
-  </linearGradient>
-  <linearGradient id="hdr_iris_p1" x1="23.3311" y1="8.66516" x2="17.4981" y2="14.5292" gradientUnits="userSpaceOnUse">
-  <stop stopColor="#FF5252"/>
-  <stop offset="1" stopColor="#4C00FF"/>
-  </linearGradient>
-  <linearGradient id="hdr_iris_p2" x1="8.66889" y1="23.3277" x2="14.3219" y2="17.5307" gradientUnits="userSpaceOnUse">
-  <stop stopColor="#FF5252"/>
-  <stop offset="1" stopColor="#4C00FF"/>
-  </linearGradient>
-  <linearGradient id="hdr_iris_p3" x1="23.3311" y1="23.3287" x2="17.4981" y2="17.4737" gradientUnits="userSpaceOnUse">
-  <stop stopColor="#FF5252"/>
-  <stop offset="1" stopColor="#4C00FF"/>
-  </linearGradient>
-  </defs>
-  </svg>
-  </button>
             </Inline>
           </div>
 
@@ -8230,451 +8203,96 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           {/* Tabs — pinned to the bottom of the header */}
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 16, marginTop: 'auto' }}>
             <button onClick={() => setActiveTab('overview')} style={tabStyle(activeTab === 'overview')}>Overview</button>
-            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
             <button onClick={() => setActiveTab('tasks')} style={tabStyle(activeTab === 'tasks')}>Tasks</button>
+            <button onClick={() => setActiveTab('documents')} style={tabStyle(activeTab === 'documents')}>Documents</button>
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, background: '#F6F7F6' }}>
-        {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
+        {(activeTab === 'overview' || activeTab === 'tasks' || activeTab === 'documents') && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: '24px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
+            <div style={{ padding: '28px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
-              {/* Tasks preview — a few of this space's tasks, with a CTA to view them all */}
-              {orderedTasks.length > 0 && (
-                <div style={{
-                  background: 'var(--ink-white-100)',
-                  border: '1px solid var(--ink-border-subtle)',
-                  borderRadius: 12,
-                  padding: 'var(--ink-spacing-300)',
-                  marginBottom: 'var(--ink-spacing-400)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
-                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Tasks</Text>
-                    {orderedTasks.length > 3 && (
-                      <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('tasks'); }}>See all</Link>
+              {(activeTab === 'tasks' || (activeTab === 'overview' && orderedTasks.length > 0)) && (
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: activeTab === 'overview' ? 'var(--ink-spacing-300)' : 0 }}>
+            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
+
+            {/* Tasks table */}
+            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
+                    {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
+                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
                     )}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--ink-spacing-200)' }}>
-                    {orderedTasks.slice(0, 3).map((task) => (
-                      <div key={task.id} style={{
-                        background: 'var(--ink-white-100)',
-                        border: '1px solid var(--ink-border-subtle)',
-                        borderRadius: 8,
-                        padding: '14px 16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 10,
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                          <Inline gap="small" align="center">
-                            <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
-                          </Inline>
-                          <RowOverflowMenu
-                            items={[
-                              { label: 'View task', onClick: () => setActiveTab('tasks') },
-                              { label: 'Send a reminder', onClick: () => showToast('Reminder sent.') },
-                            ]}
-                          />
-                        </div>
-                        <Text size="sm" weight="semibold">{task.title}</Text>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                          {task.assignee === '--' ? (
-                            <Text size="xs" color="secondary">Unassigned</Text>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
+                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderedTasks.map((task) => (
+                    <tr key={task.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Inline gap="small" align="center">
+                          {task.type === 'Sign' ? (
+                            <img src="/icon-sign.svg" alt="Sign" style={{ width: 16, height: 16, opacity: 1, filter: 'brightness(0.17) sepia(0.5) hue-rotate(275deg) saturate(1.5)' }} />
+                          ) : (task.type === 'Upload' && task.title === 'Wire Transfer') || task.title.startsWith('New Vendor Onboarding') ? (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
+                            </svg>
                           ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <Avatar initials={task.assigneeInitials} size="xsmall" />
-                              <Text size="xs" color="secondary">{task.assignee}</Text>
-                            </div>
+                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
                           )}
-                          <Text size="xs" color={task.isDueSoon ? 'warning' : 'secondary'} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : undefined}>{relativePast(task.dueDate)}</Text>
-                        </div>
-                      </div>
-                    ))}
-                    {orderedTasks.length === 1 && (
-                      <AddMenu
-                        {...addMenuHandlers}
-                        placement="center"
-                        wrapperStyle={{ height: '100%' }}
-                        renderTrigger={({ toggle }) => (
-                          <button
-                            onClick={toggle}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              background: 'none',
-                              border: '1px solid var(--ink-border-subtle)',
-                              borderRadius: 8,
-                              padding: '14px 16px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: 6,
-                              cursor: 'pointer',
-                              minHeight: 96,
-                              fontFamily: 'var(--ink-font-family-default)',
-                              color: 'var(--ink-font-color-secondary)',
-                            }}
-                          >
-                            <Icon name="plus" size={24} color="var(--ink-font-color-secondary)" />
-                            <Text size="sm" color="secondary">New document or task</Text>
-                          </button>
+                          <div>
+                            <Text size="sm">{task.title}</Text>
+                          </div>
+                        </Inline>
+                      </td>
+                      {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
+                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
+                      )}
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        {task.assignee === '--' ? (
+                          <Text size="sm">--</Text>
+                        ) : (
+                          <Inline gap="small" align="center">
+                            <Avatar initials={task.assigneeInitials} size="small" />
+                            <Text size="sm">{task.assignee}</Text>
+                          </Inline>
                         )}
-                      />
-                    )}
-                  </div>
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
+                      </td>
+                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
+                      </td>
+                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }}>
+                        <Button kind="secondary" size="small">
+                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
                 </div>
               )}
 
-              {/* Documents preview — a few of this space's documents, styled as a card list */}
-              {currentDocuments.length > 0 && (
-                <div style={{
-                  background: 'var(--ink-white-100)',
-                  border: '1px solid var(--ink-border-subtle)',
-                  borderRadius: 12,
-                  padding: 'var(--ink-spacing-300)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
-                    <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
-                    <Link href="#" onClick={(e: React.MouseEvent) => { e.preventDefault(); setActiveTab('documents'); }}>See all</Link>
-                  </div>
-
-                  {/* Bulk actions bar - shown when documents are selected */}
-                  {selectedDocs.size > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: '10px 16px',
-                      background: 'var(--ink-cobalt-10)',
-                      border: '1px solid var(--ink-cobalt-30)',
-                      borderRadius: 8,
-                      marginBottom: 'var(--ink-spacing-200)',
-                    }}>
-                      <Text size="sm" weight="semibold" style={{ color: 'var(--ink-cobalt-100)' }}>
-                        {selectedDocs.size} selected
-                      </Text>
-                      <div style={{ flex: 1 }} />
-                      <Button kind="secondary" size="small" onClick={() => setSelectedDocs(new Set())}>
-                        Clear
-                      </Button>
-                      <Button kind="secondary" size="small" onClick={() => {
-                        const selectedDocNames = currentDocuments
-                          .filter(doc => selectedDocs.has(doc.id))
-                          .map(doc => doc.name);
-                        if (selectedDocNames.length === 0) return;
-                        setApprovalModalDoc(selectedDocNames.join(', '));
-                        setSelectedDocs(new Set());
-                      }}>
-                        Send for Approval
-                      </Button>
-                      <Button kind="primary" size="small" onClick={() => {
-                        const selectedDocNames = currentDocuments
-                          .filter(doc => selectedDocs.has(doc.id))
-                          .map(doc => doc.name);
-                        setPreparePreselectedDocs(selectedDocNames);
-                        setShowPrepare(true);
-                      }}>
-                        Send for Signature
-                      </Button>
-                    </div>
-                  )}
-
-                  <div>
-                    {processedDocuments.slice(0, 5).map((item, idx) => {
-                      // Envelope rows — a packet that has been sent for signature.
-                      // Rendered identically in spirit to the Documents tab: a
-                      // signature-progress bar with a "Waiting for X" caption.
-                      if ('isEnvelope' in item && item.isEnvelope) {
-                        const envDocNames = item.documentNames && item.documentNames.length
-                          ? item.documentNames
-                          : item.documents.map(d => d.name);
-                        const envName = envDocNames.join(', ') || 'Envelope';
-                        const sp = item.signatureProgress;
-                        const envDate = item.documents[0]?.lastModified || item.documents[0]?.dateModified;
-                        return (
-                          <div
-                            key={`overview-env-${item.envelopeId}`}
-                            onClick={() => openEnvelopePanel({
-                              envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${envDocNames[0] || ''}`.trim() : (envDocNames[0] || envName),
-                              documentNames: envDocNames,
-                              signatureProgress: sp,
-                              dateModified: envDate,
-                              rowId: `overview-env-${item.envelopeId}`,
-                            })}
-                            onMouseEnter={() => setHoveredOverviewDocId(`overview-env-${item.envelopeId}`)}
-                            onMouseLeave={() => setHoveredOverviewDocId(prev => (prev === `overview-env-${item.envelopeId}` ? null : prev))}
-                            onFocus={() => setHoveredOverviewDocId(`overview-env-${item.envelopeId}`)}
-                            onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHoveredOverviewDocId(prev => (prev === `overview-env-${item.envelopeId}` ? null : prev)); }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 'var(--ink-spacing-200)',
-                              minHeight: 60,
-                              padding: '0',
-                              borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <div style={{ width: 16, flexShrink: 0 }} />
-                            <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
-                              <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{envName}</Text>
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              {sp ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
-                                    <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
-                                      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(sp.signed / sp.total) * 100}%`, background: 'var(--ink-cobalt-80)' }} />
-                                    </div>
-                                  </div>
-                                  <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    Waiting for {sp.waitingFor}
-                                  </Text>
-                                </div>
-                              ) : (
-                                <StatusLight noFill kind={getStatusLightKind('Pending Signature')} text="Pending Signature" />
-                              )}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <Text size="sm" color="secondary">{envDate ? relativePast(envDate) : ''}</Text>
-                            </div>
-                            <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
-                              <Inline gap="small" align="center" style={{ justifyContent: 'flex-end', opacity: hoveredOverviewDocId === `overview-env-${item.envelopeId}` ? 1 : 0, transition: 'opacity 120ms ease' }}>
-                                <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                                <RowOverflowMenu items={envelopeOverflowItems()} />
-                              </Inline>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      const doc = item as DealDocument;
-                      const isSelected = selectedDocs.has(doc.id);
-                      // An envelope-document (one sent for signature) opens the
-                      // detail panel on click — identical behavior to the Documents tab.
-                      const isEnvelopeDoc = !!doc.signatureProgress;
-                      const isOpen = openEnvelopeRowId === doc.id;
-                      const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
-                      return (
-                        <div
-                          key={doc.id}
-                          onClick={isEnvelopeDoc ? () => openEnvelopePanel({
-                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
-                            documentNames: [doc.name],
-                            signatureProgress: doc.signatureProgress,
-                            dateModified: doc.lastModified || doc.dateModified,
-                            rowId: doc.id,
-                          }) : undefined}
-                          onMouseEnter={(e) => { setHoveredOverviewDocId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
-                          onMouseLeave={(e) => { setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
-                          onFocus={() => setHoveredOverviewDocId(doc.id)}
-                          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHoveredOverviewDocId(prev => (prev === doc.id ? null : prev)); }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--ink-spacing-200)',
-                            minHeight: 60,
-                            padding: '0',
-                            borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-subtle)',
-                            background: restingBg,
-                            cursor: isEnvelopeDoc ? 'pointer' : 'default',
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={(e) => {
-                              const newSelected = new Set(selectedDocs);
-                              if (e.target.checked) {
-                                newSelected.add(doc.id);
-                              } else {
-                                newSelected.delete(doc.id);
-                              }
-                              setSelectedDocs(newSelected);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)', flexShrink: 0 }}
-                          />
-                          <div style={{ flex: 2, minWidth: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150)' }}>
-                            <Text size="sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</Text>
-                            {doc.commentCount ? <AlertBadge value={doc.commentCount} kind="emphasis" /> : null}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            {doc.signatureProgress ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-cobalt-80)', flexShrink: 0 }} />
-                                  <div style={{ flex: 1, height: 2, background: 'var(--ink-border-subtle)', position: 'relative' }}>
-                                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(doc.signatureProgress.signed / doc.signatureProgress.total) * 100}%`, background: 'var(--ink-cobalt-80)' }} />
-                                  </div>
-                                </div>
-                                <Text size="xs" style={{ color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  Waiting for {doc.signatureProgress.waitingFor}
-                                </Text>
-                              </div>
-                            ) : (
-                              <StatusLight noFill className={/^in (progress|review)$/i.test(doc.status) ? 'status-black' : undefined} kind={getStatusLightKind(doc.status)} text={doc.status} />
-                            )}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <Text size="sm" color="secondary">{relativePast(doc.lastModified || doc.dateModified)}</Text>
-                          </div>
-                          <div style={{ width: 140, flexShrink: 0, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
-                            <Inline gap="small" align="center" style={{ justifyContent: 'flex-end', opacity: hoveredOverviewDocId === doc.id || isOpen ? 1 : 0, transition: 'opacity 120ms ease' }}>
-                              {doc.signatureProgress ? (
-                                <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
-                              ) : (
-                                <Button
-                                  kind="secondary"
-                                  size="small"
-                                  onClick={() => {
-                                    if (doc.id.startsWith('added-')) {
-                                      setPendingPreviewDoc(doc.name);
-                                    } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                      onEditNDA();
-                                    } else {
-                                      onPreviewDocument?.(doc.name);
-                                    }
-                                  }}
-                                >
-                                  {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
-                                </Button>
-                              )}
-                              <RowOverflowMenu
-                                items={doc.signatureProgress
-                                  ? envelopeOverflowItems()
-                                  : [
-                                      { label: 'Download', onClick: () => showToast('Downloading document.') },
-                                      { label: 'View history', onClick: () => showToast('Opening document history.') },
-                                    ]}
-                              />
-                            </Inline>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            {/* Right column — Activity module, with the Messages module docked beneath it */}
-            <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) 0 var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', position: 'relative' }}>
-              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300) var(--ink-spacing-300) 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Activity</Text>
-                </div>
-
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                    {currentActivity.map((item, idx) => (
-                      <li
-                        key={item.id}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          gap: 4,
-                          height: 80,
-                          boxSizing: 'border-box',
-                          padding: 0,
-                          borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))',
-                          fontSize: 14,
-                          lineHeight: 1.45,
-                          fontFamily: 'var(--ink-font-family-default)',
-                        }}
-                      >
-                        <span style={{ color: 'var(--ink-font-color-default)', fontSize: 14 }}>
-                          <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
-                        </span>
-                        <span style={{ color: 'var(--ink-font-color-secondary)', fontSize: 14 }}>{item.time}</span>
-                      </li>
-                    ))}
-                  </ul>
-              </div>
-
-              {/* Messages module — docked to the bottom of the viewport, peeking the top
-                  message when collapsed and growing upward over the Activity feed when expanded. */}
-              <div style={{ position: 'sticky', bottom: 0, marginTop: 'auto', height: 76, zIndex: 50, flexShrink: 0 }}>
-                <div style={{
-                  position: 'absolute', left: 0, right: 0, bottom: 0,
-                  height: messagesExpanded ? 460 : 76,
-                  transition: 'height 240ms ease',
-                  display: 'flex', flexDirection: 'column',
-                  background: 'var(--ink-white-100)',
-                  border: '1px solid var(--ink-border-subtle)',
-                  borderBottom: 'none',
-                  borderRadius: '12px 12px 0 0',
-                  boxShadow: '0 -4px 16px rgba(19, 0, 50, 0.08)',
-                  overflow: 'hidden',
-                }}>
-                  <button
-                    type="button"
-                    onClick={() => setMessagesExpanded((v) => !v)}
-                    aria-expanded={messagesExpanded}
-                    aria-controls="space-messages-list"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150, 12px)',
-  height: 44, flexShrink: 0,
-  padding: '0 var(--ink-spacing-300)',
-  background: '#84EFC3',
-                      border: 'none', cursor: 'pointer', textAlign: 'left',
-                      color: 'var(--ink-font-color-default)',
-                      fontFamily: 'var(--ink-font-family-default)',
-                    }}
-                  >
-                    <Icon name="comment" size={20} color="var(--ink-font-color-default)" />
-                    <span style={{ flex: 1, fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>
-                      Messages ({spaceMessages.length})
-                    </span>
-                    <span style={{ display: 'inline-flex', transform: messagesExpanded ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 240ms ease' }}>
-                      <Icon name="chevron-down" size={16} color="var(--ink-font-color-default)" />
-                    </span>
-                  </button>
-                  <div id="space-messages-list" style={{ flex: 1, overflowY: messagesExpanded ? 'auto' : 'hidden', padding: '0 var(--ink-spacing-300)' }}>
-                    {spaceMessages.length === 0 ? (
-                      <button
-                        type="button"
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 12,
-                          margin: 'var(--ink-spacing-200) 0', padding: 0,
-                          background: 'none', border: 'none', cursor: 'pointer',
-                          color: 'var(--ink-cobalt-140)',
-                          fontFamily: 'var(--ink-font-family-default)',
-  fontSize: 14, fontWeight: 600,
-  }}
-  >
-  <Icon name="plus" size={20} color="var(--ink-cobalt-140)" />
-                        New Message
-                      </button>
-                    ) : spaceMessages.map((msg, idx) => (
-                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))' }}>
-                        <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <Text size="sm" weight="semibold" style={{ display: 'block' }}>{msg.name}</Text>
-                          <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
-                        </div>
-                      </Inline>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'documents' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
+              {(activeTab === 'documents' || (activeTab === 'overview' && currentDocuments.length > 0)) && (
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                  <Button kind="secondary" size="small" onClick={() => setShowFilePicker(true)}>Add Documents</Button>
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8766,6 +8384,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <React.Fragment key={`env-${envelope.envelopeId}`}>
                                 {/* Envelope parent row */}
                                 <tr
+                                  className="ink-table-row"
+                                  data-active={isEnvelopeOpen}
                                   onMouseEnter={() => setHoveredDocRowId(envelopeRowId)}
                                   onMouseLeave={() => setHoveredDocRowId(prev => (prev === envelopeRowId ? null : prev))}
                                   style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}
@@ -8844,7 +8464,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   </td>
                                   <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                      <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                      <Inline className="row-hover-actions" data-pinned={isEnvelopeOpen} gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                         <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                                         <RowOverflowMenu items={envelopeOverflowItems()} />
                                       </Inline>
@@ -8902,9 +8522,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 dateModified: doc.lastModified || doc.dateModified,
                                 rowId: doc.id,
                               }) : undefined}
-                              onMouseEnter={(e) => { setHoveredDocRowId(doc.id); if (isEnvelopeDoc && !isOpen && !isSelected) e.currentTarget.style.background = 'var(--ink-item-bg-color-active-subtle)'; }}
-                              onMouseLeave={(e) => { setHoveredDocRowId(prev => (prev === doc.id ? null : prev)); e.currentTarget.style.background = restingBg; }}
-                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: isEnvelopeDoc ? 'pointer' : 'default' }}
+                              className="ink-table-row"
+                              data-active={isOpen || isSelected}
+                              onMouseEnter={() => setHoveredDocRowId(doc.id)}
+                              onMouseLeave={() => setHoveredDocRowId(prev => (prev === doc.id ? null : prev))}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
@@ -8975,7 +8597,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)', color: 'var(--ink-text-default)' }}>{relativePast(doc.lastModified || doc.dateModified)}</td>
                               <td style={{ padding: '0 var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                  <Inline gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
+                                  <Inline className="row-hover-actions" data-pinned={isOpen} gap="small" align="center" style={{ justifyContent: 'flex-end' }}>
                                     {doc.signatureProgress ? (
                                       <Button kind="secondary" size="small" onClick={() => showToast('Reminder sent to signers.')}>Remind</Button>
                                     ) : (
@@ -9034,7 +8656,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         </thead>
                         <tbody>
                           {currentSupplementalDocs.map((doc) => (
-                            <tr key={doc.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                            <tr key={doc.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
@@ -9068,8 +8690,21 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   </div>
                 )}
               </div>
+                </div>
+              )}
+
             </div>
 
+            {/* Right column — combined Activity / Messages / Iris side panel, pinned to the viewport height under the header */}
+            <div style={{ position: 'relative', background: 'var(--ink-white-100)', borderLeft: '1px solid var(--ink-border-subtle)' }}>
+              <SpaceSidePanel
+                activity={currentActivity}
+                conversations={spaceMessages}
+                fitToViewport
+  style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', paddingTop: 14, borderLeft: 'none' }}
+              />
+            </div>
+          </div>
         )}
 
         {activeTab === 'details' && (
@@ -9128,89 +8763,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </div>
         )}
 
-        {activeTab === 'tasks' && (
-          <div style={{ padding: 'var(--ink-spacing-300)', background: 'var(--ink-bg-color-default)', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
-            {/* Alert banner - only show when a task is due soon */}
-            {currentTasks.some(task => task.isDueSoon) && (
-              <Alert kind="warning" action={{ label: 'Send reminder', onClick: () => {} }} onClose={() => {}} style={{ marginBottom: 'var(--ink-spacing-300)' }}>
-                {currentTasks.find(task => task.isDueSoon)?.title} is due soon. Would you like to send {currentTasks.find(task => task.isDueSoon)?.assignee} a reminder?
-              </Alert>
-            )}
-
-            <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600, marginBottom: 'var(--ink-spacing-200)' }}>Tasks</div>
-
-            {/* Search and filters */}
-            <Inline gap="medium" style={{ marginBottom: 'var(--ink-spacing-200)' }}>
-              <SearchInput placeholder="Search tasks..." value={taskSearch} onChange={setTaskSearch} style={{ width: 240 }} />
-              <Button kind="secondary" size="small">Any status <Icon name="chevron-down" size={14} /></Button>
-              <Button kind="secondary" size="small">Any team <Icon name="chevron-down" size={14} /></Button>
-            </Inline>
-
-            {/* Tasks table */}
-            <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Task</th>
-                    {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
-                      <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Team</th>
-                    )}
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Assigned To</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Status</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Due Date</th>
-                    <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orderedTasks.map((task) => (
-                    <tr key={task.id} style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Inline gap="small" align="center">
-                          {task.type === 'Sign' ? (
-                            <img src="/icon-sign.svg" alt="Sign" style={{ width: 16, height: 16, opacity: 1, filter: 'brightness(0.17) sepia(0.5) hue-rotate(275deg) saturate(1.5)' }} />
-                          ) : (task.type === 'Upload' && task.title === 'Wire Transfer') || task.title.startsWith('New Vendor Onboarding') ? (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-                            </svg>
-                          ) : (
-                            <Icon name={task.type === 'View' ? 'eye' : task.type === 'Approval' ? 'status-check' : 'upload'} size={16} color="var(--ink-text-secondary)" />
-                          )}
-                          <div>
-                            <Text size="sm">{task.title}</Text>
-                          </div>
-                        </Inline>
-                      </td>
-                      {!isUploadedDocAgreement && !isNDADraft && !isHandbookSpace && (
-                        <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{task.team}</td>
-                      )}
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        {task.assignee === '--' ? (
-                          <Text size="sm">--</Text>
-                        ) : (
-                          <Inline gap="small" align="center">
-                            <Avatar initials={task.assigneeInitials} size="small" />
-                            <Text size="sm">{task.assignee}</Text>
-                          </Inline>
-                        )}
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                              <StatusLight noFill className={/^in (progress|review)$/i.test(task.status) ? 'status-black' : undefined} kind={getStatusLightKind(task.status)} text={task.status} />
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
-                      </td>
-                      <td style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Button kind="secondary" size="small">
-                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
 
 
       </div>
@@ -9458,7 +9010,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         { term: 'Indemnification', count: 2, prev: 'Mutual', agreed: 'Enhanced vendor indemnification', outcome: 'Accepted' },
                         { term: 'Payment Terms', count: 1, prev: 'Net 30', agreed: 'Net 60', outcome: 'Accepted' },
                       ].map((row, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid var(--ink-border-subtle)' }}>
+                        <tr key={i} className="ink-table-row" style={{ borderBottom: '1px solid var(--ink-border-subtle)' }}>
                           <td style={{ padding: '12px', fontSize: 'var(--ink-font-size-sm)' }}>
                             <Inline gap="xsmall" align="center">
                               {row.term}
