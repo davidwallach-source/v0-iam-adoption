@@ -10,7 +10,11 @@ export interface SidePanelActivityItem {
   user: string;
   action: string;
   time: string;
+  conversation?: string;
 }
+
+const MESSAGE_ICONS: ReadonlySet<string> = new Set(['comment', 'comments', 'chat', 'message']);
+const isMessageEvent = (item: SidePanelActivityItem) => !!item.conversation || MESSAGE_ICONS.has(item.icon);
 
 export interface SidePanelConversation {
   name: string;
@@ -127,7 +131,7 @@ function IconCircle({ children, size = 40 }: { children: React.ReactNode; size?:
   );
 }
 
-function ActivityFeed({ items }: { items: SidePanelActivityItem[] }) {
+function ActivityFeed({ items, onOpenMessage }: { items: SidePanelActivityItem[]; onOpenMessage?: (item: SidePanelActivityItem) => void }) {
   if (items.length === 0) {
     return <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: TEXT_SECONDARY }}>No activity yet.</p>;
   }
@@ -143,12 +147,30 @@ function ActivityFeed({ items }: { items: SidePanelActivityItem[] }) {
               </IconCircle>
               {!isLast && <span aria-hidden="true" style={{ flex: 1, width: 1, minHeight: 16, background: BORDER_SUBTLE }} />}
             </div>
-            <div style={{ flex: 1, minWidth: 0, paddingTop: 8, paddingBottom: isLast ? 0 : 20, fontFamily: FONT }}>
-              <p style={{ margin: 0, fontSize: 16, lineHeight: 1.5, color: TEXT_DEFAULT }}>
-                <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
-              </p>
-              <p style={{ margin: '4px 0 0', fontSize: 14, lineHeight: 1.5, color: TEXT_SECONDARY }}>{item.time}</p>
-            </div>
+            {(() => {
+              const clickable = !!onOpenMessage && isMessageEvent(item);
+              const content = (
+                <>
+                  <p style={{ margin: 0, fontSize: 'var(--ink-font-element-label-emphasis-size)', lineHeight: 'var(--ink-font-element-label-emphasis-line-height)', fontWeight: 500, color: TEXT_DEFAULT }}>
+                    <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: 'var(--ink-font-detail-s-size)', lineHeight: 'var(--ink-font-detail-s-line-height)', color: TEXT_SECONDARY }}>{item.time}</p>
+                </>
+              );
+              const boxStyle: CSSProperties = { flex: 1, minWidth: 0, paddingTop: 10, paddingBottom: isLast ? 0 : 16, fontFamily: FONT };
+              return clickable ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenMessage!(item)}
+                  aria-label={`${item.user} ${item.action}. Open message`}
+                  style={{ ...boxStyle, display: 'block', textAlign: 'left', background: 'none', border: 'none', paddingLeft: 0, paddingRight: 0, cursor: 'pointer' }}
+                >
+                  {content}
+                </button>
+              ) : (
+                <div style={boxStyle}>{content}</div>
+              );
+            })()}
           </li>
         );
       })}
@@ -424,8 +446,8 @@ function IrisChat() {
           <button type="button" aria-label="Add attachment" style={{ width: 32, height: 32, marginLeft: -8, border: 'none', background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="plus" size={20} color={TEXT_DEFAULT} />
           </button>
-          <button type="submit" aria-label="Send to Iris" style={{ width: 36, height: 36, borderRadius: 6, border: 'none', background: 'var(--ink-cobalt-100)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="arrow-up" size={20} color="var(--ink-white-100)" />
+          <button type="submit" aria-label="Send to Iris" style={{ width: 36, height: 36, borderRadius: 6, border: 'none', background: 'var(--ink-cobalt-100)', color: 'var(--ink-white-100)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="arrow-up" size={20} color="currentColor" />
           </button>
         </div>
       </form>
@@ -462,6 +484,14 @@ export function SpaceSidePanel({ activity, conversations, style }: SpaceSidePane
     }));
   };
 
+  const openFromActivity = (item: SidePanelActivityItem) => {
+    const match = conversations.find((c) => c.name === item.conversation || c.name === item.user) ?? conversations[0];
+    if (!match) return;
+    setDraftThread(false);
+    setTab('messages');
+    setOpenThread(match.name);
+  };
+
   const startNewMessage = () => {
     if (conversations.length > 0) {
       setOpenThread(conversations[0].name);
@@ -485,12 +515,14 @@ export function SpaceSidePanel({ activity, conversations, style }: SpaceSidePane
       <header
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '16px 24px',
+          height: 52,
+          padding: '0 24px',
+          boxSizing: 'border-box',
           borderBottom: inThread ? `1px solid ${BORDER_SUBTLE}` : '1px solid transparent',
           flexShrink: 0,
         }}
       >
-        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400, lineHeight: 1.3, color: 'var(--ink-cobalt-140)' }}>{TITLES[tab]}</h2>
+        <h2 style={{ margin: 0, fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 'var(--ink-font-weight-medium)' as CSSProperties['fontWeight'], color: 'var(--ink-cobalt-140)' }}>{TITLES[tab]}</h2>
         <PanelTabs active={tab} onChange={changeTab} />
       </header>
 
@@ -505,7 +537,9 @@ export function SpaceSidePanel({ activity, conversations, style }: SpaceSidePane
             : {}),
         }}
       >
-        {tab === 'activity' && <ActivityFeed items={activity} />}
+        {tab === 'activity' && (
+          <ActivityFeed items={activity} onOpenMessage={conversations.length > 0 ? openFromActivity : undefined} />
+        )}
 
         {tab === 'messages' && (activeConversation ? (
           <MessageThread
