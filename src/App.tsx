@@ -46,6 +46,7 @@ import {
   Radio,
   dataTableStyles,
 } from '@/design-system';
+import { SpaceSidePanel, type SidePanelConversation } from './SpaceSidePanel';
 
 /* ═══════════════════════════════════════
    FilePickerDialog Component
@@ -7494,7 +7495,6 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
 
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
-  const [messagesExpanded, setMessagesExpanded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
@@ -7824,11 +7824,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
   // Messages shown in the Overview right column widget. A freshly created space
   // has no conversation yet, so its Messages list starts empty.
-  const spaceMessages: { name: string; initials: string; colorIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; preview: string }[] = isNewlyCreated ? [] : [
-    { name: 'Alex Preston', initials: 'AP', colorIndex: 1, preview: 'I left a few comments in the contract to review…' },
-    { name: 'Jerome Rill', initials: 'JR', colorIndex: 4, preview: 'Feel free to approve the agreement if I am not…' },
-    { name: 'Stacy Banks', initials: 'SB', colorIndex: 2, preview: 'I went ahead and submitted the contract agree…' },
-    { name: 'Adrien Richards', initials: 'AR', colorIndex: 7, preview: 'Thanks for sending it over! Can you also send a…' },
+  const spaceMessages: SidePanelConversation[] = isNewlyCreated ? [] : [
+    { name: 'Amy Peters', initials: 'AP', colorIndex: 1, preview: 'Thank you! I really appreciate it', date: 'June 2', receivedAt: '9:42 AM, June 2, 2026' },
+    { name: 'Jerry Helfer', initials: 'JH', colorIndex: 4, preview: 'Hi Jerry, we are onboarding a new client this week. Could you review their application?', date: 'May 25', receivedAt: '2:15 PM, May 25, 2026' },
+    { name: 'Kurt Bates', initials: 'KB', colorIndex: 2, preview: 'Hello Kurt, we have a prospective client coming in this week. Do you think you can take a first pass at the redlines?', date: 'May 14', receivedAt: '11:08 AM, May 14, 2026' },
+    { name: 'Emad Elwany', initials: 'EE', colorIndex: 7, preview: 'Made a few redlines and uploaded a new draft. Let’s check with the counter party to see what they think.', date: 'May 14', receivedAt: '1:14 PM, May 14, 2026' },
   ];
 
   // Creation metadata surfaced in the Details tab. Derived from the oldest
@@ -8239,7 +8239,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Content */}
       <div style={{ flex: 1, background: '#F6F7F6' }}>
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
             <div style={{ padding: '24px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
@@ -8565,106 +8565,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
             </div>
 
-            {/* Right column — Activity module, with the Messages module docked beneath it */}
-            <div style={{ background: '#F6F7F6', padding: '24px var(--ink-spacing-300) 0 var(--ink-spacing-100)', display: 'flex', flexDirection: 'column', gap: 'var(--ink-spacing-300)', position: 'relative' }}>
-              <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300) var(--ink-spacing-300) 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Activity</Text>
-                </div>
-
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                    {currentActivity.map((item, idx) => (
-                      <li
-                        key={item.id}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          gap: 4,
-                          height: 80,
-                          boxSizing: 'border-box',
-                          padding: 0,
-                          borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))',
-                          fontSize: 14,
-                          lineHeight: 1.45,
-                          fontFamily: 'var(--ink-font-family-default)',
-                        }}
-                      >
-                        <span style={{ color: 'var(--ink-font-color-default)', fontSize: 14 }}>
-                          <strong style={{ fontWeight: 600 }}>{item.user}</strong> {item.action}
-                        </span>
-                        <span style={{ color: 'var(--ink-font-color-secondary)', fontSize: 14 }}>{item.time}</span>
-                      </li>
-                    ))}
-                  </ul>
-              </div>
-
-              {/* Messages module — docked to the bottom of the viewport, peeking the top
-                  message when collapsed and growing upward over the Activity feed when expanded. */}
-              <div style={{ position: 'sticky', bottom: 0, marginTop: 'auto', height: 76, zIndex: 50, flexShrink: 0 }}>
-                <div style={{
-                  position: 'absolute', left: 0, right: 0, bottom: 0,
-                  height: messagesExpanded ? 460 : 76,
-                  transition: 'height 240ms ease',
-                  display: 'flex', flexDirection: 'column',
-                  background: 'var(--ink-white-100)',
-                  border: '1px solid var(--ink-border-subtle)',
-                  borderBottom: 'none',
-                  borderRadius: '12px 12px 0 0',
-                  boxShadow: '0 -4px 16px rgba(19, 0, 50, 0.08)',
-                  overflow: 'hidden',
-                }}>
-                  <button
-                    type="button"
-                    onClick={() => setMessagesExpanded((v) => !v)}
-                    aria-expanded={messagesExpanded}
-                    aria-controls="space-messages-list"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-150, 12px)',
-  height: 44, flexShrink: 0,
-  padding: '0 var(--ink-spacing-300)',
-  background: '#84EFC3',
-                      border: 'none', cursor: 'pointer', textAlign: 'left',
-                      color: 'var(--ink-font-color-default)',
-                      fontFamily: 'var(--ink-font-family-default)',
-                    }}
-                  >
-                    <Icon name="comment" size={20} color="var(--ink-font-color-default)" />
-                    <span style={{ flex: 1, fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>
-                      Messages ({spaceMessages.length})
-                    </span>
-                    <span style={{ display: 'inline-flex', transform: messagesExpanded ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 240ms ease' }}>
-                      <Icon name="chevron-down" size={16} color="var(--ink-font-color-default)" />
-                    </span>
-                  </button>
-                  <div id="space-messages-list" style={{ flex: 1, overflowY: messagesExpanded ? 'auto' : 'hidden', padding: '0 var(--ink-spacing-300)' }}>
-                    {spaceMessages.length === 0 ? (
-                      <button
-                        type="button"
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 12,
-                          margin: 'var(--ink-spacing-200) 0', padding: 0,
-                          background: 'none', border: 'none', cursor: 'pointer',
-                          color: 'var(--ink-cobalt-140)',
-                          fontFamily: 'var(--ink-font-family-default)',
-  fontSize: 14, fontWeight: 600,
-  }}
-  >
-  <Icon name="plus" size={20} color="var(--ink-cobalt-140)" />
-                        New Message
-                      </button>
-                    ) : spaceMessages.map((msg, idx) => (
-                      <Inline key={msg.name} gap="medium" align="flex-start" style={{ padding: 'var(--ink-spacing-200) 0', borderTop: idx === 0 ? 'none' : '1px solid var(--ink-border-color-subtle, var(--ink-border-subtle))' }}>
-                        <Avatar initials={msg.initials} size="small" colorIndex={msg.colorIndex} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <Text size="sm" weight="semibold" style={{ display: 'block' }}>{msg.name}</Text>
-                          <Text size="sm" color="secondary" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{msg.preview}</Text>
-                        </div>
-                      </Inline>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* Right column — combined Activity / Messages / Iris side panel, pinned to the viewport height under the header */}
+            <div style={{ position: 'relative' }}>
+              <SpaceSidePanel
+                activity={currentActivity}
+                conversations={spaceMessages}
+                style={{ position: 'sticky', top: 0, height: 'calc(100vh - 198px)', minHeight: 480 }}
+              />
             </div>
           </div>
         )}
