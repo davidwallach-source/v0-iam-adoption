@@ -6,6 +6,8 @@ import { LocalNav } from '../../5-patterns/LocalNav';
 import type { LocalNavProps } from '../../5-patterns/LocalNav';
 import { SideRail } from '../../5-patterns/SideRail';
 import type { SideRailProps } from '../../5-patterns/SideRail';
+import { TopNav } from '../../5-patterns/TopNav';
+import type { TopNavProps } from '../../5-patterns/TopNav';
 
 export interface DocuSignShellProps {
   /**
@@ -13,6 +15,9 @@ export interface DocuSignShellProps {
    * as a full-height left rail (replacing the top GlobalNav).
    */
   sideRail?: Omit<SideRailProps, 'className'>;
+
+  /** Full-width top header rendered above the side rail layout */
+  topNav?: Omit<TopNavProps, 'className'>;
 
   /** GlobalNav configuration (used when `sideRail` is not provided) */
   globalNav?: Omit<GlobalNavProps, 'className'>;
@@ -52,6 +57,7 @@ export interface DocuSignShellProps {
  */
 export const DocuSignShell: React.FC<DocuSignShellProps> = ({
   sideRail,
+  topNav,
   globalNav,
   localNav,
   children,
@@ -62,22 +68,22 @@ export const DocuSignShell: React.FC<DocuSignShellProps> = ({
   /* SideRail layout: full-height left rail as the primary navigation. */
   if (sideRail) {
     return (
-      <div
-        data-ink-component="DocuSignShell"
-        className={`${shellClasses} ${styles.shellRail}`}
-      >
-        <aside className={styles.rail}>
-          <SideRail {...sideRail} />
-        </aside>
-
-        {/* Optional secondary (contextual) sidebar */}
-        {localNav && (
-          <aside className={styles.sidebar}>
-            <LocalNav {...localNav} />
+      <div data-ink-component="DocuSignShell" className={`${shellClasses} ${styles.shellDark}`}>
+        {topNav && <TopNav {...topNav} />}
+        <div className={styles.shellRail}>
+          <aside className={styles.rail}>
+            <SideRail {...sideRail} />
           </aside>
-        )}
 
-        <main className={styles.content}>{children}</main>
+          <div className={styles.surface}>
+            {localNav && (
+              <aside className={styles.sidebar}>
+                <LocalNav {...localNav} />
+              </aside>
+            )}
+            <main className={styles.content}>{children}</main>
+          </div>
+        </div>
       </div>
     );
   }

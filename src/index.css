@@ -84,3 +84,10 @@ img, svg { display: block; max-width: 100%; }
 .overview-row {
   cursor: pointer;
 }
+
+/* Side panel feed: reply action appears on row hover/focus */
+.feed-item .feed-reply { opacity: 0; transition: opacity 120ms ease, background 120ms ease; }
+.feed-item:hover .feed-reply,
+.feed-item:focus-within .feed-reply,
+.feed-item .feed-reply:focus-visible { opacity: 1; }
+.feed-item .feed-reply:hover { background: var(--ink-cobalt-10); }
