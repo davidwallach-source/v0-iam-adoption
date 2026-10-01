@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════�������������═════════���══════════════�������═══���������������������════
+/* ═════��������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -8205,25 +8205,43 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
               <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
             </div>
-            <button
-              type="button"
-              className="space-header-add-agents"
-              style={{
-                height: 36,
-                padding: '0 var(--ink-spacing-200)',
-                borderRadius: 999,
-                border: '1px solid var(--ink-white-100)',
-                background: 'transparent',
-                color: 'var(--ink-white-100)',
-                fontFamily: 'inherit',
-                fontSize: 'var(--ink-font-size-sm, 14px)',
-                fontWeight: 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+            <Dropdown
+              position="bottom"
+              align="end"
+              items={[
+                {
+                  label: 'Share',
+                  icon: <Icon name="share-web" size="small" />,
+                  onClick: () => setShowAddSeatsModal(true),
+                },
+                {
+                  label: 'Add Agent',
+                  icon: <Icon name="sparkle" size="small" />,
+                  onClick: () => {},
+                },
+              ]}
             >
-              Add Agents
-            </button>
+              <button
+                type="button"
+                className="space-header-overflow"
+                aria-label="Space actions"
+                style={{
+                  width: 36,
+                  height: 36,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                  borderRadius: 999,
+                  border: '1px solid var(--ink-white-100)',
+                  background: 'transparent',
+                  color: 'var(--ink-white-100)',
+                  cursor: 'pointer',
+                }}
+              >
+                <Icon name="overflow-horizontal" size={18} />
+              </button>
+            </Dropdown>
           </div>
           </div>
         </div>
