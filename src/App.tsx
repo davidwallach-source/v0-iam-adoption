@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════��������������═════════���══════════════�������═══���������������������════
+/* ═════���������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -5265,7 +5265,17 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
 // WorkspaceView overlay (z-index 1060) — so its menu is invisible here. This
 // renders the menu at a fixed position computed from the trigger, above the
 // workspace, matching the envelope panel's inline menu styling.
-function RowOverflowMenu({ items }: { items: { label: string; onClick: () => void }[] }) {
+function RowOverflowMenu({
+  items,
+  trigger,
+  triggerLabel = 'More options',
+  triggerStyle,
+}: {
+  items: { label: string; icon?: React.ReactNode; onClick: () => void }[];
+  trigger?: React.ReactNode;
+  triggerLabel?: string;
+  triggerStyle?: React.CSSProperties;
+}) {
   const [open, setOpen] = useState(false);
   // `top` positions the menu below the trigger; `bottom` flips it above when
   // there isn't enough room below (e.g. rows near the viewport bottom, which
@@ -5294,12 +5304,12 @@ function RowOverflowMenu({ items }: { items: { label: string; onClick: () => voi
         ref={btnRef}
         type="button"
         onClick={toggle}
-        aria-label="More options"
+        aria-label={triggerLabel}
         aria-haspopup="menu"
         aria-expanded={open}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
+        style={triggerStyle ?? { background: 'none', border: 'none', cursor: 'pointer', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-font-color-default)', borderRadius: 6 }}
       >
-        <Icon name="overflow-vertical" size={18} />
+        {trigger ?? <Icon name="overflow-vertical" size={18} />}
       </button>
       {open && (
         <>
@@ -5313,8 +5323,9 @@ function RowOverflowMenu({ items }: { items: { label: string; onClick: () => voi
                 key={item.label}
                 role="menuitem"
                 onClick={(e) => { e.stopPropagation(); setOpen(false); item.onClick(); }}
-                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
               >
+                {item.icon}
                 {item.label}
               </button>
             ))}
@@ -8122,7 +8133,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 170, boxSizing: 'border-box' }}>
+        <div style={{ ...innerStyle, minWidth: 0, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 170, boxSizing: 'border-box' }}>
 
           {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8187,27 +8198,18 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
           })()}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexShrink: 0, marginTop: 16 }}>
-            <div
-              style={{ display: 'flex', ...(version === 'paywalls' ? { cursor: 'pointer' } : {}) }}
-              {...(version === 'paywalls'
-                ? {
-                    role: 'button',
-                    tabIndex: 0,
-                    'aria-label': 'Manage collaborators',
-                    onClick: () => setShowAddSeatsModal(true),
-                    onKeyDown: (e: React.KeyboardEvent) => {
-                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAddSeatsModal(true); }
-                    },
-                  }
-                : {})}
-            >
-              <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
-              <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
-              <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
-            </div>
-            <Dropdown
-              position="bottom"
-              align="end"
+            <RowOverflowMenu
+              triggerLabel="Space actions: share or add agent"
+              triggerStyle={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--ink-spacing-200)',
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--ink-white-100)',
+                cursor: 'pointer',
+              }}
               items={[
                 {
                   label: 'Share',
@@ -8220,28 +8222,30 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   onClick: () => {},
                 },
               ]}
-            >
-              <button
-                type="button"
-                className="space-header-overflow"
-                aria-label="Space actions"
-                style={{
-                  width: 36,
-                  height: 36,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0,
-                  borderRadius: 999,
-                  border: '1px solid var(--ink-white-100)',
-                  background: 'transparent',
-                  color: 'var(--ink-white-100)',
-                  cursor: 'pointer',
-                }}
-              >
-                <Icon name="overflow-horizontal" size={18} />
-              </button>
-            </Dropdown>
+              trigger={
+              <>
+                <span style={{ display: 'flex' }} aria-hidden="true">
+                  <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                  <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
+                  <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
+                </span>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 999,
+                    border: '1px solid var(--ink-white-100)',
+                  }}
+                >
+                  <Icon name="overflow-horizontal" size={18} />
+                </span>
+              </>
+              }
+            />
           </div>
           </div>
         </div>
