@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/design-system';
 import type { IconName } from '@/design-system/3-primitives/Icon/Icon';
@@ -62,8 +62,9 @@ interface ParticipantExperienceProps {
   participantName: string;
   contact: ParticipantContact;
   onExit: () => void;
+  renderDocumentPreview?: (documentName: string, onClose: () => void) => ReactNode;
   preview?: boolean;
-}
+  }
 
 const COLORS = {
   ink: '#130032',
@@ -237,15 +238,21 @@ function TaskRow({ task, contactName, onAction }: { task: PETask; contactName: s
   );
 }
 
-export function ParticipantExperience({ source, participantName, contact, onExit, preview = false }: ParticipantExperienceProps) {
+export function ParticipantExperience({ source, participantName, contact, onExit, renderDocumentPreview, preview = false }: ParticipantExperienceProps) {
   const initial = useMemo(() => deriveParticipantView(source), [source]);
+  const [previewDoc, setPreviewDoc] = useState<string | null>(null);
 
-  // Without the preview banner there's no visible exit, so Escape returns to the sender view.
+  // Without the preview banner there's no visible exit, so Escape returns to the sender view
+  // (or closes an open document first).
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onExit(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (previewDoc) setPreviewDoc(null);
+      else onExit();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onExit]);
+  }, [onExit, previewDoc]);
   const [tasks, setTasks] = useState<PETask[]>(initial.tasks);
   const [tab, setTab] = useState<'tasks' | 'documents'>('tasks');
   const [toast, setToast] = useState<string | null>(null);
@@ -366,13 +373,15 @@ export function ParticipantExperience({ source, participantName, contact, onExit
                   <button type="button" aria-label={`Download ${doc.name}`} onClick={() => { setToast(`Downloading ${doc.name}`); window.setTimeout(() => setToast(null), 3000); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}>
                     <Icon name="download" size={20} color={COLORS.ink} />
                   </button>
-                  <button type="button" onClick={() => { setToast(`Opening ${doc.name}`); window.setTimeout(() => setToast(null), 3000); }} style={{ minWidth: 96, height: 40, borderRadius: 4, border: `1px solid ${COLORS.border}`, background: COLORS.card, color: COLORS.ink, fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>View</button>
+                  <button type="button" aria-label={`View ${doc.name}`} onClick={() => setPreviewDoc(doc.name)} style={{ minWidth: 96, height: 40, borderRadius: 4, border: `1px solid ${COLORS.border}`, background: COLORS.card, color: COLORS.ink, fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>View</button>
                 </li>
               ))}
             </ul>
           </section>
         )}
       </main>
+
+      {previewDoc && renderDocumentPreview?.(previewDoc, () => setPreviewDoc(null))}
 
       {toast && (
         <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: COLORS.ink, color: '#FFFFFF', padding: '12px 20px', borderRadius: 4, fontSize: 14, boxShadow: '0 4px 12px rgba(19,0,50,0.25)' }}>{toast}</div>

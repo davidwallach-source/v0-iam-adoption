@@ -3972,6 +3972,7 @@ interface DocumentPreviewProps {
   onSendForSignature?: (documentName: string) => void;
   onApprovalCreated?: (task: DealTask) => void;
   documentName: string;
+  readOnly?: boolean;
 }
 
 interface SendForApprovalModalProps {
@@ -4205,7 +4206,7 @@ function SendComboButton({ onSendForSignature, onSendForClientReview }: { onSend
   );
 }
 
-function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName }: DocumentPreviewProps) {
+function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName, readOnly = false }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
@@ -4562,11 +4563,17 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-          <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
-          <SendComboButton
-            onSendForSignature={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}
-            onSendForClientReview={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}
-          />
+          {readOnly ? (
+            <Button kind="secondary" size="small" onClick={onClose}>Close</Button>
+          ) : (
+            <>
+              <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
+              <SendComboButton
+                onSendForSignature={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}
+                onSendForClientReview={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -9016,6 +9023,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       participantName="Sam Sanders"
       contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials, photoUrl: '/images/leona-legal.png' }}
       onExit={closeParticipantView}
+      renderDocumentPreview={(documentName, onClose) => (
+        <DocumentPreview open readOnly documentName={documentName} onClose={onClose} />
+      )}
       preview={participantMode === 'preview'}
     />
   )}
