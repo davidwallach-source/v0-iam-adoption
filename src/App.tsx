@@ -4071,7 +4071,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
 
           {/* Recipient */}
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>
-            Recipient <span style={{ color: '#C0362C' }}>*</span>
+                Add Recipients <span style={{ color: '#C0362C' }}>*</span>
           </label>
           <div style={{ position: 'relative', marginBottom: 8 }}>
             <input
