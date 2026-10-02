@@ -47,6 +47,7 @@ import {
   dataTableStyles,
 } from '@/design-system';
 import { SpaceSidePanel, type SidePanelConversation } from './SpaceSidePanel';
+import { ParticipantExperience } from './ParticipantExperience';
 
 /* ═══════════════════════════════════════
    FilePickerDialog Component
@@ -2906,7 +2907,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════���������������═════════���══════════════�������═══���������������������════
+/* ═════�����������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -5271,7 +5272,7 @@ function RowOverflowMenu({
   triggerLabel = 'More options',
   triggerStyle,
 }: {
-  items: { label: string; icon?: React.ReactNode; onClick: () => void }[];
+  items: { label: string; icon?: React.ReactNode; onClick: () => void; dividerAfter?: boolean }[];
   trigger?: React.ReactNode;
   triggerLabel?: string;
   triggerStyle?: React.CSSProperties;
@@ -5319,15 +5320,19 @@ function RowOverflowMenu({
             style={{ position: 'fixed', top: coords.top, bottom: coords.bottom, right: coords.right, zIndex: 1071, minWidth: 180, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
           >
             {items.map((item) => (
-              <button
-                key={item.label}
-                role="menuitem"
-                onClick={(e) => { e.stopPropagation(); setOpen(false); item.onClick(); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
-              >
-                {item.icon}
-                {item.label}
-              </button>
+              <React.Fragment key={item.label}>
+                <button
+                  role="menuitem"
+                  onClick={(e) => { e.stopPropagation(); setOpen(false); item.onClick(); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+                {item.dividerAfter && (
+                  <div role="separator" style={{ height: 1, margin: '6px 0', background: 'var(--ink-border-subtle)' }} />
+                )}
+              </React.Fragment>
             ))}
           </div>
         </>
@@ -7587,6 +7592,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
   const [showAgreementManagerModal, setShowAgreementManagerModal] = useState(false);
   const [showAddSeatsModal, setShowAddSeatsModal] = useState(false);
+  const [participantMode, setParticipantMode] = useState<'demo' | 'preview' | null>(null);
+  const closeParticipantView = useCallback(() => setParticipantMode(null), []);
   const [openEnvelope, setOpenEnvelope] = useState<OpenEnvelope | null>(null);
   // Id of the table row whose envelope panel is currently open, so that row
   // stays highlighted (and only that row) while the panel is open.
@@ -8197,7 +8204,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             );
           })()}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexShrink: 0, marginTop: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, marginTop: 16 }}>
+            <button
+              type="button"
+              onClick={() => setParticipantMode('demo')}
+              aria-label="View as Sam Sanders (participant experience)"
+              title="View as Sam Sanders"
+              style={{ display: 'flex', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 999, marginRight: -8, position: 'relative', zIndex: 3 }}
+            >
+              <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
+            </button>
             <RowOverflowMenu
               triggerLabel="Space actions: share or add agent"
               triggerStyle={{
@@ -8220,14 +8236,19 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   label: 'Add Agent',
                   icon: <Icon name="sparkle" size="small" />,
                   onClick: () => {},
+                  dividerAfter: true,
+                },
+                {
+                  label: 'Recipient Preview',
+                  icon: <Icon name="eye" size="small" />,
+                  onClick: () => setParticipantMode('preview'),
                 },
               ]}
               trigger={
               <>
                 <span style={{ display: 'flex' }} aria-hidden="true">
-                  <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
-                  <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
-                  <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
+                  <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8, position: 'relative', zIndex: 2 }} />
+                  <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', position: 'relative', zIndex: 1 }} />
                 </span>
                 <span
                   aria-hidden="true"
@@ -8886,7 +8907,23 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         <PaywallUpgradeModal kind="parties" onClose={() => setShowAgreementManagerModal(false)} />
       )}
 
-      {/* Paywall: Add user licenses modal (collaborator avatars) */}
+      {participantMode && (
+    <ParticipantExperience
+      source={{
+        spaceName: agreement.name,
+        partyName: agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : 'External party'),
+        tasks: workspaceData.tasks,
+        documents: workspaceData.documents,
+        supplementalDocs: workspaceData.supplementalDocs,
+      }}
+      participantName="Sam Sanders"
+      contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials, photoUrl: '/images/leona-legal.png' }}
+      onExit={closeParticipantView}
+      preview={participantMode === 'preview'}
+    />
+  )}
+
+  {/* Paywall: Add user licenses modal (collaborator avatars) */}
       {version === 'paywalls' && showAddSeatsModal && (
         <PaywallAddSeatsModal onClose={() => setShowAddSeatsModal(false)} />
       )}
@@ -10253,11 +10290,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         label: 'Agreements',
         icon: 'envelope' as const,
         active: activeTab === 'agreements',
+        onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); },
         onMoreClick: () => handleUnavailableTabClick('agreements-options'),
         children: [
-          { id: 'spaces-rail', label: 'Spaces', active: activeTab === 'agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
-          { id: 'envelopes-rail', label: 'Envelopes', onClick: () => handleUnavailableTabClick('envelopes') },
-          { id: 'agreement-manager-rail', label: 'Agreement Manager', onClick: () => handleUnavailableTabClick('agreement-manager') },
+          { id: 'all-agreements-rail', label: 'All Agreements', active: activeTab === 'agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
+          { id: 'document-repository-rail', label: 'Document Repository', onClick: () => handleUnavailableTabClick('document-repository') },
         ],
       },
       { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => handleUnavailableTabClick('requests') },
