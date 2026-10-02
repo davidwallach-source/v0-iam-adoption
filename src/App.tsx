@@ -2490,7 +2490,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
 
 /* ══════════════════════════════���═══��═���══
    FilterMenu — multi-select dropdown for the agreements filter bar
-   ═══════════════════════════════════════ */
+   ════════════════════════════���══════════ */
 
 interface FilterMenuProps {
   label: string;
@@ -3981,19 +3981,19 @@ interface SendForApprovalModalProps {
   onComplete: (task: DealTask) => void;
 }
 
+const DEFAULT_CLIENT_REVIEWER = { name: 'Sam Sanders', email: 'sam.sanders@globex.com' } as MentionPerson;
+
 function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendForApprovalModalProps) {
-  const [approvers, setApprovers] = useState<MentionPerson[]>([]);
+  const [approvers, setApprovers] = useState<MentionPerson[]>([DEFAULT_CLIENT_REVIEWER]);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState('');
-  const [requireAll, setRequireAll] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setApprovers([]);
+      setApprovers([DEFAULT_CLIENT_REVIEWER]);
       setQuery('');
       setMessage('');
-      setRequireAll(false);
       setSending(false);
     }
   }, [open]);
@@ -4025,10 +4025,10 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
     const first = approvers[0];
     const task: DealTask = {
       id: 'approval-' + Date.now(),
-      title: `Approve ${documentName}`,
+      title: `Review ${documentName}`,
       type: 'Approval',
-      team: '',
-      assignee: first ? first.name : 'Approvers',
+      team: 'External',
+      assignee: first ? first.name : 'Recipient',
       assigneeInitials: first ? initialsOf(first.name) : 'AP',
       status: 'In progress',
       dueDate: '--',
@@ -4043,7 +4043,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Send for approval"
+      aria-label="Send for Client Review"
       onClick={onClose}
       style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'white', display: 'flex', alignItems: 'stretch', justifyContent: 'center' }}
     >
@@ -4053,11 +4053,8 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 24px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
-          <div style={{ width: '100%', maxWidth: 640, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#130032' }}>Send for approval</div>
-              <div style={{ fontSize: 13, color: '#8A85A0', marginTop: 4, lineHeight: 1.4 }}>Choose who needs to approve this document before it moves forward.</div>
-            </div>
+          <div style={{ width: '100%', maxWidth: 640, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#130032' }}>Send for Client Review</h1>
             <button onClick={onClose} style={iconBtn} aria-label="Close"><Icon name="close" size={18} /></button>
           </div>
         </div>
@@ -4072,9 +4069,9 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
             <span style={{ fontSize: 14, fontWeight: 600, color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{documentName}</span>
           </div>
 
-          {/* Approvers */}
+          {/* Recipient */}
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>
-            Add approvers <span style={{ color: '#C0362C' }}>*</span>
+                Add Recipients <span style={{ color: '#C0362C' }}>*</span>
           </label>
           <div style={{ position: 'relative', marginBottom: 8 }}>
             <input
@@ -4120,26 +4117,9 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Add a note for your approvers"
-            style={{ width: '100%', minHeight: 80, resize: 'vertical', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '12px 14px', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--ink-font-family)', color: '#130032', marginBottom: 24, boxSizing: 'border-box' }}
+            placeholder="Add a note for your recipient"
+            style={{ width: '100%', minHeight: 80, resize: 'vertical', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '12px 14px', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--ink-font-family)', color: '#130032', boxSizing: 'border-box' }}
           />
-
-          {/* Require all toggle */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>Require all to approve</div>
-              <div style={{ fontSize: 13, color: '#8A85A0', lineHeight: 1.4, marginTop: 2, maxWidth: 320 }}>When on, every approver must approve before the document is cleared.</div>
-            </div>
-            <button
-              role="switch"
-              aria-checked={requireAll}
-              aria-label="Require all to approve"
-              onClick={() => setRequireAll((v) => !v)}
-              style={{ flexShrink: 0, width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', padding: 2, background: requireAll ? 'var(--ink-cobalt-80, #4C00FF)' : '#C7C3D0', display: 'flex', justifyContent: requireAll ? 'flex-end' : 'flex-start', transition: 'background 0.15s' }}
-            >
-              <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'white' }} />
-            </button>
-          </div>
           </div>
         </div>
 
@@ -4167,12 +4147,61 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
                 <path d="M8 2 A6 6 0 0 1 14 8" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             )}
-            Send for approval
+            Send for Review
           </button>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// The preview overlay sits at z-index 1100, above the shared Dropdown portal,
+// so this menu renders at a fixed position computed from the combo button.
+function SendComboButton({ onSendForSignature, onSendForClientReview }: { onSendForSignature: () => void; onSendForClientReview: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, right: 0 });
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const toggleMenu = () => {
+    if (!open && wrapRef.current) {
+      const r = wrapRef.current.getBoundingClientRect();
+      setCoords({ top: r.bottom + 6, right: window.innerWidth - r.right });
+    }
+    setOpen(v => !v);
+  };
+
+  const items = [
+    { label: 'Send for Client Review', onClick: onSendForClientReview },
+  ];
+
+  return (
+    <>
+      <ComboButton ref={wrapRef} variant="primary" size="small" onClick={() => { setOpen(false); onSendForSignature(); }} onDropdownClick={toggleMenu}>
+        Send for Signature
+      </ComboButton>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 1110 }} />
+          <div
+            role="menu"
+            aria-label="Send options"
+            style={{ position: 'fixed', top: coords.top, right: coords.right, zIndex: 1111, minWidth: 220, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
+          >
+            {items.map(item => (
+              <button
+                key={item.label}
+                role="menuitem"
+                onClick={() => { setOpen(false); item.onClick(); }}
+                style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
@@ -4533,9 +4562,11 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-                <Button kind="tertiary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
-                <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}>Send for Approval</Button>
-          <Button kind="primary" size="small" onClick={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}>Send for Signature</Button>
+          <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
+          <SendComboButton
+            onSendForSignature={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}
+            onSendForClientReview={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}
+          />
         </div>
       </div>
 
@@ -7520,6 +7551,21 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
   );
 }
 
+function clickableRowProps(onActivate: () => void, label: string) {
+  return {
+    onClick: onActivate,
+    onKeyDown: (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+      if (e.target !== e.currentTarget) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onActivate();
+      }
+    },
+    tabIndex: 0,
+    'aria-label': label,
+  };
+}
+
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
@@ -7584,10 +7630,37 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = (msg: string) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast(msg);
-    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  if (toastTimer.current) clearTimeout(toastTimer.current);
+  setToast(msg);
+  toastTimer.current = setTimeout(() => setToast(null), 5000);
   };
+  const tasksSectionRef = useRef<HTMLDivElement | null>(null);
+  // Wait a frame so the newly pinned task row has rendered before measuring.
+  const revealTasksSection = () => {
+  requestAnimationFrame(() => {
+    const el = tasksSectionRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const firstRowBottom = rect.top + 140;
+    if (rect.top < 0 || firstRowBottom > window.innerHeight) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+  };
+  // Review sends from the workspace-level preview arrive as injected tasks, so
+  // confirm and reveal them here; tasks present at mount are ignored.
+  const seenInjectedCount = useRef(injectedTasks?.length ?? 0);
+  useEffect(() => {
+  const count = injectedTasks?.length ?? 0;
+  if (count > seenInjectedCount.current && injectedTasks) {
+    const newest = injectedTasks[count - 1];
+    setPinnedTaskId(newest.id);
+    showToast('Your document was sent for review');
+    revealTasksSection();
+  }
+  seenInjectedCount.current = count;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [injectedTasks]);
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
   const [showAgreementManagerModal, setShowAgreementManagerModal] = useState(false);
@@ -8379,11 +8452,18 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 <tr
                                   className="ink-table-row"
                                   data-active={isEnvelopeOpen}
+                                  {...clickableRowProps(() => openEnvelopePanel({
+                                    envelopeName: agreement.name,
+                                    documentNames: envelopeDocNames,
+                                    signatureProgress: envelope.signatureProgress,
+                                    dateModified: envelope.documents[0]?.dateModified,
+                                    rowId: envelopeRowId,
+                                  }), 'Open Document Packet')}
                                   onMouseEnter={() => setHoveredDocRowId(envelopeRowId)}
                                   onMouseLeave={() => setHoveredDocRowId(prev => (prev === envelopeRowId ? null : prev))}
-                                  style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}
+                                  style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent', cursor: 'pointer' }}
                                 >
-                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <input
                                       type="checkbox"
                                       style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
@@ -8396,13 +8476,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                         <Tooltip text={envelopeDocNames.join(', ')} location="below">
                                           <button
                                             type="button"
-                                            onClick={() => openEnvelopePanel({
+                                            tabIndex={-1}
+                                            onClick={(e) => { e.stopPropagation(); openEnvelopePanel({
                                               envelopeName: agreement.name,
                                               documentNames: envelopeDocNames,
                                               signatureProgress: envelope.signatureProgress,
                                               dateModified: envelope.documents[0]?.dateModified,
                                               rowId: envelopeRowId,
-                                            })}
+                                            }); }}
                                             style={{ display: 'block', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
                                           >
                                             <Text size="sm" weight="medium">
@@ -8505,21 +8586,32 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           // Documents still being worked on should not open the panel.
                           const isEnvelopeDoc = !!doc.signatureProgress;
                           const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
+                          const openDocument = () => {
+                            if (doc.id.startsWith('added-')) {
+                              // Documents added via the Add → Document flow open in the local Doc Preview.
+                              setPendingPreviewDoc(doc.name);
+                            } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                              onEditNDA();
+                            } else {
+                              onPreviewDocument?.(doc.name);
+                            }
+                          };
+                          const activateRow = isEnvelopeDoc ? () => openEnvelopePanel({
+                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            documentNames: [doc.name],
+                            signatureProgress: doc.signatureProgress,
+                            dateModified: doc.lastModified || doc.dateModified,
+                            rowId: doc.id,
+                          }) : openDocument;
                           return (
                             <tr
                               key={doc.id}
-                              onClick={isEnvelopeDoc ? () => openEnvelopePanel({
-                                envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
-                                documentNames: [doc.name],
-                                signatureProgress: doc.signatureProgress,
-                                dateModified: doc.lastModified || doc.dateModified,
-                                rowId: doc.id,
-                              }) : undefined}
+                              {...clickableRowProps(activateRow, `Open ${doc.name}`)}
                               className="ink-table-row"
                               data-active={isOpen || isSelected}
                               onMouseEnter={() => setHoveredDocRowId(doc.id)}
                               onMouseLeave={() => setHoveredDocRowId(prev => (prev === doc.id ? null : prev))}
-                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg }}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: 'pointer' }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
@@ -8597,16 +8689,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       <Button
                                         kind="secondary"
                                         size="small"
-                                        onClick={() => {
-                                          if (doc.id.startsWith('added-')) {
-                                            // Documents added via the Add → Document flow open in the local Doc Preview.
-                                            setPendingPreviewDoc(doc.name);
-                                          } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                            onEditNDA();
-                                          } else {
-                                            onPreviewDocument?.(doc.name);
-                                          }
-                                        }}
+                                        onClick={openDocument}
                                       >
                                         {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
                                       </Button>
@@ -8648,8 +8731,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           </tr>
                         </thead>
                         <tbody>
-                          {currentSupplementalDocs.map((doc) => (
-                            <tr key={doc.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                          {currentSupplementalDocs.map((doc) => {
+                            const openSupplementalDoc = () => {
+                              if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                onEditNDA();
+                              } else {
+                                onPreviewDocument?.(doc.name);
+                              }
+                            };
+                            return (
+                            <tr key={doc.id} className="ink-table-row" {...clickableRowProps(openSupplementalDoc, `Open ${doc.name}`)} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }}>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
@@ -8658,15 +8749,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 </Inline>
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{relativePast(doc.dateModified)}</td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <Inline gap="small" align="center">
-                                  <Button kind="secondary" size="small" onClick={() => {
-                                    if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                      onEditNDA();
-                                    } else {
-                                      onPreviewDocument?.(doc.name);
-                                    }
-                                  }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
+                                  <Button kind="secondary" size="small" onClick={openSupplementalDoc}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                   <RowOverflowMenu
                                     items={[
                                       { label: 'Download', onClick: () => showToast('Downloading document.') },
@@ -8676,7 +8761,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 </Inline>
                               </td>
                             </tr>
-                          ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     )}
@@ -8687,7 +8773,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               )}
 
               {(
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+                <div ref={tasksSectionRef} style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', scrollMarginTop: 'var(--ink-spacing-300)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Tasks</div>
               <AddMenu
@@ -8716,7 +8802,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 </thead>
                 <tbody>
                   {orderedTasks.map((task) => (
-                    <tr key={task.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                    <tr key={task.id} className="ink-table-row" {...clickableRowProps(() => showToast(`Opening "${task.title}".`), `Open task ${task.title}`)} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
                           {task.type === 'Sign' ? (
@@ -8752,10 +8838,19 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
                       </td>
-                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Button kind="secondary" size="small">
-                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
-                        </Button>
+                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
+                        {(() => {
+                          const isRemind = task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') || task.status === 'In progress' || !!task.isDueSoon;
+                          return (
+                            <Button
+                              kind="secondary"
+                              size="small"
+                              onClick={() => showToast(isRemind ? `Reminder sent to ${task.assignee === '--' ? 'assignee' : task.assignee}.` : `Opening "${task.title}".`)}
+                            >
+                              {isRemind ? 'Remind' : 'View'}
+                            </Button>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}
@@ -8896,9 +8991,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onClose={() => setApprovalModalDoc(null)}
         onComplete={(task) => {
           setSentTasks(prev => [...prev, task]);
-          logActivity('check', `sent ${approvalModalDoc ?? 'a document'} for approval`);
+          setPinnedTaskId(task.id);
+          logActivity('check', `sent ${approvalModalDoc ?? 'a document'} for review`);
           setApprovalModalDoc(null);
-          showToast('Sent for approval');
+          showToast('Your document was sent for review');
+          revealTasksSection();
         }}
       />
 
@@ -8912,9 +9009,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       source={{
         spaceName: agreement.name,
         partyName: agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : 'External party'),
-        tasks: workspaceData.tasks,
-        documents: workspaceData.documents,
-        supplementalDocs: workspaceData.supplementalDocs,
+        tasks: orderedTasks,
+        documents: modifiedDocuments,
+        supplementalDocs: isNewlyCreated || isUploadedDocAgreement ? [] : workspaceData.supplementalDocs,
       }}
       participantName="Sam Sanders"
       contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials, photoUrl: '/images/leona-legal.png' }}
@@ -9737,7 +9834,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��──────────────────���─────────────────────────── */
+   ───────────────────────────��──────────────────���──────────────────���──────── */
 export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
@@ -10448,7 +10545,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     ],
   };
 
-  /* ���─ View-filtered data (Sales Agreement Workspaces) ── */
+  /* �����─ View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
     // In the Simple Use Case version the All Agreements list starts as a single
     // seeded Agreement Space (the Handbook Sign-Off). Newly created agreements

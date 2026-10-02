@@ -71,8 +71,8 @@ const COLORS = {
   surface: '#F4F4F6',
   card: '#FFFFFF',
   border: '#E3E1EA',
-  action: '#2A1560',
-  continue: '#4C00FF',
+  action: '#1F2C23',
+  continue: '#1F2C23',
   success: '#0E8A4F',
 };
 
@@ -83,7 +83,8 @@ const KIND_ICON: Record<PETaskKind, IconName> = {
   review: 'eye',
 };
 
-function formatLongDate(raw: string): string {
+function formatLongDate(raw: string | undefined | null): string {
+  if (!raw) return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(raw.trim());
   if (!m) return raw;
   const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
@@ -108,59 +109,68 @@ function toStatus(status: string | undefined): PETaskStatus {
 const isSamePerson = (a: string, b: string) =>
   a.toLowerCase().split(' ')[0] === b.toLowerCase().split(' ')[0];
 
-// Builds the external participant's view of a space: only the tasks routed to
-// their organization, plus the documents that have been shared with them.
+const INTERNAL_TEAMS = new Set(['Legal', 'Finance', 'Procurement', 'Security', 'Executive', 'IT', 'Product', 'Quality']);
+const EXTERNAL_TYPES = /sign|upload|form|view/i;
+
+// A task belongs to the external participant when it was routed outside the
+// organization (External/Family team) or is an external action (sign, upload,
+// form) with no internal team. Internal approvals never reach the participant.
+function isExternalTask(t: SourceTask, partyName: string): boolean {
+  if (t.team === 'External' || t.team === 'Family') return true;
+  if (t.assignee && t.assignee.toLowerCase() === partyName.toLowerCase()) return true;
+  if (INTERNAL_TEAMS.has(t.team)) return false;
+  if (/approv/i.test(t.type)) return false;
+  return EXTERNAL_TYPES.test(t.type);
+}
+
+const docNameFromTitle = (title: string) => title.replace(/^(Sign|Review|Upload)\s+/i, '').toLowerCase();
+
+// Builds the external participant's view of a space from its live state: only
+// the open tasks routed to them, plus the documents shared with them.
 function deriveParticipantView(source: ParticipantSpaceSource): { tasks: PETask[]; documents: PEDocument[] } {
   const { partyName } = source;
   const fallbackDate = source.documents[0]?.dateModified ?? '4/20/2026';
 
-  const tasks: PETask[] = [];
   const seen = new Set<string>();
-  const push = (t: PETask) => {
-    const key = t.title.toLowerCase();
-    if (seen.has(key)) return;
-    seen.add(key);
-    tasks.push(t);
-  };
-
-  source.tasks
-    .filter(t => t.team === 'External' || t.team === 'Family' || isSamePerson(t.assignee, partyName))
-    .forEach((t, i) => push({
-      id: `task-${t.id}`,
-      title: t.title,
-      kind: toKind(t.type),
-      status: toStatus(t.status),
-      sentDate: fallbackDate,
-      hasMessage: i === 0,
-    }));
-
-  source.documents
-    .filter(d => d.status !== 'Draft')
-    .forEach(d => {
-      const status = d.status ?? '';
-      if (/pending signature/i.test(status)) {
-        push({ id: `doc-sign-${d.id}`, title: `Sign ${d.name}`, kind: 'sign', status: 'not-started', sentDate: d.dateModified });
-      } else if (/in review/i.test(status)) {
-        push({ id: `doc-review-${d.id}`, title: `Review ${d.name}`, kind: 'review', status: 'not-started', sentDate: d.dateModified });
-      } else if (/executed|completed/i.test(status) && tasks.length < 3) {
-        push({ id: `doc-signed-${d.id}`, title: `Sign ${d.name}`, kind: 'sign', status: 'complete', sentDate: d.dateModified });
-      }
+  const tasks: PETask[] = source.tasks
+    .filter(t => isExternalTask(t, partyName) && toStatus(t.status) !== 'complete')
+    .filter(t => {
+      const key = t.title.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((t, i) => {
+      const kind = toKind(t.type);
+      // For sign/review requests the sender's "In progress" means "awaiting the
+      // recipient", so the participant hasn't started it yet.
+      const status = (kind === 'sign' || kind === 'review') ? 'not-started' as const : toStatus(t.status);
+      return {
+        id: `task-${t.id}`,
+        title: t.title,
+        kind,
+        status,
+        sentDate: fallbackDate,
+        hasMessage: i === 0,
+      };
     });
 
-  source.supplementalDocs
-    .filter(d => d.owner && isSamePerson(d.owner, partyName))
-    .forEach(d => push({ id: `doc-upload-${d.id}`, title: `Upload ${d.name}`, kind: 'upload', status: 'complete', sentDate: d.dateModified }));
+  // A document is visible once it has left draft, or when one of the
+  // participant's tasks references it (e.g. a draft just sent for review).
+  const taskDocNames = tasks.map(t => docNameFromTitle(t.title));
+  const isShared = (d: SourceDocument) =>
+    d.status !== 'Draft' || taskDocNames.some(n => n.includes(d.name.toLowerCase()) || d.name.toLowerCase().includes(n));
 
   const documents: PEDocument[] = [
     ...source.documents
-      .filter(d => d.status !== 'Draft')
-      .map(d => ({ id: `d-${d.id}`, name: d.name, status: d.status ?? 'Shared', dateModified: d.dateModified, sharedBy: 'shared' })),
+      .filter(isShared)
+      .map(d => ({ id: `d-${d.id}`, name: d.name, status: d.status && d.status !== 'Draft' ? d.status : 'In Review', dateModified: d.dateModified, sharedBy: 'shared' })),
     ...source.supplementalDocs
       .filter(d => d.owner && isSamePerson(d.owner, partyName))
       .map(d => ({ id: `s-${d.id}`, name: d.name, status: 'Uploaded', dateModified: d.dateModified, sharedBy: 'you' })),
   ];
 
-  return { tasks: tasks.slice(0, 8), documents };
+  return { tasks, documents };
 }
 
 const GROUPS: { title: string; kinds: PETaskKind[] }[] = [
@@ -267,11 +277,11 @@ export function ParticipantExperience({ source, participantName, contact, onExit
         </div>
       )}
 
-      <header style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)', color: '#FFFFFF' }}>
+      <header style={{ background: 'linear-gradient(172deg, #1E2321 0%, #1F2A24 45%, #1E3A2B 100%)', color: '#FFFFFF' }}>
         <div style={{ ...inner, paddingTop: 28, display: 'flex', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-            <button type="button" onClick={onExit} aria-label={`Docusign - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
-              <img src="/docusign-logo-white.svg" alt="" style={{ height: 27, width: 'auto', display: 'block' }} />
+            <button type="button" onClick={onExit} aria-label={`Fontara - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
+              <img src="/images/fontara-logo-white.svg" alt="" style={{ height: 40, width: 'auto', display: 'block' }} />
             </button>
             <h1 style={{ margin: 0, fontSize: 40, fontWeight: 400, lineHeight: 1.2, textWrap: 'balance' }}>{`Welcome, ${participantName}`}</h1>
             <div style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start', gap: 16, padding: '10px 24px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', fontSize: 15 }}>
