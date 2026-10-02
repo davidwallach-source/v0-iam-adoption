@@ -2490,7 +2490,7 @@ function findFolderNode(nodes: FolderNode[], id: string): FolderNode | null {
 
 /* ══════════════════════════════���═══��═���══
    FilterMenu — multi-select dropdown for the agreements filter bar
-   ═══════════════════════════════════════ */
+   ════════════════════════════���══════════ */
 
 interface FilterMenuProps {
   label: string;
@@ -7630,10 +7630,37 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = (msg: string) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast(msg);
-    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  if (toastTimer.current) clearTimeout(toastTimer.current);
+  setToast(msg);
+  toastTimer.current = setTimeout(() => setToast(null), 5000);
   };
+  const tasksSectionRef = useRef<HTMLDivElement | null>(null);
+  // Wait a frame so the newly pinned task row has rendered before measuring.
+  const revealTasksSection = () => {
+  requestAnimationFrame(() => {
+    const el = tasksSectionRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const firstRowBottom = rect.top + 140;
+    if (rect.top < 0 || firstRowBottom > window.innerHeight) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+  };
+  // Review sends from the workspace-level preview arrive as injected tasks, so
+  // confirm and reveal them here; tasks present at mount are ignored.
+  const seenInjectedCount = useRef(injectedTasks?.length ?? 0);
+  useEffect(() => {
+  const count = injectedTasks?.length ?? 0;
+  if (count > seenInjectedCount.current && injectedTasks) {
+    const newest = injectedTasks[count - 1];
+    setPinnedTaskId(newest.id);
+    showToast('Your document was sent for review');
+    revealTasksSection();
+  }
+  seenInjectedCount.current = count;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [injectedTasks]);
   const [showPartyHistory, setShowPartyHistory] = useState(false);
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
   const [showAgreementManagerModal, setShowAgreementManagerModal] = useState(false);
@@ -8746,7 +8773,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               )}
 
               {(
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)' }}>
+                <div ref={tasksSectionRef} style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', scrollMarginTop: 'var(--ink-spacing-300)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Tasks</div>
               <AddMenu
@@ -8964,9 +8991,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         onClose={() => setApprovalModalDoc(null)}
         onComplete={(task) => {
           setSentTasks(prev => [...prev, task]);
-          logActivity('check', `sent ${approvalModalDoc ?? 'a document'} for approval`);
+          setPinnedTaskId(task.id);
+          logActivity('check', `sent ${approvalModalDoc ?? 'a document'} for review`);
           setApprovalModalDoc(null);
-          showToast('Sent for approval');
+          showToast('Your document was sent for review');
+          revealTasksSection();
         }}
       />
 
