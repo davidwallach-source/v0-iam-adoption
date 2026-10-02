@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/design-system';
 import type { IconName } from '@/design-system/3-primitives/Icon/Icon';
@@ -61,6 +61,7 @@ interface ParticipantExperienceProps {
   participantName: string;
   contact: ParticipantContact;
   onExit: () => void;
+  preview?: boolean;
 }
 
 const COLORS = {
@@ -225,8 +226,15 @@ function TaskRow({ task, contactName, onAction }: { task: PETask; contactName: s
   );
 }
 
-export function ParticipantExperience({ source, participantName, contact, onExit }: ParticipantExperienceProps) {
+export function ParticipantExperience({ source, participantName, contact, onExit, preview = false }: ParticipantExperienceProps) {
   const initial = useMemo(() => deriveParticipantView(source), [source]);
+
+  // Without the preview banner there's no visible exit, so Escape returns to the sender view.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onExit(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onExit]);
   const [tasks, setTasks] = useState<PETask[]>(initial.tasks);
   const [tab, setTab] = useState<'tasks' | 'documents'>('tasks');
   const [toast, setToast] = useState<string | null>(null);
@@ -250,11 +258,13 @@ export function ParticipantExperience({ source, participantName, contact, onExit
 
   return createPortal(
     <div role="dialog" aria-modal="true" aria-label={`Participant view for ${participantName}`} style={{ position: 'fixed', inset: 0, zIndex: 1080, background: COLORS.surface, overflowY: 'auto', color: COLORS.ink }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '8px 16px', background: '#FFF4CC', color: COLORS.ink, fontSize: 14 }}>
-        <Icon name="eye" size={16} color={COLORS.ink} />
-        <span>{`Previewing the participant experience as ${participantName} (${source.partyName})`}</span>
-        <button type="button" onClick={onExit} style={{ background: 'none', border: `1px solid ${COLORS.ink}`, borderRadius: 4, padding: '2px 10px', fontSize: 13, cursor: 'pointer', color: COLORS.ink }}>Exit preview</button>
-      </div>
+      {preview && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '8px 16px', background: '#FFF4CC', color: COLORS.ink, fontSize: 14 }}>
+          <Icon name="eye" size={16} color={COLORS.ink} />
+          <span>{`Previewing the participant experience as ${participantName} (${source.partyName})`}</span>
+          <button type="button" onClick={onExit} style={{ background: 'none', border: `1px solid ${COLORS.ink}`, borderRadius: 4, padding: '2px 10px', fontSize: 13, cursor: 'pointer', color: COLORS.ink }}>Exit preview</button>
+        </div>
+      )}
 
       <header style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)', color: '#FFFFFF' }}>
         <div style={{ ...inner, paddingTop: 28, display: 'flex', justifyContent: 'space-between', gap: 32 }}>
