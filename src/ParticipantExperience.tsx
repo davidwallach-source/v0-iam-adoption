@@ -71,8 +71,8 @@ const COLORS = {
   surface: '#F4F4F6',
   card: '#FFFFFF',
   border: '#E3E1EA',
-  action: '#2A1560',
-  continue: '#4C00FF',
+  action: '#1F2C23',
+  continue: '#1F2C23',
   success: '#0E8A4F',
 };
 
@@ -267,11 +267,11 @@ export function ParticipantExperience({ source, participantName, contact, onExit
         </div>
       )}
 
-      <header style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)', color: '#FFFFFF' }}>
+      <header style={{ background: 'linear-gradient(172deg, #1E2321 0%, #1F2A24 45%, #1E3A2B 100%)', color: '#FFFFFF' }}>
         <div style={{ ...inner, paddingTop: 28, display: 'flex', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-            <button type="button" onClick={onExit} aria-label={`Docusign - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
-              <img src="/docusign-logo-white.svg" alt="" style={{ height: 27, width: 'auto', display: 'block' }} />
+            <button type="button" onClick={onExit} aria-label={`Fontara - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
+              <img src="/images/fontara-logo-white.svg" alt="" style={{ height: 40, width: 'auto', display: 'block' }} />
             </button>
             <h1 style={{ margin: 0, fontSize: 40, fontWeight: 400, lineHeight: 1.2, textWrap: 'balance' }}>{`Welcome, ${participantName}`}</h1>
             <div style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start', gap: 16, padding: '10px 24px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', fontSize: 15 }}>
