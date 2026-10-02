@@ -83,7 +83,8 @@ const KIND_ICON: Record<PETaskKind, IconName> = {
   review: 'eye',
 };
 
-function formatLongDate(raw: string): string {
+function formatLongDate(raw: string | undefined | null): string {
+  if (!raw) return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(raw.trim());
   if (!m) return raw;
   const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
