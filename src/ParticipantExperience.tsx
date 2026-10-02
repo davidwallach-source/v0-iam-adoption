@@ -54,6 +54,7 @@ export interface ParticipantContact {
   email: string;
   phone: string;
   initials: string;
+  photoUrl?: string;
 }
 
 interface ParticipantExperienceProps {
@@ -269,7 +270,9 @@ export function ParticipantExperience({ source, participantName, contact, onExit
       <header style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)', color: '#FFFFFF' }}>
         <div style={{ ...inner, paddingTop: 28, display: 'flex', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-            <img src="/docusign-logo-white.svg" alt="Docusign" style={{ height: 32, width: 'auto', alignSelf: 'flex-start' }} />
+            <button type="button" onClick={onExit} aria-label={`Docusign - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
+              <img src="/docusign-logo-white.svg" alt="" style={{ height: 27, width: 'auto', display: 'block' }} />
+            </button>
             <h1 style={{ margin: 0, fontSize: 40, fontWeight: 400, lineHeight: 1.2, textWrap: 'balance' }}>{`Welcome, ${participantName}`}</h1>
             <div style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start', gap: 16, padding: '10px 24px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', fontSize: 15 }}>
               <span style={{ fontWeight: 500 }}>{source.spaceName}</span>
@@ -291,7 +294,11 @@ export function ParticipantExperience({ source, participantName, contact, onExit
                 <span>{contact.phone}</span>
                 <button type="button" onClick={() => { setToast(`Message sent to ${contact.name}`); window.setTimeout(() => setToast(null), 3000); }} style={{ marginTop: 8, alignSelf: 'flex-start', background: 'transparent', color: '#FFFFFF', border: '1px solid #FFFFFF', borderRadius: 999, padding: '8px 22px', fontSize: 15, cursor: 'pointer' }}>Send message</button>
               </div>
-              <span aria-hidden="true" style={{ width: 80, height: 80, borderRadius: '50%', background: '#FFFFFF', color: COLORS.action, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 600 }}>{contact.initials}</span>
+              {contact.photoUrl ? (
+                <img src={contact.photoUrl} alt={contact.name} width={80} height={80} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <span aria-hidden="true" style={{ width: 80, height: 80, borderRadius: '50%', background: '#FFFFFF', color: COLORS.action, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 600 }}>{contact.initials}</span>
+              )}
             </div>
           </div>
         </div>

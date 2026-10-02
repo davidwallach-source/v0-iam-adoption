@@ -8917,7 +8917,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         supplementalDocs: workspaceData.supplementalDocs,
       }}
       participantName="Sam Sanders"
-      contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials }}
+      contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials, photoUrl: '/images/leona-legal.png' }}
       onExit={closeParticipantView}
       preview={participantMode === 'preview'}
     />
