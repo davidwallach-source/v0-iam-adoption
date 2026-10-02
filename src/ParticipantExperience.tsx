@@ -259,8 +259,20 @@ export function ParticipantExperience({ source, participantName, contact, onExit
 
   const remaining = tasks.filter(t => t.status !== 'complete').length;
 
+  const findTaskDocument = (task: PETask) => {
+  const target = docNameFromTitle(task.title);
+  return initial.documents.find(d => {
+  const name = d.name.toLowerCase();
+  return name === target || name.includes(target) || target.includes(name);
+  })?.name ?? task.title.replace(/^(Sign|Review|Upload)\s+/i, '');
+  };
+  
   const advance = (task: PETask) => {
-    if (task.status === 'complete') {
+  if (task.kind === 'review' && renderDocumentPreview) {
+  setPreviewDoc(findTaskDocument(task));
+  return;
+  }
+  if (task.status === 'complete') {
       setToast(`Opening ${task.title.replace(/^(Sign|Upload|Review) /, '')}`);
     } else if (task.kind === 'form' && task.status === 'not-started') {
       setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, status: 'started' } : t)));
