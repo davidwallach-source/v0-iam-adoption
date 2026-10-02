@@ -2906,7 +2906,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════���������������═════════���══════════════�������═══���������������������════
+/* ═════����������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -10255,9 +10255,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         active: activeTab === 'agreements',
         onMoreClick: () => handleUnavailableTabClick('agreements-options'),
         children: [
-          { id: 'spaces-rail', label: 'Spaces', active: activeTab === 'agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
-          { id: 'envelopes-rail', label: 'Envelopes', onClick: () => handleUnavailableTabClick('envelopes') },
-          { id: 'agreement-manager-rail', label: 'Agreement Manager', onClick: () => handleUnavailableTabClick('agreement-manager') },
+          { id: 'all-agreements-rail', label: 'All Agreements', active: activeTab === 'agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
+          { id: 'document-repository-rail', label: 'Document Repository', onClick: () => handleUnavailableTabClick('document-repository') },
         ],
       },
       { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => handleUnavailableTabClick('requests') },
