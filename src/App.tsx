@@ -7520,6 +7520,21 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
   );
 }
 
+function clickableRowProps(onActivate: () => void, label: string) {
+  return {
+    onClick: onActivate,
+    onKeyDown: (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+      if (e.target !== e.currentTarget) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onActivate();
+      }
+    },
+    tabIndex: 0,
+    'aria-label': label,
+  };
+}
+
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
@@ -8379,11 +8394,18 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 <tr
                                   className="ink-table-row"
                                   data-active={isEnvelopeOpen}
+                                  {...clickableRowProps(() => openEnvelopePanel({
+                                    envelopeName: agreement.name,
+                                    documentNames: envelopeDocNames,
+                                    signatureProgress: envelope.signatureProgress,
+                                    dateModified: envelope.documents[0]?.dateModified,
+                                    rowId: envelopeRowId,
+                                  }), 'Open Document Packet')}
                                   onMouseEnter={() => setHoveredDocRowId(envelopeRowId)}
                                   onMouseLeave={() => setHoveredDocRowId(prev => (prev === envelopeRowId ? null : prev))}
-                                  style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent' }}
+                                  style={{ borderTop: '1px solid var(--ink-border-subtle)', background: isEnvelopeOpen ? 'var(--ink-item-bg-color-active-subtle)' : 'transparent', cursor: 'pointer' }}
                                 >
-                                  <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                                  <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <input
                                       type="checkbox"
                                       style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
@@ -8396,13 +8418,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                         <Tooltip text={envelopeDocNames.join(', ')} location="below">
                                           <button
                                             type="button"
-                                            onClick={() => openEnvelopePanel({
+                                            tabIndex={-1}
+                                            onClick={(e) => { e.stopPropagation(); openEnvelopePanel({
                                               envelopeName: agreement.name,
                                               documentNames: envelopeDocNames,
                                               signatureProgress: envelope.signatureProgress,
                                               dateModified: envelope.documents[0]?.dateModified,
                                               rowId: envelopeRowId,
-                                            })}
+                                            }); }}
                                             style={{ display: 'block', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
                                           >
                                             <Text size="sm" weight="medium">
@@ -8505,21 +8528,32 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           // Documents still being worked on should not open the panel.
                           const isEnvelopeDoc = !!doc.signatureProgress;
                           const restingBg = isOpen ? 'var(--ink-item-bg-color-active-subtle)' : (isSelected ? 'var(--ink-cobalt-fade-5)' : 'transparent');
+                          const openDocument = () => {
+                            if (doc.id.startsWith('added-')) {
+                              // Documents added via the Add → Document flow open in the local Doc Preview.
+                              setPendingPreviewDoc(doc.name);
+                            } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                              onEditNDA();
+                            } else {
+                              onPreviewDocument?.(doc.name);
+                            }
+                          };
+                          const activateRow = isEnvelopeDoc ? () => openEnvelopePanel({
+                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            documentNames: [doc.name],
+                            signatureProgress: doc.signatureProgress,
+                            dateModified: doc.lastModified || doc.dateModified,
+                            rowId: doc.id,
+                          }) : openDocument;
                           return (
                             <tr
                               key={doc.id}
-                              onClick={isEnvelopeDoc ? () => openEnvelopePanel({
-                                envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
-                                documentNames: [doc.name],
-                                signatureProgress: doc.signatureProgress,
-                                dateModified: doc.lastModified || doc.dateModified,
-                                rowId: doc.id,
-                              }) : undefined}
+                              {...clickableRowProps(activateRow, `Open ${doc.name}`)}
                               className="ink-table-row"
                               data-active={isOpen || isSelected}
                               onMouseEnter={() => setHoveredDocRowId(doc.id)}
                               onMouseLeave={() => setHoveredDocRowId(prev => (prev === doc.id ? null : prev))}
-                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg }}
+                              style={{ borderTop: '1px solid var(--ink-border-subtle)', background: restingBg, cursor: 'pointer' }}
                             >
                               <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <input
@@ -8597,16 +8631,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                       <Button
                                         kind="secondary"
                                         size="small"
-                                        onClick={() => {
-                                          if (doc.id.startsWith('added-')) {
-                                            // Documents added via the Add → Document flow open in the local Doc Preview.
-                                            setPendingPreviewDoc(doc.name);
-                                          } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                            onEditNDA();
-                                          } else {
-                                            onPreviewDocument?.(doc.name);
-                                          }
-                                        }}
+                                        onClick={openDocument}
                                       >
                                         {doc.id.startsWith('added-') || (isNDADraft && !ndaSentForSignature) ? 'Edit' : 'View'}
                                       </Button>
@@ -8648,8 +8673,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           </tr>
                         </thead>
                         <tbody>
-                          {currentSupplementalDocs.map((doc) => (
-                            <tr key={doc.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                          {currentSupplementalDocs.map((doc) => {
+                            const openSupplementalDoc = () => {
+                              if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                                onEditNDA();
+                              } else {
+                                onPreviewDocument?.(doc.name);
+                              }
+                            };
+                            return (
+                            <tr key={doc.id} className="ink-table-row" {...clickableRowProps(openSupplementalDoc, `Open ${doc.name}`)} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }}>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{doc.name}</td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
                                 <Inline gap="small" align="center">
@@ -8658,15 +8691,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 </Inline>
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)', fontSize: 'var(--ink-font-size-sm)' }}>{relativePast(doc.dateModified)}</td>
-                              <td style={{ padding: 'var(--ink-spacing-150)' }}>
+                              <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                 <Inline gap="small" align="center">
-                                  <Button kind="secondary" size="small" onClick={() => {
-                                    if (isNDADraft && !ndaSentForSignature && onEditNDA) {
-                                      onEditNDA();
-                                    } else {
-                                      onPreviewDocument?.(doc.name);
-                                    }
-                                  }}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
+                                  <Button kind="secondary" size="small" onClick={openSupplementalDoc}>{isNDADraft && !ndaSentForSignature ? 'Edit' : 'View'}</Button>
                                   <RowOverflowMenu
                                     items={[
                                       { label: 'Download', onClick: () => showToast('Downloading document.') },
@@ -8676,7 +8703,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                 </Inline>
                               </td>
                             </tr>
-                          ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     )}
@@ -8716,7 +8744,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 </thead>
                 <tbody>
                   {orderedTasks.map((task) => (
-                    <tr key={task.id} className="ink-table-row" style={{ borderTop: '1px solid var(--ink-border-subtle)' }}>
+                    <tr key={task.id} className="ink-table-row" {...clickableRowProps(() => showToast(`Opening "${task.title}".`), `Open task ${task.title}`)} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
                           {task.type === 'Sign' ? (
@@ -8752,10 +8780,19 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Text size="sm" color={task.isDueSoon ? 'warning' : undefined} style={task.isDueSoon ? { color: 'var(--ink-yellow-100)' } : {}}>{relativeTime(task.dueDate)}</Text>
                       </td>
-                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }}>
-                        <Button kind="secondary" size="small">
-                          {task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') ? 'Remind' : task.status === 'In progress' ? 'Remind' : task.isDueSoon ? 'Remind' : 'View'}
-                        </Button>
+                      <td className="row-hover-actions" style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
+                        {(() => {
+                          const isRemind = task.id.startsWith('upload-request-') || task.id.startsWith('vendor-onboarding-') || task.status === 'In progress' || !!task.isDueSoon;
+                          return (
+                            <Button
+                              kind="secondary"
+                              size="small"
+                              onClick={() => showToast(isRemind ? `Reminder sent to ${task.assignee === '--' ? 'assignee' : task.assignee}.` : `Opening "${task.title}".`)}
+                            >
+                              {isRemind ? 'Remind' : 'View'}
+                            </Button>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}
