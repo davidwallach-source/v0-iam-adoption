@@ -8364,7 +8364,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
-                  <Text size="sm" weight="semibold" style={{ fontSize: 'var(--ink-font-heading-xxs-size)', fontWeight: 600 }}>Documents</Text>
+                  <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Documents</div>
                   <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
                 </div>
 
@@ -8414,7 +8414,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
                 {/* Primary documents table */}
                 {docSubTab === 'negotiating' && (
-                  <div>
+                  <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
                         <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
@@ -8728,6 +8728,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         <Text size="sm" color="secondary">No supplemental documents</Text>
                       </div>
                     ) : (
+                      <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                         <thead>
                           <tr style={{ background: 'var(--ink-bg-color-secondary)' }}>
@@ -8772,6 +8773,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           })}
                         </tbody>
                       </table>
+                      </div>
                     )}
                   </div>
                 )}
