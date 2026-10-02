@@ -4176,6 +4176,56 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
   );
 }
 
+// The preview overlay sits at z-index 1100, above the shared Dropdown portal,
+// so this menu renders at a fixed position computed from the combo button.
+function SendComboButton({ onSendForSignature, onSendForClientReview }: { onSendForSignature: () => void; onSendForClientReview: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, right: 0 });
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const toggleMenu = () => {
+    if (!open && wrapRef.current) {
+      const r = wrapRef.current.getBoundingClientRect();
+      setCoords({ top: r.bottom + 6, right: window.innerWidth - r.right });
+    }
+    setOpen(v => !v);
+  };
+
+  const items = [
+    { label: 'Send for Signature', onClick: onSendForSignature },
+    { label: 'Send for Client Review', onClick: onSendForClientReview },
+  ];
+
+  return (
+    <>
+      <ComboButton ref={wrapRef} variant="primary" size="small" onClick={toggleMenu} onDropdownClick={toggleMenu}>
+        Send
+      </ComboButton>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 1110 }} />
+          <div
+            role="menu"
+            aria-label="Send options"
+            style={{ position: 'fixed', top: coords.top, right: coords.right, zIndex: 1111, minWidth: 220, background: 'white', border: '1px solid var(--ink-border-subtle)', borderRadius: 8, boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)', padding: '6px 0' }}
+          >
+            {items.map(item => (
+              <button
+                key={item.label}
+                role="menuitem"
+                onClick={() => { setOpen(false); item.onClick(); }}
+                style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'var(--ink-font-family)', color: 'var(--ink-font-color-default)' }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -4533,9 +4583,11 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
           <button style={{ ...iconBtn, background: showAiPanel ? 'var(--ink-cobalt-10, #ECE6FF)' : 'transparent' }} aria-label="Toggle AI panel" onClick={() => setShowAiPanel(v => { const next = !v; if (next) setShowComments(false); return next; })}>
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
-                <Button kind="tertiary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
-                <Button kind="secondary" size="small" onClick={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}>Send for Approval</Button>
-          <Button kind="primary" size="small" onClick={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}>Send for Signature</Button>
+          <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
+          <SendComboButton
+            onSendForSignature={() => (onSendForSignature ? onSendForSignature(baseDocName) : (onSave ?? onClose)())}
+            onSendForClientReview={() => (onSendForApproval ? onSendForApproval(headerFileName) : (onSave ?? onClose)())}
+          />
         </div>
       </div>
 
@@ -9774,7 +9826,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��──────────────────���─────────────────────────── */
+   ───────────────────────────��──────────────────���──────────────────���──────── */
 export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
