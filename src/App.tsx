@@ -4027,7 +4027,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
       id: 'approval-' + Date.now(),
       title: `Review ${documentName}`,
       type: 'Approval',
-      team: '',
+      team: 'External',
       assignee: first ? first.name : 'Recipient',
       assigneeInitials: first ? initialsOf(first.name) : 'AP',
       status: 'In progress',
@@ -9009,9 +9009,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       source={{
         spaceName: agreement.name,
         partyName: agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : 'External party'),
-        tasks: workspaceData.tasks,
-        documents: workspaceData.documents,
-        supplementalDocs: workspaceData.supplementalDocs,
+        tasks: orderedTasks,
+        documents: modifiedDocuments,
+        supplementalDocs: isNewlyCreated || isUploadedDocAgreement ? [] : workspaceData.supplementalDocs,
       }}
       participantName="Sam Sanders"
       contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials, photoUrl: '/images/leona-legal.png' }}
