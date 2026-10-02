@@ -47,6 +47,7 @@ import {
   dataTableStyles,
 } from '@/design-system';
 import { SpaceSidePanel, type SidePanelConversation } from './SpaceSidePanel';
+import { ParticipantExperience } from './ParticipantExperience';
 
 /* ═══════════════════════════════════════
    FilePickerDialog Component
@@ -2906,7 +2907,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════����������������═════════���══════════════�������═══���������������������════
+/* ═════�����������������═════════���══════════════�������═══���������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -7587,6 +7588,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [partyHistoryTab, setPartyHistoryTab] = useState<'overview' | 'agreements' | 'obligations' | 'details'>('overview');
   const [showAgreementManagerModal, setShowAgreementManagerModal] = useState(false);
   const [showAddSeatsModal, setShowAddSeatsModal] = useState(false);
+  const [showParticipantView, setShowParticipantView] = useState(false);
   const [openEnvelope, setOpenEnvelope] = useState<OpenEnvelope | null>(null);
   // Id of the table row whose envelope panel is currently open, so that row
   // stays highlighted (and only that row) while the panel is open.
@@ -8197,7 +8199,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             );
           })()}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexShrink: 0, marginTop: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, marginTop: 16 }}>
+            <button
+              type="button"
+              onClick={() => setShowParticipantView(true)}
+              aria-label="View as Sam Sanders (participant experience)"
+              title="View as Sam Sanders"
+              style={{ display: 'flex', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 999, marginRight: -8, position: 'relative', zIndex: 1 }}
+            >
+              <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
+            </button>
             <RowOverflowMenu
               triggerLabel="Space actions: share or add agent"
               triggerStyle={{
@@ -8225,7 +8236,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               trigger={
               <>
                 <span style={{ display: 'flex' }} aria-hidden="true">
-                  <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
                   <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8 }} />
                   <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
                 </span>
@@ -8886,7 +8896,22 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         <PaywallUpgradeModal kind="parties" onClose={() => setShowAgreementManagerModal(false)} />
       )}
 
-      {/* Paywall: Add user licenses modal (collaborator avatars) */}
+      {showParticipantView && (
+    <ParticipantExperience
+      source={{
+        spaceName: agreement.name,
+        partyName: agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : 'External party'),
+        tasks: workspaceData.tasks,
+        documents: workspaceData.documents,
+        supplementalDocs: workspaceData.supplementalDocs,
+      }}
+      participantName="Sam Sanders"
+      contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials }}
+      onExit={() => setShowParticipantView(false)}
+    />
+  )}
+
+  {/* Paywall: Add user licenses modal (collaborator avatars) */}
       {version === 'paywalls' && showAddSeatsModal && (
         <PaywallAddSeatsModal onClose={() => setShowAddSeatsModal(false)} />
       )}
