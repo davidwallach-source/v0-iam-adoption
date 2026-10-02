@@ -3981,19 +3981,19 @@ interface SendForApprovalModalProps {
   onComplete: (task: DealTask) => void;
 }
 
+const DEFAULT_CLIENT_REVIEWER = { name: 'Sam Sanders', email: 'sam.sanders@globex.com' } as MentionPerson;
+
 function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendForApprovalModalProps) {
-  const [approvers, setApprovers] = useState<MentionPerson[]>([]);
+  const [approvers, setApprovers] = useState<MentionPerson[]>([DEFAULT_CLIENT_REVIEWER]);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState('');
-  const [requireAll, setRequireAll] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setApprovers([]);
+      setApprovers([DEFAULT_CLIENT_REVIEWER]);
       setQuery('');
       setMessage('');
-      setRequireAll(false);
       setSending(false);
     }
   }, [open]);
@@ -4025,10 +4025,10 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
     const first = approvers[0];
     const task: DealTask = {
       id: 'approval-' + Date.now(),
-      title: `Approve ${documentName}`,
+      title: `Review ${documentName}`,
       type: 'Approval',
       team: '',
-      assignee: first ? first.name : 'Approvers',
+      assignee: first ? first.name : 'Recipient',
       assigneeInitials: first ? initialsOf(first.name) : 'AP',
       status: 'In progress',
       dueDate: '--',
@@ -4043,7 +4043,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Send for approval"
+      aria-label="Send for Client Review"
       onClick={onClose}
       style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'white', display: 'flex', alignItems: 'stretch', justifyContent: 'center' }}
     >
@@ -4053,11 +4053,8 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 24px', borderBottom: '1px solid #E8E6ED', flexShrink: 0 }}>
-          <div style={{ width: '100%', maxWidth: 640, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#130032' }}>Send for approval</div>
-              <div style={{ fontSize: 13, color: '#8A85A0', marginTop: 4, lineHeight: 1.4 }}>Choose who needs to approve this document before it moves forward.</div>
-            </div>
+          <div style={{ width: '100%', maxWidth: 640, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#130032' }}>Send for Client Review</h1>
             <button onClick={onClose} style={iconBtn} aria-label="Close"><Icon name="close" size={18} /></button>
           </div>
         </div>
@@ -4072,9 +4069,9 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
             <span style={{ fontSize: 14, fontWeight: 600, color: '#130032', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{documentName}</span>
           </div>
 
-          {/* Approvers */}
+          {/* Recipient */}
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#130032', marginBottom: 8 }}>
-            Add approvers <span style={{ color: '#C0362C' }}>*</span>
+            Recipient <span style={{ color: '#C0362C' }}>*</span>
           </label>
           <div style={{ position: 'relative', marginBottom: 8 }}>
             <input
@@ -4120,26 +4117,9 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Add a note for your approvers"
-            style={{ width: '100%', minHeight: 80, resize: 'vertical', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '12px 14px', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--ink-font-family)', color: '#130032', marginBottom: 24, boxSizing: 'border-box' }}
+            placeholder="Add a note for your recipient"
+            style={{ width: '100%', minHeight: 80, resize: 'vertical', borderRadius: 10, border: '1px solid #DDD9E3', background: '#F7F6F9', padding: '12px 14px', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--ink-font-family)', color: '#130032', boxSizing: 'border-box' }}
           />
-
-          {/* Require all toggle */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#130032' }}>Require all to approve</div>
-              <div style={{ fontSize: 13, color: '#8A85A0', lineHeight: 1.4, marginTop: 2, maxWidth: 320 }}>When on, every approver must approve before the document is cleared.</div>
-            </div>
-            <button
-              role="switch"
-              aria-checked={requireAll}
-              aria-label="Require all to approve"
-              onClick={() => setRequireAll((v) => !v)}
-              style={{ flexShrink: 0, width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', padding: 2, background: requireAll ? 'var(--ink-cobalt-80, #4C00FF)' : '#C7C3D0', display: 'flex', justifyContent: requireAll ? 'flex-end' : 'flex-start', transition: 'background 0.15s' }}
-            >
-              <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'white' }} />
-            </button>
-          </div>
           </div>
         </div>
 
@@ -4167,7 +4147,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
                 <path d="M8 2 A6 6 0 0 1 14 8" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             )}
-            Send for approval
+            Send for Review
           </button>
           </div>
         </div>
@@ -10536,7 +10516,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     ],
   };
 
-  /* ���─ View-filtered data (Sales Agreement Workspaces) ── */
+  /* �����─ View-filtered data (Sales Agreement Workspaces) ── */
   const viewAgreements = useMemo(() => {
     // In the Simple Use Case version the All Agreements list starts as a single
     // seeded Agreement Space (the Handbook Sign-Off). Newly created agreements
