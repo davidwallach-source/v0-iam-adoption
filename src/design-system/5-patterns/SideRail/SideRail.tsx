@@ -66,9 +66,13 @@ const RailRow: React.FC<RailRowProps> = ({ item, depth }) => {
   const hasChildren = !!item.children && item.children.length > 0;
   const [expanded, setExpanded] = useState(!!item.defaultExpanded || containsActive(item));
 
+  // Rows that navigate leave expand/collapse to the chevron; rows without a destination toggle on click.
   const handleClick = () => {
+    if (item.onClick) {
+      item.onClick();
+      return;
+    }
     if (hasChildren) setExpanded((v) => !v);
-    item.onClick?.();
   };
 
   const rowClasses = [

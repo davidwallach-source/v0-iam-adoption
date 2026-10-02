@@ -10278,6 +10278,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         label: 'Agreements',
         icon: 'envelope' as const,
         active: activeTab === 'agreements',
+        onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); },
         onMoreClick: () => handleUnavailableTabClick('agreements-options'),
         children: [
           { id: 'all-agreements-rail', label: 'All Agreements', active: activeTab === 'agreements', onClick: () => { handleTabClick('agreements'); setSidebarView('all-agreements'); } },
