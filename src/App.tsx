@@ -8429,7 +8429,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   setSelectedDocs(new Set());
                                 }
                               }}
-                              style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                              style={{ display: 'block', margin: 0, width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                             />
                           </th>
                           <th style={{ padding: 'var(--ink-spacing-100) var(--ink-spacing-150)', textAlign: 'left', fontSize: 'var(--ink-font-size-xs)', fontWeight: 500, color: 'var(--ink-text-secondary)', width: '33%' }}>
@@ -8473,7 +8473,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                   <td style={{ padding: 'var(--ink-spacing-150)' }} onClick={(e) => e.stopPropagation()}>
                                     <input
                                       type="checkbox"
-                                      style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                                      style={{ display: 'block', margin: 0, width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                                     />
                                   </td>
                                   <td style={{ padding: 'var(--ink-spacing-150)' }}>
@@ -8633,7 +8633,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                                     }
                                     setSelectedDocs(newSelected);
                                   }}
-                                  style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
+                                  style={{ display: 'block', margin: 0, width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--ink-cobalt-80)' }}
                                 />
                               </td>
                               <td style={{ padding: 'var(--ink-spacing-150)' }}>
