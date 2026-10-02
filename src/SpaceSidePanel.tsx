@@ -70,7 +70,7 @@ interface SpaceSidePanelProps {
 }
 
 const TITLES: Record<PanelView, string> = {
-  all: 'Activity Feed',
+  all: 'Messages',
   activity: 'Activity',
   messages: 'Messages',
   iris: 'Iris Chat',
@@ -261,12 +261,9 @@ function Feed({
           </>
         );
 
-        const divided = view === 'messages';
-        const boxStyle: CSSProperties = { flex: 1, minWidth: 0, padding: 0, paddingBottom: divided || isLast ? 0 : 16, fontFamily: FONT };
+        const boxStyle: CSSProperties = { flex: 1, minWidth: 0, padding: 0, fontFamily: FONT };
         const replyLabel = isMessage ? `Reply to ${entry.name}` : `Reply to: ${eventTitle(entry)}`;
-        const itemStyle: CSSProperties = divided
-          ? { display: 'flex', gap: 16, padding: '16px 0', borderBottom: isLast ? 'none' : `1px solid ${BORDER_SUBTLE}` }
-          : { display: 'flex', gap: 16 };
+        const itemStyle: CSSProperties = { display: 'flex', gap: 16, padding: '16px 0', borderBottom: isLast ? 'none' : `1px solid ${BORDER_SUBTLE}` };
 
         return (
           <li key={entry.id} className="feed-item" style={itemStyle}>
@@ -280,7 +277,6 @@ function Feed({
                   <Icon name={entry.icon} size={16} color={TEXT_SECONDARY} />
                 </IconCircle>
               )}
-              {!isLast && !divided && <span aria-hidden="true" style={{ flex: 1, width: 1, minHeight: 16, background: BORDER_SUBTLE }} />}
             </div>
             {clickable ? (
               <button
