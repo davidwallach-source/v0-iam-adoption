@@ -4192,14 +4192,13 @@ function SendComboButton({ onSendForSignature, onSendForClientReview }: { onSend
   };
 
   const items = [
-    { label: 'Send for Signature', onClick: onSendForSignature },
     { label: 'Send for Client Review', onClick: onSendForClientReview },
   ];
 
   return (
     <>
-      <ComboButton ref={wrapRef} variant="primary" size="small" onClick={toggleMenu} onDropdownClick={toggleMenu}>
-        Send
+      <ComboButton ref={wrapRef} variant="primary" size="small" onClick={() => { setOpen(false); onSendForSignature(); }} onDropdownClick={toggleMenu}>
+        Send for Signature
       </ComboButton>
       {open && (
         <>
