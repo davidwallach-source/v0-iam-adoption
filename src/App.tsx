@@ -8230,7 +8230,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <button
               type="button"
               onClick={() => setParticipantMode('preview')}
-              style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-100)', padding: '6px 12px', border: '1px solid var(--ink-white-100)', borderRadius: 4, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', lineHeight: '20px', flexShrink: 0 }}
+              style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-100)', padding: 8, marginRight: -8, border: 'none', borderRadius: 4, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', lineHeight: '20px', flexShrink: 0 }}
             >
               <Icon name="eye" size="small" color="var(--ink-white-100)" />
               Recipient Preview
@@ -10480,7 +10480,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     ],
   };
 
-  /* ── Templates sidebar — matches production DocuSign ── */
+  /* ── Templates sidebar �� matches production DocuSign ── */
   const templatesSidebar = {
     headerLabel: 'Start',
     headerIcon: 'plus' as const,
