@@ -8227,6 +8227,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
               <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
             </button>
+            <button
+              type="button"
+              onClick={() => setParticipantMode('preview')}
+              style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-100)', padding: 8, marginRight: -8, border: 'none', borderRadius: 4, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', lineHeight: '20px', flexShrink: 0 }}
+            >
+              <Icon name="eye" size="small" color="var(--ink-white-100)" />
+              Recipient Preview
+            </button>
           </div>
 
           {/* Space name (H1) + status on the left, Add button on the right — same row */}
@@ -8316,12 +8324,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   label: 'Add Agent',
                   icon: <Icon name="sparkle" size="small" />,
                   onClick: () => {},
-                  dividerAfter: true,
-                },
-                {
-                  label: 'Recipient Preview',
-                  icon: <Icon name="eye" size="small" />,
-                  onClick: () => setParticipantMode('preview'),
                 },
               ]}
               trigger={
@@ -10478,7 +10480,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     ],
   };
 
-  /* ── Templates sidebar — matches production DocuSign ── */
+  /* ── Templates sidebar �� matches production DocuSign ── */
   const templatesSidebar = {
     headerLabel: 'Start',
     headerIcon: 'plus' as const,
