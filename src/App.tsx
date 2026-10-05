@@ -7598,6 +7598,24 @@ function clickableRowProps(onActivate: () => void, label: string) {
   };
 }
 
+type ProgressStatusKind = 'success' | 'warning' | 'emphasis' | 'neutral';
+
+interface AgreementProgress {
+  stages: string[];
+  currentIndex: number;
+  statusText: string;
+  statusKind: ProgressStatusKind;
+}
+
+interface ProgressDocument {
+  name: string;
+  status: DealDocument['status'];
+  signatureProgress?: { signed: number; total: number };
+}
+
+const SIGNATURE_FLOW_STAGES = ['Prepare', 'Sent', 'Signing', 'Complete'];
+const NDA_DOC_PATTERN = /\bnda\b|non-disclosure/i;
+
 function getAgreementStages(agreementType: string | undefined): string[] {
   const type = (agreementType ?? '').toLowerCase();
   if (/renewal/.test(type)) return ['Inception', 'Negotiation', 'Review', 'Confirmation'];
@@ -7605,14 +7623,98 @@ function getAgreementStages(agreementType: string | undefined): string[] {
   return ['Inception', 'Negotiation', 'Legal Review', 'Approval', 'Complete'];
 }
 
-function getCurrentStageIndex(stages: string[], documents: { status: string }[], isComplete: boolean): number {
+function signatureStatusText(docs: ProgressDocument[]): string {
+  const pending = docs.filter(d => d.status === 'Pending Signature');
+  const signed = pending.reduce((n, d) => n + (d.signatureProgress?.signed ?? 0), 0);
+  const total = pending.reduce((n, d) => n + (d.signatureProgress?.total ?? 1), 0);
+  return signed > 0 ? `${signed} of ${total} signed` : 'Awaiting Signature';
+}
+
+// Derives the header progress bar + status pill from what has actually
+// happened in the space, so a space only advances as far as its real activity.
+function deriveAgreementProgress({
+  agreement,
+  documents,
+  reviewTaskTitles,
+  hasLiveActivity,
+  isSignatureFlow,
+}: {
+  agreement: Agreement;
+  documents: ProgressDocument[];
+  reviewTaskTitles: string[];
+  hasLiveActivity: boolean;
+  isSignatureFlow: boolean;
+}): AgreementProgress {
+  const isComplete = agreement.statusKind === 'success';
+  const stages = isSignatureFlow ? SIGNATURE_FLOW_STAGES : getAgreementStages(agreement.agreementType);
   const last = stages.length - 1;
-  if (isComplete || (documents.length > 0 && documents.every(d => d.status === 'Executed'))) return last;
-  if (documents.some(d => d.status === 'Pending Signature')) return last - 1;
-  const reviewIndex = stages.findIndex(s => /review/i.test(s));
-  if (documents.some(d => d.status === 'In Review')) return reviewIndex === -1 ? 1 : reviewIndex;
-  if (documents.length === 0) return 0;
-  return Math.min(1, last);
+  const findStage = (pattern: RegExp, fallback: number) => {
+    const i = stages.findIndex(s => pattern.test(s));
+    return i === -1 ? fallback : i;
+  };
+  const negotiationIndex = findStage(/negotiat/i, Math.min(1, last));
+  const reviewIndex = findStage(/review/i, Math.min(1, last));
+  const signatureIndex = findStage(/approval|signature/i, Math.max(0, last - 1));
+
+  if (isComplete) {
+    return { stages, currentIndex: last, statusText: agreement.status, statusKind: 'success' };
+  }
+
+  // Seeded spaces with no new activity: their recorded sub-status is the truth.
+  if (!hasLiveActivity && agreement.statusSub) {
+    const sub = agreement.statusSub.toLowerCase();
+    const currentIndex =
+      /sign/.test(sub) ? signatureIndex :
+      /approv/.test(sub) ? findStage(/approval/i, signatureIndex) :
+      /negotiat/.test(sub) ? negotiationIndex :
+      /review/.test(sub) ? reviewIndex :
+      0;
+    const statusKind: ProgressStatusKind = /sign/.test(sub) ? 'emphasis' : /prepar|draft/.test(sub) ? 'neutral' : 'warning';
+    return { stages, currentIndex, statusText: agreement.statusSub, statusKind };
+  }
+
+  if (isSignatureFlow) {
+    const pending = documents.filter(d => d.status === 'Pending Signature');
+    if (documents.length > 0 && documents.every(d => d.status === 'Executed')) {
+      return { stages, currentIndex: last, statusText: 'Completed', statusKind: 'success' };
+    }
+    if (pending.length === 0) return { stages, currentIndex: 0, statusText: 'Draft', statusKind: 'neutral' };
+    const anySigned = pending.some(d => (d.signatureProgress?.signed ?? 0) > 0);
+    return { stages, currentIndex: anySigned ? 2 : 1, statusText: signatureStatusText(pending), statusKind: 'emphasis' };
+  }
+
+  // Ancillary NDAs (in a non-NDA agreement) don't move the deal itself forward.
+  const isNdaAgreement = /\bnda\b|non-disclosure/i.test(agreement.agreementType ?? '');
+  const primaryDocs = isNdaAgreement ? documents : documents.filter(d => !NDA_DOC_PATTERN.test(d.name));
+  const ancillaryPending = documents.filter(d => !primaryDocs.includes(d) && d.status === 'Pending Signature');
+
+  if (primaryDocs.length > 0 && primaryDocs.every(d => d.status === 'Executed')) {
+    return { stages, currentIndex: last, statusText: 'Completed', statusKind: 'success' };
+  }
+
+  const sentForReview = (name: string) => reviewTaskTitles.some(t => t === `Review ${name}`);
+  const docStage = (d: ProgressDocument) =>
+    d.status === 'Pending Signature' ? signatureIndex :
+    d.status === 'In Review' ? reviewIndex :
+    d.status === 'Draft' && sentForReview(d.name) ? negotiationIndex :
+    0;
+  const activeDocs = primaryDocs.filter(d => d.status !== 'Executed');
+  const leadDoc = activeDocs.reduce<ProgressDocument | null>((best, d) => (!best || docStage(d) > docStage(best) ? d : best), null);
+  const currentIndex = leadDoc ? docStage(leadDoc) : 0;
+
+  if (!leadDoc || currentIndex === 0) {
+    if (ancillaryPending.length > 0) {
+      return { stages, currentIndex: 0, statusText: 'NDA Awaiting Signature', statusKind: 'emphasis' };
+    }
+    return { stages, currentIndex: 0, statusText: 'Draft', statusKind: 'neutral' };
+  }
+  if (leadDoc.status === 'Pending Signature') {
+    return { stages, currentIndex, statusText: signatureStatusText(activeDocs), statusKind: 'emphasis' };
+  }
+  if (leadDoc.status === 'Draft') {
+    return { stages, currentIndex, statusText: 'Client Review', statusKind: 'warning' };
+  }
+  return { stages, currentIndex, statusText: stages[currentIndex], statusKind: 'warning' };
 }
 
 function AgreementStageProgress({ stages, currentIndex }: { stages: string[]; currentIndex: number }) {
@@ -7967,6 +8069,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     }) as DealDocument[];
   }, [workspaceData.documents, isNDADraft, isPermissionSlipDraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments, allSignedDocs]);
   
+  const agreementProgress = useMemo(() => {
+    const reviewTaskTitles = (injectedTasks ?? []).filter(t => t.id.startsWith('approval-')).map(t => t.title);
+    const isSignatureFlow =
+      (isNewlyCreated || agreement.workspaceKind === 'uploaded' || agreement.workspaceKind === 'permission-slip') &&
+      !/master services|purchase|request/i.test(agreement.agreementType ?? '');
+    const hasLiveActivity =
+      isNewlyCreated || isUploadedDocAgreement || isNDADraft || addedDocuments.length > 0 || allSignedDocs.length > 0 || reviewTaskTitles.length > 0;
+    return deriveAgreementProgress({ agreement, documents: modifiedDocuments, reviewTaskTitles, hasLiveActivity, isSignatureFlow });
+  }, [agreement, modifiedDocuments, injectedTasks, isNewlyCreated, isUploadedDocAgreement, isNDADraft, addedDocuments, allSignedDocs]);
+
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   // The Permission Slip space (Simple Use Case) shows a real activity feed based
@@ -8332,20 +8444,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <StatusLight
                 noFill
                 className="status-on-dark"
-                kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-                text={agreement.status}
+                kind={agreementProgress.statusKind}
+                text={agreementProgress.statusText}
               />
             </div>
           </div>
-          {(() => {
-            const stages = getAgreementStages(agreement.agreementType);
-            const currentIndex = getCurrentStageIndex(stages, modifiedDocuments as { status: string }[], agreement.statusKind === 'success');
-            return (
-              <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
-                <AgreementStageProgress stages={stages} currentIndex={currentIndex} />
-              </div>
-            );
-          })()}
+          <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
+            <AgreementStageProgress stages={agreementProgress.stages} currentIndex={agreementProgress.currentIndex} />
+          </div>
           {/* Key extractions pill on the left, collaborators + Add Agents on the right — same row, vertically centered */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
