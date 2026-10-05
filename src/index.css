@@ -85,9 +85,36 @@ img, svg { display: block; max-width: 100%; }
   cursor: pointer;
 }
 
+/* Document grid: selection checkbox appears on card hover, stays visible once checked */
+.doc-grid-check {
+  appearance: none;
+  position: absolute; top: 10px; left: 10px;
+  width: 20px; height: 20px; margin: 0;
+  border: 2px solid #8F8C99; border-radius: 4px;
+  background: #FFFFFF; cursor: pointer;
+  opacity: 0; transition: opacity 120ms ease;
+}
+.doc-grid-card-wrap:hover .doc-grid-check,
+.doc-grid-check:focus-visible,
+.doc-grid-check:checked { opacity: 1; }
+.doc-grid-check:focus-visible { outline: 2px solid var(--ink-cobalt-80); outline-offset: 2px; }
+.doc-grid-check:checked {
+  border-color: var(--ink-cobalt-80);
+  background: var(--ink-cobalt-80) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+.doc-grid-card-wrap[data-selected="true"] .doc-grid-card { border-color: var(--ink-cobalt-80) !important; }
+
 /* Side panel feed: reply action appears on row hover/focus */
 .feed-item .feed-reply { opacity: 0; transition: opacity 120ms ease, background 120ms ease; }
 .feed-item:hover .feed-reply,
 .feed-item:focus-within .feed-reply,
 .feed-item .feed-reply:focus-visible { opacity: 1; }
 .feed-item .feed-reply:hover { background: var(--ink-cobalt-10); }
+
+.recipient-comment-anchor {
+  background-color: rgba(76, 154, 255, 0.14);
+  text-decoration: underline;
+  text-decoration-color: #7CB4F8;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}

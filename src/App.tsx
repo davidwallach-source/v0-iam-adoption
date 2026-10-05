@@ -2907,7 +2907,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════�����������������═════════���══════════════�������═══���������������������════
+/* ═════�����������������═════════���══════════════�������═══�����������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -3329,7 +3329,7 @@ function HomePage({ onUnavailable }: { onUnavailable: (e: React.MouseEvent) => v
   );
 }
 
-/* ═════���════════════════════��════════════
+/* ═════���══════════��═════════��════════════
    Insights — Overview sub-view
    ═══════════════════════════════════════ */
 
@@ -4217,7 +4217,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [zoom, setZoom] = useState(100);
-  const [editing, setEditing] = useState(true);
+  const [editing, setEditing] = useState(!readOnly);
   const [selMenu, setSelMenu] = useState<{ x: number; y: number } | null>(null);
   const [composer, setComposer] = useState<{ y: number; anchor: string } | null>(null);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
@@ -4310,6 +4310,29 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
     window.getSelection()?.removeAllRanges();
   };
 
+  // The recipient canvas isn't contentEditable, so execCommand can't style the
+  // selection there; wrap each selected text node in a styled span instead.
+  const markRecipientAnchor = (range: Range) => {
+    const root = range.commonAncestorContainer;
+    const walker = document.createTreeWalker(
+      root.nodeType === Node.TEXT_NODE ? root.parentNode ?? root : root,
+      NodeFilter.SHOW_TEXT,
+    );
+    const textNodes: Text[] = [];
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (range.intersectsNode(n) && n.textContent?.trim()) textNodes.push(n as Text);
+    }
+    textNodes.forEach((node) => {
+      let target = node;
+      if (node === range.endContainer && range.endOffset < node.length) target.splitText(range.endOffset);
+      if (node === range.startContainer && range.startOffset > 0) target = target.splitText(range.startOffset);
+      const mark = document.createElement('span');
+      mark.className = 'recipient-comment-anchor';
+      target.parentNode?.insertBefore(mark, target);
+      mark.appendChild(target);
+    });
+  };
+
   // Open the comment composer anchored to the current selection, and
   // highlight the selected text as the comment anchor.
   const openComposer = () => {
@@ -4322,10 +4345,14 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
       const rect = sel.getRangeAt(0).getBoundingClientRect();
       const cRect = container.getBoundingClientRect();
       y = rect.top - cRect.top + container.scrollTop;
-      try {
-        document.execCommand('backColor', false, '#FCE9A6');
-        document.execCommand('underline');
-      } catch { /* noop */ }
+      if (readOnly) {
+        markRecipientAnchor(sel.getRangeAt(0));
+      } else {
+        try {
+          document.execCommand('backColor', false, '#FCE9A6');
+          document.execCommand('underline');
+        } catch { /* noop */ }
+      }
     }
     setSelMenu(null);
     window.getSelection()?.removeAllRanges();
@@ -4578,7 +4605,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
       </div>
 
       {/* ��─ Toolbar ── */}
-      {!doc.hideEditToolbar && (
+      {!doc.hideEditToolbar && !readOnly && (
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, height: 48, padding: '0 16px',
         background: 'white', borderBottom: '1px solid #E8E6ED', flexShrink: 0, overflowX: 'auto',
@@ -6715,7 +6742,7 @@ function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onU
           Add
         </Button>
       ) : variant === 'secondary' ? (
-        <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(o => !o); }}>Add document</Button>
+        <IconButton icon="plus" variant="secondary" size="small" aria-label="Add document" aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(o => !o); }} />
       ) : (
         <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add Document</Button>
       )}
@@ -6754,6 +6781,31 @@ function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onU
         </div>
       )}
     </div>
+  );
+}
+
+function DocViewToggle({ mode, selected, onSelect }: { mode: 'list' | 'grid'; selected: boolean; onSelect: () => void }) {
+  const color = selected ? 'var(--ink-cobalt-100)' : 'rgba(19, 0, 50, 0.7)';
+  return (
+    <button
+      type="button"
+      aria-label={mode === 'list' ? 'Table view' : 'Thumbnail view'}
+      aria-pressed={selected}
+      onClick={onSelect}
+      className="doc-view-toggle"
+      data-selected={selected}
+      style={{ width: 36, height: 36, borderRadius: 8, border: 'none', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: selected ? 'var(--ink-cobalt-10)' : 'transparent', color }}
+    >
+      {mode === 'list' ? (
+        <svg width="18" height="18" viewBox="7 7 18 18" fill="none" aria-hidden="true">
+          <path d="M12 11V13H10V11H12ZM14 9H8V15H14V9ZM12 19V21H10V19H12ZM14 17H8V23H14V17ZM24 11H16V13H24V11ZM24 19H16V21H24V19Z" fill="currentColor" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M4 2V4H2V2H4ZM6 0H0V6H6V0ZM12 2V4H10V2H12ZM14 0H8V6H14V0ZM4 10V12H2V10H4ZM6 8H0V14H6V8ZM12 10V12H10V10H12ZM14 8H8V14H14V8Z" fill="currentColor" />
+        </svg>
+      )}
+    </button>
   );
 }
 
@@ -7573,12 +7625,253 @@ function clickableRowProps(onActivate: () => void, label: string) {
   };
 }
 
+type ProgressStatusKind = 'success' | 'warning' | 'emphasis' | 'neutral';
+
+interface AgreementProgress {
+  stages: string[];
+  currentIndex: number;
+  statusText: string;
+  statusKind: ProgressStatusKind;
+}
+
+interface ProgressDocument {
+  name: string;
+  status: DealDocument['status'];
+  signatureProgress?: { signed: number; total: number };
+}
+
+const SIGNATURE_FLOW_STAGES = ['Prepare', 'Sent', 'Signing', 'Complete'];
+const NDA_DOC_PATTERN = /\bnda\b|non-disclosure/i;
+const DEAL_DOC_PATTERN = /\bmsa\b|master services|\bsow\b|statement of work|\bdpa\b|data processing|services agreement|license agreement|purchase agreement|order form/i;
+const LIVE_DEAL_STAGES = ['Inception', 'Drafting', 'Client Review', 'Legal Review', 'Signature', 'Complete'];
+
+function getAgreementStages(agreementType: string | undefined): string[] {
+  const type = (agreementType ?? '').toLowerCase();
+  if (/renewal/.test(type)) return ['Inception', 'Negotiation', 'Review', 'Confirmation'];
+  if (/\bnda\b|non-disclosure|acknowledg|offer letter|form|handbook|permission/.test(type)) return ['Inception', 'Review', 'Signature', 'Complete'];
+  return ['Inception', 'Negotiation', 'Legal Review', 'Approval', 'Complete'];
+}
+
+function signatureStatusText(docs: ProgressDocument[]): string {
+  const pending = docs.filter(d => d.status === 'Pending Signature');
+  const signed = pending.reduce((n, d) => n + (d.signatureProgress?.signed ?? 0), 0);
+  const total = pending.reduce((n, d) => n + (d.signatureProgress?.total ?? 1), 0);
+  return signed > 0 ? `${signed} of ${total} signed` : 'Awaiting Signature';
+}
+
+// Derives the header progress bar + status pill from what has actually
+// happened in the space, so a space only advances as far as its real activity.
+function deriveAgreementProgress({
+  agreement,
+  documents,
+  reviewTaskTitles,
+  hasLiveActivity,
+  isSignatureFlow,
+}: {
+  agreement: Agreement;
+  documents: ProgressDocument[];
+  reviewTaskTitles: string[];
+  hasLiveActivity: boolean;
+  isSignatureFlow: boolean;
+}): AgreementProgress {
+  const isComplete = agreement.statusKind === 'success';
+  const stages = isSignatureFlow ? SIGNATURE_FLOW_STAGES : getAgreementStages(agreement.agreementType);
+  const last = stages.length - 1;
+  const findStage = (pattern: RegExp, fallback: number) => {
+    const i = stages.findIndex(s => pattern.test(s));
+    return i === -1 ? fallback : i;
+  };
+  const negotiationIndex = findStage(/negotiat/i, Math.min(1, last));
+  const reviewIndex = findStage(/review/i, Math.min(1, last));
+  const signatureIndex = findStage(/approval|signature/i, Math.max(0, last - 1));
+
+  if (isComplete) {
+    return { stages, currentIndex: last, statusText: agreement.status, statusKind: 'success' };
+  }
+
+  // Seeded spaces with no new activity: their recorded sub-status is the truth.
+  if (!hasLiveActivity && agreement.statusSub) {
+    const sub = agreement.statusSub.toLowerCase();
+    const currentIndex =
+      /sign/.test(sub) ? signatureIndex :
+      /approv/.test(sub) ? findStage(/approval/i, signatureIndex) :
+      /negotiat/.test(sub) ? negotiationIndex :
+      /review/.test(sub) ? reviewIndex :
+      0;
+    const statusKind: ProgressStatusKind = /sign/.test(sub) ? 'emphasis' : /prepar|draft/.test(sub) ? 'neutral' : 'warning';
+    return { stages, currentIndex, statusText: agreement.statusSub, statusKind };
+  }
+
+  // A space that started as a simple send (e.g. an NDA) becomes a deal as soon
+  // as a primary agreement like an MSA is added, so it switches to deal milestones.
+  const hasDealDoc = documents.some(d => !NDA_DOC_PATTERN.test(d.name) && DEAL_DOC_PATTERN.test(d.name));
+  if (isSignatureFlow && !hasDealDoc) {
+    const pending = documents.filter(d => d.status === 'Pending Signature');
+    if (documents.length > 0 && documents.every(d => d.status === 'Executed')) {
+      return { stages, currentIndex: last, statusText: 'Completed', statusKind: 'success' };
+    }
+    if (pending.length === 0) return { stages, currentIndex: 0, statusText: 'Draft', statusKind: 'neutral' };
+    const anySigned = pending.some(d => (d.signatureProgress?.signed ?? 0) > 0);
+    return { stages, currentIndex: anySigned ? 2 : 1, statusText: signatureStatusText(pending), statusKind: 'emphasis' };
+  }
+
+  // Live deal milestones: Inception → Drafting → Client Review → Legal Review → Signature → Complete.
+  // Ancillary NDAs never move the deal itself forward; they only colour the Inception status.
+  const dealStages = LIVE_DEAL_STAGES;
+  const dealLast = dealStages.length - 1;
+  const isNdaAgreement = /\bnda\b|non-disclosure/i.test(agreement.agreementType ?? '');
+  const primaryDocs = isNdaAgreement && !hasDealDoc ? documents : documents.filter(d => !NDA_DOC_PATTERN.test(d.name));
+  const ancillaryDocs = documents.filter(d => !primaryDocs.includes(d));
+
+  if (primaryDocs.length > 0 && primaryDocs.every(d => d.status === 'Executed')) {
+    return { stages: dealStages, currentIndex: dealLast, statusText: 'Completed', statusKind: 'success' };
+  }
+
+  const sentForReview = (name: string) => reviewTaskTitles.some(t => t === `Review ${name}`);
+  const docStage = (d: ProgressDocument) =>
+    d.status === 'Pending Signature' ? 4 :
+    d.status === 'In Review' ? 3 :
+    sentForReview(d.name) ? 2 :
+    d.status === 'Draft' ? 1 :
+    0;
+  const activeDocs = primaryDocs.filter(d => d.status !== 'Executed');
+  const leadDoc = activeDocs.reduce<ProgressDocument | null>((best, d) => (!best || docStage(d) > docStage(best) ? d : best), null);
+  const currentIndex = leadDoc ? docStage(leadDoc) : 0;
+
+  if (!leadDoc || currentIndex === 0) {
+    if (ancillaryDocs.some(d => d.status === 'Pending Signature')) {
+      return { stages: dealStages, currentIndex: 0, statusText: 'NDA Awaiting Signature', statusKind: 'emphasis' };
+    }
+    if (ancillaryDocs.some(d => d.status === 'Executed')) {
+      return { stages: dealStages, currentIndex: 0, statusText: 'NDA Signed', statusKind: 'success' };
+    }
+    return { stages: dealStages, currentIndex: 0, statusText: 'Getting Started', statusKind: 'neutral' };
+  }
+  const label = shortDocLabel(leadDoc.name);
+  switch (currentIndex) {
+    case 1: return { stages: dealStages, currentIndex, statusText: `Drafting ${label}`, statusKind: 'neutral' };
+    case 2: return { stages: dealStages, currentIndex, statusText: `${label} in Client Review`, statusKind: 'warning' };
+    case 3: return { stages: dealStages, currentIndex, statusText: `${label} in Legal Review`, statusKind: 'warning' };
+    default: return { stages: dealStages, currentIndex, statusText: signatureStatusText(activeDocs), statusKind: 'emphasis' };
+  }
+}
+
+function shortDocLabel(name: string): string {
+  if (/\bmsa\b|master services/i.test(name)) return 'MSA';
+  if (/\bsow\b|statement of work/i.test(name)) return 'SOW';
+  if (/\bdpa\b|data processing/i.test(name)) return 'DPA';
+  return name.length > 24 ? 'Agreement' : name;
+}
+
+const DOC_RAIL_FADE = 72;
+
+function DocThumbnailRail({ children }: { children: React.ReactNode }) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ start: false, end: false });
+
+  const measure = () => {
+    const el = railRef.current;
+    if (!el) return;
+    const start = el.scrollLeft > 1;
+    const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    setEdges(prev => (prev.start === start && prev.end === end ? prev : { start, end }));
+  };
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    Array.from(el.children).forEach(child => observer.observe(child));
+    return () => observer.disconnect();
+  });
+
+  const left = edges.start ? `transparent 0, #000 ${DOC_RAIL_FADE}px` : '#000 0';
+  const right = edges.end ? `#000 calc(100% - ${DOC_RAIL_FADE}px), transparent 100%` : '#000 100%';
+  const mask = `linear-gradient(to right, ${left}, ${right})`;
+
+  return (
+    <div
+      ref={railRef}
+      onScroll={measure}
+      className="doc-thumbnail-rail"
+      style={{
+        display: 'flex',
+        gap: 16,
+        // Zero intrinsic width keeps the rail from stretching its flex parent;
+        // min-width then fills the container (+8px offsets the negative margins).
+        width: 0,
+        minWidth: 'calc(100% + 8px)',
+        boxSizing: 'border-box',
+        overflowX: 'auto',
+        overflowY: 'visible',
+        scrollSnapType: 'x proximity',
+        scrollPaddingInline: 4,
+        padding: '4px 4px 12px',
+        margin: '-4px -4px -12px',
+        scrollbarWidth: 'none',
+        WebkitMaskImage: mask,
+        maskImage: mask,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function AgreementStageProgress({ stages, currentIndex }: { stages: string[]; currentIndex: number }) {
+  return (
+    <ol
+      aria-label="Agreement progress"
+      style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', gap: 6 }}
+    >
+      {stages.map((stage, i) => {
+        const isCurrent = i === currentIndex;
+        const isReached = i <= currentIndex;
+        return (
+          <li
+            key={stage}
+            aria-current={isCurrent ? 'step' : undefined}
+            style={{ width: 108, display: 'flex', flexDirection: 'column', gap: 12 }}
+          >
+            <span
+              style={{
+                fontSize: 14,
+                lineHeight: '20px',
+                fontWeight: isCurrent ? 600 : 400,
+                color: isCurrent ? 'var(--ink-white-100)' : 'rgba(255, 255, 255, 0.55)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {stage}
+              {isReached && !isCurrent && (
+                <span style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}> (completed)</span>
+              )}
+            </span>
+            <span
+              aria-hidden="true"
+              style={{
+                display: 'block',
+                height: 4,
+                borderRadius: 2,
+                background: isReached ? 'var(--ink-white-100)' : 'rgba(255, 255, 255, 0.14)',
+              }}
+            />
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
+  const [docViewMode, setDocViewMode] = useState<'list' | 'grid'>('grid');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [hoveredOverviewDocId, setHoveredOverviewDocId] = useState<string | null>(null);
   const [hoveredDocRowId, setHoveredDocRowId] = useState<string | null>(null);
@@ -7879,6 +8172,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
     }) as DealDocument[];
   }, [workspaceData.documents, isNDADraft, isPermissionSlipDraft, ndaSentForSignature, ndaRecipientName, savedNDAData, isUploadedDocAgreement, uploadedDocAgreement, addedDocuments, allSignedDocs]);
   
+  const agreementProgress = useMemo(() => {
+    const reviewTaskTitles = (injectedTasks ?? []).filter(t => t.id.startsWith('approval-')).map(t => t.title);
+    const isSignatureFlow =
+      (isNewlyCreated || agreement.workspaceKind === 'uploaded' || agreement.workspaceKind === 'permission-slip') &&
+      !/master services|purchase|request/i.test(agreement.agreementType ?? '');
+    const hasLiveActivity =
+      isNewlyCreated || isUploadedDocAgreement || isNDADraft || addedDocuments.length > 0 || allSignedDocs.length > 0 || reviewTaskTitles.length > 0;
+    return deriveAgreementProgress({ agreement, documents: modifiedDocuments, reviewTaskTitles, hasLiveActivity, isSignatureFlow });
+  }, [agreement, modifiedDocuments, injectedTasks, isNewlyCreated, isUploadedDocAgreement, isNDADraft, addedDocuments, allSignedDocs]);
+
   const currentDocuments = docSubTab === 'negotiating' ? modifiedDocuments : workspaceData.supplementalDocs;
   const currentAttentionItems = workspaceData.attentionItems;
   // The Permission Slip space (Simple Use Case) shows a real activity feed based
@@ -8220,37 +8523,69 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, minWidth: 0, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 170, boxSizing: 'border-box' }}>
-
-          {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
-              <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setParticipantMode('preview')}
-              style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-100)', padding: 8, marginRight: -8, border: 'none', borderRadius: 4, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', lineHeight: '20px', flexShrink: 0 }}
-            >
-              <Icon name="eye" size="small" color="var(--ink-white-100)" />
-              Recipient Preview
-            </button>
-          </div>
-
-          {/* Space name (H1) + status on the left, Add button on the right — same row */}
-          <div style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+        <div style={{ ...innerStyle, minWidth: 0, alignItems: 'flex-start', gap: 'var(--ink-spacing-300)', padding: '28px var(--ink-spacing-300) 32px', boxSizing: 'border-box' }}>
+          <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
+            <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
+          </button>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Space name (H1) on the left, collaborators + space actions on the right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
-              <StatusLight
-                noFill
-                className="status-on-dark"
-                kind={agreement.statusKind === 'success' ? 'success' : agreement.statusKind === 'warning' ? 'warning' : agreement.statusKind === 'neutral' ? 'neutral' : 'emphasis'}
-                text={agreement.status}
+            </div>
+            {/* Icon buttons pad their glyphs by ~8px, so an 8px gap everywhere gives equal ~25px glyph-to-glyph spacing. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setParticipantMode('demo')}
+                  aria-label="View as Sam Sanders (participant experience)"
+                  title="View as Sam Sanders"
+                  style={{ display: 'flex', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 999, position: 'relative', zIndex: 3 }}
+                >
+                  <Avatar initials="SS" size="small" style={HEADER_AVATAR_STYLE} />
+                </button>
+                <Avatar initials="JL" size="small" style={{ ...HEADER_AVATAR_STYLE, marginLeft: -8, position: 'relative', zIndex: 2 }} />
+                <Avatar initials="NK" size="small" style={{ ...HEADER_AVATAR_STYLE, marginLeft: -8, position: 'relative', zIndex: 1 }} />
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <RowOverflowMenu
+                triggerLabel="Share or add agent"
+                triggerStyle={HEADER_ICON_BUTTON_STYLE}
+                items={[
+                  {
+                    label: 'Share',
+                    icon: <Icon name="share-web" size="small" />,
+                    onClick: () => setShowAddSeatsModal(true),
+                  },
+                  {
+                    label: 'Add Agent',
+                    icon: <Icon name="sparkle" size="small" />,
+                    onClick: () => {},
+                  },
+                ]}
+                trigger={
+                  <svg width="18" height="20" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+                    <path d="M6 1.9C7.16 1.9 8.1 2.84 8.1 4C8.1 5.16 7.16 6.1 6 6.1C4.84 6.1 3.9 5.16 3.9 4C3.9 2.84 4.84 1.9 6 1.9ZM6 0C3.79 0 2 1.79 2 4C2 6.21 3.79 8 6 8C8.21 8 10 6.21 10 4C10 1.79 8.21 0 6 0ZM14 12H12V10H10V12H8V14H10V16H12V14H14V12ZM8 9H5C2.24 9 0 11.24 0 14V16H2V13.88C2 12.23 3.22 11 4.88 11H8V9Z" fill="currentColor" />
+                  </svg>
+                }
               />
+              <button
+                type="button"
+                onClick={() => setParticipantMode('preview')}
+                aria-label="Recipient preview"
+                title="Recipient preview"
+                style={{ ...HEADER_ICON_BUTTON_STYLE, marginRight: -8 }}
+              >
+                <Icon name="eye" size={20} color="var(--ink-white-100)" />
+              </button>
+              </span>
             </div>
           </div>
-          {/* Key extractions pill on the left, collaborators + Add Agents on the right — same row, vertically centered */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+          <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
+            <AgreementStageProgress stages={agreementProgress.stages} currentIndex={agreementProgress.currentIndex} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
           {(() => {
             const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
@@ -8284,6 +8619,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             const [primary, ...rest] = all;
             return (
               <ExtractionsPill
+                status={{ text: agreementProgress.statusText, kind: agreementProgress.statusKind }}
                 partyName={partyName}
                 onPartyClick={() => setShowPartyHistory(true)}
                 primary={primary}
@@ -8292,63 +8628,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             );
           })()}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, marginTop: 16 }}>
-            <button
-              type="button"
-              onClick={() => setParticipantMode('demo')}
-              aria-label="View as Sam Sanders (participant experience)"
-              title="View as Sam Sanders"
-              style={{ display: 'flex', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 999, marginRight: -8, position: 'relative', zIndex: 3 }}
-            >
-              <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
-            </button>
-            <RowOverflowMenu
-              triggerLabel="Space actions: share or add agent"
-              triggerStyle={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 'var(--ink-spacing-200)',
-                padding: 0,
-                border: 'none',
-                background: 'transparent',
-                color: 'var(--ink-white-100)',
-                cursor: 'pointer',
-              }}
-              items={[
-                {
-                  label: 'Share',
-                  icon: <Icon name="share-web" size="small" />,
-                  onClick: () => setShowAddSeatsModal(true),
-                },
-                {
-                  label: 'Add Agent',
-                  icon: <Icon name="sparkle" size="small" />,
-                  onClick: () => {},
-                },
-              ]}
-              trigger={
-              <>
-                <span style={{ display: 'flex' }} aria-hidden="true">
-                  <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8, position: 'relative', zIndex: 2 }} />
-                  <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', position: 'relative', zIndex: 1 }} />
-                </span>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 999,
-                    border: '1px solid var(--ink-white-100)',
-                  }}
-                >
-                  <Icon name="overflow-horizontal" size={18} />
-                </span>
-              </>
-              }
-            />
           </div>
           </div>
         </div>
@@ -8362,12 +8641,18 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <div style={{ padding: '28px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {(
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'var(--ink-spacing-300)' }}>
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'var(--ink-spacing-300)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Documents</div>
-                  <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div role="group" aria-label="Document view" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <DocViewToggle mode="grid" selected={docViewMode === 'grid'} onSelect={() => setDocViewMode('grid')} />
+                  <DocViewToggle mode="list" selected={docViewMode === 'list'} onSelect={() => setDocViewMode('list')} />
+                    </div>
+                    <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
+                  </div>
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8414,8 +8699,82 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   </div>
                 )}
 
+                {/* Primary documents — thumbnail grid view */}
+                {docSubTab === 'negotiating' && docViewMode === 'grid' && (
+                  <DocThumbnailRail>
+                    <button
+                      type="button"
+                      onClick={addMenuHandlers.onUpload}
+                      className="doc-grid-add"
+                      style={{ flex: '0 0 240px', scrollSnapAlign: 'start', minHeight: 252, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
+                    >
+                      <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
+                      </span>
+                      <span style={{ fontSize: 16, color: 'var(--ink-text-secondary)' }}>Add Documents</span>
+                    </button>
+                    {(currentDocuments as DealDocument[]).map(doc => {
+                      const openCard = () => {
+                        if (doc.signatureProgress) {
+                          openEnvelopePanel({
+                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            documentNames: [doc.name],
+                            signatureProgress: doc.signatureProgress,
+                            dateModified: doc.lastModified || doc.dateModified,
+                            rowId: doc.id,
+                          });
+                        } else if (doc.id.startsWith('added-')) {
+                          setPendingPreviewDoc(doc.name);
+                        } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                          onEditNDA();
+                        } else {
+                          onPreviewDocument?.(doc.name);
+                        }
+                      };
+                      const isSelected = selectedDocs.has(doc.id);
+                      return (
+                        <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 240px', scrollSnapAlign: 'start', display: 'flex' }}>
+                        <button
+                          type="button"
+                          onClick={openCard}
+                          aria-label={`Open ${doc.name}`}
+                          className="doc-grid-card"
+                          style={{ width: '100%', minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                        >
+                          <div style={{ height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
+                            <div style={{ width: '78%' }}>
+                              <EnvelopeDocThumbnail docName={doc.name} />
+                            </div>
+                          </div>
+                          <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+                            <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
+                            <span style={{ fontSize: 14, color: 'var(--ink-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {`Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
+                            </span>
+                          </div>
+                        </button>
+                        <input
+                          type="checkbox"
+                          className="doc-grid-check"
+                          aria-label={`Select ${doc.name}`}
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSelectedDocs((prev) => {
+                              const next = new Set(prev);
+                              if (checked) next.add(doc.id); else next.delete(doc.id);
+                              return next;
+                            });
+                          }}
+                        />
+                        </div>
+                      );
+                    })}
+                  </DocThumbnailRail>
+                )}
+
                 {/* Primary documents table */}
-                {docSubTab === 'negotiating' && (
+                {docSubTab === 'negotiating' && docViewMode === 'list' && (
                   <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
@@ -8784,14 +9143,14 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               )}
 
               {(
-                <div ref={tasksSectionRef} style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', scrollMarginTop: 'var(--ink-spacing-300)' }}>
+                <div ref={tasksSectionRef} style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', scrollMarginTop: 'var(--ink-spacing-300)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Tasks</div>
               <AddMenu
                 {...addMenuHandlers}
                 mode="tasks"
                 renderTrigger={({ toggle, open }) => (
-                  <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} aria-haspopup="menu" aria-expanded={open} onClick={toggle}>Add task</Button>
+                  <IconButton icon="plus" variant="secondary" size="small" aria-label="Add task" aria-haspopup="menu" aria-expanded={open} onClick={toggle} />
                 )}
               />
             </div>
@@ -9268,7 +9627,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       </div>
                       <div>
                         <Text size="xs" color="secondary">Total Value</Text>
-                        <Text size="xl" weight="semibold">—</Text>
+                        <Text size="xl" weight="semibold">��</Text>
                       </div>
                     </Inline>
                     <div>
@@ -9993,7 +10352,18 @@ type ExtractionDetail = { label: string; value: string };
 const PILL_LABEL_COLOR = 'rgba(255, 255, 255, 0.64)';
 const PILL_DIVIDER = <span aria-hidden="true" style={{ width: 1, height: 20, background: 'rgba(255, 255, 255, 0.24)', flexShrink: 0 }} />;
 
-function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
+const HEADER_AVATAR_STYLE: CSSProperties = { border: '2px solid #1B0838', background: 'var(--ink-white-100)', color: '#4C00FF', fontWeight: 600 };
+const HEADER_ICON_BUTTON_STYLE: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, padding: 0, border: 'none', borderRadius: 999, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer' };
+
+const PILL_STATUS_COLORS: Record<ProgressStatusKind, { dot: string; text: string }> = {
+  warning: { dot: '#F5A55A', text: '#F7C08A' },
+  emphasis: { dot: '#B9A6FF', text: '#D6CCFF' },
+  success: { dot: '#6FD7A0', text: '#A6E8C4' },
+  neutral: { dot: '#C9C5D3', text: '#E4E1EA' },
+};
+
+function ExtractionsPill({ status, partyName, onPartyClick, primary, details }: {
+  status?: { text: string; kind: ProgressStatusKind };
   partyName: string | null;
   onPartyClick: () => void;
   primary?: ExtractionDetail;
@@ -10018,6 +10388,15 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
         background: 'rgba(255, 255, 255, 0.12)',
         fontFamily: 'var(--ink-font-family)',
       }}>
+        {status && (
+          <>
+            <span role="status" style={{ ...groupStyle, color: PILL_STATUS_COLORS[status.kind].text, fontSize: 12, fontWeight: 500 }}>
+              <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 999, background: PILL_STATUS_COLORS[status.kind].dot, flexShrink: 0 }} />
+              {status.text}
+            </span>
+            {(partyName || primary || details.length > 0) && PILL_DIVIDER}
+          </>
+        )}
         {partyName && (
           <span style={groupStyle}>
             <span style={labelStyle}>Party</span>
