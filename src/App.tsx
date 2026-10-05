@@ -7598,13 +7598,75 @@ function clickableRowProps(onActivate: () => void, label: string) {
   };
 }
 
+function getAgreementStages(agreementType: string | undefined): string[] {
+  const type = (agreementType ?? '').toLowerCase();
+  if (/renewal/.test(type)) return ['Inception', 'Negotiation', 'Review', 'Confirmation'];
+  if (/\bnda\b|non-disclosure|acknowledg|offer letter|form|handbook|permission/.test(type)) return ['Inception', 'Review', 'Signature', 'Complete'];
+  return ['Inception', 'Negotiation', 'Legal Review', 'Approval', 'Complete'];
+}
+
+function getCurrentStageIndex(stages: string[], documents: { status: string }[], isComplete: boolean): number {
+  const last = stages.length - 1;
+  if (isComplete || (documents.length > 0 && documents.every(d => d.status === 'Executed'))) return last;
+  if (documents.some(d => d.status === 'Pending Signature')) return last - 1;
+  const reviewIndex = stages.findIndex(s => /review/i.test(s));
+  if (documents.some(d => d.status === 'In Review')) return reviewIndex === -1 ? 1 : reviewIndex;
+  if (documents.length === 0) return 0;
+  return Math.min(1, last);
+}
+
+function AgreementStageProgress({ stages, currentIndex }: { stages: string[]; currentIndex: number }) {
+  return (
+    <ol
+      aria-label="Agreement progress"
+      style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', gap: 6 }}
+    >
+      {stages.map((stage, i) => {
+        const isCurrent = i === currentIndex;
+        const isReached = i <= currentIndex;
+        return (
+          <li
+            key={stage}
+            aria-current={isCurrent ? 'step' : undefined}
+            style={{ width: 108, display: 'flex', flexDirection: 'column', gap: 12 }}
+          >
+            <span
+              style={{
+                fontSize: 14,
+                lineHeight: '20px',
+                fontWeight: isCurrent ? 600 : 400,
+                color: isCurrent ? 'var(--ink-white-100)' : 'rgba(255, 255, 255, 0.55)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {stage}
+              {isReached && !isCurrent && (
+                <span style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}> (completed)</span>
+              )}
+            </span>
+            <span
+              aria-hidden="true"
+              style={{
+                display: 'block',
+                height: 4,
+                borderRadius: 2,
+                background: isReached ? 'var(--ink-white-100)' : 'rgba(255, 255, 255, 0.14)',
+              }}
+            />
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, ndaSentForSignature, ndaRecipientName, uploadedDocAgreement, persistedAddedDocs, onAddDocument, onPreviewDocument, injectedTasks, injectedSignatureDocs, persistedSignedDocs, onSignDocs, initialOverlay, uploadRequestPrefill, vendorOnboardingPrefill, justSentEnvelope, persistedPinnedDocNames, onPinDocNames, persistedPinnedTaskId, onPinTaskId, persistedActivity, onAddActivity }: WorkspaceViewProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [sidebarTab, setSidebarTab] = useState<'activity' | 'details'>('activity');
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
-  const [docViewMode, setDocViewMode] = useState<'list' | 'grid'>('list');
+  const [docViewMode, setDocViewMode] = useState<'list' | 'grid'>('grid');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [hoveredOverviewDocId, setHoveredOverviewDocId] = useState<string | null>(null);
   const [hoveredDocRowId, setHoveredDocRowId] = useState<string | null>(null);
@@ -8246,7 +8308,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, minWidth: 0, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 170, boxSizing: 'border-box' }}>
+        <div style={{ ...innerStyle, minWidth: 0, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 230, boxSizing: 'border-box' }}>
 
           {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8275,6 +8337,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               />
             </div>
           </div>
+          {(() => {
+            const stages = getAgreementStages(agreement.agreementType);
+            const currentIndex = getCurrentStageIndex(stages, modifiedDocuments as { status: string }[], agreement.statusKind === 'success');
+            return (
+              <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
+                <AgreementStageProgress stages={stages} currentIndex={currentIndex} />
+              </div>
+            );
+          })()}
           {/* Key extractions pill on the left, collaborators + Add Agents on the right — same row, vertically centered */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -8395,8 +8466,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Documents</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <div role="group" aria-label="Document view" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <DocViewToggle mode="list" selected={docViewMode === 'list'} onSelect={() => setDocViewMode('list')} />
-                      <DocViewToggle mode="grid" selected={docViewMode === 'grid'} onSelect={() => setDocViewMode('grid')} />
+                  <DocViewToggle mode="grid" selected={docViewMode === 'grid'} onSelect={() => setDocViewMode('grid')} />
+                  <DocViewToggle mode="list" selected={docViewMode === 'list'} onSelect={() => setDocViewMode('list')} />
                     </div>
                     <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
                   </div>
