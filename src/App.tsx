@@ -4206,6 +4206,8 @@ function SendComboButton({ onSendForSignature, onSendForClientReview }: { onSend
   );
 }
 
+type DocSuggestion = { id: string; ins: string; del: string; y: number; time: string };
+
 function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName, readOnly = false }: DocumentPreviewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -4231,6 +4233,8 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
   // Width of the scrollable document canvas, tracked so we can reserve a
   // right-hand comment rail and dock comment cards 16px past the page edge.
   const [containerWidth, setContainerWidth] = useState(0);
+  const [suggestions, setSuggestions] = useState<DocSuggestion[]>([]);
+  const suggestionTimes = useRef<Record<string, string>>({});
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -4263,7 +4267,176 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
     return () => ro.disconnect();
   }, [open]);
 
+  // Rebuild the suggestion list from the DOM, since the edits themselves live
+  // in the contentEditable canvas rather than in React state.
+  const collectSuggestions = useCallback(() => {
+    const root = canvasRef.current;
+    const container = scrollRef.current;
+    if (!root || !container) return;
+    root.querySelectorAll<HTMLElement>('[data-sid]').forEach((el) => { if (!el.textContent) el.remove(); });
+    const cRect = container.getBoundingClientRect();
+    const map = new Map<string, DocSuggestion>();
+    root.querySelectorAll<HTMLElement>('[data-sid]').forEach((el) => {
+      const id = el.dataset.sid as string;
+      let s = map.get(id);
+      if (!s) {
+        s = { id, ins: '', del: '', y: el.getBoundingClientRect().top - cRect.top + container.scrollTop, time: suggestionTimes.current[id] ?? '' };
+        map.set(id, s);
+      }
+      if (el.dataset.kind === 'ins') s.ins += el.textContent; else s.del += el.textContent;
+    });
+    setSuggestions([...map.values()].sort((a, b) => a.y - b.y));
+  }, []);
+
+  // Suggesting mode for recipients: every keystroke is intercepted and turned
+  // into a tracked insertion or deletion instead of editing the text directly.
+  useEffect(() => {
+    if (!open || !readOnly) return;
+    const root = canvasRef.current;
+    if (!root) return;
+
+    const suggestionEl = (n: Node | null) =>
+      ((n && n.nodeType === Node.TEXT_NODE ? n.parentElement : n as Element | null)?.closest('[data-sid]') ?? null) as HTMLElement | null;
+
+    const adjacentSuggestion = (range: Range): HTMLElement | null => {
+      const own = suggestionEl(range.startContainer);
+      if (own && root.contains(own)) return own;
+      const c = range.startContainer;
+      const o = range.startOffset;
+      const neighbors: (Node | null)[] = c.nodeType === Node.TEXT_NODE
+        ? [o === 0 ? c.previousSibling : null, o === (c as Text).length ? c.nextSibling : null]
+        : [c.childNodes[o - 1] ?? null, c.childNodes[o] ?? null];
+      for (const n of neighbors) if (n instanceof HTMLElement && n.dataset.sid) return n;
+      return null;
+    };
+
+    const newSid = () => {
+      const id = 'sg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      suggestionTimes.current[id] = new Date().toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+      return id;
+    };
+
+    const placeCaret = (node: Node, offset: number) => {
+      const sel = window.getSelection();
+      const r = document.createRange();
+      r.setStart(node, offset);
+      r.collapse(true);
+      sel?.removeAllRanges();
+      sel?.addRange(r);
+    };
+
+    // Strike through original text in the range; text the recipient inserted
+    // themselves is removed outright, matching Google Docs.
+    const markDeleted = (range: Range, sid: string, caretAtStart: boolean) => {
+      const base = range.commonAncestorContainer;
+      const walker = document.createTreeWalker(base.nodeType === Node.TEXT_NODE ? base.parentNode ?? base : base, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (range.intersectsNode(n) && (n as Text).length && !(n.parentElement?.closest('[contenteditable="false"]'))) nodes.push(n as Text);
+      }
+      nodes.forEach((node) => {
+        let target = node;
+        if (node === range.endContainer && range.endOffset < node.length) target.splitText(range.endOffset);
+        if (node === range.startContainer && range.startOffset > 0) target = target.splitText(range.startOffset);
+        const owner = suggestionEl(target);
+        if (owner?.dataset.kind === 'ins') { target.remove(); return; }
+        if (owner?.dataset.kind === 'del') return;
+        const del = document.createElement('span');
+        del.dataset.sid = sid;
+        del.dataset.kind = 'del';
+        del.className = 'suggest-del';
+        target.parentNode?.insertBefore(del, target);
+        del.appendChild(target);
+      });
+      range.collapse(caretAtStart);
+      const r = range.cloneRange();
+      const owner = suggestionEl(r.startContainer);
+      if (owner?.dataset.kind === 'del') {
+        if (caretAtStart) r.setStartBefore(owner); else r.setStartAfter(owner);
+        r.collapse(true);
+      }
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(r);
+    };
+
+    const insertSuggested = (text: string, sid: string) => {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      const c = range.startContainer;
+      const owner = suggestionEl(c);
+      if (owner?.dataset.kind === 'ins' && c.nodeType === Node.TEXT_NODE) {
+        (c as Text).insertData(range.startOffset, text);
+        placeCaret(c, range.startOffset + text.length);
+        return;
+      }
+      if (owner?.dataset.kind === 'del') {
+        const atStart = c.nodeType === Node.TEXT_NODE && range.startOffset === 0 && !c.previousSibling;
+        if (atStart) range.setStartBefore(owner); else range.setStartAfter(owner);
+        range.collapse(true);
+      }
+      const prev = range.startContainer.nodeType === Node.TEXT_NODE
+        ? (range.startOffset === 0 ? range.startContainer.previousSibling : null)
+        : range.startContainer.childNodes[range.startOffset - 1];
+      if (prev instanceof HTMLElement && prev.dataset.kind === 'ins' && prev.lastChild?.nodeType === Node.TEXT_NODE) {
+        const t = prev.lastChild as Text;
+        t.appendData(text);
+        placeCaret(t, t.length);
+        return;
+      }
+      const ins = document.createElement('span');
+      ins.dataset.sid = sid;
+      ins.dataset.kind = 'ins';
+      ins.className = 'suggest-ins';
+      ins.textContent = text;
+      range.insertNode(ins);
+      placeCaret(ins.firstChild as Text, text.length);
+    };
+
+    const onBeforeInput = (e: InputEvent) => {
+      const type = e.inputType;
+      if (type === 'insertCompositionText') return;
+      e.preventDefault();
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount || !root.contains(sel.anchorNode)) return;
+
+      if (type.startsWith('insert')) {
+        const text = (e.data ?? e.dataTransfer?.getData('text/plain') ?? '').replace(/\s*\n+\s*/g, ' ');
+        if (!text) return;
+        const range = sel.getRangeAt(0);
+        const sid = adjacentSuggestion(range)?.dataset.sid ?? newSid();
+        if (!range.collapsed) markDeleted(range, sid, false);
+        insertSuggested(text, sid);
+      } else if (type.startsWith('delete')) {
+        const backward = type.includes('Backward');
+        const existingSid = adjacentSuggestion(sel.getRangeAt(0))?.dataset.sid;
+        if (sel.isCollapsed) sel.modify('extend', backward ? 'backward' : 'forward', type.includes('Word') ? 'word' : 'character');
+        if (sel.isCollapsed) return;
+        const range = sel.getRangeAt(0);
+        const sid = existingSid ?? newSid();
+        markDeleted(range, sid, backward);
+      } else {
+        return;
+      }
+      setSelMenu(null);
+      collectSuggestions();
+    };
+
+    root.addEventListener('beforeinput', onBeforeInput);
+    return () => root.removeEventListener('beforeinput', onBeforeInput);
+  }, [open, readOnly, collectSuggestions]);
+
   if (!open) return null;
+
+  const rejectSuggestion = (id: string) => {
+    canvasRef.current?.querySelectorAll<HTMLElement>(`[data-sid="${id}"]`).forEach((el) => {
+      if (el.dataset.kind === 'ins') el.remove();
+      else el.replaceWith(...Array.from(el.childNodes));
+    });
+    canvasRef.current?.normalize();
+    collectSuggestions();
+  };
 
   const send = (text: string) => {
     const trimmed = text.trim();
@@ -4546,7 +4719,14 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
   const RAIL_W = 340;
   const RAIL_GAP = 16;
   const CANVAS_PAD = 24;
-  const commentOpen = !!(composer || openCardId);
+  const showSuggestionCards = readOnly && suggestions.length > 0 && !composer && !openCardId;
+  const commentOpen = !!(composer || openCardId || showSuggestionCards);
+  // Stack suggestion cards beside their text without letting them overlap.
+  const SUGGESTION_CARD_H = 112;
+  const suggestionCardTops = suggestions.reduce<number[]>((tops, s, i) => {
+    tops.push(i === 0 ? s.y : Math.max(s.y, tops[i - 1] + SUGGESTION_CARD_H + 8));
+    return tops;
+  }, []);
   const naturalDocW = (zoom / 100) * 800;
   const maxDocW = containerWidth > 0 ? containerWidth - CANVAS_PAD * 2 - RAIL_GAP - RAIL_W : naturalDocW;
   const docW = commentOpen && containerWidth > 0
@@ -4577,6 +4757,11 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
           <span style={{ fontSize: 15, fontWeight: 600, color: '#130032', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{headerFileName}</span>
           <button style={{ ...toolbarBtn, height: 26 }}>version 4.0 <Icon name="chevron-down" size={14} /></button>
           <span style={{ padding: '3px 10px', borderRadius: 12, background: '#FFF4E5', color: '#8A5A00', fontSize: 12, fontWeight: 600 }}>In Review</span>
+          {readOnly && (
+            <span title="Your edits appear as suggestions for the sender to review" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 12, background: 'var(--ink-cobalt-10, #ECE6FF)', color: 'var(--ink-cobalt-80, #4C00FF)', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+              <Icon name="pencil" size={12} /> Suggesting
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <button style={iconBtn} aria-label="More options"><Icon name="overflow-horizontal" size={18} /></button>
@@ -4922,9 +5107,10 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
         >
           <div
             ref={canvasRef}
-            contentEditable={editing}
+            contentEditable={editing || readOnly}
             suppressContentEditableWarning
             spellCheck={false}
+            aria-label={readOnly ? 'Document, suggesting mode' : undefined}
             style={{
               maxWidth: 800,
               marginTop: 0, marginBottom: 0,
@@ -5003,6 +5189,45 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
           )}
 
           <style>{commentComposerStyles}</style>
+
+          {showSuggestionCards && suggestions.map((s, i) => {
+            const quote = (t: string) => `"${t.length > 60 ? t.slice(0, 60) + '…' : t}"`;
+            return (
+              <div
+                key={s.id}
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                  position: 'absolute', left: railLeft, top: suggestionCardTops[i], zIndex: 28, width: RAIL_W,
+                  background: 'white', borderRadius: 12, padding: 16,
+                  border: '1px solid #EAE7F0', boxShadow: '0 4px 16px rgba(19,0,50,0.10)',
+                  fontFamily: 'var(--ink-font-family)', transition: 'top 0.15s ease',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{
+                    flexShrink: 0, width: 32, height: 32, borderRadius: '50%',
+                    background: '#CFE9E5', color: '#0F6B5F',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 600,
+                  }}>{CURRENT_USER.initials}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{CURRENT_USER.name}</div>
+                    <div style={{ fontSize: 13, color: '#8A85A0' }}>{s.time}</div>
+                  </div>
+                  <button style={iconBtn} aria-label="Reject suggestion" title="Reject suggestion" onClick={() => rejectSuggestion(s.id)}><Icon name="close" size={16} /></button>
+                </div>
+                <div style={{ fontSize: 14, lineHeight: 1.5, color: '#130032', marginTop: 12, overflowWrap: 'anywhere' }}>
+                  {s.ins && s.del ? (
+                    <><strong>Replace:</strong> <span className="suggest-del">{quote(s.del)}</span> with <span className="suggest-ins">{quote(s.ins)}</span></>
+                  ) : s.ins ? (
+                    <><strong>Add:</strong> <span className="suggest-ins">{quote(s.ins)}</span></>
+                  ) : (
+                    <><strong>Delete:</strong> <span className="suggest-del">{quote(s.del)}</span></>
+                  )}
+                </div>
+              </div>
+            );
+          })}
 
           {/* Posted comment card (only the open one shows on the canvas; all remain in the Comments panel) */}
           {pinnedComments.filter((c) => c.id === openCardId).map((c) => (

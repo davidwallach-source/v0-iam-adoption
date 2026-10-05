@@ -118,3 +118,16 @@ img, svg { display: block; max-width: 100%; }
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+
+.suggest-ins {
+  color: #0F6B5F;
+  text-decoration: underline;
+  text-decoration-color: #0F6B5F;
+  text-underline-offset: 3px;
+}
+
+.suggest-del {
+  color: #0F6B5F;
+  text-decoration: line-through;
+  text-decoration-color: #0F6B5F;
+}
