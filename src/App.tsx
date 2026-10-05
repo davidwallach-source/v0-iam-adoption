@@ -7615,6 +7615,8 @@ interface ProgressDocument {
 
 const SIGNATURE_FLOW_STAGES = ['Prepare', 'Sent', 'Signing', 'Complete'];
 const NDA_DOC_PATTERN = /\bnda\b|non-disclosure/i;
+const DEAL_DOC_PATTERN = /\bmsa\b|master services|\bsow\b|statement of work|\bdpa\b|data processing|services agreement|license agreement|purchase agreement|order form/i;
+const LIVE_DEAL_STAGES = ['Inception', 'Drafting', 'Client Review', 'Legal Review', 'Signature', 'Complete'];
 
 function getAgreementStages(agreementType: string | undefined): string[] {
   const type = (agreementType ?? '').toLowerCase();
@@ -7673,7 +7675,10 @@ function deriveAgreementProgress({
     return { stages, currentIndex, statusText: agreement.statusSub, statusKind };
   }
 
-  if (isSignatureFlow) {
+  // A space that started as a simple send (e.g. an NDA) becomes a deal as soon
+  // as a primary agreement like an MSA is added, so it switches to deal milestones.
+  const hasDealDoc = documents.some(d => !NDA_DOC_PATTERN.test(d.name) && DEAL_DOC_PATTERN.test(d.name));
+  if (isSignatureFlow && !hasDealDoc) {
     const pending = documents.filter(d => d.status === 'Pending Signature');
     if (documents.length > 0 && documents.every(d => d.status === 'Executed')) {
       return { stages, currentIndex: last, statusText: 'Completed', statusKind: 'success' };
@@ -7683,38 +7688,109 @@ function deriveAgreementProgress({
     return { stages, currentIndex: anySigned ? 2 : 1, statusText: signatureStatusText(pending), statusKind: 'emphasis' };
   }
 
-  // Ancillary NDAs (in a non-NDA agreement) don't move the deal itself forward.
+  // Live deal milestones: Inception → Drafting → Client Review → Legal Review → Signature → Complete.
+  // Ancillary NDAs never move the deal itself forward; they only colour the Inception status.
+  const dealStages = LIVE_DEAL_STAGES;
+  const dealLast = dealStages.length - 1;
   const isNdaAgreement = /\bnda\b|non-disclosure/i.test(agreement.agreementType ?? '');
-  const primaryDocs = isNdaAgreement ? documents : documents.filter(d => !NDA_DOC_PATTERN.test(d.name));
-  const ancillaryPending = documents.filter(d => !primaryDocs.includes(d) && d.status === 'Pending Signature');
+  const primaryDocs = isNdaAgreement && !hasDealDoc ? documents : documents.filter(d => !NDA_DOC_PATTERN.test(d.name));
+  const ancillaryDocs = documents.filter(d => !primaryDocs.includes(d));
 
   if (primaryDocs.length > 0 && primaryDocs.every(d => d.status === 'Executed')) {
-    return { stages, currentIndex: last, statusText: 'Completed', statusKind: 'success' };
+    return { stages: dealStages, currentIndex: dealLast, statusText: 'Completed', statusKind: 'success' };
   }
 
   const sentForReview = (name: string) => reviewTaskTitles.some(t => t === `Review ${name}`);
   const docStage = (d: ProgressDocument) =>
-    d.status === 'Pending Signature' ? signatureIndex :
-    d.status === 'In Review' ? reviewIndex :
-    d.status === 'Draft' && sentForReview(d.name) ? negotiationIndex :
+    d.status === 'Pending Signature' ? 4 :
+    d.status === 'In Review' ? 3 :
+    sentForReview(d.name) ? 2 :
+    d.status === 'Draft' ? 1 :
     0;
   const activeDocs = primaryDocs.filter(d => d.status !== 'Executed');
   const leadDoc = activeDocs.reduce<ProgressDocument | null>((best, d) => (!best || docStage(d) > docStage(best) ? d : best), null);
   const currentIndex = leadDoc ? docStage(leadDoc) : 0;
 
   if (!leadDoc || currentIndex === 0) {
-    if (ancillaryPending.length > 0) {
-      return { stages, currentIndex: 0, statusText: 'NDA Awaiting Signature', statusKind: 'emphasis' };
+    if (ancillaryDocs.some(d => d.status === 'Pending Signature')) {
+      return { stages: dealStages, currentIndex: 0, statusText: 'NDA Awaiting Signature', statusKind: 'emphasis' };
     }
-    return { stages, currentIndex: 0, statusText: 'Draft', statusKind: 'neutral' };
+    if (ancillaryDocs.some(d => d.status === 'Executed')) {
+      return { stages: dealStages, currentIndex: 0, statusText: 'NDA Signed', statusKind: 'success' };
+    }
+    return { stages: dealStages, currentIndex: 0, statusText: 'Getting Started', statusKind: 'neutral' };
   }
-  if (leadDoc.status === 'Pending Signature') {
-    return { stages, currentIndex, statusText: signatureStatusText(activeDocs), statusKind: 'emphasis' };
+  const label = shortDocLabel(leadDoc.name);
+  switch (currentIndex) {
+    case 1: return { stages: dealStages, currentIndex, statusText: `Drafting ${label}`, statusKind: 'neutral' };
+    case 2: return { stages: dealStages, currentIndex, statusText: `${label} in Client Review`, statusKind: 'warning' };
+    case 3: return { stages: dealStages, currentIndex, statusText: `${label} in Legal Review`, statusKind: 'warning' };
+    default: return { stages: dealStages, currentIndex, statusText: signatureStatusText(activeDocs), statusKind: 'emphasis' };
   }
-  if (leadDoc.status === 'Draft') {
-    return { stages, currentIndex, statusText: 'Client Review', statusKind: 'warning' };
-  }
-  return { stages, currentIndex, statusText: stages[currentIndex], statusKind: 'warning' };
+}
+
+function shortDocLabel(name: string): string {
+  if (/\bmsa\b|master services/i.test(name)) return 'MSA';
+  if (/\bsow\b|statement of work/i.test(name)) return 'SOW';
+  if (/\bdpa\b|data processing/i.test(name)) return 'DPA';
+  return name.length > 24 ? 'Agreement' : name;
+}
+
+const DOC_RAIL_FADE = 72;
+
+function DocThumbnailRail({ children }: { children: React.ReactNode }) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ start: false, end: false });
+
+  const measure = () => {
+    const el = railRef.current;
+    if (!el) return;
+    const start = el.scrollLeft > 1;
+    const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    setEdges(prev => (prev.start === start && prev.end === end ? prev : { start, end }));
+  };
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    Array.from(el.children).forEach(child => observer.observe(child));
+    return () => observer.disconnect();
+  });
+
+  const left = edges.start ? `transparent 0, #000 ${DOC_RAIL_FADE}px` : '#000 0';
+  const right = edges.end ? `#000 calc(100% - ${DOC_RAIL_FADE}px), transparent 100%` : '#000 100%';
+  const mask = `linear-gradient(to right, ${left}, ${right})`;
+
+  return (
+    <div
+      ref={railRef}
+      onScroll={measure}
+      className="doc-thumbnail-rail"
+      style={{
+        display: 'flex',
+        gap: 16,
+        // Zero intrinsic width keeps the rail from stretching its flex parent;
+        // min-width then fills the container (+8px offsets the negative margins).
+        width: 0,
+        minWidth: 'calc(100% + 8px)',
+        boxSizing: 'border-box',
+        overflowX: 'auto',
+        overflowY: 'visible',
+        scrollSnapType: 'x proximity',
+        scrollPaddingInline: 4,
+        padding: '4px 4px 12px',
+        margin: '-4px -4px -12px',
+        scrollbarWidth: 'none',
+        WebkitMaskImage: mask,
+        maskImage: mask,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 function AgreementStageProgress({ stages, currentIndex }: { stages: string[]; currentIndex: number }) {
@@ -8625,12 +8701,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
                 {/* Primary documents — thumbnail grid view */}
                 {docSubTab === 'negotiating' && docViewMode === 'grid' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                  <DocThumbnailRail>
                     <button
                       type="button"
                       onClick={addMenuHandlers.onUpload}
                       className="doc-grid-add"
-                      style={{ minHeight: 252, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ flex: '0 0 172px', scrollSnapAlign: 'start', minHeight: 216, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
@@ -8662,9 +8738,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           onClick={openCard}
                           aria-label={`Open ${doc.name}`}
                           className="doc-grid-card"
-                          style={{ minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                          style={{ flex: '0 0 172px', scrollSnapAlign: 'start', minHeight: 216, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
                         >
-                          <div style={{ height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 20, boxSizing: 'border-box', flexShrink: 0 }}>
+                          <div style={{ height: 136, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
                             <div style={{ width: '78%' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
@@ -8678,7 +8754,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         </button>
                       );
                     })}
-                  </div>
+                  </DocThumbnailRail>
                 )}
 
                 {/* Primary documents table */}
