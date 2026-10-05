@@ -8496,40 +8496,83 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       {/* Header + Tabs — single full-width block */}
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
-        <div style={{ ...innerStyle, minWidth: 0, flexDirection: 'column', alignItems: 'stretch', padding: 'var(--ink-spacing-100) var(--ink-spacing-300) 0', height: 230, boxSizing: 'border-box' }}>
-
-          {/* Top actions row ��� back arrow on the left, avatars/icons on the right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
-              <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setParticipantMode('preview')}
-              style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 'var(--ink-spacing-100)', padding: 8, marginRight: -8, border: 'none', borderRadius: 4, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', lineHeight: '20px', flexShrink: 0 }}
-            >
-              <Icon name="eye" size="small" color="var(--ink-white-100)" />
-              Recipient Preview
-            </button>
-          </div>
-
-          {/* Space name (H1) + status on the left, Add button on the right — same row */}
-          <div style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+        <div style={{ ...innerStyle, minWidth: 0, alignItems: 'flex-start', gap: 'var(--ink-spacing-300)', padding: '28px var(--ink-spacing-300) 32px', boxSizing: 'border-box' }}>
+          <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
+            <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
+          </button>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Space name (H1) on the left, collaborators + space actions on the right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
-              <StatusLight
-                noFill
-                className="status-on-dark"
-                kind={agreementProgress.statusKind}
-                text={agreementProgress.statusText}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexShrink: 0 }}>
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setParticipantMode('demo')}
+                  aria-label="View as Sam Sanders (participant experience)"
+                  title="View as Sam Sanders"
+                  style={{ display: 'flex', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 999, position: 'relative', zIndex: 3 }}
+                >
+                  <Avatar initials="SS" size="small" style={HEADER_AVATAR_STYLE} />
+                </button>
+                <Avatar initials="JL" size="small" style={{ ...HEADER_AVATAR_STYLE, marginLeft: -8, position: 'relative', zIndex: 2 }} />
+                <Avatar initials="NK" size="small" style={{ ...HEADER_AVATAR_STYLE, marginLeft: -8, position: 'relative', zIndex: 1 }} />
+              </span>
+              <RowOverflowMenu
+                triggerLabel="Share or add agent"
+                triggerStyle={HEADER_ICON_BUTTON_STYLE}
+                items={[
+                  {
+                    label: 'Share',
+                    icon: <Icon name="share-web" size="small" />,
+                    onClick: () => setShowAddSeatsModal(true),
+                  },
+                  {
+                    label: 'Add Agent',
+                    icon: <Icon name="sparkle" size="small" />,
+                    onClick: () => {},
+                  },
+                ]}
+                trigger={
+                  <svg width="18" height="20" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+                    <path d="M6 1.9C7.16 1.9 8.1 2.84 8.1 4C8.1 5.16 7.16 6.1 6 6.1C4.84 6.1 3.9 5.16 3.9 4C3.9 2.84 4.84 1.9 6 1.9ZM6 0C3.79 0 2 1.79 2 4C2 6.21 3.79 8 6 8C8.21 8 10 6.21 10 4C10 1.79 8.21 0 6 0ZM14 12H12V10H10V12H8V14H10V16H12V14H14V12ZM8 9H5C2.24 9 0 11.24 0 14V16H2V13.88C2 12.23 3.22 11 4.88 11H8V9Z" fill="currentColor" />
+                  </svg>
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setParticipantMode('preview')}
+                aria-label="Recipient preview"
+                title="Recipient preview"
+                style={HEADER_ICON_BUTTON_STYLE}
+              >
+                <Icon name="eye" size={20} color="var(--ink-white-100)" />
+              </button>
+              <RowOverflowMenu
+                triggerLabel="More space actions"
+                triggerStyle={{ ...HEADER_ICON_BUTTON_STYLE, marginRight: -8 }}
+                items={[
+                  {
+                    label: 'View as participant',
+                    icon: <Icon name="person" size="small" />,
+                    onClick: () => setParticipantMode('demo'),
+                  },
+                  {
+                    label: 'Party history',
+                    icon: <Icon name="building-person" size="small" />,
+                    onClick: () => setShowPartyHistory(true),
+                  },
+                ]}
+                trigger={<Icon name="overflow-vertical" size={20} color="var(--ink-white-100)" />}
               />
             </div>
           </div>
           <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
             <AgreementStageProgress stages={agreementProgress.stages} currentIndex={agreementProgress.currentIndex} />
           </div>
-          {/* Key extractions pill on the left, collaborators + Add Agents on the right — same row, vertically centered */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-300)' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
           {(() => {
             const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
@@ -8563,6 +8606,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             const [primary, ...rest] = all;
             return (
               <ExtractionsPill
+                status={{ text: agreementProgress.statusText, kind: agreementProgress.statusKind }}
                 partyName={partyName}
                 onPartyClick={() => setShowPartyHistory(true)}
                 primary={primary}
@@ -8571,63 +8615,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             );
           })()}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, marginTop: 16 }}>
-            <button
-              type="button"
-              onClick={() => setParticipantMode('demo')}
-              aria-label="View as Sam Sanders (participant experience)"
-              title="View as Sam Sanders"
-              style={{ display: 'flex', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 999, marginRight: -8, position: 'relative', zIndex: 3 }}
-            >
-              <Avatar initials="SS" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)' }} />
-            </button>
-            <RowOverflowMenu
-              triggerLabel="Space actions: share or add agent"
-              triggerStyle={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 'var(--ink-spacing-200)',
-                padding: 0,
-                border: 'none',
-                background: 'transparent',
-                color: 'var(--ink-white-100)',
-                cursor: 'pointer',
-              }}
-              items={[
-                {
-                  label: 'Share',
-                  icon: <Icon name="share-web" size="small" />,
-                  onClick: () => setShowAddSeatsModal(true),
-                },
-                {
-                  label: 'Add Agent',
-                  icon: <Icon name="sparkle" size="small" />,
-                  onClick: () => {},
-                },
-              ]}
-              trigger={
-              <>
-                <span style={{ display: 'flex' }} aria-hidden="true">
-                  <Avatar initials="JL" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', marginRight: -8, position: 'relative', zIndex: 2 }} />
-                  <Avatar initials="NK" size="small" style={{ border: '2px solid var(--ink-white-100)', background: '#2A1560', color: 'var(--ink-white-100)', position: 'relative', zIndex: 1 }} />
-                </span>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 999,
-                    border: '1px solid var(--ink-white-100)',
-                  }}
-                >
-                  <Icon name="overflow-horizontal" size={18} />
-                </span>
-              </>
-              }
-            />
           </div>
           </div>
         </div>
@@ -8731,14 +8718,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           onPreviewDocument?.(doc.name);
                         }
                       };
+                      const isSelected = selectedDocs.has(doc.id);
                       return (
+                        <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 240px', scrollSnapAlign: 'start', display: 'flex' }}>
                         <button
-                          key={doc.id}
                           type="button"
                           onClick={openCard}
                           aria-label={`Open ${doc.name}`}
                           className="doc-grid-card"
-                          style={{ flex: '0 0 240px', scrollSnapAlign: 'start', minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                          style={{ width: '100%', minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
                         >
                           <div style={{ height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
                             <div style={{ width: '78%' }}>
@@ -8752,6 +8740,21 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             </span>
                           </div>
                         </button>
+                        <input
+                          type="checkbox"
+                          className="doc-grid-check"
+                          aria-label={`Select ${doc.name}`}
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSelectedDocs((prev) => {
+                              const next = new Set(prev);
+                              if (checked) next.add(doc.id); else next.delete(doc.id);
+                              return next;
+                            });
+                          }}
+                        />
+                        </div>
                       );
                     })}
                   </DocThumbnailRail>
@@ -10336,7 +10339,18 @@ type ExtractionDetail = { label: string; value: string };
 const PILL_LABEL_COLOR = 'rgba(255, 255, 255, 0.64)';
 const PILL_DIVIDER = <span aria-hidden="true" style={{ width: 1, height: 20, background: 'rgba(255, 255, 255, 0.24)', flexShrink: 0 }} />;
 
-function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
+const HEADER_AVATAR_STYLE: CSSProperties = { border: '2px solid #1B0838', background: 'var(--ink-white-100)', color: '#4C00FF', fontWeight: 600 };
+const HEADER_ICON_BUTTON_STYLE: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, padding: 0, border: 'none', borderRadius: 999, background: 'transparent', color: 'var(--ink-white-100)', cursor: 'pointer' };
+
+const PILL_STATUS_COLORS: Record<ProgressStatusKind, { dot: string; text: string }> = {
+  warning: { dot: '#F5A55A', text: '#F7C08A' },
+  emphasis: { dot: '#B9A6FF', text: '#D6CCFF' },
+  success: { dot: '#6FD7A0', text: '#A6E8C4' },
+  neutral: { dot: '#C9C5D3', text: '#E4E1EA' },
+};
+
+function ExtractionsPill({ status, partyName, onPartyClick, primary, details }: {
+  status?: { text: string; kind: ProgressStatusKind };
   partyName: string | null;
   onPartyClick: () => void;
   primary?: ExtractionDetail;
@@ -10361,6 +10375,15 @@ function ExtractionsPill({ partyName, onPartyClick, primary, details }: {
         background: 'rgba(255, 255, 255, 0.12)',
         fontFamily: 'var(--ink-font-family)',
       }}>
+        {status && (
+          <>
+            <span role="status" style={{ ...groupStyle, color: PILL_STATUS_COLORS[status.kind].text, fontSize: 12, fontWeight: 500 }}>
+              <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 999, background: PILL_STATUS_COLORS[status.kind].dot, flexShrink: 0 }} />
+              {status.text}
+            </span>
+            {(partyName || primary || details.length > 0) && PILL_DIVIDER}
+          </>
+        )}
         {partyName && (
           <span style={groupStyle}>
             <span style={labelStyle}>Party</span>
