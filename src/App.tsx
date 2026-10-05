@@ -4217,7 +4217,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [zoom, setZoom] = useState(100);
-  const [editing, setEditing] = useState(true);
+  const [editing, setEditing] = useState(!readOnly);
   const [selMenu, setSelMenu] = useState<{ x: number; y: number } | null>(null);
   const [composer, setComposer] = useState<{ y: number; anchor: string } | null>(null);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
@@ -4578,7 +4578,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
       </div>
 
       {/* ��─ Toolbar ── */}
-      {!doc.hideEditToolbar && (
+      {!doc.hideEditToolbar && !readOnly && (
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, height: 48, padding: '0 16px',
         background: 'white', borderBottom: '1px solid #E8E6ED', flexShrink: 0, overflowX: 'auto',
@@ -8506,7 +8506,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <div style={{ flex: 1, minWidth: 0 }}>
               <EditableSpaceName name={agreement.name} onRename={onRename} titleSize={32} color="var(--ink-white-100)" onDark />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ink-spacing-200)', flexShrink: 0 }}>
+            {/* Icon buttons pad their glyphs by ~8px, so an 8px gap everywhere gives equal ~25px glyph-to-glyph spacing. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ display: 'flex', alignItems: 'center' }}>
                 <button
                   type="button"
@@ -8520,6 +8521,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 <Avatar initials="JL" size="small" style={{ ...HEADER_AVATAR_STYLE, marginLeft: -8, position: 'relative', zIndex: 2 }} />
                 <Avatar initials="NK" size="small" style={{ ...HEADER_AVATAR_STYLE, marginLeft: -8, position: 'relative', zIndex: 1 }} />
               </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <RowOverflowMenu
                 triggerLabel="Share or add agent"
                 triggerStyle={HEADER_ICON_BUTTON_STYLE}
@@ -8546,27 +8548,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 onClick={() => setParticipantMode('preview')}
                 aria-label="Recipient preview"
                 title="Recipient preview"
-                style={HEADER_ICON_BUTTON_STYLE}
+                style={{ ...HEADER_ICON_BUTTON_STYLE, marginRight: -8 }}
               >
                 <Icon name="eye" size={20} color="var(--ink-white-100)" />
               </button>
-              <RowOverflowMenu
-                triggerLabel="More space actions"
-                triggerStyle={{ ...HEADER_ICON_BUTTON_STYLE, marginRight: -8 }}
-                items={[
-                  {
-                    label: 'View as participant',
-                    icon: <Icon name="person" size="small" />,
-                    onClick: () => setParticipantMode('demo'),
-                  },
-                  {
-                    label: 'Party history',
-                    icon: <Icon name="building-person" size="small" />,
-                    onClick: () => setShowPartyHistory(true),
-                  },
-                ]}
-                trigger={<Icon name="overflow-vertical" size={20} color="var(--ink-white-100)" />}
-              />
+              </span>
             </div>
           </div>
           <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
