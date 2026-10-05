@@ -3329,7 +3329,7 @@ function HomePage({ onUnavailable }: { onUnavailable: (e: React.MouseEvent) => v
   );
 }
 
-/* ═════���════════════════════��════════════
+/* ═════���══════════��═════════��════════════
    Insights — Overview sub-view
    ═══════════════════════════════════════ */
 
@@ -4310,6 +4310,29 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
     window.getSelection()?.removeAllRanges();
   };
 
+  // The recipient canvas isn't contentEditable, so execCommand can't style the
+  // selection there; wrap each selected text node in a styled span instead.
+  const markRecipientAnchor = (range: Range) => {
+    const root = range.commonAncestorContainer;
+    const walker = document.createTreeWalker(
+      root.nodeType === Node.TEXT_NODE ? root.parentNode ?? root : root,
+      NodeFilter.SHOW_TEXT,
+    );
+    const textNodes: Text[] = [];
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (range.intersectsNode(n) && n.textContent?.trim()) textNodes.push(n as Text);
+    }
+    textNodes.forEach((node) => {
+      let target = node;
+      if (node === range.endContainer && range.endOffset < node.length) target.splitText(range.endOffset);
+      if (node === range.startContainer && range.startOffset > 0) target = target.splitText(range.startOffset);
+      const mark = document.createElement('span');
+      mark.className = 'recipient-comment-anchor';
+      target.parentNode?.insertBefore(mark, target);
+      mark.appendChild(target);
+    });
+  };
+
   // Open the comment composer anchored to the current selection, and
   // highlight the selected text as the comment anchor.
   const openComposer = () => {
@@ -4322,10 +4345,14 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
       const rect = sel.getRangeAt(0).getBoundingClientRect();
       const cRect = container.getBoundingClientRect();
       y = rect.top - cRect.top + container.scrollTop;
-      try {
-        document.execCommand('backColor', false, '#FCE9A6');
-        document.execCommand('underline');
-      } catch { /* noop */ }
+      if (readOnly) {
+        markRecipientAnchor(sel.getRangeAt(0));
+      } else {
+        try {
+          document.execCommand('backColor', false, '#FCE9A6');
+          document.execCommand('underline');
+        } catch { /* noop */ }
+      }
     }
     setSelMenu(null);
     window.getSelection()?.removeAllRanges();

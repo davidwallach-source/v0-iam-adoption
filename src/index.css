@@ -110,3 +110,11 @@ img, svg { display: block; max-width: 100%; }
 .feed-item:focus-within .feed-reply,
 .feed-item .feed-reply:focus-visible { opacity: 1; }
 .feed-item .feed-reply:hover { background: var(--ink-cobalt-10); }
+
+.recipient-comment-anchor {
+  background-color: rgba(76, 154, 255, 0.14);
+  text-decoration: underline;
+  text-decoration-color: #7CB4F8;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
