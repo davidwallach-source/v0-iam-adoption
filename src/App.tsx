@@ -8706,7 +8706,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       type="button"
                       onClick={addMenuHandlers.onUpload}
                       className="doc-grid-add"
-                      style={{ flex: '0 0 172px', scrollSnapAlign: 'start', minHeight: 216, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ flex: '0 0 240px', scrollSnapAlign: 'start', minHeight: 252, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
@@ -8738,9 +8738,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           onClick={openCard}
                           aria-label={`Open ${doc.name}`}
                           className="doc-grid-card"
-                          style={{ flex: '0 0 172px', scrollSnapAlign: 'start', minHeight: 216, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                          style={{ flex: '0 0 240px', scrollSnapAlign: 'start', minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
                         >
-                          <div style={{ height: 136, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
+                          <div style={{ height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
                             <div style={{ width: '78%' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
