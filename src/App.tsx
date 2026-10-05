@@ -2907,7 +2907,7 @@ const templateColumns: any[] = [
   },
 ];
 
-/* ═════�����������������═════════���══════════════�������═══���������������������════
+/* ═════�����������������═════════���══════════════�������═══�����������������������════
    Insights Reports Data
    ═��═════════════════════════════════════ */
 
@@ -6757,6 +6757,31 @@ function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onU
   );
 }
 
+function DocViewToggle({ mode, selected, onSelect }: { mode: 'list' | 'grid'; selected: boolean; onSelect: () => void }) {
+  const color = selected ? 'var(--ink-cobalt-100)' : 'rgba(19, 0, 50, 0.7)';
+  return (
+    <button
+      type="button"
+      aria-label={mode === 'list' ? 'Table view' : 'Thumbnail view'}
+      aria-pressed={selected}
+      onClick={onSelect}
+      className="doc-view-toggle"
+      data-selected={selected}
+      style={{ width: 36, height: 36, borderRadius: 8, border: 'none', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: selected ? 'var(--ink-cobalt-10)' : 'transparent', color }}
+    >
+      {mode === 'list' ? (
+        <svg width="18" height="18" viewBox="7 7 18 18" fill="none" aria-hidden="true">
+          <path d="M12 11V13H10V11H12ZM14 9H8V15H14V9ZM12 19V21H10V19H12ZM14 17H8V23H14V17ZM24 11H16V13H24V11ZM24 19H16V21H24V19Z" fill="currentColor" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M4 2V4H2V2H4ZM6 0H0V6H6V0ZM12 2V4H10V2H12ZM14 0H8V6H14V0ZM4 10V12H2V10H4ZM6 8H0V14H6V8ZM12 10V12H10V10H12ZM14 8H8V14H14V8Z" fill="currentColor" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 function MenuRow({ icon, label, description, onClick, chevron, crown }: {
   icon?: React.ReactNode;
   label: string;
@@ -7579,6 +7604,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const [taskSearch, setTaskSearch] = useState('');
   const fadeIn = useFadeIn(0, 250);
   const [docSubTab, setDocSubTab] = useState<'negotiating' | 'supplemental'>('negotiating');
+  const [docViewMode, setDocViewMode] = useState<'list' | 'grid'>('list');
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
   const [hoveredOverviewDocId, setHoveredOverviewDocId] = useState<string | null>(null);
   const [hoveredDocRowId, setHoveredDocRowId] = useState<string | null>(null);
@@ -8367,7 +8393,13 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
                   <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Documents</div>
-                  <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div role="group" aria-label="Document view" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <DocViewToggle mode="list" selected={docViewMode === 'list'} onSelect={() => setDocViewMode('list')} />
+                      <DocViewToggle mode="grid" selected={docViewMode === 'grid'} onSelect={() => setDocViewMode('grid')} />
+                    </div>
+                    <AddDocumentMenu variant="secondary" onUpload={addMenuHandlers.onUpload} onUseTemplate={addMenuHandlers.onUseTemplate} />
+                  </div>
                 </div>
 
                 {/* Bulk actions bar - shown when documents are selected */}
@@ -8414,8 +8446,66 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   </div>
                 )}
 
+                {/* Primary documents — thumbnail grid view */}
+                {docSubTab === 'negotiating' && docViewMode === 'grid' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                    <button
+                      type="button"
+                      onClick={addMenuHandlers.onUpload}
+                      className="doc-grid-add"
+                      style={{ minHeight: 252, border: '1px dashed var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-bg-color-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
+                    >
+                      <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
+                      </span>
+                      <span style={{ fontSize: 16, color: 'var(--ink-text-secondary)' }}>Add Documents</span>
+                    </button>
+                    {(currentDocuments as DealDocument[]).map(doc => {
+                      const openCard = () => {
+                        if (doc.signatureProgress) {
+                          openEnvelopePanel({
+                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            documentNames: [doc.name],
+                            signatureProgress: doc.signatureProgress,
+                            dateModified: doc.lastModified || doc.dateModified,
+                            rowId: doc.id,
+                          });
+                        } else if (doc.id.startsWith('added-')) {
+                          setPendingPreviewDoc(doc.name);
+                        } else if (isNDADraft && !ndaSentForSignature && onEditNDA) {
+                          onEditNDA();
+                        } else {
+                          onPreviewDocument?.(doc.name);
+                        }
+                      };
+                      return (
+                        <button
+                          key={doc.id}
+                          type="button"
+                          onClick={openCard}
+                          aria-label={`Open ${doc.name}`}
+                          className="doc-grid-card"
+                          style={{ minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                        >
+                          <div style={{ height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 20, boxSizing: 'border-box', flexShrink: 0 }}>
+                            <div style={{ width: '78%' }}>
+                              <EnvelopeDocThumbnail docName={doc.name} />
+                            </div>
+                          </div>
+                          <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+                            <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
+                            <span style={{ fontSize: 14, color: 'var(--ink-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {`Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {/* Primary documents table */}
-                {docSubTab === 'negotiating' && (
+                {docSubTab === 'negotiating' && docViewMode === 'list' && (
                   <div style={{ border: '1px solid var(--ink-border-subtle)', borderRadius: 8, overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                       <thead>
@@ -9268,7 +9358,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       </div>
                       <div>
                         <Text size="xs" color="secondary">Total Value</Text>
-                        <Text size="xl" weight="semibold">—</Text>
+                        <Text size="xl" weight="semibold">��</Text>
                       </div>
                     </Inline>
                     <div>
