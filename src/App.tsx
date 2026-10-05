@@ -6715,7 +6715,7 @@ function AddDocumentMenu({ onUpload, onUseTemplate, variant = 'primary' }: { onU
           Add
         </Button>
       ) : variant === 'secondary' ? (
-        <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(o => !o); }}>Add document</Button>
+        <IconButton icon="plus" variant="secondary" size="small" aria-label="Add document" aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(o => !o); }} />
       ) : (
         <Button kind="primary" size="small" startElement={<Icon name="plus" size={16} />} onClick={() => { setOpen(o => !o); }}>Add Document</Button>
       )}
@@ -8791,7 +8791,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 {...addMenuHandlers}
                 mode="tasks"
                 renderTrigger={({ toggle, open }) => (
-                  <Button kind="secondary" size="small" startElement={<Icon name="plus" size={16} />} aria-haspopup="menu" aria-expanded={open} onClick={toggle}>Add task</Button>
+                  <IconButton icon="plus" variant="secondary" size="small" aria-label="Add task" aria-haspopup="menu" aria-expanded={open} onClick={toggle} />
                 )}
               />
             </div>
