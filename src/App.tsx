@@ -8656,10 +8656,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const didAutoOpenEnvelope = useRef(false);
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
+    // Decide once, on entry: a space that starts with zero or several envelopes
+    // must not auto-open later just because its count changes to one.
+    didAutoOpenEnvelope.current = true;
     // Entering the space right after sending an envelope: confirm the send with
     // a success toast only — the panel stays closed after a fresh send.
     if (justSentEnvelope) {
-      didAutoOpenEnvelope.current = true;
       showToast('Your documents were sent for signature.');
       return;
     }
@@ -8667,7 +8669,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
     );
     if (envelopeItems.length !== 1) return;
-    didAutoOpenEnvelope.current = true;
     const only = envelopeItems[0];
     if ('isEnvelope' in only && only.isEnvelope) {
       const envelopeDocNames = only.documentNames || only.documents.map((d) => d.name);
@@ -9191,7 +9192,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             }
                           };
                           const activateRow = isEnvelopeDoc ? () => openEnvelopePanel({
-                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            envelopeName: agreement.party && agreement.party !== '��' ? `${agreement.party} ${doc.name}` : doc.name,
                             documentNames: [doc.name],
                             signatureProgress: doc.signatureProgress,
                             dateModified: doc.lastModified || doc.dateModified,
