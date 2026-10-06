@@ -48,6 +48,7 @@ import {
 } from '@/design-system';
 import { SpaceSidePanel, type SidePanelConversation } from './SpaceSidePanel';
 import { ParticipantExperience } from './ParticipantExperience';
+import { AgreementListView, AgreementGridView, AgreementLayoutToggle, type AgreementLayout, type AgreementCardItem } from './components/AgreementCardViews';
 
 /* ═══════════════════════════════════════
    FilePickerDialog Component
@@ -8655,10 +8656,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   const didAutoOpenEnvelope = useRef(false);
   useEffect(() => {
     if (didAutoOpenEnvelope.current) return;
+    // Decide once, on entry: a space that starts with zero or several envelopes
+    // must not auto-open later just because its count changes to one.
+    didAutoOpenEnvelope.current = true;
     // Entering the space right after sending an envelope: confirm the send with
     // a success toast only — the panel stays closed after a fresh send.
     if (justSentEnvelope) {
-      didAutoOpenEnvelope.current = true;
       showToast('Your documents were sent for signature.');
       return;
     }
@@ -8666,7 +8669,6 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       (item) => ('isEnvelope' in item && item.isEnvelope) || (item as DealDocument).signatureProgress,
     );
     if (envelopeItems.length !== 1) return;
-    didAutoOpenEnvelope.current = true;
     const only = envelopeItems[0];
     if ('isEnvelope' in only && only.isEnvelope) {
       const envelopeDocNames = only.documentNames || only.documents.map((d) => d.name);
@@ -9190,7 +9192,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             }
                           };
                           const activateRow = isEnvelopeDoc ? () => openEnvelopePanel({
-                            envelopeName: agreement.party && agreement.party !== '—' ? `${agreement.party} ${doc.name}` : doc.name,
+                            envelopeName: agreement.party && agreement.party !== '��' ? `${agreement.party} ${doc.name}` : doc.name,
                             documentNames: [doc.name],
                             signatureProgress: doc.signatureProgress,
                             dateModified: doc.lastModified || doc.dateModified,
@@ -10960,7 +10962,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     };
   }, [unavailableCallout]);
 
-  /* ── GlobalNav — matches production DocuSign comp ─���� */
+  /* ─��� GlobalNav — matches production DocuSign comp ─���� */
   const globalNavConfig = {
     logo: <img src="/docusign-logo.svg" alt="DocuSign" />,
     showAppSwitcher: false,
@@ -11280,6 +11282,47 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         return { ...a, documentNames: merged, documentsCount: merged.length };
       });
   }, [search, viewAgreements, filterParty, filterType, filterStatus, filterOwner, ownerOf, addedDocsById]);
+
+  const [agreementLayout, setAgreementLayout] = useState<AgreementLayout>('list');
+
+  const agreementCardItems = useMemo<AgreementCardItem[]>(() => filteredAgreements.map((a) => {
+    const ws = AGREEMENT_WORKSPACE_DATA[a.id];
+    const tasks = ws?.tasks ?? [];
+    const people = Array.from(new Set(
+      tasks
+        .filter(t => t.assignee && t.assignee !== 'You' && t.assignee !== 'Me')
+        .map(t => t.assigneeInitials)
+        .filter(Boolean),
+    ));
+    if (people.length === 0 && a.partyLogo) people.push(a.partyLogo);
+    const envelopeIds = new Set((ws?.documents ?? []).map(d => d.envelopeId).filter(Boolean));
+    const envelopesCount = Math.max(
+      envelopeIds.size + (signedDocsById[a.id]?.length ? 1 : 0),
+      a.signatureProgress ? 1 : 0,
+    );
+    return {
+      id: a.id,
+      name: a.name,
+      party: a.party,
+      dealValue: a.dealValue,
+      agreementType: a.agreementType,
+      termLength: a.termLength,
+      status: a.status,
+      statusKind: a.statusKind,
+      documentsCount: a.documentNames?.length ?? a.documentsCount ?? 0,
+      tasksCount: ws ? tasks.length : (a.tasksCount ?? 0),
+      envelopesCount,
+      people,
+    };
+  }), [filteredAgreements, signedDocsById]);
+
+  const openAgreementById = useCallback((id: string) => {
+    const row = filteredAgreements.find(a => a.id === id);
+    if (!row) return;
+    setJustSentEnvelope(false);
+    setSelectedAgreement(row);
+    setShowDealWorkspace(true);
+  }, [filteredAgreements]);
 
   // When "Documents" is chosen in the Type filter, the list shows individual
   // documents with document-specific columns instead of agreements.
@@ -11625,6 +11668,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         />
       }
       filterBar={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
         <FilterBar
           viewSelector={isPartiesView ? (
             <Button kind="secondary" size="small" menuTrigger>Role View</Button>
@@ -11668,6 +11713,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             </Inline>
           )}
         />
+        </div>
+        {!isPartiesView && !isRequestsView && !isDocumentsView && (
+          <AgreementLayoutToggle value={agreementLayout} onChange={setAgreementLayout} />
+        )}
+        </div>
       }
     >
       {isPartiesView ? (
@@ -11676,7 +11726,40 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         <DataTable key="table-documents" columns={documentColumns} data={filteredDocuments} getRowKey={(row: ProcurementDocument) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage="No documents match your search" pagination={{ page: 1, pageSize: 25, totalItems: filteredDocuments.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
       ) : isRequestsView ? (
         <DataTable key="table-requests" columns={requestColumns} data={filteredRequests} getRowKey={(row) => row.id} stickyHeader showColumnControl rowHeight="tall" emptyMessage="No requests found" pagination={{ page: 1, pageSize: 10, totalItems: filteredRequests.length, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true }} />
-      ) : (
+      ) : (() => {
+        const emptyMessage =
+          sidebarView === 'drafts' ? 'No draft agreements' :
+          sidebarView === 'in-progress' ? 'No agreements in progress' :
+          sidebarView === 'completed' ? 'No completed agreements' :
+          'No agreements match your search';
+        const renderName = (id: string, fallback: React.ReactNode) => renamingId === id ? (
+          <div onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} style={{ flex: 1, minWidth: 0 }}>
+            <RowRenameInput value={renameDraft} onChange={setRenameDraftValue} onCommit={commitRename} onCancel={cancelRename} />
+          </div>
+        ) : fallback;
+        const renderMenu = (id: string) => {
+          const row = filteredAgreements.find(a => a.id === id);
+          return (
+            <Dropdown
+              position="bottom"
+              align="end"
+              items={[{ label: 'Rename', icon: <Icon name="pencil" size="small" />, onClick: () => row && startRename(row) }]}
+            >
+              <IconButton icon="overflow-vertical" variant="tertiary" size="small" aria-label="More actions" />
+            </Dropdown>
+          );
+        };
+        return (
+          <div style={{ paddingTop: 8 }}>
+            {agreementLayout === 'grid' ? (
+              <AgreementGridView items={agreementCardItems} onOpen={openAgreementById} renderName={renderName} emptyMessage={emptyMessage} />
+            ) : (
+              <AgreementListView items={agreementCardItems} onOpen={openAgreementById} renderName={renderName} renderMenu={renderMenu} emptyMessage={emptyMessage} />
+            )}
+          </div>
+        );
+      })()}
+      {false && (
         <DataTable key="table-agreements" columns={agreementColumns} data={filteredAgreements} getRowKey={(row) => row.id} selectable stickyHeader showColumnControl rowHeight="tall" emptyMessage={
           sidebarView === 'drafts' ? 'No draft agreements' :
           sidebarView === 'in-progress' ? 'No agreements in progress' :
