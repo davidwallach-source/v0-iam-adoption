@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "agentation": "^3.0.2",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",
