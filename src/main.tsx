@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Agentation } from 'agentation';
+import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 import './index.css';
 
@@ -8,5 +9,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
     <Agentation endpoint="http://localhost:4747" />
+    <Analytics />
   </React.StrictMode>
 );
