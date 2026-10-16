@@ -116,7 +116,12 @@ const EXTERNAL_TYPES = /sign|upload|form|view/i;
 // A task belongs to the external participant when it was routed outside the
 // organization (External/Family team) or is an external action (sign, upload,
 // form) with no internal team. Internal approvals never reach the participant.
+const isVendorOnboardingTask = (t: SourceTask) =>
+  t.id.startsWith('vendor-onboarding-') || /^New Vendor Onboarding/i.test(t.title);
+
 function isExternalTask(t: SourceTask, partyName: string): boolean {
+  // The vendor onboarding workflow is always completed by the external vendor.
+  if (isVendorOnboardingTask(t)) return true;
   if (t.team === 'External' || t.team === 'Family') return true;
   if (t.assignee && t.assignee.toLowerCase() === partyName.toLowerCase()) return true;
   if (INTERNAL_TEAMS.has(t.team)) return false;
@@ -142,7 +147,7 @@ function deriveParticipantView(source: ParticipantSpaceSource): { tasks: PETask[
       return true;
     })
     .map((t, i) => {
-      const kind = toKind(t.type);
+      const kind = isVendorOnboardingTask(t) ? 'form' as const : toKind(t.type);
       // For sign/review requests the sender's "In progress" means "awaiting the
       // recipient", so the participant hasn't started it yet.
       const status = (kind === 'sign' || kind === 'review') ? 'not-started' as const : toStatus(t.status);
