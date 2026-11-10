@@ -8968,10 +8968,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           className="doc-grid-card"
                           style={{ width: '100%', minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
                         >
-                          <div style={{ height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
+                          <div style={{ position: 'relative', height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
                             <div style={{ width: '78%' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
+                            {doc.signatureProgress && doc.signatureProgress.signed < doc.signatureProgress.total && (
+                              <span style={{ position: 'absolute', left: 12, bottom: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
+                                <Badge kind="info" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {`Waiting for ${doc.signatureProgress.waitingFor}`}
+                                </Badge>
+                              </span>
+                            )}
                           </div>
                           <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                             <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
@@ -11313,6 +11320,9 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       tasksCount: ws ? tasks.length : (a.tasksCount ?? 0),
       envelopesCount,
       people,
+      signatureProgress: envelopesCount === 1
+        ? (a.signatureProgress ?? (ws?.documents ?? []).find(d => d.signatureProgress)?.signatureProgress)
+        : undefined,
     };
   }), [filteredAgreements, signedDocsById]);
 
@@ -12306,7 +12316,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: ndaId,
             entityKind: 'space',
             workspaceKind: 'nda',
-            name: buildSpaceName(sentNdaDocs),
+            name: 'New Vendor Deal',
             documentNames: sentNdaDocs,
             party: savedNDAData?.receivingParty || recipientName || 'Receiving Party',
             partyLogo: (savedNDAData?.receivingParty || recipientName || 'ND').substring(0, 2).toUpperCase(),
@@ -12362,7 +12372,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
             id: newId,
             entityKind: 'space',
             workspaceKind: isPermissionSlipFlow ? 'permission-slip' : 'uploaded',
-            name: buildSpaceName(uploadedDocNames),
+            name: isPermissionSlipFlow ? buildSpaceName(uploadedDocNames) : 'New Vendor Deal',
             documentNames: uploadedDocNames,
             party: recipientName || 'Recipient',
             partyLogo: recipientName ? recipientName.substring(0, 2).toUpperCase() : 'RC',
