@@ -1834,8 +1834,8 @@ const AGREEMENT_WORKSPACE_DATA: Record<string, {
     documents: [
     { id: '1', name: 'Master Service Agreement', status: 'Executed', dateModified: '4/20/2026' },
     { id: '2', name: 'Data Processing Agreement', status: 'Executed', dateModified: '4/22/2026' },
-    { id: '3', name: 'Security Addendum', commentCount: 1, status: 'Pending Signature', dateModified: '4/24/2026', signatureProgress: { signed: 2, total: 4, waitingFor: 'Bruce Wallach' }, envelopeId: 'env-001' },
-    { id: '4', name: 'AI Terms Addendum', status: 'Pending Signature', dateModified: '4/24/2026', signatureProgress: { signed: 2, total: 4, waitingFor: 'Bruce Wallach' }, envelopeId: 'env-001' },
+    { id: '3', name: 'Security Addendum', commentCount: 1, status: 'Pending Signature', dateModified: '4/24/2026', signatureProgress: { signed: 2, total: 4, waitingFor: 'Jordan Mitchell' }, envelopeId: 'env-001' },
+    { id: '4', name: 'AI Terms Addendum', status: 'Pending Signature', dateModified: '4/24/2026', signatureProgress: { signed: 2, total: 4, waitingFor: 'Jordan Mitchell' }, envelopeId: 'env-001' },
     ],
     supplementalDocs: [
       { id: '4', name: 'SOC 2 Type II Report', owner: 'DataVault Technologies', ownerInitials: 'DV', dateModified: '4/1/2026' },
