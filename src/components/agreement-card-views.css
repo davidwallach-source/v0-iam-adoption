@@ -43,7 +43,7 @@
 /* List rows */
 .acv-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.6fr) minmax(0, 1.3fr) minmax(96px, 1fr) auto 32px;
+  grid-template-columns: minmax(180px, 1.6fr) minmax(0, 1.1fr) minmax(96px, 1.6fr) 200px 32px;
   align-items: center;
   column-gap: 24px;
   min-height: 70px;
@@ -94,6 +94,55 @@
 .acv-dot[data-tone='neutral'] { background: #8a8698; }
 
 /* Avatars */
+.acv-row-people {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 32px;
+}
+.acv-row-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 176px;
+}
+.acv-row-people > .acv-avatars {
+  flex-shrink: 0;
+}
+.acv-progress-track {
+  display: flex;
+  align-items: center;
+}
+.acv-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-cobalt-80, #4c00fb);
+  flex-shrink: 0;
+}
+.acv-progress-line {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  background: var(--ink-border-subtle, #e3e2e8);
+}
+.acv-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--ink-cobalt-80, #4c00fb);
+}
+.acv-progress-label {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #130032;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .acv-avatars {
   display: flex;
   align-items: center;

@@ -16,6 +16,29 @@ export interface AgreementCardItem {
   tasksCount: number;
   envelopesCount: number;
   people: string[];
+  signatureProgress?: { signed: number; total: number; waitingFor: string };
+}
+
+function RowProgress({ progress }: { progress: NonNullable<AgreementCardItem['signatureProgress']> }) {
+  const pct = progress.total > 0 ? (progress.signed / progress.total) * 100 : 0;
+  return (
+    <div className="acv-row-progress">
+      <div
+        className="acv-progress-track"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={progress.total}
+        aria-valuenow={progress.signed}
+        aria-label={`${progress.signed} of ${progress.total} signed`}
+      >
+        <span className="acv-progress-dot" aria-hidden="true" />
+        <span className="acv-progress-line">
+          <span className="acv-progress-fill" style={{ width: `${pct}%` }} />
+        </span>
+      </div>
+      <span className="acv-progress-label">Waiting for {progress.waitingFor}</span>
+    </div>
+  );
 }
 
 interface ViewProps {
@@ -85,9 +108,13 @@ export function AgreementListView({ items, onOpen, renderName, renderMenu, empty
               <span className="acv-row-meta">
                 {hasValue(item.dealValue) ? `${item.party} · ${item.dealValue}` : item.party}
               </span>
-              <AvatarStack people={item.people} />
+              <div className="acv-row-people">
+                {item.signatureProgress
+                  ? <RowProgress progress={item.signatureProgress} />
+                  : <AvatarStack people={item.people} />}
+              </div>
               <div className="acv-row-counts">
-                <span>{plural(item.documentsCount, 'document', 'documents')}</span>
+                {!item.signatureProgress && <span>{plural(item.documentsCount, 'document', 'documents')}</span>}
                 <span>{plural(item.envelopesCount, 'envelope', 'envelopes')}</span>
               </div>
               <div className="acv-menu" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
