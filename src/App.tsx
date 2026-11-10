@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════�����════════��═��══
+/* ═════════════════════════�������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3470,7 +3470,7 @@ function AdminPage() {
   );
 }
 
-/* ══════���═���═══���══════════�����������═══════════════
+/* ═══���══���═���═══���══════════�����������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
@@ -3639,7 +3639,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════��������═��══������═��══════��═
+/* ═════════════════════���������═��══������═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8964,23 +8964,25 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         >
                           <div style={{ position: 'relative', height: 139, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 12, boxSizing: 'border-box', flexShrink: 0 }}>
                             {/* Render at the original size and scale down so the miniature page keeps its proportions. */}
-                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.974)', transformOrigin: 'top center' }}>
+                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.8265)', transformOrigin: 'top center' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
-                            <span style={{ position: 'absolute', right: 12, top: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
+                            <span style={{ position: 'absolute', right: 12, top: 16, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
                               <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
                                 {!doc.signatureProgress
                                   ? 'Draft'
                                   : doc.signatureProgress.signed >= doc.signatureProgress.total
                                     ? 'Completed'
-                                    : `Waiting for ${doc.signatureProgress.waitingFor}`}
+                                    : 'Out for signature'}
                               </Badge>
                             </span>
                           </div>
                           <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
                             <span style={{ fontSize: 13, color: 'var(--ink-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {`Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
+                              {doc.signatureProgress && doc.signatureProgress.signed < doc.signatureProgress.total
+                                ? `Waiting for ${doc.signatureProgress.waitingFor}`
+                                : `Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
                             </span>
                           </div>
                         </button>
@@ -10438,7 +10440,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��────────────���─────���──────────────────���──────── */
+   ───────────────────────────��────────────���─────���──────────────────���──────��─ */
 export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
@@ -11824,7 +11826,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     </AgreementTableView>
   );
 
-  /* ����� Resolve content + sidebar ── */
+  /* ������� Resolve content + sidebar ── */
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
     agreements: undefined,
