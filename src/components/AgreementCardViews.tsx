@@ -115,7 +115,7 @@ export function AgreementListView({ items, onOpen, renderName, renderMenu, empty
               </div>
               <div className="acv-row-counts">
                 {!item.signatureProgress && <span>{plural(item.documentsCount, 'document', 'documents')}</span>}
-                <span>{plural(item.envelopesCount, 'envelope', 'envelopes')}</span>
+                {item.envelopesCount > 0 && <span>{plural(item.envelopesCount, 'envelope', 'envelopes')}</span>}
               </div>
               <div className="acv-menu" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                 {renderMenu(item.id)}
@@ -158,7 +158,8 @@ export function AgreementGridView({ items, onOpen, renderName, emptyMessage }: O
               <div className="acv-tile-foot">
                 <AvatarStack people={item.people} />
                 <span className="acv-tile-counts">
-                  {plural(item.tasksCount, 'task', 'tasks')} | {plural(item.envelopesCount, 'envelope', 'envelopes')}
+                  {plural(item.tasksCount, 'task', 'tasks')}
+                  {item.envelopesCount > 0 && ` | ${plural(item.envelopesCount, 'envelope', 'envelopes')}`}
                 </span>
               </div>
             </div>
