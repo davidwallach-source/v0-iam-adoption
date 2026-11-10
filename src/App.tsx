@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════���������════════��═��══
+/* ═════════════════════════����������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3639,7 +3639,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════����������═��══������═��══════��═
+/* ═════════════════════�����������═��══������═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -6428,7 +6428,7 @@ function UploadRequestScreen({ open, onClose, onSend, initialData }: { open: boo
   const [email, setEmail] = useState('');
 
   // Prefill the form when the overlay opens from a deep link (e.g. the
-  // "request a COI from Marco" scenario URL).
+  // "request a COI from Sam Sanders" scenario URL).
   useEffect(() => {
     if (open && initialData) {
       setTitle(initialData.title ?? '');
@@ -10391,10 +10391,10 @@ function getTabFromHash(): TabId {
    Tally Inc vendor scenario data. Steps 2-4 share one Tally Inc workspace. */
 const SCENARIO_VENDOR = {
   company: 'Tally Inc',
-  contactFirst: 'Marco',
-  contactLast: 'Corcoran',
-  contactName: 'Marco Corcoran',
-  contactEmail: 'marco.corcoran@dsxtr.com',
+  contactFirst: 'Sam',
+  contactLast: 'Sanders',
+  contactName: 'Sam Sanders',
+  contactEmail: 'sam.sanders@globex.com',
 };
 const SCENARIO_WORKSPACE_ID = 'vendor-tally-inc';
 const SCENARIO_MSA_DOC = 'Master Service Agreement (MSA)';
@@ -10440,7 +10440,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��────────────���─────���────────────────���─���──────��─ */
+   ───────────────────────────��────────────���─────���───────────────������─���──────��─ */
 export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
@@ -12018,6 +12018,8 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         vendorOnboardingPrefill={{
           vendorName: SCENARIO_VENDOR.company,
           contactEmail: SCENARIO_VENDOR.contactEmail,
+          assigneeFirst: SCENARIO_VENDOR.contactFirst,
+          assigneeLast: SCENARIO_VENDOR.contactLast,
         }}
       />
     )}
