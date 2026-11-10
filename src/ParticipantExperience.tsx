@@ -323,7 +323,7 @@ export function ParticipantExperience({ source, participantName, contact, onExit
             <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 15 }}>
                 <span style={{ fontSize: 12, letterSpacing: 0.5, textTransform: 'uppercase', opacity: 0.85 }}>Your contact</span>
-                <span style={{ fontWeight: 600 }}>{`${contact.name} - ${contact.title}`}</span>
+                <span style={{ fontWeight: 600 }}>{contact.name}</span>
                 <span>{contact.email}</span>
                 <span>{contact.phone}</span>
                 <button type="button" onClick={() => { setToast(`Message sent to ${contact.name}`); window.setTimeout(() => setToast(null), 3000); }} style={{ marginTop: 8, alignSelf: 'flex-start', background: 'transparent', color: '#FFFFFF', border: '1px solid #FFFFFF', borderRadius: 999, padding: '8px 22px', fontSize: 15, cursor: 'pointer' }}>Send message</button>
