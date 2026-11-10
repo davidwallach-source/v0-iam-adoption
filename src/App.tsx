@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════��════════��═��══
+/* ═════════════════════════���════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3639,7 +3639,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════��������══════��═��══════��═
+/* ═════════════════════��������═════����═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -6910,15 +6910,6 @@ function AddMenu({ onSignatureRequest, onAddWireTransfer, onUploadRequest, onNew
                     <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
                   </svg>
                 }
-                label="Wire Transfer Request"
-                onClick={() => { setOpen(false); onAddWireTransfer?.(); }}
-              />
-              <MenuRow
-                icon={
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 6V11H18V13H12V18H18V20H11C10.45 20 10 19.55 10 19V13H2V11H10V5C10 4.45 10.45 4 11 4H18V6H12ZM22 4H20V6H22V4ZM22 11H20V13H22V11ZM22 18H20V20H22V18Z" fill="#130032" fillOpacity="0.9"/>
-                  </svg>
-                }
                 label="New Vendor Onboarding"
                 onClick={() => { setOpen(false); onNewVendorOnboarding?.(); }}
               />
@@ -8506,7 +8497,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         isDueSoon: false,
         createdAt: Date.now(),
       };
-      return [signNdaTask, ...[...sentTasks].reverse()];
+      return [...[...sentTasks].reverse(), signNdaTask];
     }
     
     // A saved-blank draft has no signature task yet - just show any added tasks.
@@ -8532,8 +8523,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         isDueSoon: false,
         createdAt: Date.now(),
       };
-      // Include any additional tasks added via Add menu (like Wire Transfer)
-      return [signTask, ...[...sentTasks].reverse()];
+      return [...[...sentTasks].reverse(), signTask];
     }
     // For the Instant NDA (standard version), the base task's Assigned To should
     // reflect the Receiving Party entered in the NDA form, not the default "You".
@@ -8552,7 +8542,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
 
   // Pin the just-sent upload task to the top of the Tasks list.
   const orderedTasks = useMemo(() => {
-    if (!pinnedTaskId) return currentTasks;
+    // Locally added tasks are already newest-first; pinning one would push a newer task below it.
+    if (!pinnedTaskId || sentTasks.some(t => t.id === pinnedTaskId)) return currentTasks;
     const idx = currentTasks.findIndex(t => t.id === pinnedTaskId);
     if (idx < 0) return currentTasks;
     return [currentTasks[idx], ...currentTasks.slice(0, idx), ...currentTasks.slice(idx + 1)];
@@ -8936,7 +8927,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       type="button"
                       onClick={addMenuHandlers.onUpload}
                       className="doc-grid-add"
-                      style={{ flex: '0 0 240px', scrollSnapAlign: 'start', minHeight: 252, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ flex: '0 0 180px', scrollSnapAlign: 'start', minHeight: 189, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
@@ -8963,16 +8954,17 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       };
                       const isSelected = selectedDocs.has(doc.id);
                       return (
-                        <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 240px', scrollSnapAlign: 'start', display: 'flex' }}>
+                        <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 180px', scrollSnapAlign: 'start', display: 'flex' }}>
                         <button
                           type="button"
                           onClick={openCard}
                           aria-label={`Open ${doc.name}`}
                           className="doc-grid-card"
-                          style={{ width: '100%', minHeight: 252, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                          style={{ width: '100%', minHeight: 189, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
                         >
-                          <div style={{ position: 'relative', height: 168, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 16, boxSizing: 'border-box', flexShrink: 0 }}>
-                            <div style={{ width: '78%' }}>
+                          <div style={{ position: 'relative', height: 126, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 12, boxSizing: 'border-box', flexShrink: 0 }}>
+                            {/* Render at the original size and scale down 25% so the miniature page keeps its proportions. */}
+                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.75)', transformOrigin: 'top center' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
                             <span style={{ position: 'absolute', right: 12, top: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
@@ -9623,7 +9615,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         supplementalDocs: isNewlyCreated || isUploadedDocAgreement ? [] : workspaceData.supplementalDocs,
       }}
       participantName="Sam Sanders"
-      contact={{ name: CURRENT_USER.name, title: 'Agreement Owner', email: 'leona.legal@email.com', phone: '630-875-0001', initials: CURRENT_USER.initials, photoUrl: '/images/leona-legal.png' }}
+      contact={{ name: 'Paula Procurement', title: 'Agreement Owner', email: 'paula.procurement@email.com', phone: '630-875-0001', initials: 'PP', photoUrl: '/images/leona-legal.png' }}
       onExit={closeParticipantView}
       renderDocumentPreview={(documentName, onClose) => (
         <DocumentPreview open readOnly documentName={documentName} onClose={onClose} />
