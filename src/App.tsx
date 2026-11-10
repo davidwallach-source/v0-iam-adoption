@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════�������════════��═��══
+/* ═════════════════════════��������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3639,7 +3639,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════���������═��══������═��══════��═
+/* ═════════════════════����������═��══������═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8859,10 +8859,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         {(activeTab === 'overview' || activeTab === 'tasks' || activeTab === 'documents') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', minHeight: '100%', maxWidth: 1440, minWidth: 1280, margin: '0 auto' }}>
             {/* Main content */}
-            <div style={{ padding: '28px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
+            <div style={{ padding: '18px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {(
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'var(--ink-spacing-300)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
+                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'calc(var(--ink-spacing-300) - 10px)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
