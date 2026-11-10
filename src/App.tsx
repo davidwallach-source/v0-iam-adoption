@@ -3641,7 +3641,7 @@ const TEAM_PROGRESS = [
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
    and an AI-Assisted panel. Fully self-contained / controllable.
-   ═════════════════════════���������═════════════ */
+   ══════��══════════════════���������═════════════ */
 
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
@@ -4777,7 +4777,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
             <Icon name="ai-spark-filled" size={18} color="var(--ink-cobalt-80)" />
           </button>
           {readOnly ? (
-            <Button kind="secondary" size="small" onClick={onClose}>Close</Button>
+            <Button kind="secondary" size="small" onClick={onClose}>Save</Button>
           ) : (
             <>
               <Button kind="secondary" size="small" onClick={() => (onSave ?? onClose)()}>Save</Button>
