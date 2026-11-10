@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════���════════��═��══
+/* ═════════════════════════����════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3470,7 +3470,7 @@ function AdminPage() {
   );
 }
 
-/* ════════���═══���══════════�����������═══════════════
+/* ══════���═���═══���══════════�����������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
@@ -3639,7 +3639,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════��������═════����═��══════��═
+/* ═════════════════════��������════������═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -8927,7 +8927,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       type="button"
                       onClick={addMenuHandlers.onUpload}
                       className="doc-grid-add"
-                      style={{ flex: '0 0 180px', scrollSnapAlign: 'start', minHeight: 189, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ flex: '0 0 169px', scrollSnapAlign: 'start', minHeight: 189, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
@@ -8954,7 +8954,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       };
                       const isSelected = selectedDocs.has(doc.id);
                       return (
-                        <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 180px', scrollSnapAlign: 'start', display: 'flex' }}>
+                        <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 169px', scrollSnapAlign: 'start', display: 'flex' }}>
                         <button
                           type="button"
                           onClick={openCard}
@@ -8963,8 +8963,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                           style={{ width: '100%', minHeight: 189, border: '1px solid var(--ink-border-subtle)', borderRadius: 8, background: 'var(--ink-white-100)', padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
                         >
                           <div style={{ position: 'relative', height: 126, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 12, boxSizing: 'border-box', flexShrink: 0 }}>
-                            {/* Render at the original size and scale down 25% so the miniature page keeps its proportions. */}
-                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.75)', transformOrigin: 'top center' }}>
+                            {/* Render at the original size and scale down so the miniature page keeps its proportions. */}
+                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.885)', transformOrigin: 'top center' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
                             <span style={{ position: 'absolute', right: 12, top: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
@@ -8977,9 +8977,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                               </Badge>
                             </span>
                           </div>
-                          <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
-                            <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
-                            <span style={{ fontSize: 14, color: 'var(--ink-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
+                            <span style={{ fontSize: 13, color: 'var(--ink-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {`Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
                             </span>
                           </div>
@@ -11824,7 +11824,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     </AgreementTableView>
   );
 
-  /* ── Resolve content + sidebar ── */
+  /* ��─ Resolve content + sidebar ── */
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
     agreements: undefined,
