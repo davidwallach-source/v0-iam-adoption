@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════����������════════��═��══
+/* ═════════════════════════�����������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3639,7 +3639,7 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════�����������═��══������═��══════��═
+/* ═════════════════════������������═��══������═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
@@ -3977,6 +3977,7 @@ interface DocumentPreviewProps {
   onApprovalCreated?: (task: DealTask) => void;
   documentName: string;
   readOnly?: boolean;
+  onSuggestionsChange?: (count: number) => void;
 }
 
 interface SendForApprovalModalProps {
@@ -4212,7 +4213,9 @@ function SendComboButton({ onSendForSignature, onSendForClientReview }: { onSend
 
 type DocSuggestion = { id: string; ins: string; del: string; y: number; time: string };
 
-function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName, readOnly = false }: DocumentPreviewProps) {
+function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSignature, onApprovalCreated, documentName, readOnly = false, onSuggestionsChange }: DocumentPreviewProps) {
+  const onSuggestionsChangeRef = useRef(onSuggestionsChange);
+  onSuggestionsChangeRef.current = onSuggestionsChange;
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsTab, setCommentsTab] = useState<'open' | 'resolved'>('open');
@@ -4290,6 +4293,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
       if (el.dataset.kind === 'ins') s.ins += el.textContent; else s.del += el.textContent;
     });
     setSuggestions([...map.values()].sort((a, b) => a.y - b.y));
+    onSuggestionsChangeRef.current?.(map.size);
   }, []);
 
   // Suggesting mode for recipients: every keystroke is intercepted and turned
@@ -8111,6 +8115,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   }, [initialOverlay]);
 
   const [pendingPreviewDoc, setPendingPreviewDoc] = useState<string | null>(null);
+  const [docsWithSuggestedEdits, setDocsWithSuggestedEdits] = useState<Set<string>>(() => new Set());
   // Seed from the parent-persisted list so documents added earlier still show
   // after navigating away from this space and back.
   const [addedDocuments, setAddedDocuments] = useState<string[]>(persistedAddedDocs ?? []);
@@ -8969,7 +8974,9 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             </div>
                             <span style={{ position: 'absolute', right: 12, top: 16, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
                               <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
-                                {!doc.signatureProgress
+                                {docsWithSuggestedEdits.has(doc.name)
+                                  ? 'Edits suggested'
+                                  : !doc.signatureProgress
                                   ? 'Draft'
                                   : doc.signatureProgress.signed >= doc.signatureProgress.total
                                     ? 'Completed'
@@ -9620,7 +9627,20 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       contact={{ name: 'Paula Procurement', title: 'Agreement Owner', email: 'paula.procurement@email.com', phone: '630-875-0001', initials: 'PP', photoUrl: '/images/leona-legal.png' }}
       onExit={closeParticipantView}
       renderDocumentPreview={(documentName, onClose) => (
-        <DocumentPreview open readOnly documentName={documentName} onClose={onClose} />
+        <DocumentPreview
+          open
+          readOnly
+          documentName={documentName}
+          onClose={onClose}
+          onSuggestionsChange={(count) => {
+            setDocsWithSuggestedEdits(prev => {
+              if (count > 0 === prev.has(documentName)) return prev;
+              const next = new Set(prev);
+              if (count > 0) next.add(documentName); else next.delete(documentName);
+              return next;
+            });
+          }}
+        />
       )}
       preview={participantMode === 'preview'}
     />
