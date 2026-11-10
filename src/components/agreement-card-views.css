@@ -43,7 +43,7 @@
 /* List rows */
 .acv-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.6fr) minmax(0, 1.1fr) minmax(96px, 1.6fr) auto 32px;
+  grid-template-columns: minmax(180px, 1.6fr) minmax(0, 1.1fr) minmax(96px, 1.6fr) 200px 32px;
   align-items: center;
   column-gap: 24px;
   min-height: 70px;
