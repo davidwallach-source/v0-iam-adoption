@@ -8974,8 +8974,8 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             </div>
                             {doc.signatureProgress && doc.signatureProgress.signed < doc.signatureProgress.total && (
                               <span style={{ position: 'absolute', left: 12, bottom: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
-                                <Badge kind="info" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {`Waiting for ${doc.signatureProgress.waitingFor}`}
+  <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
+  {`Waiting for ${doc.signatureProgress.waitingFor}`}
                                 </Badge>
                               </span>
                             )}

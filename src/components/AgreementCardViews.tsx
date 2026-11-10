@@ -109,11 +109,12 @@ export function AgreementListView({ items, onOpen, renderName, renderMenu, empty
                 {hasValue(item.dealValue) ? `${item.party} · ${item.dealValue}` : item.party}
               </span>
               <div className="acv-row-people">
-                <AvatarStack people={item.people} />
-                {item.signatureProgress && <RowProgress progress={item.signatureProgress} />}
+                {item.signatureProgress
+                  ? <RowProgress progress={item.signatureProgress} />
+                  : <AvatarStack people={item.people} />}
               </div>
               <div className="acv-row-counts">
-                <span>{plural(item.documentsCount, 'document', 'documents')}</span>
+                {!item.signatureProgress && <span>{plural(item.documentsCount, 'document', 'documents')}</span>}
                 <span>{plural(item.envelopesCount, 'envelope', 'envelopes')}</span>
               </div>
               <div className="acv-menu" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
