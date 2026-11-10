@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════��������════════��═��══
+/* ═════════════════════════���������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -8932,7 +8932,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                       <span aria-hidden="true" style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--ink-cobalt-10)', color: 'var(--ink-cobalt-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Icon name="plus" size={24} color="var(--ink-cobalt-100)" />
                       </span>
-                      <span style={{ fontSize: 16, color: 'var(--ink-text-secondary)' }}>Add Documents</span>
+                      <span style={{ fontSize: 14, color: 'var(--ink-text-secondary)' }}>Add Documents</span>
                     </button>
                     {(currentDocuments as DealDocument[]).map(doc => {
                       const openCard = () => {
@@ -10440,7 +10440,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��────────────���─────���──────────────────���──────��─ */
+   ───────────────────────────��────────────���─────���────────────────���─���──────��─ */
 export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
