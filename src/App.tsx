@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ════════════════════════════════════��══
+/* ═════════════════════════��══════════��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3470,7 +3470,7 @@ function AdminPage() {
   );
 }
 
-/* ═══════════════════════�����������═══════════════
+/* ════════════���══════════�����������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
@@ -8975,13 +8975,15 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <div style={{ width: '78%' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
-                            {doc.signatureProgress && doc.signatureProgress.signed < doc.signatureProgress.total && (
-                              <span style={{ position: 'absolute', left: 12, bottom: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
-  <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
-  {`Waiting for ${doc.signatureProgress.waitingFor}`}
-                                </Badge>
-                              </span>
-                            )}
+                            <span style={{ position: 'absolute', right: 12, top: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
+                              <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
+                                {!doc.signatureProgress
+                                  ? 'Draft'
+                                  : doc.signatureProgress.signed >= doc.signatureProgress.total
+                                    ? 'Completed'
+                                    : `Waiting for ${doc.signatureProgress.waitingFor}`}
+                              </Badge>
+                            </span>
                           </div>
                           <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                             <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
