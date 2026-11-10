@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════��══════════��══
+/* ═════════════════════════��════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -3470,7 +3470,7 @@ function AdminPage() {
   );
 }
 
-/* ════════════���══════════�����������═══════════════
+/* ════════���═══���══════════�����������═══════════════
    Footer
    ════��═══��������������������════════════════════════════ */
 
@@ -7697,7 +7697,7 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
           top: 20,
           bottom: 0,
           right: 0,
-          width: 360,
+          width: 400,
           background: 'white',
           borderTopLeftRadius: 20,
           boxShadow: '0 8.08px 20.21px rgba(19, 0, 50, 0.16)',
@@ -10446,7 +10446,7 @@ function buildSpaceName(_documentNames?: (string | undefined)[]): string {
    The active version is exposed via context purely as a flag, so that future
    work can branch behaviour per-version (e.g. `if (version === 'simple')`)
    without forking the code. For now every version behaves identically.
-   ───────────────────────────��──────────────────���──────────────────���──────── */
+   ───────────────────────────��────────────���─────���──────────────────���──────── */
 export type PrototypeVersion = 'standard' | 'simple' | 'paywalls';
 
 export const PROTOTYPE_VERSIONS: { id: PrototypeVersion; label: string; description: string }[] = [
