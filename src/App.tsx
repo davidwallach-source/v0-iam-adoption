@@ -2572,7 +2572,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════�����════════��═��══
+/* ═════════════════════════������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -8964,23 +8964,25 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         >
                           <div style={{ position: 'relative', height: 139, width: '100%', background: '#F1F1F1', display: 'flex', justifyContent: 'center', overflow: 'hidden', paddingTop: 12, boxSizing: 'border-box', flexShrink: 0 }}>
                             {/* Render at the original size and scale down so the miniature page keeps its proportions. */}
-                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.974)', transformOrigin: 'top center' }}>
+                            <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.87)', transformOrigin: 'top center' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
-                            <span style={{ position: 'absolute', right: 12, top: 12, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
+                            <span style={{ position: 'absolute', right: 12, top: 16, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
                               <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
                                 {!doc.signatureProgress
                                   ? 'Draft'
                                   : doc.signatureProgress.signed >= doc.signatureProgress.total
                                     ? 'Completed'
-                                    : `Waiting for ${doc.signatureProgress.waitingFor}`}
+                                    : 'Out for signature'}
                               </Badge>
                             </span>
                           </div>
                           <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
                             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-text-default)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.name}</span>
                             <span style={{ fontSize: 13, color: 'var(--ink-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {`Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
+                              {doc.signatureProgress && doc.signatureProgress.signed < doc.signatureProgress.total
+                                ? `Waiting for ${doc.signatureProgress.waitingFor}`
+                                : `Modified ${relativeTime(doc.lastModified || doc.dateModified)}`}
                             </span>
                           </div>
                         </button>
@@ -11824,7 +11826,7 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     </AgreementTableView>
   );
 
-  /* ����� Resolve content + sidebar ── */
+  /* ������� Resolve content + sidebar ── */
   const sidebarMap: Record<TabId, object | undefined> = {
     home: undefined,
     agreements: undefined,
