@@ -62,7 +62,7 @@
         <h2 class="pm-cover__title pm-cover__title--closing">One space for the whole agreement.</h2>
         <p class="pm-cover__sub">Unified Agreements concept</p>
       </div>
-      <div class="pm-cover__art pm-cover__art--gradient" aria-hidden="true"></div>`;
+      <div class="pm-cover__art pm-cover__art--illustration"><img src="/present-cover.png" alt="" aria-hidden="true"></div>`;
     stage.append(camera, cover, closing, veil, shield);
 
     const viewport = el("div", "pm-viewport");
@@ -142,8 +142,12 @@
         tick();
       });
     }
-    function rectOf(n) {
-      const r = n.getBoundingClientRect();
+  function rectOf(n) {
+  // display:contents wrappers have no box of their own; measure their children instead.
+  if (n.nodeType === 1 && win().getComputedStyle(n).display === "contents" && n.children.length) {
+  return union([...n.children].map(rectOf));
+  }
+  const r = n.getBoundingClientRect();
       return { x: r.left, y: r.top, w: r.width, h: r.height };
     }
     function union(rects) {
@@ -177,7 +181,7 @@
       };
     }
     function rowOf(n) {
-      return n?.closest("tr,[role='row']") || n;
+      return n?.closest("tr,[role='row'],.acv-row") || n;
     }
     const evalTriggers = () => qa(".v0-eval-trigger");
     const triggerFor = (name) => evalTriggers().find((t) => rowOf(t)?.textContent.includes(name));
@@ -585,7 +589,19 @@
         clearHighlight();
         await clickEl(pm("chip-party"));
         await waitPm("party-drawer");
-        highlight(await waitPm("party-negotiation"));
+        const negotiation = await waitPm("party-negotiation");
+        // The drawer slides in; measure only once it has stopped moving.
+        await sleep(150);
+        let last = null;
+        await waitFor(() => {
+          const r = negotiation.getBoundingClientRect();
+          const settled = last && Math.abs(r.left - last.left) < 0.5 && Math.abs(r.top - last.top) < 0.5;
+          last = r;
+          return settled;
+        });
+        // Opening the drawer moves focus to its first tab; drop that focus ring.
+        doc().activeElement?.blur?.();
+        highlight(negotiation);
       },
       // 19 · Close drawer
       async () => {
