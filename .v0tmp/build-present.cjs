@@ -9,6 +9,7 @@ let block=fs.readFileSync('src/present/steps-runtime.js','utf8')
   .replace('__PM_STEPS__',JSON.stringify(steps,null,2).replace(/\n/g,'\n    '));
 let out=[...src.slice(0,a),block,...src.slice(b)].join('\n')
   .replace(`q('[aria-label="Countersigning Agent"]'), 15000`,`q('[data-pm="deal-name"]'), 15000`)
+  .replace('const rects = (marksTarget?.() || []).filter(Boolean);','const rects = (marksTarget?.() || [])\n        .filter(Boolean)\n        .map((n) => ("x" in n && "w" in n ? n : rectOf(n)));')
   .replace('Commit Agent for Countersigning','Concept walkthrough')
   .replace('<h1 class="pm-cover__title">Meet Sam</h1>','<h1 class="pm-cover__title">Unified Agreements</h1>')
   .replace('\n        <p class="pm-cover__sub">VP of Sales at Acme</p>','')

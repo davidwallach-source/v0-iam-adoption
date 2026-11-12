@@ -107,6 +107,7 @@ function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogPro
       }}
     >
       <div
+        data-pm="file-picker"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: 720,
@@ -239,6 +240,7 @@ function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogPro
                 return (
                   <div
                     key={file.name}
+                    data-pm={file.name === 'New Vendor MSA' ? 'file-picker-msa' : undefined}
                     onClick={() => setSelectedFile(file.name)}
                     onDoubleClick={handleOpen}
                     style={{
@@ -286,6 +288,7 @@ function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogPro
             Cancel
           </button>
           <button
+            data-pm="file-open"
             onClick={handleOpen}
             style={{
               padding: '5px 20px', borderRadius: 6, fontSize: 13, fontWeight: 600,
@@ -2969,7 +2972,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���������═����═══��═══�����������������������������������════════════════════
+/* ═��══════���������═����═══���═══�����������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════��═══ */
 
@@ -4993,6 +4996,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
                 Description <span style={{ color: '#C0362C' }}>*</span>
               </label>
               <textarea
+                data-pm="approval-description"
                 value={approvalDraft.description}
                 onChange={(e) => setApprovalDraft((d) => d ? { ...d, description: e.target.value } : d)}
                 placeholder="Add a description"
@@ -5024,6 +5028,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
               </label>
               <div style={{ position: 'relative', marginBottom: 8 }}>
                 <input
+                  data-pm="approval-search"
                   value={approverQuery}
                   onChange={(e) => setApproverQuery(e.target.value)}
                   placeholder="Type name or email"
@@ -5034,6 +5039,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
                     {approverMatches.map((p) => (
                       <button
                         key={p.email}
+                        data-pm={`approver-option-${p.name.split(' ')[0].toLowerCase()}`}
                         onClick={() => addApprover(p)}
                         onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
@@ -6584,6 +6590,7 @@ function UploadRequestScreen({ open, onClose, onSend, initialData }: { open: boo
         >Cancel</button>
         <button
           onClick={handleSend}
+          data-pm="upload-send"
           disabled={!canSend}
           style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.5, fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
         >Send</button>
@@ -6710,7 +6717,7 @@ function VendorOnboardingScreen({ open, onClose, onCreate, initialData }: { open
         >Cancel</button>
         <button
           onClick={handleCreate}
-          data-pm="upload-send"
+          data-pm="onboarding-create"
           disabled={!canCreate}
           style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: canCreate ? 'pointer' : 'default', opacity: canCreate ? 1 : 0.5, fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
         >Create task</button>
@@ -7090,6 +7097,8 @@ function MenuRow({ icon, label, description, onClick, chevron, crown }: {
   const [hovered, setHovered] = useState(false);
   return (
     <div
+      role="menuitem"
+      data-pm={`menu-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
       style={{
         display: 'flex',
         alignItems: 'center',

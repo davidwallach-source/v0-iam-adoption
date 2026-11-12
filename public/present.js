@@ -233,7 +233,9 @@
     let marksTarget = null;
     let marks = [];
     function placeMarks(instant) {
-      const rects = (marksTarget?.() || []).filter(Boolean);
+      const rects = (marksTarget?.() || [])
+        .filter(Boolean)
+        .map((n) => ("x" in n && "w" in n ? n : rectOf(n)));
       while (marks.length < rects.length) {
         const m = el("div", "pm-mark");
         m.style.transitionDelay = FAST || instant ? "0ms" : `${marks.length * 90}ms`;
@@ -430,7 +432,9 @@
       const w = doc().createTreeWalker(doc().body, NodeFilter.SHOW_TEXT);
       let t;
       while ((t = w.nextNode())) if (t.nodeValue.includes(needle)) return t;
-      return null;
+      const els = [...doc().body.querySelectorAll("*")].filter((n) => n.textContent.includes(needle));
+      const leaf = els.find((n) => ![...n.children].some((c) => c.textContent.includes(needle)));
+      return leaf ? leaf.firstChild || leaf : null;
     };
 
     async function typeInto(input, text) {
@@ -583,8 +587,13 @@
       // 19 · Close drawer
       async () => {
         clearHighlight();
-        const drawer = pm("party-drawer");
-        await clickEl(drawer.querySelector('[aria-label^="Close"]'));
+        let root = pm("party-drawer");
+        let close = null;
+        while (root && !close) {
+          close = root.querySelector('[aria-label*="lose" i]');
+          root = root.parentElement;
+        }
+        await clickEl(close);
         await waitFor(() => !pm("party-drawer"));
         hideCursor();
         await resetCamera();
@@ -639,7 +648,13 @@
         await moveTo(search);
         search.click();
         await typeInto(search, "le");
-        const leona = await waitFor(() => [...doc().querySelectorAll("[role=option],li,button,div")].find((n) => n.children.length < 4 && n.textContent.trim().startsWith("Leona Legal")));
+        const desc = pm("approval-description");
+        if (desc && !desc.value.trim()) {
+          await moveTo(desc);
+          await typeInto(desc, "Legal review of effective date");
+          await moveTo(search);
+        }
+        const leona = await waitPm("approver-option-leona");
         await clickEl(leona);
         const create = await waitFor(() => {
           const b = pm("approval-create");
@@ -670,7 +685,7 @@
       async () => {
         clearHighlight();
         await scrollToEl(pm("tasks-panel"), { offset: 24 });
-        await clickEl(pm("tasks-add"));
+        await clickEl(pm("tasks-add").querySelector("button") || pm("tasks-add"));
         const item = await waitFor(() => byText("button,[role=menuitem]", "Upload request"));
         highlight(pm("tasks-add-menu") || item.closest('[role="menu"]') || item.parentElement);
       },
@@ -694,7 +709,7 @@
       // 31 · New Vendor Onboarding → Create task
       async () => {
         clearHighlight();
-        await clickEl(pm("tasks-add"));
+        await clickEl(pm("tasks-add").querySelector("button") || pm("tasks-add"));
         await clickEl(await waitFor(() => byText("button,[role=menuitem]", "New Vendor Onboarding")));
         const close = await waitFor(() => q('[aria-label="Close vendor onboarding"]'));
         const form = pm("onboarding-form") || close.closest('[role="dialog"], aside') || close.parentElement.parentElement;
