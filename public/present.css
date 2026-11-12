@@ -467,4 +467,5 @@ body {
   transform: none;
 }
 
+.pm-cover__art--illustration{background:#f6f5f9;box-shadow:0 1px 0 rgba(19,0,50,.04),0 24px 60px -30px rgba(76,0,251,.25);}
 .pm-cover__art--gradient{background:radial-gradient(120% 90% at 85% 40%,rgba(76,0,255,.22),rgba(76,0,255,.06) 55%,transparent 80%),linear-gradient(135deg,#f4f0ff 0%,#e6dcff 100%);}

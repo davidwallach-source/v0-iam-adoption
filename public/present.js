@@ -50,7 +50,7 @@
         <p class="pm-cover__eyebrow">Concept walkthrough</p>
         <h1 class="pm-cover__title">Unified Agreements</h1>
       </div>
-      <div class="pm-cover__art pm-cover__art--gradient" aria-hidden="true"></div>`;
+      <div class="pm-cover__art pm-cover__art--illustration"><img src="/present-cover.png" alt="Scattered contracts, forms, messages, and calendar items converging into a single signed agreement"></div>`;
     overlay.append(ring, cursor);
     camera.append(frame, overlay);
     const closing = el("div", "pm-cover pm-cover--closing");
