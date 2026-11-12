@@ -5,21 +5,24 @@
     return;
   }
   if (!params.has("present")) {
-    mountLauncher();
+    bindLogoLauncher();
     return;
   }
   mountPresenter();
 
-  function mountLauncher() {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "pm-launch";
-    btn.innerHTML =
-      '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 2.8v10.4L13 8z" fill="currentColor"/></svg><span>Presentation mode</span>';
-    btn.addEventListener("click", () => {
-      location.href = "/?present";
-    });
-    document.body.appendChild(btn);
+  function bindLogoLauncher() {
+    // Capture phase so the app's own "unavailable" handler on the brand button never fires.
+    document.addEventListener(
+      "click",
+      (e) => {
+        const brand = e.target.closest && e.target.closest('[data-nav-id="app-switcher"]');
+        if (!brand) return;
+        e.preventDefault();
+        e.stopPropagation();
+        location.href = "/?present";
+      },
+      true,
+    );
   }
 
   function mountPresenter() {
@@ -478,7 +481,7 @@
       // 4 · Mark who it's waiting on
       async () => {
         clearMarks();
-        mark(() => [rowWith("deal-status", "DataVault")]);
+        mark(() => visibleInFrame(qa(".acv-row-people")));
       },
       // 5 · Highlight Start
       async () => {
@@ -861,8 +864,8 @@
       },
       {
         "scene": 1,
-        "title": "Mark who it’s waiting on",
-        "cue": "and who it’s waiting on."
+    "title": "Mark who is involved",
+    "cue": "and who is involved."
       },
       {
         "scene": 2,

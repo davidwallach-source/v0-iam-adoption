@@ -58,10 +58,10 @@
         clearMarks();
         mark(() => visibleInFrame(pmAll("deal-counts")));
       },
-      // 4 · Mark who it's waiting on
+      // 4 · Mark who is involved (whole status column)
       async () => {
         clearMarks();
-        mark(() => [rowWith("deal-status", "DataVault")]);
+        mark(() => visibleInFrame(qa(".acv-row-people")));
       },
       // 5 · Highlight Start
       async () => {

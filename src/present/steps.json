@@ -37,9 +37,9 @@
   },
   {
    "scene": 1,
-   "title": "Mark who it’s waiting on",
-   "cue": "and who it’s waiting on.",
-   "do": "Replace marks with the DataVault row’s “Waiting for Jordan Mitchell” status [pm=deal-status, DataVault row]."
+   "title": "Mark who is involved",
+   "cue": "and who is involved.",
+   "do": "Replace marks with the whole people/status column on every visible row [.acv-row-people]."
   },
   {
    "scene": 2,
