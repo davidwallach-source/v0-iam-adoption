@@ -91,9 +91,9 @@ export function AgreementListView({ items, onOpen, renderName, renderMenu, empty
   return (
     <ul className="acv-list" aria-label="Agreements">
       {items.map(item => {
-        const name = <span className="acv-row-name">{item.name}</span>;
+        const name = <span className="acv-row-name" data-pm="deal-name">{item.name}</span>;
         return (
-          <li key={item.id}>
+          <li key={item.id} data-pm-row={item.name === 'New Vendor Deal' ? 'deal-row-new-vendor' : item.party}>
             <div
               className="acv-card acv-row"
               role="button"
@@ -110,10 +110,10 @@ export function AgreementListView({ items, onOpen, renderName, renderMenu, empty
               </span>
               <div className="acv-row-people">
                 {item.signatureProgress
-                  ? <RowProgress progress={item.signatureProgress} />
+                  ? <span data-pm="deal-status" style={{ display: 'contents' }}><RowProgress progress={item.signatureProgress} /></span>
                   : <AvatarStack people={item.people} />}
               </div>
-              <div className="acv-row-counts">
+              <div className="acv-row-counts" data-pm="deal-counts">
                 {!item.signatureProgress && <span>{plural(item.documentsCount, 'document', 'documents')}</span>}
                 {item.envelopesCount > 0 && <span>{plural(item.envelopesCount, 'envelope', 'envelopes')}</span>}
               </div>

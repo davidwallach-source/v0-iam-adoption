@@ -107,6 +107,7 @@ function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogPro
       }}
     >
       <div
+        data-pm="file-picker"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: 720,
@@ -239,6 +240,7 @@ function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogPro
                 return (
                   <div
                     key={file.name}
+                    data-pm={file.name === 'New Vendor MSA' ? 'file-picker-msa' : undefined}
                     onClick={() => setSelectedFile(file.name)}
                     onDoubleClick={handleOpen}
                     style={{
@@ -286,6 +288,7 @@ function FilePickerDialog({ open, onCancel, onOpen, files }: FilePickerDialogPro
             Cancel
           </button>
           <button
+            data-pm="file-open"
             onClick={handleOpen}
             style={{
               padding: '5px 20px', borderRadius: 6, fontSize: 13, fontWeight: 600,
@@ -2228,7 +2231,7 @@ function createAgreementColumns(rename: AgreementRenameControls, hideParties = f
     sortable: true,
     width: '30%',
     cell: (row: Agreement) => (
-      <Stack gap="none" style={{ gap: 2 }}>
+      <div data-pm-row={row.name === 'New Vendor Deal' ? 'deal-row-new-vendor' : row.party} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {rename.renamingId === row.id ? (
           <RowRenameInput
             value={rename.renameDraft}
@@ -2237,14 +2240,16 @@ function createAgreementColumns(rename: AgreementRenameControls, hideParties = f
             onCancel={rename.onCancelRename}
           />
         ) : (
-          <Text size="sm" weight="medium">{row.name}</Text>
+          <span data-pm="deal-name" style={{ alignSelf: 'flex-start' }}><Text size="sm" weight="medium">{row.name}</Text></span>
         )}
-        {row.documentNames && row.documentNames.length > 0 ? (
-          <DocumentNamesSubtext names={row.documentNames} />
-        ) : (
-          <Text size="xs" color="secondary">{row.agreementType} · {row.dealValue}</Text>
-        )}
-      </Stack>
+        <span data-pm="deal-counts" style={{ alignSelf: 'flex-start', maxWidth: '100%' }}>
+          {row.documentNames && row.documentNames.length > 0 ? (
+            <DocumentNamesSubtext names={row.documentNames} />
+          ) : (
+            <Text size="xs" color="secondary">{row.agreementType} · {row.dealValue}</Text>
+          )}
+        </span>
+      </div>
     ),
   },
   {
@@ -2253,7 +2258,7 @@ function createAgreementColumns(rename: AgreementRenameControls, hideParties = f
     width: '15%',
     cell: (row: Agreement) => (
       row.signatureProgress ? (
-        <SignatureProgressStatus progress={row.signatureProgress} />
+        <span data-pm="deal-status" style={{ display: 'inline-flex' }}><SignatureProgressStatus progress={row.signatureProgress} /></span>
       ) : (
         <StatusLight
           noFill
@@ -2572,7 +2577,7 @@ function FilterMenu({ label, options, selected, onToggle, onClear, radio = false
   );
 }
 
-/* ═════════════════════════�����������════════��═��══
+/* ═════════════════════════�������������════════��═��══
    Navigator (Completed) Data — matches Navigator view
    ═══════════════════════════════════════ */
 
@@ -2967,7 +2972,7 @@ const reportColumns: any[] = [
   },
 ];
 
-/* ═��══════���������═����═══════�����������������������������������════════════════════
+/* ═��══════���������═����═══���═══�����������������������������������════════════════════
    Home Page
    ═══════════════════════���═══���═��═════��═══ */
 
@@ -3639,12 +3644,12 @@ const TEAM_PROGRESS = [
   { team: 'Product', completed: 1, total: 4, color: 'var(--ink-cobalt-80)' },
 ];
 
-/* ═════════════════════������������═��══������═��══════��═
+/* ════════════════════��������������═��══������═��══════��═
    DocumentPreview Component (merged in-app document editor)
    Replaces the external v0-doc-preview prototype. Renders any
    document by name in an editor-style chrome with tracked changes
    and an AI-Assisted panel. Fully self-contained / controllable.
-   ══════���══════════════════���������═════════════ */
+   ══���═══���══════════════════���������═════════════ */
 
 type DocRunKind = 'del' | 'ins' | 'mark';
 interface DocRun { text: string; kind?: DocRunKind; }
@@ -3893,6 +3898,7 @@ function withMentions(text: string): React.ReactNode {
 
 // The signed-in user who authors new comments.
 const CURRENT_USER = { name: 'Leona Legal', initials: 'LL' };
+const SUGGESTION_AUTHOR = { name: 'Sam Sanders', initials: 'SS' };
 
 // Derive initials + a stable avatar color from a person's name.
 function initialsOf(name: string): string {
@@ -4050,6 +4056,7 @@ function SendForApprovalModal({ open, documentName, onClose, onComplete }: SendF
       role="dialog"
       aria-modal="true"
       aria-label="Send for Client Review"
+      data-pm="client-review-modal"
       onClick={onClose}
       style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'white', display: 'flex', alignItems: 'stretch', justifyContent: 'center' }}
     >
@@ -4433,6 +4440,45 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
 
     root.addEventListener('beforeinput', onBeforeInput);
     return () => root.removeEventListener('beforeinput', onBeforeInput);
+  }, [open, readOnly, collectSuggestions]);
+
+  // Presentation mode drives the vendor's suggested edit through this event so it
+  // produces the same tracked change as typing it by hand in Suggesting mode.
+  useEffect(() => {
+    if (!open || !readOnly) return;
+    const onSuggest = (e: Event) => {
+      const root = canvasRef.current;
+      if (!root) return;
+      const { from = 'January 15, 2026', to = 'February 1, 2026' } = (e as CustomEvent).detail ?? {};
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node: Text | null;
+      while ((node = walker.nextNode() as Text | null)) {
+        if (node.parentElement?.closest('[data-sid]')) continue;
+        const at = node.nodeValue?.indexOf(from) ?? -1;
+        if (at < 0) continue;
+        const sid = 'sg-' + Date.now();
+        suggestionTimes.current[sid] = new Date().toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        const target = node.splitText(at);
+        target.splitText(from.length);
+        const del = document.createElement('span');
+        del.dataset.sid = sid;
+        del.dataset.kind = 'del';
+        del.className = 'suggest-del';
+        del.setAttribute('contenteditable', 'false');
+        target.replaceWith(del);
+        del.appendChild(target);
+        const ins = document.createElement('span');
+        ins.dataset.sid = sid;
+        ins.dataset.kind = 'ins';
+        ins.className = 'suggest-ins';
+        ins.textContent = to;
+        del.after(ins);
+        collectSuggestions();
+        return;
+      }
+    };
+    window.addEventListener('pm:suggest-edit', onSuggest);
+    return () => window.removeEventListener('pm:suggest-edit', onSuggest);
   }, [open, readOnly, collectSuggestions]);
 
   if (!open) return null;
@@ -4950,6 +4996,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
                 Description <span style={{ color: '#C0362C' }}>*</span>
               </label>
               <textarea
+                data-pm="approval-description"
                 value={approvalDraft.description}
                 onChange={(e) => setApprovalDraft((d) => d ? { ...d, description: e.target.value } : d)}
                 placeholder="Add a description"
@@ -4981,6 +5028,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
               </label>
               <div style={{ position: 'relative', marginBottom: 8 }}>
                 <input
+                  data-pm="approval-search"
                   value={approverQuery}
                   onChange={(e) => setApproverQuery(e.target.value)}
                   placeholder="Type name or email"
@@ -4991,6 +5039,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
                     {approverMatches.map((p) => (
                       <button
                         key={p.email}
+                        data-pm={`approver-option-${p.name.split(' ')[0].toLowerCase()}`}
                         onClick={() => addApprover(p)}
                         onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F3FB'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
@@ -5026,6 +5075,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
               >Reset</button>
               <button
                 onClick={createApproval}
+                data-pm="approval-create"
                 disabled={creatingApproval || !approvalDraft.description.trim() || approvalDraft.approvers.length === 0}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 24px', borderRadius: 8, border: 'none',
@@ -5203,6 +5253,7 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
             return (
               <div
                 key={s.id}
+                data-pm="suggestion-card"
                 onMouseDown={(e) => e.stopPropagation()}
                 style={{
                   position: 'absolute', left: railLeft, top: suggestionCardTops[i], zIndex: 28, width: RAIL_W,
@@ -5217,9 +5268,9 @@ function DocumentPreview({ open, onClose, onSave, onSendForApproval, onSendForSi
                     background: '#CFE9E5', color: '#0F6B5F',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12, fontWeight: 600,
-                  }}>{CURRENT_USER.initials}</div>
+                  }}>{SUGGESTION_AUTHOR.initials}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{CURRENT_USER.name}</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#130032' }}>{SUGGESTION_AUTHOR.name}</div>
                     <div style={{ fontSize: 13, color: '#8A85A0' }}>{s.time}</div>
                   </div>
                   <button style={iconBtn} aria-label="Reject suggestion" title="Reject suggestion" onClick={() => rejectSuggestion(s.id)}><Icon name="close" size={16} /></button>
@@ -6045,11 +6096,11 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
       </div>
 
       {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '40px 80px' }}>
+      <div data-pm="sr-page" style={{ flex: 1, overflowY: 'auto', padding: '40px 80px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
 
           {/* Add documents section */}
-          <section style={{ marginBottom: 40 }}>
+          <section data-pm="sr-docs" style={{ marginBottom: 40 }}>
             <div style={sectionHeaderStyle} onClick={() => setDocsExpanded(!docsExpanded)}>
               <h2 style={sectionTitleStyle}>Add documents</h2>
               <Icon name={docsExpanded ? 'chevron-up' : 'chevron-down'} size={20} color="var(--ink-text-secondary)" />
@@ -6219,7 +6270,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
           <div style={{ height: 1, background: 'var(--ink-border-subtle)', marginBottom: 40 }} />
 
           {/* Add recipients section */}
-          <section style={{ marginBottom: 40 }}>
+          <section data-pm="sr-recipients" style={{ marginBottom: 40 }}>
             <div style={sectionHeaderStyle} onClick={() => setRecipientsExpanded(!recipientsExpanded)}>
               <h2 style={sectionTitleStyle}>Add recipients</h2>
               <Icon name={recipientsExpanded ? 'chevron-up' : 'chevron-down'} size={20} color="var(--ink-text-secondary)" />
@@ -6403,7 +6454,7 @@ function PrepareScreen({ open, onClose, preselectedDocs = [], onSend }: PrepareS
         flexShrink: 0,
       }}>
         <Button kind="secondary" size="medium">Save</Button>
-        <Button kind="primary" size="medium" onClick={() => {
+        <Button kind="primary" size="medium" data-pm="sr-next" onClick={() => {
           if (onSend) {
             onSend(documents, recipients);
           }
@@ -6539,6 +6590,7 @@ function UploadRequestScreen({ open, onClose, onSend, initialData }: { open: boo
         >Cancel</button>
         <button
           onClick={handleSend}
+          data-pm="upload-send"
           disabled={!canSend}
           style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.5, fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
         >Send</button>
@@ -6665,6 +6717,7 @@ function VendorOnboardingScreen({ open, onClose, onCreate, initialData }: { open
         >Cancel</button>
         <button
           onClick={handleCreate}
+          data-pm="onboarding-create"
           disabled={!canCreate}
           style={{ height: 44, padding: '0 28px', borderRadius: 4, border: 'none', background: 'var(--ink-cobalt-80, #4C00FF)', color: 'white', cursor: canCreate ? 'pointer' : 'default', opacity: canCreate ? 1 : 0.5, fontSize: 15, fontWeight: 600, fontFamily: 'var(--ink-font-family)' }}
         >Create task</button>
@@ -7044,6 +7097,8 @@ function MenuRow({ icon, label, description, onClick, chevron, crown }: {
   const [hovered, setHovered] = useState(false);
   return (
     <div
+      role="menuitem"
+      data-pm={`menu-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -7643,6 +7698,14 @@ function EnvelopeDocThumbnail({ docName }: { docName: string }) {
   );
 }
 
+function pmTaskKey(task: { id: string; title: string; type?: string }): string | undefined {
+  if (task.id.startsWith('vendor-onboarding-') || /^New Vendor Onboarding/i.test(task.title)) return 'task-onboarding';
+  if (/certificate of insurance|\bcoi\b/i.test(task.title)) return 'task-coi';
+  if (task.type === 'Approval' && /\bmsa\b|master service/i.test(task.title)) return 'task-approve-msa';
+  if (/review/i.test(task.title) && /\bmsa\b|master service/i.test(task.title)) return 'task-review-msa';
+  return undefined;
+}
+
 function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelope: OpenEnvelope; onClose: () => void; onRemind?: () => void; onViewDetails?: () => void }) {
   const [entered, setEntered] = useState(false);
   const [docIndex, setDocIndex] = useState(0);
@@ -7686,6 +7749,7 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
       />
       <aside
         role="dialog"
+        data-pm="nda-panel"
         aria-label={`${docs[0]} envelope details`}
         style={{
           position: 'fixed',
@@ -7756,13 +7820,13 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
         )}
 
         {/* Document name + sent timestamp */}
-        <div style={{ padding: '20px 20px 0', flexShrink: 0 }}>
+        <div data-pm="nda-sent-by" style={{ padding: '20px 20px 0', flexShrink: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink-font-color-default)', lineHeight: 1.3 }}>Sent by {envelope.sentBy}</div>
           <div style={{ fontSize: 14, color: 'var(--ink-font-color-secondary)', marginTop: 4 }}>{envelope.sentAtLabel}</div>
         </div>
 
         {/* Recipients timeline — flows with the rest of the panel so the whole thing scrolls together */}
-        <div style={{ padding: '24px 20px 20px' }}>
+        <div data-pm="nda-recipients" style={{ padding: '24px 20px 20px' }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink-font-color-default)', marginBottom: 24 }}>
             Recipients ({completeCount} of {signable.length} complete)
           </div>
@@ -7823,6 +7887,7 @@ function EnvelopePanel({ envelope, onClose, onRemind, onViewDetails }: { envelop
             View Details
           </button>
           <button
+            data-pm="nda-remind"
             onClick={onRemind}
             style={{ background: '#130032', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', fontSize: 15, fontWeight: 600, lineHeight: '20px', fontFamily: 'var(--ink-font-family)', cursor: 'pointer' }}
           >
@@ -8739,7 +8804,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
   };
 
   return (
-    <div style={{
+    <div data-pm="deal-page" style={{
       position: 'fixed', inset: 0, zIndex: 1060,
       ...fadeIn.style,
       background: 'var(--ink-bg-color-default)',
@@ -8750,7 +8815,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
       <div style={{ background: 'linear-gradient(180deg, #160430 0%, #2A1560 60%, #3C2482 100%)' }}>
         {/* 174px-tall header: actions row, H1, key extractions, then tabs */}
         <div style={{ ...innerStyle, minWidth: 0, alignItems: 'flex-start', gap: 'var(--ink-spacing-300)', padding: '28px var(--ink-spacing-300) 32px', boxSizing: 'border-box' }}>
-          <button onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
+          <button data-pm="deal-back" onClick={onClose} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8, marginLeft: -8, flexShrink: 0, color: 'var(--ink-white-100)' }}>
             <Icon name="arrow-left" size={20} color="var(--ink-white-100)" />
           </button>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
@@ -8761,9 +8826,10 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </div>
             {/* Icon buttons pad their glyphs by ~8px, so an 8px gap everywhere gives equal ~25px glyph-to-glyph spacing. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <span style={{ display: 'flex', alignItems: 'center' }}>
+              <span data-pm="deal-participants" style={{ display: 'flex', alignItems: 'center' }}>
                 <button
                   type="button"
+                  data-pm="deal-view-as-sam"
                   onClick={() => setParticipantMode('demo')}
                   aria-label="View as Sam Sanders (participant experience)"
                   title="View as Sam Sanders"
@@ -8808,11 +8874,11 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               </span>
             </div>
           </div>
-          <div style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
+          <div data-pm="deal-stages" style={{ marginTop: 'var(--ink-spacing-200)', marginBottom: 'var(--ink-spacing-100)' }}>
             <AgreementStageProgress stages={agreementProgress.stages} currentIndex={agreementProgress.currentIndex} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div data-pm="deal-chips" style={{ flex: 1, minWidth: 0 }}>
           {(() => {
             const partyName = isPermissionSlipSpace ? null : (agreement.externalParticipants?.[0] ?? (agreement.party && agreement.party !== '—' ? agreement.party : null));
             const docCount = agreement.documentsCount ?? 1;
@@ -8867,7 +8933,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             <div style={{ padding: '18px var(--ink-spacing-300) var(--ink-spacing-300)', background: '#F6F7F6' }}>
 
               {(
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'calc(var(--ink-spacing-300) - 10px)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
+                <div data-pm="docs-panel" style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', marginBottom: 'calc(var(--ink-spacing-300) - 10px)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
               {/* Documents section with Primary / Supplemental sub-tabs */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
@@ -8930,6 +8996,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                   <DocThumbnailRail>
                     <button
                       type="button"
+                      data-pm="doc-add"
                       onClick={addMenuHandlers.onUpload}
                       className="doc-grid-add"
                       style={{ flex: '0 0 186px', scrollSnapAlign: 'start', minHeight: 208, border: '1px dashed #D9D8DE', borderRadius: 8, background: 'linear-gradient(180deg, #F8F7FE 0%, #FDFDFF 100%)', boxShadow: '0 2px 6px rgba(19, 0, 50, 0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, cursor: 'pointer', fontFamily: 'inherit' }}
@@ -8958,10 +9025,12 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                         }
                       };
                       const isSelected = selectedDocs.has(doc.id);
+                      const pmCard = /non-disclosure|\bnda\b/i.test(doc.name) ? 'doc-card-nda' : /\bmsa\b|master service/i.test(doc.name) ? 'doc-card-msa' : undefined;
                       return (
                         <div key={doc.id} className="doc-grid-card-wrap" data-selected={isSelected} style={{ position: 'relative', flex: '0 0 186px', scrollSnapAlign: 'start', display: 'flex' }}>
                         <button
                           type="button"
+                          data-pm={pmCard}
                           onClick={openCard}
                           aria-label={`Open ${doc.name}`}
                           className="doc-grid-card"
@@ -8972,7 +9041,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <div style={{ width: 187, flexShrink: 0, transform: 'scale(0.8265)', transformOrigin: 'top center' }}>
                               <EnvelopeDocThumbnail docName={doc.name} />
                             </div>
-                            <span style={{ position: 'absolute', right: 12, top: 16, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
+                            <span data-pm={pmCard ? `${pmCard}-badge` : undefined} style={{ position: 'absolute', right: 12, top: 16, maxWidth: 'calc(100% - 24px)', display: 'flex' }}>
                               <Badge kind="promoSubtle" size="small" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxShadow: '0 1px 2px rgba(19, 0, 50, 0.12)' }}>
                                 {docsWithSuggestedEdits.has(doc.name)
                                   ? 'Edits suggested'
@@ -9383,14 +9452,16 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
               )}
 
               {(
-                <div ref={tasksSectionRef} style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', scrollMarginTop: 'var(--ink-spacing-300)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
+                <div ref={tasksSectionRef} data-pm="tasks-panel" style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 12, padding: 'var(--ink-spacing-300)', scrollMarginTop: 'var(--ink-spacing-300)', boxShadow: '0 2px 8px rgba(19, 0, 50, 0.08)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-200)' }}>
               <div style={{ fontSize: 'var(--ink-font-heading-xxs-size)', lineHeight: 'var(--ink-font-heading-xxs-line-height)', fontWeight: 600 }}>Tasks</div>
               <AddMenu
                 {...addMenuHandlers}
                 mode="tasks"
                 renderTrigger={({ toggle, open }) => (
-                  <IconButton icon="plus" variant="secondary" size="small" aria-label="Add task" aria-haspopup="menu" aria-expanded={open} onClick={toggle} />
+                  <span data-pm="tasks-add" style={{ display: 'inline-flex' }}>
+                    <IconButton icon="plus" variant="secondary" size="small" aria-label="Add task" aria-haspopup="menu" aria-expanded={open} onClick={toggle} />
+                  </span>
                 )}
               />
             </div>
@@ -9412,7 +9483,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                 </thead>
                 <tbody>
                   {orderedTasks.map((task) => (
-                    <tr key={task.id} className="ink-table-row" {...clickableRowProps(() => showToast(`Opening "${task.title}".`), `Open task ${task.title}`)} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }}>
+                    <tr key={task.id} data-pm={pmTaskKey(task)} className="ink-table-row" {...clickableRowProps(() => showToast(`Opening "${task.title}".`), `Open task ${task.title}`)} style={{ borderTop: '1px solid var(--ink-border-subtle)', cursor: 'pointer' }}>
                       <td style={{ padding: 'var(--ink-spacing-150)' }}>
                         <Inline gap="small" align="center">
                           {task.type === 'Sign' ? (
@@ -9455,6 +9526,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
                             <Button
                               kind="secondary"
                               size="small"
+                              data-pm={pmTaskKey(task) ? `${pmTaskKey(task)}-${isRemind ? 'remind' : 'view'}` : undefined}
                               onClick={() => showToast(isRemind ? `Reminder sent to ${task.assignee === '--' ? 'assignee' : task.assignee}.` : `Opening "${task.title}".`)}
                             >
                               {isRemind ? 'Remind' : 'View'}
@@ -9473,7 +9545,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             </div>
 
             {/* Right column — combined Activity / Messages / Iris side panel, pinned to the viewport height under the header */}
-            <div style={{ position: 'relative', background: 'var(--ink-white-100)', borderLeft: '1px solid var(--ink-border-subtle)' }}>
+            <div data-pm="messages-panel" style={{ position: 'relative', background: 'var(--ink-white-100)', borderLeft: '1px solid var(--ink-border-subtle)' }}>
               <SpaceSidePanel
                 activity={currentActivity}
                 conversations={spaceMessages}
@@ -9752,7 +9824,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
         customSize="680px"
         zIndex={99999}
         title={
-          <div style={{ width: '100%', paddingLeft: 24, paddingTop: 20 }}>
+          <div data-pm="party-drawer" style={{ width: '100%', paddingLeft: 24, paddingTop: 20 }}>
             <Inline gap="medium" align="center" style={{ marginBottom: 12 }}>
               <Heading as="h2" size="sm">{agreement.party}</Heading>
               <Badge kind="primary" size="small" style={{ background: 'linear-gradient(135deg, #4C00FB 0%, #9333EA 100%)', color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -9791,7 +9863,7 @@ function WorkspaceView({ agreement, onClose, onRename, onEditNDA, savedNDAData, 
             {partyHistoryTab === 'overview' && (
               <Stack gap="large">
                 {/* Negotiation History */}
-                <div style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
+                <div data-pm="party-negotiation" style={{ background: 'var(--ink-white-100)', border: '1px solid var(--ink-border-subtle)', borderRadius: 'var(--ink-radius-size-s)', padding: 'var(--ink-spacing-300)' }}>
                   <Inline align="center" style={{ justifyContent: 'space-between', marginBottom: 'var(--ink-spacing-100)' }}>
                     <div>
                       <Text size="md" weight="semibold">Negotiation History</Text>
@@ -10416,6 +10488,7 @@ const SCENARIO_VENDOR = {
   contactName: 'Sam Sanders',
   contactEmail: 'sam.sanders@globex.com',
 };
+const VENDOR = 'Globex Industries';
 const SCENARIO_WORKSPACE_ID = 'vendor-tally-inc';
 const SCENARIO_MSA_DOC = 'Master Service Agreement (MSA)';
 
@@ -10635,7 +10708,7 @@ function ExtractionsPill({ status, partyName, onPartyClick, primary, details }: 
 
   return (
     <div style={{ marginTop: 'var(--ink-spacing-200)', display: 'flex' }}>
-      <div style={{
+      <div data-pm="deal-chips" style={{
         display: 'inline-flex', alignItems: 'center', gap: 12,
         height: 32, padding: '0 16px', borderRadius: 999,
         background: 'rgba(255, 255, 255, 0.12)',
@@ -10655,6 +10728,7 @@ function ExtractionsPill({ status, partyName, onPartyClick, primary, details }: 
             <span style={labelStyle}>Party</span>
             <button
               type="button"
+              data-pm="chip-party"
               onClick={onPartyClick}
               aria-label={`View history for ${partyName}`}
               style={{ ...valueStyle, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit' }}
@@ -10666,7 +10740,7 @@ function ExtractionsPill({ status, partyName, onPartyClick, primary, details }: 
         )}
         {partyName && primary && PILL_DIVIDER}
         {primary && (
-          <span style={groupStyle}>
+          <span data-pm={/expir/i.test(primary.label) ? 'chip-expires' : 'chip-primary'} style={groupStyle}>
             <span style={labelStyle}>{primary.label}</span>
             <span style={valueStyle}>{primary.value}</span>
           </span>
@@ -12030,13 +12104,13 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         initialOverlay={selectedAgreement.id === SCENARIO_WORKSPACE_ID ? wsInitialOverlay : null}
         uploadRequestPrefill={{
           title: 'Certificate of Insurance',
-          description: `Please upload ${SCENARIO_VENDOR.company}'s current Certificate of Insurance (COI).`,
+          description: `Please upload ${VENDOR}'s current Certificate of Insurance (COI).`,
           firstName: SCENARIO_VENDOR.contactFirst,
           lastName: SCENARIO_VENDOR.contactLast,
           email: SCENARIO_VENDOR.contactEmail,
         }}
         vendorOnboardingPrefill={{
-          vendorName: SCENARIO_VENDOR.company,
+          vendorName: VENDOR,
           contactEmail: SCENARIO_VENDOR.contactEmail,
           assigneeFirst: SCENARIO_VENDOR.contactFirst,
           assigneeLast: SCENARIO_VENDOR.contactLast,

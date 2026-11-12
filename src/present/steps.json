@@ -1,0 +1,303 @@
+{
+ "scenes": [
+  "01 · One home for every deal",
+  "02 · Keep eSignature simple",
+  "03 · Send an NDA, just like today",
+  "04 · Status right on the row",
+  "05 · See who you’re waiting on",
+  "06 · What’s inside the contract",
+  "07 · Add the MSA",
+  "08 · Route it to legal",
+  "09 · The deal keeps up with you",
+  "10 · Ask the vendor for their insurance",
+  "11 · Kick off onboarding",
+  "12 · One space for everyone on the deal",
+  "13 · What the vendor sees",
+  "14 · Edits come back to you",
+  "15 · Where this goes"
+ ],
+ "steps": [
+  {
+   "scene": 1,
+   "title": "Cover: Unified Agreements",
+   "cue": "This is our unified agreements concept.",
+   "do": "Show the cover card. Hide cursor, clear highlights, reset camera."
+  },
+  {
+   "scene": 1,
+   "title": "Fade to All Agreements · mark every deal",
+   "cue": "Every deal in one place,",
+   "do": "Fade the cover out. Mark the six deal names [pm=deal-name]."
+  },
+  {
+   "scene": 1,
+   "title": "Mark what’s in each deal",
+   "cue": "with what’s in it",
+   "do": "Replace marks with the document/envelope counts [pm=deal-counts]."
+  },
+  {
+   "scene": 1,
+   "title": "Mark who is involved",
+   "cue": "and who is involved.",
+   "do": "Replace marks with the whole people/status column on every visible row [.acv-row-people]."
+  },
+  {
+   "scene": 2,
+   "title": "Highlight Start",
+   "cue": "eSignature already works great for most users.",
+   "do": "Clear marks. Highlight the Start button [pm=start-button]; move the cursor onto it."
+  },
+  {
+   "scene": 2,
+   "title": "Open Start menu",
+   "cue": "So we keep it that simple, and make it the front door to the rest of our platform.",
+   "do": "Click Start. Highlight the open menu [pm=start-menu] (Send an Envelope, New Agreement, New Request, New Purchase Request)."
+  },
+  {
+   "scene": 3,
+   "title": "Send an Envelope → Signature Request",
+   "cue": "It starts just like today.",
+   "do": "Click “Send an Envelope” [pm=start-send-envelope]. Wait for the Signature Request page [pm=sr-page]. Reset camera."
+  },
+  {
+   "scene": 3,
+   "title": "The NDA is already attached",
+   "cue": "Grab the NDA,",
+   "do": "Highlight the Non-Disclosure Agreement tile [pm=sr-doc-nda]."
+  },
+  {
+   "scene": 3,
+   "title": "Type Sam in as the recipient",
+   "cue": "add Sam from the vendor,",
+   "do": "Scroll to Add recipients [pm=sr-recipients]. Click the Name field and type “Sam Sanders”, then the Email field and type “sam.sanders@globex.com” (typed character by character, ~35 ms per character; instant in fast replay). Highlight the recipient block."
+  },
+  {
+   "scene": 3,
+   "title": "Next → deal page, sent toast",
+   "cue": "and send.",
+   "do": "Clear highlight. Click Next [pm=sr-next]. Wait for the deal page [pm=deal-page] in its “sent” state; toast “Your documents were sent for signature.”"
+  },
+  {
+   "scene": 4,
+   "title": "Back to the list · new top row",
+   "cue": "The new deal shows up in your list,",
+   "do": "Click the deal’s back arrow [pm=deal-back]. On All Agreements, highlight the new top row “New Vendor Deal · Sam Sanders · 1 envelope” [pm=deal-row-new-vendor]."
+  },
+  {
+   "scene": 4,
+   "title": "Mark the row’s status",
+   "cue": "status right on the row.",
+   "do": "Mark “Waiting for Sam Sanders” on that row [pm=deal-status, New Vendor Deal row]."
+  },
+  {
+   "scene": 5,
+   "title": "Open the deal · NDA side panel",
+   "cue": "Click in to see who you’re waiting on,",
+   "do": "Clear. Click the New Vendor Deal row; wait for the deal page. Click the NDA document card [pm=doc-card-nda]; wait for the side panel [pm=nda-panel]. Highlight its recipients block [pm=nda-recipients] (“Sam Sanders needs to sign”)."
+  },
+  {
+   "scene": 5,
+   "title": "What’s happened so far",
+   "cue": "what’s happened,",
+   "do": "Highlight “Sent by you · Yesterday at 10:14 am” [pm=nda-sent-by]."
+  },
+  {
+   "scene": 5,
+   "title": "Remind Signers",
+   "cue": "and send a reminder.",
+   "do": "Move the cursor to Remind Signers [pm=nda-remind] and highlight it. Don’t click."
+  },
+  {
+   "scene": 6,
+   "title": "Close panel · header chips",
+   "cue": "We also pull out what’s inside your contracts,",
+   "do": "Clear. Close the side panel. Highlight the header chip strip [pm=deal-chips] (Awaiting Signature · Party Sam Sanders · Expires In 1 year)."
+  },
+  {
+   "scene": 6,
+   "title": "Key dates",
+   "cue": "like key dates",
+   "do": "Mark “Expires In 1 year” [pm=chip-expires]."
+  },
+  {
+   "scene": 6,
+   "title": "Party drawer · negotiation history",
+   "cue": "and your history with this party.",
+   "do": "Clear. Click the Party chip [pm=chip-party]; wait for the party drawer [pm=party-drawer]. Highlight Negotiation History [pm=party-negotiation]."
+  },
+  {
+   "scene": 7,
+   "title": "Close drawer",
+   "cue": "Now imagine a few weeks go by.",
+   "do": "Clear. Close the drawer, hide cursor, reset camera."
+  },
+  {
+   "scene": 7,
+   "title": "Add Documents → file picker → editor",
+   "cue": "You upload the MSA right into the same deal.",
+   "do": "Click Add Documents [pm=doc-add]. Wait for the in-app file picker [pm=file-picker] with “New Vendor MSA” preselected; pause 400 ms; click Open [pm=file-open]. Wait for the MSA editor [pm=msa-editor]."
+  },
+  {
+   "scene": 8,
+   "title": "Zoom to the document",
+   "cue": "Need legal’s sign-off?",
+   "do": "Zoom gently onto the document page [pm=msa-page] (max 1.3)."
+  },
+  {
+   "scene": 8,
+   "title": "Select text · context menu",
+   "cue": "Select the text,",
+   "do": "Show a text-selection highlight on “Effective Date: January 15, 2026” [pm=msa-effective-date] and open the context menu [pm=msa-context-menu] (Add comment, Add approval) beside it."
+  },
+  {
+   "scene": 8,
+   "title": "Add approval panel",
+   "cue": "add an approval,",
+   "do": "Click Add approval. Reset camera. Wait for the Add Approval panel [pm=approval-panel] with Description prefilled “Please approve”. Highlight the panel."
+  },
+  {
+   "scene": 8,
+   "title": "Pick Leona → Create Approval",
+   "cue": "pick Leona.",
+   "do": "Click Add approvers [pm=approval-search], type “le”, wait for results (Leona Legal, Liam Legal), click Leona Legal, click Create Approval [pm=approval-create]. Toast “Approval added to tasks”."
+  },
+  {
+   "scene": 9,
+   "title": "Back to the deal · documents side by side",
+   "cue": "The draft sits next to the NDA,",
+   "do": "Click the editor back arrow [pm=editor-back]. The deal is now in its drafting state; toast “Your document was added”. Highlight both document cards [pm=doc-card-msa, doc-card-nda]."
+  },
+  {
+   "scene": 9,
+   "title": "Approval task",
+   "cue": "the approval’s a task,",
+   "do": "Highlight the task row “Approve content in New Vendor MSA · Leona Legal · In progress” [pm=task-approve-msa]."
+  },
+  {
+   "scene": 9,
+   "title": "New milestones",
+   "cue": "and the milestones move to match where the deal is.",
+   "do": "Highlight the stage tracker [pm=deal-stages] (Inception · Drafting · Client Review · Legal Review · Signature · Complete, with Drafting current) and the “Drafting MSA” chip."
+  },
+  {
+   "scene": 10,
+   "title": "Tasks + menu",
+   "cue": "Need the vendor’s insurance certificate?",
+   "do": "Clear. Scroll to Tasks [pm=tasks-panel]. Click the Tasks + button [pm=tasks-add]; highlight the menu [pm=tasks-add-menu] (Signature Request, Upload request, Identity verification, New Vendor Onboarding)."
+  },
+  {
+   "scene": 10,
+   "title": "Upload request → Send",
+   "cue": "Send an upload request.",
+   "do": "Click Upload request. Wait for the Upload request form [pm=upload-form], already filled in. Highlight it briefly, then click Send [pm=upload-send]."
+  },
+  {
+   "scene": 10,
+   "title": "COI task lands in the list",
+   "cue": "It lands in the same task list.",
+   "do": "Toast “Upload request sent out”. Highlight the new top task row “Certificate of Insurance · Sam Sanders · Not started” [pm=task-coi]."
+  },
+  {
+   "scene": 11,
+   "title": "New Vendor Onboarding → Create task",
+   "cue": "Ready to onboard them? Start the onboarding workflow right here.",
+   "do": "Clear. Click Tasks + then New Vendor Onboarding. Wait for the form [pm=onboarding-form], already filled in; highlight it; click Create task [pm=onboarding-create]."
+  },
+  {
+   "scene": 11,
+   "title": "Onboarding task",
+   "cue": "It’s tracked like everything else,",
+   "do": "Toast “Vendor onboarding workflow created”. Highlight the task row “New Vendor Onboarding — Globex Industries · Sam Sanders · Not started · in 7 months” [pm=task-onboarding]."
+  },
+  {
+   "scene": 11,
+   "title": "Remind",
+   "cue": "and you can nudge anyone who’s behind.",
+   "do": "Hover that row so its Remind button [pm=task-onboarding-remind] appears; highlight Remind."
+  },
+  {
+   "scene": 12,
+   "title": "Everyone on the deal",
+   "cue": "Here’s a real strength: everyone on the deal works in one space.",
+   "do": "Clear hover. Scroll to top. Highlight the participant avatars [pm=deal-participants] and the Messages panel [pm=messages-panel]."
+  },
+  {
+   "scene": 12,
+   "title": "Open the MSA",
+   "cue": "MSA ready?",
+   "do": "Clear. Click the MSA document card; wait for the editor."
+  },
+  {
+   "scene": 12,
+   "title": "Send for Client Review",
+   "cue": "Send it to the vendor for review, right from here.",
+   "do": "Click the Send for Signature caret [pm=editor-send-caret]; click “Send for Client Review”; wait for the modal [pm=client-review-modal] (recipient Sam Sanders prefilled); click Send for Review. Return to the deal; toast “Your document was sent for review”."
+  },
+  {
+   "scene": 13,
+   "title": "Cut to the vendor portal",
+   "cue": "Here’s the vendor’s side:",
+   "do": "Veil-cut (white flash, 300 ms) to the vendor portal [pm=portal], “Welcome, Sam Sanders”. Reset camera, hide cursor."
+  },
+  {
+   "scene": 13,
+   "title": "Everything waiting on them",
+   "cue": "one page with everything waiting on them.",
+   "do": "Scroll so all four tasks show. Highlight the task list [pm=portal-tasks]."
+  },
+  {
+   "scene": 13,
+   "title": "Review · Sign · Start · Upload",
+   "cue": "Review, sign, onboard, upload.",
+   "do": "Clear highlight. Mark the four action buttons in order [pm=portal-btn-review, portal-btn-sign, portal-btn-start, portal-btn-upload], each mark appearing 450 ms after the last."
+  },
+  {
+   "scene": 14,
+   "title": "Vendor opens the MSA · Suggesting",
+   "cue": "In the real world, things change.",
+   "do": "Clear. Click Review [pm=portal-btn-review]; wait for the editor in vendor Suggesting mode [pm=msa-editor-suggesting]. Highlight the “Suggesting” badge."
+  },
+  {
+   "scene": 14,
+   "title": "Suggested edit",
+   "cue": "Suggested edits come right back to you,",
+   "do": "Show the suggestion: “January 15, 2026” in section 1 struck through and “February 1, 2026” inserted, plus a suggestion card [pm=suggestion-card] by Sam Sanders (Globex). Highlight the card and the edit together."
+  },
+  {
+   "scene": 14,
+   "title": "Back on the deal · Edits suggested",
+   "cue": "flagged on the deal.",
+   "do": "Veil-cut to the internal deal page. Highlight the MSA card’s “Edits suggested” badge [pm=doc-card-msa-badge] and the task row “Review New Vendor MSA.docx · Sam Sanders · In progress” [pm=task-review-msa]."
+  },
+  {
+   "scene": 15,
+   "title": "Where we started",
+   "cue": "We started with simple signature collection.",
+   "do": "Clear. Highlight the NDA document card [pm=doc-card-nda]."
+  },
+  {
+   "scene": 15,
+   "title": "The whole agreement",
+   "cue": "Now it’s one shared space for the whole agreement:",
+   "do": "Highlight Documents, Tasks and Messages together [pm=docs-panel, tasks-panel, messages-panel]."
+  },
+  {
+   "scene": 15,
+   "title": "Tasks, workflows, vendor view",
+   "cue": "tasks, workflows, a vendor view,",
+   "do": "Highlight the Tasks panel [pm=tasks-panel]."
+  },
+  {
+   "scene": 15,
+   "title": "Messaging",
+   "cue": "and down the road, messaging inside and out.",
+   "do": "Highlight the Messages panel and its composer [pm=messages-panel]."
+  },
+  {
+   "scene": 15,
+   "title": "Closing",
+   "cue": "That’s how we believe we drive IAM adoption.",
+   "do": "Clear all, hide cursor, reset camera, show the closing card."
+  }
+ ]
+}
