@@ -80,6 +80,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             type="button"
             className={styles.start}
+            data-pm="start-button"
             onClick={() => setMenuOpen((o) => !o)}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
@@ -88,12 +89,13 @@ export const TopNav: React.FC<TopNavProps> = ({
             <Icon name="chevron-down" size={16} />
           </button>
           {menuOpen && startMenuItems.length > 0 && (
-            <div className={styles.menu} role="menu" aria-label={startLabel}>
+            <div className={styles.menu} role="menu" aria-label={startLabel} data-pm="start-menu">
               {startMenuItems.map((item) => (
                 <React.Fragment key={item.id}>
                   <button
                     type="button"
                     role="menuitem"
+                    data-pm={`start-${item.label.toLowerCase().replace(/\ban\b|\ba\b/g, '').trim().replace(/\s+/g, '-')}`}
                     className={styles.menuItem}
                     onClick={() => {
                       setMenuOpen(false);

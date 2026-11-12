@@ -238,7 +238,7 @@ function TaskRow({ task, contactName, onAction }: { task: PETask; contactName: s
         </span>
       </div>
       <StatusDot status={task.status} />
-      <button type="button" onClick={onAction} style={buttonStyle} aria-label={`${label}: ${task.title}`}>{label}</button>
+      <button type="button" onClick={onAction} style={buttonStyle} aria-label={`${label}: ${task.title}`} data-pm={`portal-btn-${task.kind === 'form' ? 'start' : task.kind}`}>{label}</button>
     </li>
   );
 }
@@ -292,7 +292,7 @@ export function ParticipantExperience({ source, participantName, contact, onExit
   const inner: CSSProperties = { maxWidth: 1200, margin: '0 auto', width: '100%', padding: '0 48px', boxSizing: 'border-box' };
 
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label={`Participant view for ${participantName}`} style={{ position: 'fixed', inset: 0, zIndex: 1080, background: COLORS.surface, overflowY: 'auto', color: COLORS.ink }}>
+    <div data-pm="portal" role="dialog" aria-modal="true" aria-label={`Participant view for ${participantName}`} style={{ position: 'fixed', inset: 0, zIndex: 1080, background: COLORS.surface, overflowY: 'auto', color: COLORS.ink }}>
       {preview && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '8px 16px', background: '#FFF4CC', color: COLORS.ink, fontSize: 14 }}>
           <Icon name="eye" size={16} color={COLORS.ink} />
@@ -304,8 +304,8 @@ export function ParticipantExperience({ source, participantName, contact, onExit
       <header style={{ background: 'linear-gradient(172deg, #1E2321 0%, #1F2A24 45%, #1E3A2B 100%)', color: '#FFFFFF' }}>
         <div style={{ ...inner, paddingTop: 28, display: 'flex', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-            <button type="button" onClick={onExit} aria-label={`Fontara - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
-              <img src="/images/fontara-logo-white.svg" alt="" style={{ height: 40, width: 'auto', display: 'block' }} />
+            <button type="button" data-pm="portal-exit" onClick={onExit} aria-label={`Acme - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex', color: '#FFFFFF', fontSize: 30, fontWeight: 700, letterSpacing: -0.5, lineHeight: '40px' }}>
+              Acme
             </button>
             <h1 style={{ margin: 0, fontSize: 40, fontWeight: 400, lineHeight: 1.2, textWrap: 'balance' }}>{`Welcome, ${participantName}`}</h1>
             <div style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start', gap: 16, padding: '10px 24px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', fontSize: 15 }}>
@@ -353,7 +353,7 @@ export function ParticipantExperience({ source, participantName, contact, onExit
         </nav>
       </header>
 
-      <main style={{ ...inner, paddingTop: 40, paddingBottom: 64, display: 'flex', flexDirection: 'column', gap: 40 }}>
+      <main data-pm="portal-tasks" style={{ ...inner, paddingTop: 40, paddingBottom: 64, display: 'flex', flexDirection: 'column', gap: 40 }}>
         {tab === 'tasks' && (
           tasks.length === 0 ? (
             <p style={{ fontSize: 16, color: COLORS.inkMuted }}>{'You have no tasks in this space right now.'}</p>
