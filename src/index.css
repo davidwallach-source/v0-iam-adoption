@@ -15,6 +15,10 @@ html, body, #root { height: 100%; overflow: hidden; }
 .row-hover-actions { opacity: 0; transition: opacity 120ms ease; }
 tr:hover .row-hover-actions,
 tr:focus-within .row-hover-actions,
+tr.pm-hovered .row-hover-actions,
+tr.pm-row-hovered .row-hover-actions,
+.row-hover-actions.pm-hovered,
+.row-hover-actions:has(.pm-hovered),
 .row-hover-actions[data-pinned="true"] { opacity: 1; }
   [data-ink-component="StatusLight"].status-on-dark > div > div { background-color: #F3F2F5 !important; }
   [data-ink-component="StatusLight"].status-on-dark > span { color: #F3F2F5 !important; }
