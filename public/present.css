@@ -16,6 +16,36 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+.pm-launch {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--pm-line);
+  border-radius: 999px;
+  background: var(--pm-ink);
+  color: var(--pm-text);
+  font: 600 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  box-shadow: 0 8px 24px rgba(19, 0, 50, 0.28);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pm-launch:hover {
+  background: var(--pm-brand);
+}
+
+.pm-launch:focus-visible {
+  outline: 2px solid var(--pm-brand);
+  outline-offset: 3px;
+}
+
 .pm-root {
   position: fixed;
   inset: 0;
