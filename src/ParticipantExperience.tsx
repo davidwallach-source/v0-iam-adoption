@@ -304,8 +304,8 @@ export function ParticipantExperience({ source, participantName, contact, onExit
       <header style={{ background: 'linear-gradient(172deg, #1E2321 0%, #1F2A24 45%, #1E3A2B 100%)', color: '#FFFFFF' }}>
         <div style={{ ...inner, paddingTop: 28, display: 'flex', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-            <button type="button" data-pm="portal-exit" onClick={onExit} aria-label={`Acme - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex', color: '#FFFFFF', fontSize: 30, fontWeight: 700, letterSpacing: -0.5, lineHeight: '40px' }}>
-              Acme
+            <button type="button" data-pm="portal-exit" onClick={onExit} aria-label={`Fontara - back to ${source.spaceName}`} title={`Back to ${source.spaceName}`} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', alignSelf: 'flex-start', display: 'inline-flex' }}>
+              <img src="/images/fontara-logo-white.svg" alt="" style={{ height: 40, width: 'auto', display: 'block' }} />
             </button>
             <h1 style={{ margin: 0, fontSize: 40, fontWeight: 400, lineHeight: 1.2, textWrap: 'balance' }}>{`Welcome, ${participantName}`}</h1>
             <div style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start', gap: 16, padding: '10px 24px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', fontSize: 15 }}>
