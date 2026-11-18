@@ -3477,7 +3477,7 @@ function AdminPage() {
 
 /* ═══���══���═���═══���══════════�����������═══════════════
    Footer
-   ════��═══��������������������════════════════════════════ */
+   ════��═══���������������������════════════════════════════ */
 
 function Footer() {
   const links = ['Contact Us', 'Terms of Use', 'Privacy', 'Intellectual Property', 'Trust'];
@@ -11399,12 +11399,19 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
         .map(t => t.assigneeInitials)
         .filter(Boolean),
     ));
-    if (people.length === 0 && a.partyLogo) people.push(a.partyLogo);
+    if (people.length === 0) {
+      const initials = a.partyLogo || a.party.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
+      if (initials) people.push(initials);
+    }
     const envelopeIds = new Set((ws?.documents ?? []).map(d => d.envelopeId).filter(Boolean));
   const envelopesCount = a.envelopesCount ?? Math.max(
   envelopeIds.size + (signedDocsById[a.id]?.length ? 1 : 0),
   a.signatureProgress ? 1 : 0,
   );
+    const documentsCount = a.documentNames?.length ?? a.documentsCount ?? 0;
+    // The progress-bar treatment only describes a lone sent document. Once more
+    // documents join the space, the row reverts to participants + counts.
+    const showSignatureProgress = envelopesCount === 1 && documentsCount <= 1;
     return {
       id: a.id,
       name: a.name,
@@ -11414,11 +11421,11 @@ const [showPurchaseModal, setShowPurchaseModal] = useState(false);
       termLength: a.termLength,
       status: a.status,
       statusKind: a.statusKind,
-      documentsCount: a.documentNames?.length ?? a.documentsCount ?? 0,
+      documentsCount,
       tasksCount: ws ? tasks.length : (a.tasksCount ?? 0),
       envelopesCount,
       people,
-      signatureProgress: envelopesCount === 1
+      signatureProgress: showSignatureProgress
         ? (a.signatureProgress ?? (ws?.documents ?? []).find(d => d.signatureProgress)?.signatureProgress)
         : undefined,
     };
